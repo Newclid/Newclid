@@ -31,6 +31,7 @@ class GeometricSolver:
         self.defs = defs
         self.rules = rules
         self.problem_string = problem.txt()
+        self.run_infos = {}
 
     @property
     def goal(self):
@@ -55,17 +56,21 @@ class GeometricSolver:
         return self.problem.setup_str_from_problem(self.defs)
 
     def run(self, max_steps: int = 1000) -> bool:
-        solve(self.proof_state, self.rules, self.problem, max_level=max_steps)
+        _,_,_,_,_,infos = solve(self.proof_state, self.rules, self.problem, max_level=max_steps)
         goal = self.problem.goal
         goal_args_names = self.proof_state.names2nodes(goal.args)
+        self.run_infos = infos
         if not self.proof_state.check(goal.name, goal_args_names):
             logging.info("Solver failed to solve the problem.")
+            self.run_infos["success"] = False
             return False
         logging.info("Solved.")
+        self.run_infos["success"] = True
         return True
 
     def write_solution(self, out_file: Path):
-        write_solution(self.proof_state, self.problem, out_file)
+        infos = write_solution(self.proof_state, self.problem, out_file)
+        self.run_infos.update(infos)
 
     def draw_figure(self, out_file: Path):
         draw(

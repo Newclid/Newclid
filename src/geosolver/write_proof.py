@@ -73,6 +73,12 @@ def write_solution(proof: "Graph", problem: "Problem", out_file: str) -> None:
         with open(out_file, "w", encoding="utf-8") as f:
             f.write(solution)
         logging.info("Solution written to %s.", out_file)
+    ####
+    infos = {
+        "proof.len" : len(proof_steps),
+        "num.aux" : len(aux_premises_nl)
+    }
+    return infos
 
 
 def _proof_step_string(

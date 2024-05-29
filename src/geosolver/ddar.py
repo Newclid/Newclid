@@ -71,8 +71,9 @@ def saturate_or_goal(
 
         if level_time > timeout:
             break
-
-    return derives, eq4s, branching, all_added
+    #
+    _timeout = level_time > timeout
+    return derives, eq4s, branching, all_added, _timeout
 
 
 def solve(
@@ -91,12 +92,18 @@ def solve(
     eq4s = [eq4]
     branches = []
     all_added = []
+    infos = {}
+
+    steps = 0
+    _timeout = None
+    t0 = time.time()
 
     while len(level_times) < max_level:
-        dervs, eq4, next_branches, added = saturate_or_goal(
+        dervs, eq4, next_branches, added, _timeout = saturate_or_goal(
             g, theorems, level_times, controller, max_level, timeout=timeout
         )
         all_added += added
+        steps += sum(next_branches)
 
         derives += dervs
         eq4s += eq4
@@ -128,8 +135,15 @@ def solve(
 
         if not added:  # Nothing left. saturated.
             break
+    #
+    
+    infos["success"] = None # determined in higher level, run
+    infos["runtime"] = time.time() - t0
+    infos["timeout"] = _timeout
+    infos["overlevel"] = len(level_times) >= max_level
+    infos["step"] = steps + len(all_added)
 
-    return g, level_times, status, branches, all_added
+    return g, level_times, status, branches, all_added, infos
 
 
 def get_proof_steps(
