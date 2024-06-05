@@ -41,6 +41,7 @@ ag_ckpt_vocab/
 
 # Results
 ddar_results/
+run_results/
 
 # Profiling
 *.prof
