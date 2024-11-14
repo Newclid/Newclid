@@ -1,0 +1,17 @@
+Agent
+=====
+
+.. automodule:: geosolver.agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   geosolver.agent.agents_interface
+   geosolver.agent.breadth_first_search
+   geosolver.agent.flemmard
+   geosolver.agent.human_agent

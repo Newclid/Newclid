@@ -1,0 +1,7 @@
+Breadth First Search
+====================
+
+.. automodule:: geosolver.agent.breadth_first_search
+   :members:
+   :undoc-members:
+   :show-inheritance:

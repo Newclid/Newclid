@@ -1,0 +1,7 @@
+Load Geogebra
+=============
+
+.. automodule:: geosolver.load_geogebra
+   :members:
+   :undoc-members:
+   :show-inheritance:

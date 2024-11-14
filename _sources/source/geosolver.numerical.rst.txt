@@ -1,0 +1,19 @@
+Numerical
+=========
+
+.. automodule:: geosolver.numerical
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   geosolver.numerical.angles
+   geosolver.numerical.check
+   geosolver.numerical.distances
+   geosolver.numerical.draw_figure
+   geosolver.numerical.geometries
+   geosolver.numerical.sketch

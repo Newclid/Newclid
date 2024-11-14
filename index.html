@@ -1,0 +1,892 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Newclid: A User-Friendly Replacement for AlphaGeometry with Agentic Support &mdash; Newclid 0.1.dev1+gd05c737 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/styles/custom.css?v=12096124" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=b302d3c9"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Overview" href="manual/overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff9900" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Newclid
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="manual/overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#proof-state">Proof State</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#deductive-agent">Deductive Agent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#how-is-a-problem-built">How is a Problem Built</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#problem-solving">Problem Solving</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="manual/overview.html#matching-and-caching">Matching and Caching</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#writing-the-proof">Writing the Proof</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="manual/overview.html#translating-to-natural-language">Translating to natural language</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual/python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/adding_problems.html">Adding new problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/adding_problems.html#using-definitions">Using definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/adding_problems.html#writing-a-new-problem">Writing a new problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/adding_problems.html#ensuring-the-problem-can-be-built">Ensuring the problem can be built</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual/adding_rules.html">Adding new rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/default_files/index.html">Default Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/default_files/definitions.html">Definitions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="manual/default_files/definitions.html#legacy-definitions">Legacy definitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#angle-bisector-x-a-b-c">angle_bisector x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#angle-mirror-x-a-b-c">angle_mirror x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#circle-x-a-b-c">circle x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#circumcenter-x-a-b-c">circumcenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#eq-quadrangle-a-b-c-d">eq_quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#iso-trapezoid-a-b-c-d">iso_trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#eq-triangle-x-b-c">eq_triangle x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#eqangle2-x-a-b-c">eqangle2 x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#eqdia-quadrangle-a-b-c-d">eqdia_quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#eqdistance-x-a-b-c">eqdistance x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#foot-x-a-b-c">foot x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#free-a">free a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#incenter-x-a-b-c">incenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#incenter2-x-y-z-i-a-b-c">incenter2 x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#excenter-x-a-b-c">excenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#excenter2-x-y-z-i-a-b-c">excenter2 x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#centroid-x-y-z-i-a-b-c">centroid x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#ninepoints-x-y-z-i-a-b-c">ninepoints x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#intersection-cc-x-o-w-a">intersection_cc x o w a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#intersection-lc-x-a-o-b">intersection_lc x a o b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#intersection-ll-x-a-b-c-d">intersection_ll x a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#intersection-lp-x-a-b-c-m-n">intersection_lp x a b c m n</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#intersection-lt-x-a-b-c-d-e">intersection_lt x a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#intersection-pp-x-a-b-c-d-e-f">intersection_pp x a b c d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#intersection-tt-x-a-b-c-d-e-f">intersection_tt x a b c d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#iso-triangle-a-b-c">iso_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#lc-tangent-x-a-o">lc_tangent x a o</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#midpoint-x-a-b">midpoint x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#mirror-x-a-b">mirror x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#nsquare-x-a-b">nsquare x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-aline-x-a-b-c-d-e">on_aline x a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-bline-x-a-b">on_bline x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-circle-x-o-a">on_circle x o a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-line-x-a-b">on_line x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-pline-x-a-b-c">on_pline x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-tline-x-a-b-c">on_tline x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#orthocenter-x-a-b-c">orthocenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#parallelogram-a-b-c-x">parallelogram a b c x</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#pentagon-a-b-c-d-e">pentagon a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#psquare-x-a-b">psquare x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#quadrangle-a-b-c-d">quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#r-trapezoid-a-b-c-d">r_trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#r-triangle-a-b-c">r_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#rectangle-a-b-c-d">rectangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#reflect-x-a-b-c">reflect x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#risos-a-b-c">risos a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#segment-a-b">segment a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#shift-x-b-c-d">shift x b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#square-a-b-x-y">square a b x y</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#isquare-a-b-c-d">isquare a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#trapezoid-a-b-c-d">trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#triangle-a-b-c">triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#triangle12-a-b-c">triangle12 a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#l1c-x-y-z-i-a-b-c-o">2l1c x y z i a b c o</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#e5128-x-y-a-b-c-d">e5128 x y a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#peq-x-y-z-a-b-c">3peq x y z a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#trisect-x-y-a-b-c">trisect x y a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#trisegment-x-y-a-b">trisegment x y a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-dia-x-a-b">on_dia x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#ieq-triangle-a-b-c">ieq_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#cc-tangent-x-y-z-i-o-a-w-b">cc_tangent x y z i o a w b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#eqangle3-x-a-b-d-e-f">eqangle3 x a b d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#tangent-x-y-a-o-b">tangent x y a o b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-circum-x-a-b-c">on_circum x a b c</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="manual/default_files/definitions.html#new-definitions">New Definitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-pline0-x-a-b-c">on_pline0 x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#iso-triangle0-a-b-c">iso_triangle0 a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#iso-triangle-vertex-x-b-c">iso_triangle_vertex x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#iso-triangle-vertex-angle-x-b-c">iso_triangle_vertex_angle x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#on-aline0-x-a-b-c-d-e-f-g">on_aline0 x a b c d e f g</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#eqratio-x-a-b-c-d-e-f-g">eqratio x a b c d e f g</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#eqratio6-x-a-c-e-f-g-h">eqratio6 x a c e f g h</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#rconst-a-b-c-x-r">rconst a b c x r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#rconst2-x-a-b-r">rconst2 x a b r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#aconst-a-b-c-x-r">aconst a b c x r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#s-angle-a-b-x-y">s_angle a b x y</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/definitions.html#lconst-x-a-l">lconst x a l</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="manual/default_files/rules.html">Rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="manual/default_files/rules.html#legacy-rules">Legacy rules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r00-perpendiculars-give-parallel">r00 : Perpendiculars give parallel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r01-definition-of-circle">r01 : Definition of circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r02-parallel-from-inclination">r02 : Parallel from inclination</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r03-arc-determines-internal-angles">r03 : Arc determines internal angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r04-congruent-angles-are-in-a-circle">r04 : Congruent angles are in a circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r05-same-arc-same-chord">r05 : Same arc same chord</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r06-base-of-half-triangle">r06 : Base of half triangle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r07-thales-theorem-i">r07 : Thales Theorem I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r08-right-triangles-common-angle-i">r08 : Right triangles common angle I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r09-sum-of-angles-of-a-triangle">r09 : Sum of angles of a triangle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r10-ratio-cancellation">r10 : Ratio cancellation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r11-bisector-theorem-i">r11 : Bisector theorem I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r12-bisector-theorem-ii">r12 : Bisector theorem II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r13-isosceles-triangle-equal-angles">r13 : Isosceles triangle equal angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r14-equal-base-angles-imply-isosceles">r14 : Equal base angles imply isosceles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r15-arc-determines-inscribed-angles-tangent">r15 : Arc determines inscribed angles (tangent)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r16-same-arc-giving-tangent">r16 : Same arc giving tangent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r17-central-angle-vs-inscribed-angle-i">r17 : Central angle vs inscribed angle I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r18-central-angle-vs-inscribed-angle-ii">r18 : Central angle vs inscribed angle II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r19-hypothenuse-is-diameter">r19 : Hypothenuse is diameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r20-diameter-is-hypotenuse">r20 : Diameter is hypotenuse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r21-cyclic-trapezoid">r21 : Cyclic trapezoid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r22-bisector-construction">r22 : Bisector Construction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r23-bisector-is-perpendicular">r23 : Bisector is perpendicular</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r24-cyclic-kite">r24 : Cyclic kite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r25-diagonals-of-parallelogram-i">r25 : Diagonals of parallelogram I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r26-diagonals-of-parallelogram-ii">r26 : Diagonals of parallelogram II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r27-thales-theorem-ii">r27 : Thales theorem II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r28-overlapping-parallels">r28 : Overlapping parallels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r29-midpoint-is-an-eqratio">r29 : Midpoint is an eqratio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r30-right-triangles-common-angle-ii">r30 : Right triangles common angle II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r31-denominator-cancelling">r31 : Denominator cancelling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r32-sss-triangle-congruence">r32 : SSS Triangle congruence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r33-sas-triangle-congruence">r33 : SAS Triangle congruence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r34-aa-similarity-of-triangles-direct">r34 : AA Similarity of triangles (direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r35-aa-similarity-of-triangles-reverse">r35 : AA Similarity of triangles (reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r36-asa-congruence-of-triangles-direct">r36 : ASA Congruence of triangles (direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r37-asa-congruence-of-triangles-reverse">r37 : ASA Congruence of triangles (reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r38-sss-triangle-similarity-original">r38 : SSS Triangle similarity (original)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r39-sas-triangle-similarity-original">r39 : SAS Triangle similarity (original)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r40-similarity-without-scaling">r40 : Similarity without scaling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r41-thales-theorem-iii">r41 : Thales theorem III</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r42-thales-theorem-iv">r42 : Thales theorem IV</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="manual/default_files/rules.html#new-rules">New rules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r43-orthocenter-theorem">r43 : Orthocenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r44-pappus-s-theorem">r44 : Pappus’s theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r45-simson-s-line-theorem">r45 : Simson’s line theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r46-incenter-theorem">r46 : Incenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r47-circumcenter-theorem">r47 : Circumcenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r48-centroid-theorem">r48 : Centroid theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r49-recognize-center-of-cyclic-circle">r49 : Recognize center of cyclic (circle)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r50-recognize-center-of-cyclic-cong">r50 : Recognize center of cyclic (cong)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r51-midpoint-splits-in-two">r51 : Midpoint splits in two</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r52-properties-of-similar-triangles-direct">r52 : Properties of similar triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r53-properties-of-similar-triangles-reverse">r53 : Properties of similar triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r54-definition-of-midpoint">r54 : Definition of midpoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r55-properties-of-midpoint-cong">r55 : Properties of midpoint (cong)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r56-properties-of-midpoint-coll">r56 : Properties of midpoint (coll)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r57-pythagoras-theorem">r57 : Pythagoras theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r58-same-chord-same-arc-i">r58 : Same chord same arc I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r59-same-chord-same-arc-ii">r59 : Same chord same arc II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r60-sss-similarity-of-triangles-direct">r60 : SSS Similarity of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r61-sss-similarity-of-triangles-reverse">r61 : SSS Similarity of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r62-sas-similarity-of-triangles-direct">r62 : SAS Similarity of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r63-sas-similarity-of-triangles-reverse">r63 : SAS Similarity of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r64-sss-congruence-of-triangles-direct">r64 : SSS Congruence of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r65-sss-congruence-of-triangles-reverse">r65 : SSS Congruence of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r66-sas-congruence-of-triangles-direct">r66 : SAS Congruence of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r67-sas-congruence-of-triangles-reverse">r67 : SAS Congruence of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r68-similarity-without-scaling-direct">r68 : Similarity without scaling (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="manual/default_files/rules.html#r69-similarity-without-scaling-reverse">r69 : Similarity without scaling (Reverse)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual/problem_databases/index.html">Problems Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/problem_databases/imo_ag_30.html">imo_ag_30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/problem_databases/jgex_ag_231.html">jgex_ag_231</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/problem_databases/new_benchmark_50.html">new_benchmark_50</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/problem_databases/examples.html">examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source/geosolver.html">Geosolver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.agent.html">Agent</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.agent.agents_interface.html">Agents Interface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.agent.agents_interface.html#geosolver.agent.agents_interface.DeductiveAgent"><code class="docutils literal notranslate"><span class="pre">DeductiveAgent</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.agent.breadth_first_search.html">Breadth First Search</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.agent.breadth_first_search.html#geosolver.agent.breadth_first_search.BFSDDAR"><code class="docutils literal notranslate"><span class="pre">BFSDDAR</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.agent.flemmard.html">Flemmard</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.agent.flemmard.html#geosolver.agent.flemmard.Flemmard"><code class="docutils literal notranslate"><span class="pre">Flemmard</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.agent.human_agent.html">Human Agent</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.agent.human_agent.html#geosolver.agent.human_agent.NamedFunction"><code class="docutils literal notranslate"><span class="pre">NamedFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.agent.human_agent.html#geosolver.agent.human_agent.HumanAgent"><code class="docutils literal notranslate"><span class="pre">HumanAgent</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.algebraic_reasoning.html">Algebraic Reasoning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.algebraic_reasoning.algebraic_manipulator.html">Algebraic Manipulator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.algebraic_manipulator.html#geosolver.algebraic_reasoning.algebraic_manipulator.AlgebraicManipulator"><code class="docutils literal notranslate"><span class="pre">AlgebraicManipulator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html">Tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.strip"><code class="docutils literal notranslate"><span class="pre">strip()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.plus"><code class="docutils literal notranslate"><span class="pre">plus()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.plus_all"><code class="docutils literal notranslate"><span class="pre">plus_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.mult"><code class="docutils literal notranslate"><span class="pre">mult()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.minus"><code class="docutils literal notranslate"><span class="pre">minus()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.recon"><code class="docutils literal notranslate"><span class="pre">recon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.replace"><code class="docutils literal notranslate"><span class="pre">replace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.report"><code class="docutils literal notranslate"><span class="pre">report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.Table"><code class="docutils literal notranslate"><span class="pre">Table</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.dependencies.html">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.dependencies.dependency.html">Dependency</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.dependencies.dependency.html#geosolver.dependencies.dependency.Dependency"><code class="docutils literal notranslate"><span class="pre">Dependency</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.dependencies.dependency_graph.html">Dependency Graph</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.dependencies.dependency_graph.html#geosolver.dependencies.dependency_graph.DependencyGraph"><code class="docutils literal notranslate"><span class="pre">DependencyGraph</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.dependencies.symbols.html">Symbols</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Symbol"><code class="docutils literal notranslate"><span class="pre">Symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Point"><code class="docutils literal notranslate"><span class="pre">Point</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Line"><code class="docutils literal notranslate"><span class="pre">Line</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Circle"><code class="docutils literal notranslate"><span class="pre">Circle</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.dependencies.symbols_graph.html">Symbols Graph</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.dependencies.symbols_graph.html#geosolver.dependencies.symbols_graph.SymbolsGraph"><code class="docutils literal notranslate"><span class="pre">SymbolsGraph</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.formulations.html">Formulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.formulations.clause.html">Clause</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.formulations.clause.html#geosolver.formulations.clause.Clause"><code class="docutils literal notranslate"><span class="pre">Clause</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.formulations.clause.html#geosolver.formulations.clause.translate_sentence"><code class="docutils literal notranslate"><span class="pre">translate_sentence()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.formulations.definition.html">Definition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.formulations.definition.html#geosolver.formulations.definition.DefinitionJGEX"><code class="docutils literal notranslate"><span class="pre">DefinitionJGEX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.formulations.problem.html">Problem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.formulations.problem.html#geosolver.formulations.problem.ProblemJGEX"><code class="docutils literal notranslate"><span class="pre">ProblemJGEX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.formulations.rule.html">Rule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.formulations.rule.html#geosolver.formulations.rule.Rule"><code class="docutils literal notranslate"><span class="pre">Rule</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.numerical.html">Numerical</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.html#geosolver.numerical.close_enough"><code class="docutils literal notranslate"><span class="pre">close_enough()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.html#geosolver.numerical.nearly_zero"><code class="docutils literal notranslate"><span class="pre">nearly_zero()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.html#geosolver.numerical.sign"><code class="docutils literal notranslate"><span class="pre">sign()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.angles.html">Angles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.angles.html#geosolver.numerical.angles.ang_of"><code class="docutils literal notranslate"><span class="pre">ang_of()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.angles.html#geosolver.numerical.angles.ang_between"><code class="docutils literal notranslate"><span class="pre">ang_between()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.check.html">Check</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.check.html#geosolver.numerical.check.same_clock"><code class="docutils literal notranslate"><span class="pre">same_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.check.html#geosolver.numerical.check.clock"><code class="docutils literal notranslate"><span class="pre">clock()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.distances.html">Distances</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.distances.html#geosolver.numerical.distances.PointTooCloseError"><code class="docutils literal notranslate"><span class="pre">PointTooCloseError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.distances.html#geosolver.numerical.distances.PointTooFarError"><code class="docutils literal notranslate"><span class="pre">PointTooFarError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.distances.html#geosolver.numerical.distances.check_too_close_numerical"><code class="docutils literal notranslate"><span class="pre">check_too_close_numerical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.distances.html#geosolver.numerical.distances.check_too_far_numerical"><code class="docutils literal notranslate"><span class="pre">check_too_far_numerical()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html">Draw Figure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.init_figure"><code class="docutils literal notranslate"><span class="pre">init_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_figure"><code class="docutils literal notranslate"><span class="pre">draw_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.fill_missing"><code class="docutils literal notranslate"><span class="pre">fill_missing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_circle"><code class="docutils literal notranslate"><span class="pre">draw_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_line"><code class="docutils literal notranslate"><span class="pre">draw_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_segment"><code class="docutils literal notranslate"><span class="pre">draw_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_segment_num"><code class="docutils literal notranslate"><span class="pre">draw_segment_num()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_angle"><code class="docutils literal notranslate"><span class="pre">draw_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_rectangle"><code class="docutils literal notranslate"><span class="pre">draw_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_point"><code class="docutils literal notranslate"><span class="pre">draw_point()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.geometries.html">Geometries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.PointNum"><code class="docutils literal notranslate"><span class="pre">PointNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.FormNum"><code class="docutils literal notranslate"><span class="pre">FormNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.LineNum"><code class="docutils literal notranslate"><span class="pre">LineNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.CircleNum"><code class="docutils literal notranslate"><span class="pre">CircleNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.perpendicular_bisector"><code class="docutils literal notranslate"><span class="pre">perpendicular_bisector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.InvalidIntersectError"><code class="docutils literal notranslate"><span class="pre">InvalidIntersectError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.InvalidReduceError"><code class="docutils literal notranslate"><span class="pre">InvalidReduceError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.solve_quad"><code class="docutils literal notranslate"><span class="pre">solve_quad()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.intersect"><code class="docutils literal notranslate"><span class="pre">intersect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.circle_circle_intersection"><code class="docutils literal notranslate"><span class="pre">circle_circle_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.line_circle_intersection"><code class="docutils literal notranslate"><span class="pre">line_circle_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.circle_segment_intersect"><code class="docutils literal notranslate"><span class="pre">circle_segment_intersect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.line_line_intersection"><code class="docutils literal notranslate"><span class="pre">line_line_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.reduce"><code class="docutils literal notranslate"><span class="pre">reduce()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.numerical.sketch.html">Sketch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch"><code class="docutils literal notranslate"><span class="pre">sketch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aline"><code class="docutils literal notranslate"><span class="pre">sketch_aline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aline0"><code class="docutils literal notranslate"><span class="pre">sketch_aline0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_acircle"><code class="docutils literal notranslate"><span class="pre">sketch_acircle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_amirror"><code class="docutils literal notranslate"><span class="pre">sketch_amirror()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_bisect"><code class="docutils literal notranslate"><span class="pre">sketch_bisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_exbisect"><code class="docutils literal notranslate"><span class="pre">sketch_exbisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_bline"><code class="docutils literal notranslate"><span class="pre">sketch_bline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_dia"><code class="docutils literal notranslate"><span class="pre">sketch_dia()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_tangent"><code class="docutils literal notranslate"><span class="pre">sketch_tangent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_circle"><code class="docutils literal notranslate"><span class="pre">sketch_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_cc_tangent"><code class="docutils literal notranslate"><span class="pre">sketch_cc_tangent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_e5128"><code class="docutils literal notranslate"><span class="pre">sketch_e5128()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.random_rfss"><code class="docutils literal notranslate"><span class="pre">random_rfss()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.head_from"><code class="docutils literal notranslate"><span class="pre">head_from()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eq_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_eq_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_iso_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_iso_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqangle2"><code class="docutils literal notranslate"><span class="pre">sketch_eqangle2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqangle3"><code class="docutils literal notranslate"><span class="pre">sketch_eqangle3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqdia_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_eqdia_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.random_points"><code class="docutils literal notranslate"><span class="pre">random_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_free"><code class="docutils literal notranslate"><span class="pre">sketch_free()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isos"><code class="docutils literal notranslate"><span class="pre">sketch_isos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_line"><code class="docutils literal notranslate"><span class="pre">sketch_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_cyclic"><code class="docutils literal notranslate"><span class="pre">sketch_cyclic()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_midp"><code class="docutils literal notranslate"><span class="pre">sketch_midp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pentagon"><code class="docutils literal notranslate"><span class="pre">sketch_pentagon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pline"><code class="docutils literal notranslate"><span class="pre">sketch_pline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pmirror"><code class="docutils literal notranslate"><span class="pre">sketch_pmirror()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_r_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_r_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_r_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_r_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rectangle"><code class="docutils literal notranslate"><span class="pre">sketch_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_reflect"><code class="docutils literal notranslate"><span class="pre">sketch_reflect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_risos"><code class="docutils literal notranslate"><span class="pre">sketch_risos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rotaten90"><code class="docutils literal notranslate"><span class="pre">sketch_rotaten90()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rotatep90"><code class="docutils literal notranslate"><span class="pre">sketch_rotatep90()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_s_angle"><code class="docutils literal notranslate"><span class="pre">sketch_s_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aconst"><code class="docutils literal notranslate"><span class="pre">sketch_aconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_segment"><code class="docutils literal notranslate"><span class="pre">sketch_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_shift"><code class="docutils literal notranslate"><span class="pre">sketch_shift()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_square"><code class="docutils literal notranslate"><span class="pre">sketch_square()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isquare"><code class="docutils literal notranslate"><span class="pre">sketch_isquare()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_tline"><code class="docutils literal notranslate"><span class="pre">sketch_tline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_triangle12"><code class="docutils literal notranslate"><span class="pre">sketch_triangle12()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trisect"><code class="docutils literal notranslate"><span class="pre">sketch_trisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trisegment"><code class="docutils literal notranslate"><span class="pre">sketch_trisegment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_ieq_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_ieq_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_incenter2"><code class="docutils literal notranslate"><span class="pre">sketch_incenter2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_excenter2"><code class="docutils literal notranslate"><span class="pre">sketch_excenter2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_centroid"><code class="docutils literal notranslate"><span class="pre">sketch_centroid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_ninepoints"><code class="docutils literal notranslate"><span class="pre">sketch_ninepoints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_2l1c"><code class="docutils literal notranslate"><span class="pre">sketch_2l1c()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_3peq"><code class="docutils literal notranslate"><span class="pre">sketch_3peq()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isosvertex"><code class="docutils literal notranslate"><span class="pre">sketch_isosvertex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqratio"><code class="docutils literal notranslate"><span class="pre">sketch_eqratio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rconst"><code class="docutils literal notranslate"><span class="pre">sketch_rconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqratio6"><code class="docutils literal notranslate"><span class="pre">sketch_eqratio6()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_lconst"><code class="docutils literal notranslate"><span class="pre">sketch_lconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rconst2"><code class="docutils literal notranslate"><span class="pre">sketch_rconst2()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.predicates.html">Predicates</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.Pythagoras.html">Pythagoras</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.Pythagoras.html#geosolver.predicates.Pythagoras.PythagoreanPremises"><code class="docutils literal notranslate"><span class="pre">PythagoreanPremises</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.Pythagoras.html#geosolver.predicates.Pythagoras.PythagoreanConclusions"><code class="docutils literal notranslate"><span class="pre">PythagoreanConclusions</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.circumcenter.html">Circumcenter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.circumcenter.html#geosolver.predicates.circumcenter.Circumcenter"><code class="docutils literal notranslate"><span class="pre">Circumcenter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.collinearity.html">Collinearity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.collinearity.html#geosolver.predicates.collinearity.Coll"><code class="docutils literal notranslate"><span class="pre">Coll</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.collinearity.html#geosolver.predicates.collinearity.NColl"><code class="docutils literal notranslate"><span class="pre">NColl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.congruence.html">Congruence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.congruence.html#geosolver.predicates.congruence.Cong"><code class="docutils literal notranslate"><span class="pre">Cong</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.constant_angle.html">Constant Angle</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.constant_angle.html#geosolver.predicates.constant_angle.ConstantAngle"><code class="docutils literal notranslate"><span class="pre">ConstantAngle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.constant_angle.html#geosolver.predicates.constant_angle.ACompute"><code class="docutils literal notranslate"><span class="pre">ACompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.constant_length.html">Constant Length</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.constant_length.html#geosolver.predicates.constant_length.ConstantLength"><code class="docutils literal notranslate"><span class="pre">ConstantLength</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.constant_length.html#geosolver.predicates.constant_length.LCompute"><code class="docutils literal notranslate"><span class="pre">LCompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.constant_ratio.html">Constant Ratio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.constant_ratio.html#geosolver.predicates.constant_ratio.ConstantRatio"><code class="docutils literal notranslate"><span class="pre">ConstantRatio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.constant_ratio.html#geosolver.predicates.constant_ratio.RCompute"><code class="docutils literal notranslate"><span class="pre">RCompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.cyclic.html">Cyclic</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.cyclic.html#geosolver.predicates.cyclic.Cyclic"><code class="docutils literal notranslate"><span class="pre">Cyclic</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.different.html">Different</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.different.html#geosolver.predicates.different.Diff"><code class="docutils literal notranslate"><span class="pre">Diff</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.equal_angles.html">Equal Angles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.equal_angles.html#geosolver.predicates.equal_angles.EqAngle"><code class="docutils literal notranslate"><span class="pre">EqAngle</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.equal_ratios.html">Equal Ratios</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.equal_ratios.html#geosolver.predicates.equal_ratios.EqRatio"><code class="docutils literal notranslate"><span class="pre">EqRatio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.equal_ratios.html#geosolver.predicates.equal_ratios.EqRatio3"><code class="docutils literal notranslate"><span class="pre">EqRatio3</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.midpoint.html">Midpoint</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.midpoint.html#geosolver.predicates.midpoint.MidPoint"><code class="docutils literal notranslate"><span class="pre">MidPoint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.parallelism.html">Parallelism</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.parallelism.html#geosolver.predicates.parallelism.Para"><code class="docutils literal notranslate"><span class="pre">Para</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.parallelism.html#geosolver.predicates.parallelism.NPara"><code class="docutils literal notranslate"><span class="pre">NPara</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.perpendicularity.html">Perpendicularity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.perpendicularity.html#geosolver.predicates.perpendicularity.Perp"><code class="docutils literal notranslate"><span class="pre">Perp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.perpendicularity.html#geosolver.predicates.perpendicularity.NPerp"><code class="docutils literal notranslate"><span class="pre">NPerp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.predicate.html">Predicate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.predicate.html#geosolver.predicates.predicate.Predicate"><code class="docutils literal notranslate"><span class="pre">Predicate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.sameclock.html">Sameclock</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.sameclock.html#geosolver.predicates.sameclock.SameClock"><code class="docutils literal notranslate"><span class="pre">SameClock</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.sameside.html">Sameside</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.sameside.html#geosolver.predicates.sameside.SameSide"><code class="docutils literal notranslate"><span class="pre">SameSide</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.sameside.html#geosolver.predicates.sameside.NSameSide"><code class="docutils literal notranslate"><span class="pre">NSameSide</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.triangles_congruent.html">Triangles Congruent</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.triangles_congruent.html#geosolver.predicates.triangles_congruent.ContriClock"><code class="docutils literal notranslate"><span class="pre">ContriClock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.triangles_congruent.html#geosolver.predicates.triangles_congruent.ContriReflect"><code class="docutils literal notranslate"><span class="pre">ContriReflect</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.predicates.triangles_similar.html">Triangles Similar</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.two_triangles"><code class="docutils literal notranslate"><span class="pre">two_triangles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.SimtriClock"><code class="docutils literal notranslate"><span class="pre">SimtriClock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.SimtriReflect"><code class="docutils literal notranslate"><span class="pre">SimtriReflect</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.api.html">Api</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolver"><code class="docutils literal notranslate"><span class="pre">GeometricSolver</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolver.run"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolver.write_proof_steps"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_proof_steps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolver.draw_figure"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.draw_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolver.write_run_infos"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_run_infos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolver.write_all_outputs"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_all_outputs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.defs"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.defs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.rules"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.rules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.build"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.del_goals"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.del_goals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_rules_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_rules_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_rules_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_rules_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_defs_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_defs_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_defs_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_defs_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.with_deductive_agent"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.with_deductive_agent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_geogebra"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_geogebra()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_goal"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_goal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_goals_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_goals_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.with_problem_path"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.with_problem_path()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.configs.html">Configs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.configs.html#geosolver.configs.default_configs_path"><code class="docutils literal notranslate"><span class="pre">default_configs_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.configs.html#geosolver.configs.default_defs_path"><code class="docutils literal notranslate"><span class="pre">default_defs_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.configs.html#geosolver.configs.default_rules_path"><code class="docutils literal notranslate"><span class="pre">default_rules_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.load_geogebra.html">Load Geogebra</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form"><code class="docutils literal notranslate"><span class="pre">Form</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form.Circle"><code class="docutils literal notranslate"><span class="pre">Form.Circle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form.Line"><code class="docutils literal notranslate"><span class="pre">Form.Line</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.load_geogebra.html#geosolver.load_geogebra.dedup"><code class="docutils literal notranslate"><span class="pre">dedup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.load_geogebra.html#geosolver.load_geogebra.load_geogebra"><code class="docutils literal notranslate"><span class="pre">load_geogebra()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.match_theorems.html">Match Theorems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher"><code class="docutils literal notranslate"><span class="pre">Matcher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.update"><code class="docutils literal notranslate"><span class="pre">Matcher.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.cache_theorem"><code class="docutils literal notranslate"><span class="pre">Matcher.cache_theorem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.match_theorem"><code class="docutils literal notranslate"><span class="pre">Matcher.match_theorem()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.proof.html">Proof</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.proof.html#geosolver.proof.ConstructionError"><code class="docutils literal notranslate"><span class="pre">ConstructionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.proof.html#geosolver.proof.ProofState"><code class="docutils literal notranslate"><span class="pre">ProofState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.proof.html#geosolver.proof.ProofState.add_construction"><code class="docutils literal notranslate"><span class="pre">ProofState.add_construction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.proof.html#geosolver.proof.ProofState.build_problemJGEX"><code class="docutils literal notranslate"><span class="pre">ProofState.build_problemJGEX()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.proof.html#geosolver.proof.ProofState.match_theorem"><code class="docutils literal notranslate"><span class="pre">ProofState.match_theorem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.proof.html#geosolver.proof.ProofState.apply_dep"><code class="docutils literal notranslate"><span class="pre">ProofState.apply_dep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.proof.html#geosolver.proof.ProofState.check_goals"><code class="docutils literal notranslate"><span class="pre">ProofState.check_goals()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.proof_writing.html">Proof Writing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.proof_writing.html#geosolver.proof_writing.write_proof_steps"><code class="docutils literal notranslate"><span class="pre">write_proof_steps()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.run_loop.html">Run Loop</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.run_loop.html#geosolver.run_loop.run_loop"><code class="docutils literal notranslate"><span class="pre">run_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.statement.html">Statement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.statement.html#geosolver.statement.Statement"><code class="docutils literal notranslate"><span class="pre">Statement</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.statement.html#geosolver.statement.Statement.check"><code class="docutils literal notranslate"><span class="pre">Statement.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.statement.html#geosolver.statement.Statement.check_numerical"><code class="docutils literal notranslate"><span class="pre">Statement.check_numerical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.statement.html#geosolver.statement.Statement.why"><code class="docutils literal notranslate"><span class="pre">Statement.why()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.statement.html#geosolver.statement.Statement.from_tokens"><code class="docutils literal notranslate"><span class="pre">Statement.from_tokens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.statement.html#geosolver.statement.Statement.pretty"><code class="docutils literal notranslate"><span class="pre">Statement.pretty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.statement.html#geosolver.statement.Statement.with_new"><code class="docutils literal notranslate"><span class="pre">Statement.with_new()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source/geosolver.statement.html#geosolver.statement.Statement.draw"><code class="docutils literal notranslate"><span class="pre">Statement.draw()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.tools.html">Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.InfQuotientError"><code class="docutils literal notranslate"><span class="pre">InfQuotientError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.notNone"><code class="docutils literal notranslate"><span class="pre">notNone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.get_quotient"><code class="docutils literal notranslate"><span class="pre">get_quotient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.atomize"><code class="docutils literal notranslate"><span class="pre">atomize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.str_to_fraction"><code class="docutils literal notranslate"><span class="pre">str_to_fraction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.fraction_to_len"><code class="docutils literal notranslate"><span class="pre">fraction_to_len()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.fraction_to_ratio"><code class="docutils literal notranslate"><span class="pre">fraction_to_ratio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.fraction_to_angle"><code class="docutils literal notranslate"><span class="pre">fraction_to_angle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.reshape"><code class="docutils literal notranslate"><span class="pre">reshape()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.add_edge"><code class="docutils literal notranslate"><span class="pre">add_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.runtime_cache_path"><code class="docutils literal notranslate"><span class="pre">runtime_cache_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.run_static_server"><code class="docutils literal notranslate"><span class="pre">run_static_server()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.tools.html#geosolver.tools.boring_statement"><code class="docutils literal notranslate"><span class="pre">boring_statement()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.webapp.html">Webapp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source/geosolver.webapp.html#geosolver.webapp.pull_to_server"><code class="docutils literal notranslate"><span class="pre">pull_to_server()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff9900" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Newclid</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Newclid: A User-Friendly Replacement for AlphaGeometry with Agentic Support</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="manual/overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="newclid-a-user-friendly-replacement-for-alphageometry-with-agentic-support">
+<h1>Newclid: A User-Friendly Replacement for AlphaGeometry with Agentic Support<a class="headerlink" href="#newclid-a-user-friendly-replacement-for-alphageometry-with-agentic-support" title="Link to this heading"></a></h1>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<section id="using-pip">
+<h3>Using pip<a class="headerlink" href="#using-pip" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/LMCRC/Newclid.git
+</pre></div>
+</div>
+</section>
+<section id="from-source">
+<h3>From source<a class="headerlink" href="#from-source" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LMCRC/Newclid.git
+<span class="nb">cd</span><span class="w"> </span>Newclid
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+</section>
+<section id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h2>
+<p>To simply solve a problem using Newclid, use the command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>geosolver<span class="w"> </span>--problem-name<span class="w"> </span>problem_name<span class="w"> </span>--problems-file<span class="w"> </span>path/to/problem
+</pre></div>
+</div>
+<p>For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>geosolver<span class="w"> </span>--problem-name<span class="w"> </span>orthocenter_consequence_aux<span class="w"> </span>--problems-file<span class="w"> </span>./problems_datasets/examples.txt
+</pre></div>
+</div>
+<p>See other command line interface options with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>geosolver<span class="w"> </span>--help
+</pre></div>
+</div>
+<p>For more complex applications, use the Python interface.
+Below is a minimal example to load a specific problem,
+then uses the built solver to solve it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geosolver</span> <span class="kn">import</span> <span class="n">GeometricSolverBuilder</span><span class="p">,</span> <span class="n">GeometricSolver</span>
+
+<span class="n">solver_builder</span> <span class="o">=</span> <span class="n">GeometricSolverBuilder</span><span class="p">()</span>
+<span class="n">solver_builder</span><span class="o">.</span><span class="n">load_problem_from_txt</span><span class="p">(</span>
+    <span class="s2">&quot;a b c = triangle a b c; &quot;</span>
+    <span class="s2">&quot;d = on_tline d b a c, on_tline d c a b &quot;</span>
+    <span class="s2">&quot;? perp a d b c&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># We now obtain the GeometricSolver with the build method</span>
+<span class="n">solver</span><span class="p">:</span> <span class="n">GeometricSolver</span> <span class="o">=</span> <span class="n">solver_builder</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+
+<span class="c1"># And run the GeometricSolver</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfuly solved the problem!&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to solve the problem...&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Run infos </span><span class="si">{</span><span class="n">solver</span><span class="o">.</span><span class="n">run_infos</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Some more advanced examples of script using the Python interface
+are displayed in the folder <code class="docutils literal notranslate"><span class="pre">examples</span></code> or used in <code class="docutils literal notranslate"><span class="pre">tests</span></code>.</p>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading"></a></h2>
+<p>See <a class="reference external" href="https://ddar-noahs-ark-libraries-d1a330533fb77a761c85bd7785b7974dd32b06.rnd-gitlab-eu.huawei.com/">the online documentation</a>
+for more detailed informations about Newclid.</p>
+</section>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Clone the repository</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/LMCRC/Newclid.git
+<span class="nb">cd</span><span class="w"> </span>Newclid
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>(Optional) Create a virtual environment, for example with venv:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+
+<span class="c1"># On UNIX</span>
+<span class="nb">source</span><span class="w"> </span>./bin/activate
+
+<span class="c1"># On Windows</span>
+.<span class="se">\v</span>env<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Install as an editable package with dev requirements</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Install pre-commit and pre-push checks</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install<span class="w"> </span>-t<span class="w"> </span>pre-commit<span class="w"> </span>-t<span class="w"> </span>pre-push
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Run tests</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>tests
+</pre></div>
+</div>
+</section>
+<section id="about-newclid">
+<h2>About Newclid<a class="headerlink" href="#about-newclid" title="Link to this heading"></a></h2>
+<p>Newclid is a successor to AlphaGeometry, introduced in this early 2024 Nature paper:
+<a class="reference external" href="https://www.nature.com/articles/s41586-023-06747-5">Solving Olympiad Geometry without Human Demonstrations</a>. whose original codebase can be found <a class="reference external" href="https://github.com/google-deepmind/alphageometry">here</a>.</p>
+<p>If you found Newclid useful, please cite us as:</p>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">newclid2024sicca</span><span class="p">,</span>
+<span class="w">  </span><span class="na">author</span><span class="w">  </span><span class="p">=</span><span class="w"> </span><span class="s">{Sicca, Vladmir and Xia, Tianxiang and F\&#39;ed\&#39;erico, Math\&quot;is and Gorinski, Philip John and Frieder, Simon and Jui, Shangling}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{arXiv preprint}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">title</span><span class="w">   </span><span class="p">=</span><span class="w"> </span><span class="s">{Newclid: A User-Friendly Replacement for AlphaGeometry with Agentic Support}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">year</span><span class="w">    </span><span class="p">=</span><span class="w"> </span><span class="s">{2024}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The AlphaGeometry checkpoints and vocabulary are made available
+under the terms of the Creative Commons Attribution 4.0
+International (CC BY 4.0) license.
+You can find details at:
+<a class="reference external" href="https://creativecommons.org/licenses/by/4.0/legalcode">https://creativecommons.org/licenses/by/4.0/legalcode</a></p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="manual/overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#proof-state">Proof State</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#deductive-agent">Deductive Agent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#how-is-a-problem-built">How is a Problem Built</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#problem-solving">Problem Solving</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/overview.html#writing-the-proof">Writing the Proof</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual/python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/adding_problems.html">Adding new problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/adding_problems.html#using-definitions">Using definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/adding_problems.html#writing-a-new-problem">Writing a new problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/adding_problems.html#ensuring-the-problem-can-be-built">Ensuring the problem can be built</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual/adding_rules.html">Adding new rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manual/default_files/index.html">Default Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/default_files/definitions.html">Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/default_files/rules.html">Rules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual/problem_databases/index.html">Problems Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manual/problem_databases/imo_ag_30.html">imo_ag_30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/problem_databases/jgex_ag_231.html">jgex_ag_231</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/problem_databases/new_benchmark_50.html">new_benchmark_50</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manual/problem_databases/examples.html">examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source/geosolver.html">Geosolver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.agent.html">Agent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.algebraic_reasoning.html">Algebraic Reasoning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.dependencies.html">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.formulations.html">Formulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.numerical.html">Numerical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.predicates.html">Predicates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.api.html">Api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.configs.html">Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.load_geogebra.html">Load Geogebra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.match_theorems.html">Match Theorems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.proof.html">Proof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.proof_writing.html">Proof Writing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.run_loop.html">Run Loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.statement.html">Statement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/geosolver.webapp.html">Webapp</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="manual/overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Mathïs Fédérico, Vladmir Sicca, Tianxiang Xia.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

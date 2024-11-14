@@ -1,0 +1,32 @@
+Predicates
+==========
+
+.. automodule:: geosolver.predicates
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   geosolver.predicates.Pythagoras
+   geosolver.predicates.circumcenter
+   geosolver.predicates.collinearity
+   geosolver.predicates.congruence
+   geosolver.predicates.constant_angle
+   geosolver.predicates.constant_length
+   geosolver.predicates.constant_ratio
+   geosolver.predicates.cyclic
+   geosolver.predicates.different
+   geosolver.predicates.equal_angles
+   geosolver.predicates.equal_ratios
+   geosolver.predicates.midpoint
+   geosolver.predicates.parallelism
+   geosolver.predicates.perpendicularity
+   geosolver.predicates.predicate
+   geosolver.predicates.sameclock
+   geosolver.predicates.sameside
+   geosolver.predicates.triangles_congruent
+   geosolver.predicates.triangles_similar

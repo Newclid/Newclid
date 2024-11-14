@@ -1,0 +1,2601 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Definitions &mdash; Newclid 0.1.dev1+gd05c737 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/styles/custom.css?v=12096124" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=b302d3c9"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Rules" href="rules.html" />
+    <link rel="prev" title="Default Files" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff9900" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Newclid
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#proof-state">Proof State</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#deductive-agent">Deductive Agent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#how-is-a-problem-built">How is a Problem Built</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#problem-solving">Problem Solving</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../overview.html#matching-and-caching">Matching and Caching</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#writing-the-proof">Writing the Proof</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../overview.html#translating-to-natural-language">Translating to natural language</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_problems.html">Adding new problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../adding_problems.html#using-definitions">Using definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adding_problems.html#writing-a-new-problem">Writing a new problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adding_problems.html#ensuring-the-problem-can-be-built">Ensuring the problem can be built</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_rules.html">Adding new rules</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Default Files</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Definitions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#legacy-definitions">Legacy definitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#angle-bisector-x-a-b-c">angle_bisector x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#angle-mirror-x-a-b-c">angle_mirror x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#circle-x-a-b-c">circle x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#circumcenter-x-a-b-c">circumcenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eq-quadrangle-a-b-c-d">eq_quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iso-trapezoid-a-b-c-d">iso_trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eq-triangle-x-b-c">eq_triangle x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eqangle2-x-a-b-c">eqangle2 x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eqdia-quadrangle-a-b-c-d">eqdia_quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eqdistance-x-a-b-c">eqdistance x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#foot-x-a-b-c">foot x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#free-a">free a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#incenter-x-a-b-c">incenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#incenter2-x-y-z-i-a-b-c">incenter2 x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#excenter-x-a-b-c">excenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#excenter2-x-y-z-i-a-b-c">excenter2 x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#centroid-x-y-z-i-a-b-c">centroid x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ninepoints-x-y-z-i-a-b-c">ninepoints x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#intersection-cc-x-o-w-a">intersection_cc x o w a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#intersection-lc-x-a-o-b">intersection_lc x a o b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#intersection-ll-x-a-b-c-d">intersection_ll x a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#intersection-lp-x-a-b-c-m-n">intersection_lp x a b c m n</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#intersection-lt-x-a-b-c-d-e">intersection_lt x a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#intersection-pp-x-a-b-c-d-e-f">intersection_pp x a b c d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#intersection-tt-x-a-b-c-d-e-f">intersection_tt x a b c d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iso-triangle-a-b-c">iso_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lc-tangent-x-a-o">lc_tangent x a o</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#midpoint-x-a-b">midpoint x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mirror-x-a-b">mirror x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nsquare-x-a-b">nsquare x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-aline-x-a-b-c-d-e">on_aline x a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-bline-x-a-b">on_bline x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-circle-x-o-a">on_circle x o a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-line-x-a-b">on_line x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-pline-x-a-b-c">on_pline x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-tline-x-a-b-c">on_tline x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#orthocenter-x-a-b-c">orthocenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parallelogram-a-b-c-x">parallelogram a b c x</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pentagon-a-b-c-d-e">pentagon a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#psquare-x-a-b">psquare x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quadrangle-a-b-c-d">quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r-trapezoid-a-b-c-d">r_trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r-triangle-a-b-c">r_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rectangle-a-b-c-d">rectangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reflect-x-a-b-c">reflect x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#risos-a-b-c">risos a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#segment-a-b">segment a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shift-x-b-c-d">shift x b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#square-a-b-x-y">square a b x y</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#isquare-a-b-c-d">isquare a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trapezoid-a-b-c-d">trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#triangle-a-b-c">triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#triangle12-a-b-c">triangle12 a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#l1c-x-y-z-i-a-b-c-o">2l1c x y z i a b c o</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#e5128-x-y-a-b-c-d">e5128 x y a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#peq-x-y-z-a-b-c">3peq x y z a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trisect-x-y-a-b-c">trisect x y a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trisegment-x-y-a-b">trisegment x y a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-dia-x-a-b">on_dia x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ieq-triangle-a-b-c">ieq_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cc-tangent-x-y-z-i-o-a-w-b">cc_tangent x y z i o a w b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eqangle3-x-a-b-d-e-f">eqangle3 x a b d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tangent-x-y-a-o-b">tangent x y a o b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-circum-x-a-b-c">on_circum x a b c</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#new-definitions">New Definitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#on-pline0-x-a-b-c">on_pline0 x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iso-triangle0-a-b-c">iso_triangle0 a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iso-triangle-vertex-x-b-c">iso_triangle_vertex x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iso-triangle-vertex-angle-x-b-c">iso_triangle_vertex_angle x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-aline0-x-a-b-c-d-e-f-g">on_aline0 x a b c d e f g</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eqratio-x-a-b-c-d-e-f-g">eqratio x a b c d e f g</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#eqratio6-x-a-c-e-f-g-h">eqratio6 x a c e f g h</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rconst-a-b-c-x-r">rconst a b c x r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rconst2-x-a-b-r">rconst2 x a b r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#aconst-a-b-c-x-r">aconst a b c x r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#s-angle-a-b-x-y">s_angle a b x y</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lconst-x-a-l">lconst x a l</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="rules.html">Rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="rules.html#legacy-rules">Legacy rules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r00-perpendiculars-give-parallel">r00 : Perpendiculars give parallel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r01-definition-of-circle">r01 : Definition of circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r02-parallel-from-inclination">r02 : Parallel from inclination</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r03-arc-determines-internal-angles">r03 : Arc determines internal angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r04-congruent-angles-are-in-a-circle">r04 : Congruent angles are in a circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r05-same-arc-same-chord">r05 : Same arc same chord</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r06-base-of-half-triangle">r06 : Base of half triangle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r07-thales-theorem-i">r07 : Thales Theorem I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r08-right-triangles-common-angle-i">r08 : Right triangles common angle I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r09-sum-of-angles-of-a-triangle">r09 : Sum of angles of a triangle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r10-ratio-cancellation">r10 : Ratio cancellation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r11-bisector-theorem-i">r11 : Bisector theorem I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r12-bisector-theorem-ii">r12 : Bisector theorem II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r13-isosceles-triangle-equal-angles">r13 : Isosceles triangle equal angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r14-equal-base-angles-imply-isosceles">r14 : Equal base angles imply isosceles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r15-arc-determines-inscribed-angles-tangent">r15 : Arc determines inscribed angles (tangent)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r16-same-arc-giving-tangent">r16 : Same arc giving tangent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r17-central-angle-vs-inscribed-angle-i">r17 : Central angle vs inscribed angle I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r18-central-angle-vs-inscribed-angle-ii">r18 : Central angle vs inscribed angle II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r19-hypothenuse-is-diameter">r19 : Hypothenuse is diameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r20-diameter-is-hypotenuse">r20 : Diameter is hypotenuse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r21-cyclic-trapezoid">r21 : Cyclic trapezoid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r22-bisector-construction">r22 : Bisector Construction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r23-bisector-is-perpendicular">r23 : Bisector is perpendicular</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r24-cyclic-kite">r24 : Cyclic kite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r25-diagonals-of-parallelogram-i">r25 : Diagonals of parallelogram I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r26-diagonals-of-parallelogram-ii">r26 : Diagonals of parallelogram II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r27-thales-theorem-ii">r27 : Thales theorem II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r28-overlapping-parallels">r28 : Overlapping parallels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r29-midpoint-is-an-eqratio">r29 : Midpoint is an eqratio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r30-right-triangles-common-angle-ii">r30 : Right triangles common angle II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r31-denominator-cancelling">r31 : Denominator cancelling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r32-sss-triangle-congruence">r32 : SSS Triangle congruence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r33-sas-triangle-congruence">r33 : SAS Triangle congruence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r34-aa-similarity-of-triangles-direct">r34 : AA Similarity of triangles (direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r35-aa-similarity-of-triangles-reverse">r35 : AA Similarity of triangles (reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r36-asa-congruence-of-triangles-direct">r36 : ASA Congruence of triangles (direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r37-asa-congruence-of-triangles-reverse">r37 : ASA Congruence of triangles (reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r38-sss-triangle-similarity-original">r38 : SSS Triangle similarity (original)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r39-sas-triangle-similarity-original">r39 : SAS Triangle similarity (original)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r40-similarity-without-scaling">r40 : Similarity without scaling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r41-thales-theorem-iii">r41 : Thales theorem III</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r42-thales-theorem-iv">r42 : Thales theorem IV</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="rules.html#new-rules">New rules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r43-orthocenter-theorem">r43 : Orthocenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r44-pappus-s-theorem">r44 : Pappus’s theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r45-simson-s-line-theorem">r45 : Simson’s line theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r46-incenter-theorem">r46 : Incenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r47-circumcenter-theorem">r47 : Circumcenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r48-centroid-theorem">r48 : Centroid theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r49-recognize-center-of-cyclic-circle">r49 : Recognize center of cyclic (circle)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r50-recognize-center-of-cyclic-cong">r50 : Recognize center of cyclic (cong)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r51-midpoint-splits-in-two">r51 : Midpoint splits in two</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r52-properties-of-similar-triangles-direct">r52 : Properties of similar triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r53-properties-of-similar-triangles-reverse">r53 : Properties of similar triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r54-definition-of-midpoint">r54 : Definition of midpoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r55-properties-of-midpoint-cong">r55 : Properties of midpoint (cong)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r56-properties-of-midpoint-coll">r56 : Properties of midpoint (coll)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r57-pythagoras-theorem">r57 : Pythagoras theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r58-same-chord-same-arc-i">r58 : Same chord same arc I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r59-same-chord-same-arc-ii">r59 : Same chord same arc II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r60-sss-similarity-of-triangles-direct">r60 : SSS Similarity of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r61-sss-similarity-of-triangles-reverse">r61 : SSS Similarity of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r62-sas-similarity-of-triangles-direct">r62 : SAS Similarity of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r63-sas-similarity-of-triangles-reverse">r63 : SAS Similarity of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r64-sss-congruence-of-triangles-direct">r64 : SSS Congruence of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r65-sss-congruence-of-triangles-reverse">r65 : SSS Congruence of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r66-sas-congruence-of-triangles-direct">r66 : SAS Congruence of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r67-sas-congruence-of-triangles-reverse">r67 : SAS Congruence of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r68-similarity-without-scaling-direct">r68 : Similarity without scaling (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rules.html#r69-similarity-without-scaling-reverse">r69 : Similarity without scaling (Reverse)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../problem_databases/index.html">Problems Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../problem_databases/imo_ag_30.html">imo_ag_30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../problem_databases/jgex_ag_231.html">jgex_ag_231</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../problem_databases/new_benchmark_50.html">new_benchmark_50</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../problem_databases/examples.html">examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/geosolver.html">Geosolver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.agent.html">Agent</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.agent.agents_interface.html">Agents Interface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.agents_interface.html#geosolver.agent.agents_interface.DeductiveAgent"><code class="docutils literal notranslate"><span class="pre">DeductiveAgent</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.agent.breadth_first_search.html">Breadth First Search</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.breadth_first_search.html#geosolver.agent.breadth_first_search.BFSDDAR"><code class="docutils literal notranslate"><span class="pre">BFSDDAR</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.agent.flemmard.html">Flemmard</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.flemmard.html#geosolver.agent.flemmard.Flemmard"><code class="docutils literal notranslate"><span class="pre">Flemmard</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.agent.human_agent.html">Human Agent</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.human_agent.html#geosolver.agent.human_agent.NamedFunction"><code class="docutils literal notranslate"><span class="pre">NamedFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.human_agent.html#geosolver.agent.human_agent.HumanAgent"><code class="docutils literal notranslate"><span class="pre">HumanAgent</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.html">Algebraic Reasoning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.algebraic_manipulator.html">Algebraic Manipulator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.algebraic_manipulator.html#geosolver.algebraic_reasoning.algebraic_manipulator.AlgebraicManipulator"><code class="docutils literal notranslate"><span class="pre">AlgebraicManipulator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html">Tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.strip"><code class="docutils literal notranslate"><span class="pre">strip()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.plus"><code class="docutils literal notranslate"><span class="pre">plus()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.plus_all"><code class="docutils literal notranslate"><span class="pre">plus_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.mult"><code class="docutils literal notranslate"><span class="pre">mult()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.minus"><code class="docutils literal notranslate"><span class="pre">minus()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.recon"><code class="docutils literal notranslate"><span class="pre">recon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.replace"><code class="docutils literal notranslate"><span class="pre">replace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.report"><code class="docutils literal notranslate"><span class="pre">report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.Table"><code class="docutils literal notranslate"><span class="pre">Table</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.dependencies.html">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.dependencies.dependency.html">Dependency</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.dependency.html#geosolver.dependencies.dependency.Dependency"><code class="docutils literal notranslate"><span class="pre">Dependency</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.dependencies.dependency_graph.html">Dependency Graph</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.dependency_graph.html#geosolver.dependencies.dependency_graph.DependencyGraph"><code class="docutils literal notranslate"><span class="pre">DependencyGraph</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html">Symbols</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Symbol"><code class="docutils literal notranslate"><span class="pre">Symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Point"><code class="docutils literal notranslate"><span class="pre">Point</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Line"><code class="docutils literal notranslate"><span class="pre">Line</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Circle"><code class="docutils literal notranslate"><span class="pre">Circle</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.dependencies.symbols_graph.html">Symbols Graph</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols_graph.html#geosolver.dependencies.symbols_graph.SymbolsGraph"><code class="docutils literal notranslate"><span class="pre">SymbolsGraph</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.formulations.html">Formulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.formulations.clause.html">Clause</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.clause.html#geosolver.formulations.clause.Clause"><code class="docutils literal notranslate"><span class="pre">Clause</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.clause.html#geosolver.formulations.clause.translate_sentence"><code class="docutils literal notranslate"><span class="pre">translate_sentence()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.formulations.definition.html">Definition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.definition.html#geosolver.formulations.definition.DefinitionJGEX"><code class="docutils literal notranslate"><span class="pre">DefinitionJGEX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.formulations.problem.html">Problem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.problem.html#geosolver.formulations.problem.ProblemJGEX"><code class="docutils literal notranslate"><span class="pre">ProblemJGEX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.formulations.rule.html">Rule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.rule.html#geosolver.formulations.rule.Rule"><code class="docutils literal notranslate"><span class="pre">Rule</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.numerical.html">Numerical</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.html#geosolver.numerical.close_enough"><code class="docutils literal notranslate"><span class="pre">close_enough()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.html#geosolver.numerical.nearly_zero"><code class="docutils literal notranslate"><span class="pre">nearly_zero()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.html#geosolver.numerical.sign"><code class="docutils literal notranslate"><span class="pre">sign()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.angles.html">Angles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.angles.html#geosolver.numerical.angles.ang_of"><code class="docutils literal notranslate"><span class="pre">ang_of()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.angles.html#geosolver.numerical.angles.ang_between"><code class="docutils literal notranslate"><span class="pre">ang_between()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.check.html">Check</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.check.html#geosolver.numerical.check.same_clock"><code class="docutils literal notranslate"><span class="pre">same_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.check.html#geosolver.numerical.check.clock"><code class="docutils literal notranslate"><span class="pre">clock()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.distances.html">Distances</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.distances.html#geosolver.numerical.distances.PointTooCloseError"><code class="docutils literal notranslate"><span class="pre">PointTooCloseError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.distances.html#geosolver.numerical.distances.PointTooFarError"><code class="docutils literal notranslate"><span class="pre">PointTooFarError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.distances.html#geosolver.numerical.distances.check_too_close_numerical"><code class="docutils literal notranslate"><span class="pre">check_too_close_numerical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.distances.html#geosolver.numerical.distances.check_too_far_numerical"><code class="docutils literal notranslate"><span class="pre">check_too_far_numerical()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html">Draw Figure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.init_figure"><code class="docutils literal notranslate"><span class="pre">init_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_figure"><code class="docutils literal notranslate"><span class="pre">draw_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.fill_missing"><code class="docutils literal notranslate"><span class="pre">fill_missing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_circle"><code class="docutils literal notranslate"><span class="pre">draw_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_line"><code class="docutils literal notranslate"><span class="pre">draw_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_segment"><code class="docutils literal notranslate"><span class="pre">draw_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_segment_num"><code class="docutils literal notranslate"><span class="pre">draw_segment_num()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_angle"><code class="docutils literal notranslate"><span class="pre">draw_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_rectangle"><code class="docutils literal notranslate"><span class="pre">draw_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_point"><code class="docutils literal notranslate"><span class="pre">draw_point()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html">Geometries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.PointNum"><code class="docutils literal notranslate"><span class="pre">PointNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.FormNum"><code class="docutils literal notranslate"><span class="pre">FormNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.LineNum"><code class="docutils literal notranslate"><span class="pre">LineNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.CircleNum"><code class="docutils literal notranslate"><span class="pre">CircleNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.perpendicular_bisector"><code class="docutils literal notranslate"><span class="pre">perpendicular_bisector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.InvalidIntersectError"><code class="docutils literal notranslate"><span class="pre">InvalidIntersectError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.InvalidReduceError"><code class="docutils literal notranslate"><span class="pre">InvalidReduceError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.solve_quad"><code class="docutils literal notranslate"><span class="pre">solve_quad()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.intersect"><code class="docutils literal notranslate"><span class="pre">intersect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.circle_circle_intersection"><code class="docutils literal notranslate"><span class="pre">circle_circle_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.line_circle_intersection"><code class="docutils literal notranslate"><span class="pre">line_circle_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.circle_segment_intersect"><code class="docutils literal notranslate"><span class="pre">circle_segment_intersect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.line_line_intersection"><code class="docutils literal notranslate"><span class="pre">line_line_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.reduce"><code class="docutils literal notranslate"><span class="pre">reduce()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html">Sketch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch"><code class="docutils literal notranslate"><span class="pre">sketch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aline"><code class="docutils literal notranslate"><span class="pre">sketch_aline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aline0"><code class="docutils literal notranslate"><span class="pre">sketch_aline0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_acircle"><code class="docutils literal notranslate"><span class="pre">sketch_acircle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_amirror"><code class="docutils literal notranslate"><span class="pre">sketch_amirror()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_bisect"><code class="docutils literal notranslate"><span class="pre">sketch_bisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_exbisect"><code class="docutils literal notranslate"><span class="pre">sketch_exbisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_bline"><code class="docutils literal notranslate"><span class="pre">sketch_bline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_dia"><code class="docutils literal notranslate"><span class="pre">sketch_dia()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_tangent"><code class="docutils literal notranslate"><span class="pre">sketch_tangent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_circle"><code class="docutils literal notranslate"><span class="pre">sketch_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_cc_tangent"><code class="docutils literal notranslate"><span class="pre">sketch_cc_tangent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_e5128"><code class="docutils literal notranslate"><span class="pre">sketch_e5128()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.random_rfss"><code class="docutils literal notranslate"><span class="pre">random_rfss()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.head_from"><code class="docutils literal notranslate"><span class="pre">head_from()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eq_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_eq_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_iso_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_iso_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqangle2"><code class="docutils literal notranslate"><span class="pre">sketch_eqangle2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqangle3"><code class="docutils literal notranslate"><span class="pre">sketch_eqangle3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqdia_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_eqdia_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.random_points"><code class="docutils literal notranslate"><span class="pre">random_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_free"><code class="docutils literal notranslate"><span class="pre">sketch_free()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isos"><code class="docutils literal notranslate"><span class="pre">sketch_isos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_line"><code class="docutils literal notranslate"><span class="pre">sketch_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_cyclic"><code class="docutils literal notranslate"><span class="pre">sketch_cyclic()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_midp"><code class="docutils literal notranslate"><span class="pre">sketch_midp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pentagon"><code class="docutils literal notranslate"><span class="pre">sketch_pentagon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pline"><code class="docutils literal notranslate"><span class="pre">sketch_pline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pmirror"><code class="docutils literal notranslate"><span class="pre">sketch_pmirror()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_r_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_r_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_r_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_r_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rectangle"><code class="docutils literal notranslate"><span class="pre">sketch_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_reflect"><code class="docutils literal notranslate"><span class="pre">sketch_reflect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_risos"><code class="docutils literal notranslate"><span class="pre">sketch_risos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rotaten90"><code class="docutils literal notranslate"><span class="pre">sketch_rotaten90()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rotatep90"><code class="docutils literal notranslate"><span class="pre">sketch_rotatep90()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_s_angle"><code class="docutils literal notranslate"><span class="pre">sketch_s_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aconst"><code class="docutils literal notranslate"><span class="pre">sketch_aconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_segment"><code class="docutils literal notranslate"><span class="pre">sketch_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_shift"><code class="docutils literal notranslate"><span class="pre">sketch_shift()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_square"><code class="docutils literal notranslate"><span class="pre">sketch_square()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isquare"><code class="docutils literal notranslate"><span class="pre">sketch_isquare()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_tline"><code class="docutils literal notranslate"><span class="pre">sketch_tline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_triangle12"><code class="docutils literal notranslate"><span class="pre">sketch_triangle12()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trisect"><code class="docutils literal notranslate"><span class="pre">sketch_trisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trisegment"><code class="docutils literal notranslate"><span class="pre">sketch_trisegment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_ieq_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_ieq_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_incenter2"><code class="docutils literal notranslate"><span class="pre">sketch_incenter2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_excenter2"><code class="docutils literal notranslate"><span class="pre">sketch_excenter2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_centroid"><code class="docutils literal notranslate"><span class="pre">sketch_centroid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_ninepoints"><code class="docutils literal notranslate"><span class="pre">sketch_ninepoints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_2l1c"><code class="docutils literal notranslate"><span class="pre">sketch_2l1c()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_3peq"><code class="docutils literal notranslate"><span class="pre">sketch_3peq()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isosvertex"><code class="docutils literal notranslate"><span class="pre">sketch_isosvertex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqratio"><code class="docutils literal notranslate"><span class="pre">sketch_eqratio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rconst"><code class="docutils literal notranslate"><span class="pre">sketch_rconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqratio6"><code class="docutils literal notranslate"><span class="pre">sketch_eqratio6()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_lconst"><code class="docutils literal notranslate"><span class="pre">sketch_lconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rconst2"><code class="docutils literal notranslate"><span class="pre">sketch_rconst2()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.predicates.html">Predicates</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.Pythagoras.html">Pythagoras</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.Pythagoras.html#geosolver.predicates.Pythagoras.PythagoreanPremises"><code class="docutils literal notranslate"><span class="pre">PythagoreanPremises</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.Pythagoras.html#geosolver.predicates.Pythagoras.PythagoreanConclusions"><code class="docutils literal notranslate"><span class="pre">PythagoreanConclusions</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.circumcenter.html">Circumcenter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.circumcenter.html#geosolver.predicates.circumcenter.Circumcenter"><code class="docutils literal notranslate"><span class="pre">Circumcenter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.collinearity.html">Collinearity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.collinearity.html#geosolver.predicates.collinearity.Coll"><code class="docutils literal notranslate"><span class="pre">Coll</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.collinearity.html#geosolver.predicates.collinearity.NColl"><code class="docutils literal notranslate"><span class="pre">NColl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.congruence.html">Congruence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.congruence.html#geosolver.predicates.congruence.Cong"><code class="docutils literal notranslate"><span class="pre">Cong</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.constant_angle.html">Constant Angle</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_angle.html#geosolver.predicates.constant_angle.ConstantAngle"><code class="docutils literal notranslate"><span class="pre">ConstantAngle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_angle.html#geosolver.predicates.constant_angle.ACompute"><code class="docutils literal notranslate"><span class="pre">ACompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.constant_length.html">Constant Length</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_length.html#geosolver.predicates.constant_length.ConstantLength"><code class="docutils literal notranslate"><span class="pre">ConstantLength</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_length.html#geosolver.predicates.constant_length.LCompute"><code class="docutils literal notranslate"><span class="pre">LCompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.constant_ratio.html">Constant Ratio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_ratio.html#geosolver.predicates.constant_ratio.ConstantRatio"><code class="docutils literal notranslate"><span class="pre">ConstantRatio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_ratio.html#geosolver.predicates.constant_ratio.RCompute"><code class="docutils literal notranslate"><span class="pre">RCompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.cyclic.html">Cyclic</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.cyclic.html#geosolver.predicates.cyclic.Cyclic"><code class="docutils literal notranslate"><span class="pre">Cyclic</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.different.html">Different</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.different.html#geosolver.predicates.different.Diff"><code class="docutils literal notranslate"><span class="pre">Diff</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.equal_angles.html">Equal Angles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.equal_angles.html#geosolver.predicates.equal_angles.EqAngle"><code class="docutils literal notranslate"><span class="pre">EqAngle</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.equal_ratios.html">Equal Ratios</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.equal_ratios.html#geosolver.predicates.equal_ratios.EqRatio"><code class="docutils literal notranslate"><span class="pre">EqRatio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.equal_ratios.html#geosolver.predicates.equal_ratios.EqRatio3"><code class="docutils literal notranslate"><span class="pre">EqRatio3</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.midpoint.html">Midpoint</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.midpoint.html#geosolver.predicates.midpoint.MidPoint"><code class="docutils literal notranslate"><span class="pre">MidPoint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.parallelism.html">Parallelism</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.parallelism.html#geosolver.predicates.parallelism.Para"><code class="docutils literal notranslate"><span class="pre">Para</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.parallelism.html#geosolver.predicates.parallelism.NPara"><code class="docutils literal notranslate"><span class="pre">NPara</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.perpendicularity.html">Perpendicularity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.perpendicularity.html#geosolver.predicates.perpendicularity.Perp"><code class="docutils literal notranslate"><span class="pre">Perp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.perpendicularity.html#geosolver.predicates.perpendicularity.NPerp"><code class="docutils literal notranslate"><span class="pre">NPerp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.predicate.html">Predicate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.predicate.html#geosolver.predicates.predicate.Predicate"><code class="docutils literal notranslate"><span class="pre">Predicate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.sameclock.html">Sameclock</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.sameclock.html#geosolver.predicates.sameclock.SameClock"><code class="docutils literal notranslate"><span class="pre">SameClock</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.sameside.html">Sameside</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.sameside.html#geosolver.predicates.sameside.SameSide"><code class="docutils literal notranslate"><span class="pre">SameSide</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.sameside.html#geosolver.predicates.sameside.NSameSide"><code class="docutils literal notranslate"><span class="pre">NSameSide</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.triangles_congruent.html">Triangles Congruent</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_congruent.html#geosolver.predicates.triangles_congruent.ContriClock"><code class="docutils literal notranslate"><span class="pre">ContriClock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_congruent.html#geosolver.predicates.triangles_congruent.ContriReflect"><code class="docutils literal notranslate"><span class="pre">ContriReflect</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.triangles_similar.html">Triangles Similar</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.two_triangles"><code class="docutils literal notranslate"><span class="pre">two_triangles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.SimtriClock"><code class="docutils literal notranslate"><span class="pre">SimtriClock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.SimtriReflect"><code class="docutils literal notranslate"><span class="pre">SimtriReflect</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.api.html">Api</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver"><code class="docutils literal notranslate"><span class="pre">GeometricSolver</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.run"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.write_proof_steps"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_proof_steps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.draw_figure"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.draw_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.write_run_infos"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_run_infos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.write_all_outputs"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_all_outputs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.defs"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.defs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.rules"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.rules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.build"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.del_goals"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.del_goals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_rules_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_rules_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_rules_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_rules_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_defs_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_defs_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_defs_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_defs_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.with_deductive_agent"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.with_deductive_agent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_geogebra"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_geogebra()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_goal"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_goal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_goals_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_goals_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.with_problem_path"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.with_problem_path()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.configs.html">Configs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.configs.html#geosolver.configs.default_configs_path"><code class="docutils literal notranslate"><span class="pre">default_configs_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.configs.html#geosolver.configs.default_defs_path"><code class="docutils literal notranslate"><span class="pre">default_defs_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.configs.html#geosolver.configs.default_rules_path"><code class="docutils literal notranslate"><span class="pre">default_rules_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.load_geogebra.html">Load Geogebra</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form"><code class="docutils literal notranslate"><span class="pre">Form</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form.Circle"><code class="docutils literal notranslate"><span class="pre">Form.Circle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form.Line"><code class="docutils literal notranslate"><span class="pre">Form.Line</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.dedup"><code class="docutils literal notranslate"><span class="pre">dedup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.load_geogebra"><code class="docutils literal notranslate"><span class="pre">load_geogebra()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.match_theorems.html">Match Theorems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher"><code class="docutils literal notranslate"><span class="pre">Matcher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.update"><code class="docutils literal notranslate"><span class="pre">Matcher.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.cache_theorem"><code class="docutils literal notranslate"><span class="pre">Matcher.cache_theorem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.match_theorem"><code class="docutils literal notranslate"><span class="pre">Matcher.match_theorem()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.proof.html">Proof</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ConstructionError"><code class="docutils literal notranslate"><span class="pre">ConstructionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState"><code class="docutils literal notranslate"><span class="pre">ProofState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.add_construction"><code class="docutils literal notranslate"><span class="pre">ProofState.add_construction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.build_problemJGEX"><code class="docutils literal notranslate"><span class="pre">ProofState.build_problemJGEX()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.match_theorem"><code class="docutils literal notranslate"><span class="pre">ProofState.match_theorem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.apply_dep"><code class="docutils literal notranslate"><span class="pre">ProofState.apply_dep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.check_goals"><code class="docutils literal notranslate"><span class="pre">ProofState.check_goals()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.proof_writing.html">Proof Writing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.proof_writing.html#geosolver.proof_writing.write_proof_steps"><code class="docutils literal notranslate"><span class="pre">write_proof_steps()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.run_loop.html">Run Loop</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.run_loop.html#geosolver.run_loop.run_loop"><code class="docutils literal notranslate"><span class="pre">run_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.statement.html">Statement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement"><code class="docutils literal notranslate"><span class="pre">Statement</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.check"><code class="docutils literal notranslate"><span class="pre">Statement.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.check_numerical"><code class="docutils literal notranslate"><span class="pre">Statement.check_numerical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.why"><code class="docutils literal notranslate"><span class="pre">Statement.why()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.from_tokens"><code class="docutils literal notranslate"><span class="pre">Statement.from_tokens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.pretty"><code class="docutils literal notranslate"><span class="pre">Statement.pretty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.with_new"><code class="docutils literal notranslate"><span class="pre">Statement.with_new()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.draw"><code class="docutils literal notranslate"><span class="pre">Statement.draw()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.tools.html">Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.InfQuotientError"><code class="docutils literal notranslate"><span class="pre">InfQuotientError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.notNone"><code class="docutils literal notranslate"><span class="pre">notNone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.get_quotient"><code class="docutils literal notranslate"><span class="pre">get_quotient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.atomize"><code class="docutils literal notranslate"><span class="pre">atomize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.str_to_fraction"><code class="docutils literal notranslate"><span class="pre">str_to_fraction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.fraction_to_len"><code class="docutils literal notranslate"><span class="pre">fraction_to_len()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.fraction_to_ratio"><code class="docutils literal notranslate"><span class="pre">fraction_to_ratio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.fraction_to_angle"><code class="docutils literal notranslate"><span class="pre">fraction_to_angle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.reshape"><code class="docutils literal notranslate"><span class="pre">reshape()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.add_edge"><code class="docutils literal notranslate"><span class="pre">add_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.runtime_cache_path"><code class="docutils literal notranslate"><span class="pre">runtime_cache_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.run_static_server"><code class="docutils literal notranslate"><span class="pre">run_static_server()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.boring_statement"><code class="docutils literal notranslate"><span class="pre">boring_statement()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.webapp.html">Webapp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.webapp.html#geosolver.webapp.pull_to_server"><code class="docutils literal notranslate"><span class="pre">pull_to_server()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff9900" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Newclid</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Default Files</a></li>
+      <li class="breadcrumb-item active">Definitions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/manual/default_files/definitions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="index.html" class="btn btn-neutral float-left" title="Default Files" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rules.html" class="btn btn-neutral float-right" title="Rules" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="definitions">
+<h1>Definitions<a class="headerlink" href="#definitions" title="Link to this heading"></a></h1>
+<p>Definitions are the basic building blocks for the statement of problems. Each definition works as a function, demanding a certain collection of arguments, in order to create new points, and add corresponding predicates to the proof state (see details in <a class="reference internal" href="../adding_problems.html#adding-new-problems"><span class="std std-ref">Adding new problems</span></a>).</p>
+<p>Constructions that are not points directly can be subject to intersection, otherwise they generate point coordinates through a random choice.</p>
+<p>The definitions available in the defs.txt file are listed below. The definitions in section <a class="reference internal" href="#new-definitions"><span class="std std-ref">New Definitions</span></a> were added by us.</p>
+<p>The original AlphaGeometry also had definitions “on_aline2” and “cc_tangent0”, which were not functional, and “on_opline”, which depended on the half-line class, which was eliminated. We also renamed the previous “eq_trapezoid” definition to “iso_trapezoid”.</p>
+<section id="legacy-definitions">
+<h2>Legacy definitions<a class="headerlink" href="#legacy-definitions" title="Link to this heading"></a></h2>
+<section id="angle-bisector-x-a-b-c">
+<h3>angle_bisector x a b c<a class="headerlink" href="#angle-bisector-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/angle_bisector.png"><img alt="angle_bisector" src="../../_images/angle_bisector.png" style="width: 100%;" /></a></p></td>
+<td><p>From non-collinear points a, b, c, creates x in the internal bisector of angle abc, with vertex at b.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\widehat{abx}=\widehat{xbc}\)</span> (eqangle b a b x b x b c).</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="angle-mirror-x-a-b-c">
+<h3>angle_mirror x a b c<a class="headerlink" href="#angle-mirror-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/angle_mirror.png"><img alt="angle_mirror" src="../../_images/angle_mirror.png" style="width: 100%;" /></a></p></td>
+<td><p>From non-collinear points a, b, c, creates x on the opposite side of bc with respect to a in a way that angle abx doubles angle abc. (Compare to <a class="reference internal" href="#on-aline0-x-a-b-c-d-e-f-g"><span class="std std-ref">on_aline0 x a b c d e f g</span></a> below.)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\widehat{abc}=\widehat{cbx}\)</span> (eqangle b a b c b c b x).</p></td>
+<td><p>Ray</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="circle-x-a-b-c">
+<h3>circle x a b c<a class="headerlink" href="#circle-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/circle.png"><img alt="circle" src="../../_images/circle.png" style="width: 100%;" /></a></p></td>
+<td><p>From non-collinear points a, b, c, creates x the center of the circle through a, b, c.</p></td>
+<td><p><span class="math notranslate nohighlight">\(xa=xb \wedge xb=xc\)</span>  (cong x a x b, cong x b x c)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="circumcenter-x-a-b-c">
+<h3>circumcenter x a b c<a class="headerlink" href="#circumcenter-x-a-b-c" title="Link to this heading"></a></h3>
+<p>Same construction as <strong>circle x a b c</strong>.</p>
+</section>
+<section id="eq-quadrangle-a-b-c-d">
+<h3>eq_quadrangle a b c d<a class="headerlink" href="#eq-quadrangle-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/eq_quadrangle.png"><img alt="eq_quadrangle" src="../../_images/eq_quadrangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothings, adds four points in a quadrilateral abcd with two opposing sides (AD and BC) of same length.</p></td>
+<td><p><span class="math notranslate nohighlight">\(ad=bc\)</span>  (cong d a b c)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="iso-trapezoid-a-b-c-d">
+<h3>iso_trapezoid a b c d<a class="headerlink" href="#iso-trapezoid-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/iso_trapezoid.png"><img alt="iso_trapezoid" src="../../_images/iso_trapezoid.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, adds four points on a trapezoid abcd with parallel opposing sides ab and cd and non-parallel opposing sides ad and bc of same length. Adds the congruence statement that ad=bc and the parallel statement that ab//cd.</p></td>
+<td><p><span class="math notranslate nohighlight">\(ab//cd \wedge ad=bc\)</span>  (para d c a b, cong d a b c)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="eq-triangle-x-b-c">
+<h3>eq_triangle x b c<a class="headerlink" href="#eq-triangle-x-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/eq_triangle.png"><img alt="eq_triangle" src="../../_images/eq_triangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From two different points b, c, adds a third point x such that the triangle xbc is equilateral.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}xb=bx \wedge bc=cx \\ \widehat{xbc} = \widehat{bcx} \wedge \widehat{cxb} = \widehat{xbc}\end{cases}\)</span>  (cong x b b c, cong b c c x; eqangle b x b c c b c x, eqangle x c x b b x b c)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="eqangle2-x-a-b-c">
+<h3>eqangle2 x a b c<a class="headerlink" href="#eqangle2-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/eqangle2.png"><img alt="eqangle2" src="../../_images/eqangle2.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, adds a third point x such that the quadrilateral abcx has two opposite angles that are congruent, bax and bcx.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\widehat{bax} = \widehat{xcb}\)</span>  (eqangle a b a x c x c b)</p></td>
+<td><p>Point (Locus could be hyperbola.)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="eqdia-quadrangle-a-b-c-d">
+<h3>eqdia_quadrangle a b c d<a class="headerlink" href="#eqdia-quadrangle-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/eqdia_quadrangle.png"><img alt="eqdia_quadrangle" src="../../_images/eqdia_quadrangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, adds four points on a quadrilateral abcd with the two diagonals of same length.</p></td>
+<td><p><span class="math notranslate nohighlight">\(bd=ac\)</span>  (cong d b a c)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="eqdistance-x-a-b-c">
+<h3>eqdistance x a b c<a class="headerlink" href="#eqdistance-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/eqdistance.png"><img alt="eqdistance" src="../../_images/eqdistance.png" style="width: 100%;" /></a></p></td>
+<td><p>From two different points b, c, and with a base point a (that can be either b or c itself), adds x such that the distance from x to a is equal to the distance from b to c.</p></td>
+<td><p><span class="math notranslate nohighlight">\(ax=bc\)</span>  (cong x a b c)</p></td>
+<td><p>Circle</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="foot-x-a-b-c">
+<h3>foot x a b c<a class="headerlink" href="#foot-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/foot.png"><img alt="foot" src="../../_images/foot.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, adds x that is the perpendicular projection of a onto line bc.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x,b,c\ collinear\\ ax\perp bc\end{cases}\)</span>  (coll x b c, perp x a b c)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="free-a">
+<h3>free a<a class="headerlink" href="#free-a" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/free.png"><img alt="free" src="../../_images/free.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, adds point a with random coordinates.</p></td>
+<td><p>No statement added</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="incenter-x-a-b-c">
+<h3>incenter x a b c<a class="headerlink" href="#incenter-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/incenter.png"><img alt="incenter" src="../../_images/incenter.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, adds x the incenter of the triangle abc. It acknowledges the fact that it is the intersection of the three internal bisectors of the angles of the triangle.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\widehat{bax}=\widehat{xac}\\ \widehat{acx}=\widehat{xcb}\\ \widehat{cbx}=\widehat{xba}\end{cases}\)</span>  (eqangle a b a x a x a c, eqangle c a c x c x c b, eqangle b c b x b x b a)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="incenter2-x-y-z-i-a-b-c">
+<h3>incenter2 x y z i a b c<a class="headerlink" href="#incenter2-x-y-z-i-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/incenter2.png"><img alt="incenter2" src="../../_images/incenter2.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, adds i, the incenter of the triangle abc, as well as x, y, and z, the tangent points of the incircle with sides bc, ac, and ab, respectively. It acknowledges the fact that the incenter is the intersection of the three internal bisectors of the angles of the triangle, and that a radius of a circle and the tangent line are perpendicular at the point of tangency.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\widehat{bax}=\widehat{xac}\\ \widehat{acx}=\widehat{xcb}\\ \widehat{cbx}=\widehat{xba}\\ x,b,c\ collinear\\ ix\perp bc\\ y,c,a\ collinear\\ iy\perp ca\\ z,a,b\ collinear\\ iz\perp ab\\ ix=iy, iy=iz\end{cases}\)</span>  (eqangle a b a i a i a c, eqangle c a c i c i c b, eqangle b c b i b i b a, coll x b c, perp i x b c, coll y c a, perp i y c a, coll z a b, perp i z a b, cong i x i y, cong i y i z)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="excenter-x-a-b-c">
+<h3>excenter x a b c<a class="headerlink" href="#excenter-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/excenter.png"><img alt="excenter" src="../../_images/excenter.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, adds x the excenter of triangle abc in a way that the corresponding excircle is externally tangent to side bc. Symbolically, it works exactly as the incenter construction because the angle constructions in DD do not differentiate the two bisectors of an angle crossing.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\widehat{bax}=\widehat{xac}\\ \widehat{acx}=\widehat{xcb}\\ \widehat{cbx}=\widehat{xba}\end{cases}\)</span> (eqangle a b a x a x a c, eqangle c a c x c x c b, eqangle b c b x b x b a)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="excenter2-x-y-z-i-a-b-c">
+<h3>excenter2 x y z i a b c<a class="headerlink" href="#excenter2-x-y-z-i-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/excenter2.png"><img alt="excenter2" src="../../_images/excenter2.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, adds i, the excenter of the triangle abc in a way that the corresponding excircle is externally tangent to side bc. It also adds x, y, and z, the tangent points of the incircle with the lines containing sides bc, ac, and ab, respectively. Symbolically, it works exactly as the incenter construction because the angle constructions in DD do not differentiate the two bisectors of an angle crossing.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\widehat{bax}=\widehat{xac}\\ \widehat{acx}=\widehat{xcb}\\ \widehat{cbx}=\widehat{xba}\\ x,b,c\ collinear\\ ix\perp bc\\ y,c,a\ collinear\\ iy\perp ca\\ z,a,b\ collinear\\ iz\perp ab\\ ix=iy, iy=iz\end{cases}\)</span>  (eqangle a b a i a i a c, eqangle c a c i c i c b, eqangle b c b i b i b a, coll x b c, perp i x b c, coll y c a, perp i y c a, coll z a b, perp i z a b, cong i x i y, cong i y i z)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="centroid-x-y-z-i-a-b-c">
+<h3>centroid x y z i a b c<a class="headerlink" href="#centroid-x-y-z-i-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/centroid.png"><img alt="centroid" src="../../_images/centroid.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, adds i, the centroid of the triangle. It also adds x, y, and z, the midpoints of sides bc, ac, and ab, respectively.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x,b,c\ collinear\\ bx=xc\\ y,c,a\ collinear\\ cy=ya\\ z,a,b\ collinear\\ az=zb\\ a,i,x\ collinear\\b,i,y\ collinear\\c,i,z\ collinear\end{cases}\)</span>  (coll x b c, cong x b x c, coll y c a, cong y c y a, coll z a b, cong z a z b, coll a x i, coll b y i, coll c z i)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="ninepoints-x-y-z-i-a-b-c">
+<h3>ninepoints x y z i a b c<a class="headerlink" href="#ninepoints-x-y-z-i-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/ninepoints.png"><img alt="ninepoints" src="../../_images/ninepoints.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, adds x, y, and z, the midpoints of sides bc, ac, and ab, respectively. It also adds i, the center of the circle going through x, y, and z, which is also the nine points circle of the triangle abc.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x,b,c\ collinear\\ bx=xc\\ y,c,a\ collinear\\ cy=ya\\ z,a,b\ collinear\\ az=zb\\ xi=iy\\ yi=iz\end{cases}\)</span>  (coll x b c, cong x b x c, coll y c a, cong y c y a, coll z a b, cong z a z b, cong i x i y, cong i y i z)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intersection-cc-x-o-w-a">
+<h3>intersection_cc x o w a<a class="headerlink" href="#intersection-cc-x-o-w-a" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/intersection_cc.png"><img alt="intersection_cc" src="../../_images/intersection_cc.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-colinear points, o, w, and a, adds x, the other intersection of the circle of center o through a and the circle of center w through a.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}oa=ox\\ wa=wx\end{cases}\)</span>  (cong o a o x, cong w a w x)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intersection-lc-x-a-o-b">
+<h3>intersection_lc x a o b<a class="headerlink" href="#intersection-lc-x-a-o-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/intersection_lc.png"><img alt="intersection_lc" src="../../_images/intersection_lc.png" style="width: 100%;" /></a></p></td>
+<td><p>From three points, a, o, and b, b different from both a and o, such that bo is not perpendicular to ba (to avoid the situation of a line tangent to a circle at b), adds point x, the second intersection of line ab with the circle of center o going through b.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x, a, b\ collinear\\ ob=ox\end{cases}\)</span>  (coll x a b, cong o b o x)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intersection-ll-x-a-b-c-d">
+<h3>intersection_ll x a b c d<a class="headerlink" href="#intersection-ll-x-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/intersection_ll.png"><img alt="intersection_ll" src="../../_images/intersection_ll.png" style="width: 100%;" /></a></p></td>
+<td><p>From four points a, b, c, d, such that lines ab and cd are not parallel and such that they do are not all collinear, build point x on the intersection of lines ab and cd.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x, a, b\ collinear\\ x, c, d\ collinear\end{cases}\)</span>  (coll x a b, coll x c d)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intersection-lp-x-a-b-c-m-n">
+<h3>intersection_lp x a b c m n<a class="headerlink" href="#intersection-lp-x-a-b-c-m-n" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/intersection_lp.png"><img alt="intersection_lp" src="../../_images/intersection_lp.png" style="width: 100%;" /></a></p></td>
+<td><p>From five points a, b, c, m, and n, such that lines ab and mn are not parallel, and that c is neither on line ab nor on line mn, builds x, the intersection of line ab with the line through c that is parallel to mn.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x, a, b\ collinear\\ cx\parallel mn\end{cases}\)</span>  (coll x a b, para c x m n)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intersection-lt-x-a-b-c-d-e">
+<h3>intersection_lt x a b c d e<a class="headerlink" href="#intersection-lt-x-a-b-c-d-e" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/intersection_lt.png"><img alt="intersection_lt" src="../../_images/intersection_lt.png" style="width: 100%;" /></a></p></td>
+<td><p>From five points a, b, c, d, and e, such that lines ab and de are not perpendicular and c is not on line ab, build x, the intersection of line ab and the line through c perpendicular to de.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x, a, b\ collinear\\ cx\perp de\end{cases}\)</span>  (coll x a b, perp x c d e)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intersection-pp-x-a-b-c-d-e-f">
+<h3>intersection_pp x a b c d e f<a class="headerlink" href="#intersection-pp-x-a-b-c-d-e-f" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/intersection_pp.png"><img alt="intersection_pp" src="../../_images/intersection_pp.png" style="width: 100%;" /></a></p></td>
+<td><p>From six points, a, b, c, d, e, f, such that a and d are different and that lines bc and ef are not parallel, builds point x in the intersection of the line through a parallel to bc and the line through d parallel to ef.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}xa\parallel bc\\ xd\parallel ef\end{cases}\)</span>  (para x a b c, para x d e f)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intersection-tt-x-a-b-c-d-e-f">
+<h3>intersection_tt x a b c d e f<a class="headerlink" href="#intersection-tt-x-a-b-c-d-e-f" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/intersection_tt.png"><img alt="intersection_tt" src="../../_images/intersection_tt.png" style="width: 100%;" /></a></p></td>
+<td><p>From six points, a, b, c, d, e, f, such that a and d are different and lines bc and ef are not parallel, build point x in the intersection of the line through a perpendicular to bc and the line through d perpendicular to ef.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}xa\perp bc\\ xd\perp ef\end{cases}\)</span>  (perp x a b c, perp x d e f)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="iso-triangle-a-b-c">
+<h3>iso_triangle a b c<a class="headerlink" href="#iso-triangle-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/iso_triangle.png"><img alt="iso_triangle" src="../../_images/iso_triangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates the three vertices a, b, c of an isosceles triangle with ab=ac. (Compare to <a class="reference internal" href="#iso-triangle0-a-b-c"><span class="std std-ref">iso_triangle0 a b c</span></a> below).</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab= ac\\ \widehat{abc}=\widehat{bca}\end{cases}\)</span>  (cong a b a c, eqangle b a b c c b c a)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="lc-tangent-x-a-o">
+<h3>lc_tangent x a o<a class="headerlink" href="#lc-tangent-x-a-o" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/lc_tangent.png"><img alt="lc_tangent" src="../../_images/lc_tangent.png" style="width: 100%;" /></a></p></td>
+<td><p>From two different points a, o, builds x, a point on the line perpendicular to ao through a (the line tangent to the circle of center o through a, with tangent point a). It is equivalent to on_tline x a a o (see on_tline below).</p></td>
+<td><p><span class="math notranslate nohighlight">\(ax \perp ao\)</span>  (perp a x a o)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="midpoint-x-a-b">
+<h3>midpoint x a b<a class="headerlink" href="#midpoint-x-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/midpoint.png"><img alt="midpoint" src="../../_images/midpoint.png" style="width: 100%;" /></a></p></td>
+<td><p>From a pair of points a, b, that are different, builds x, the midpoint of a and b. <strong>The original version of AlphaGeometry did not return midpoint as a predicate, resulting in solutions where a midpoint construction would have to be recovered as a predicate during the proof. We fixed that.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(x\text{ midpoint of }ab\)</span>  (midp x a b)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="mirror-x-a-b">
+<h3>mirror x a b<a class="headerlink" href="#mirror-x-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/mirror.png"><img alt="mirror" src="../../_images/mirror.png" style="width: 100%;" /></a></p></td>
+<td><p>From two points a, b that are different, builds x, the reflection of point a with respect to point b (so that b is the midpoint of ax).</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x, a, b\text{ collinear}\\ ba=bx\end{cases}\)</span>  (coll x a b, cong b a b x)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="nsquare-x-a-b">
+<h3>nsquare x a b<a class="headerlink" href="#nsquare-x-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/nsquare.png"><img alt="nsquare" src="../../_images/nsquare.png" style="width: 100%;" /></a></p></td>
+<td><p>Given two distinct points a, b, builds x such that the triangle xab is an isosceles right triangle.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}xa=ab\\ xa\perp ab\end{cases}\)</span>  (cong x a a b, perp x a a b)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-aline-x-a-b-c-d-e">
+<h3>on_aline x a b c d e<a class="headerlink" href="#on-aline-x-a-b-c-d-e" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_aline.png"><img alt="on_aline" src="../../_images/on_aline.png" style="width: 100%;" /></a></p></td>
+<td><p>From five points a, b, c, d, e, such that c, d, e are non-collinear, adds point x in a way that the angle bax is the same as the angle edc (up to a rotation and a translation). It transfers the angle measure between lines with the vertices specified (compare to <a class="reference internal" href="#on-aline0-x-a-b-c-d-e-f-g"><span class="std std-ref">on_aline0 x a b c d e f g</span></a> below).</p></td>
+<td><p><span class="math notranslate nohighlight">\(\widehat{xab}= \widehat{cde}\)</span>  (eqangle a x a b d c d e)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-bline-x-a-b">
+<h3>on_bline x a b<a class="headerlink" href="#on-bline-x-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_bline.png"><img alt="on_bline" src="../../_images/on_bline.png" style="width: 100%;" /></a></p></td>
+<td><p>Given two distinct points a, b, builds x a point on the perpendicular bisector of the segment ab. (Compare to <a class="reference internal" href="#iso-triangle-vertex-x-b-c"><span class="std std-ref">iso_triangle_vertex x b c</span></a> and to <a class="reference internal" href="#iso-triangle-vertex-angle-x-b-c"><span class="std std-ref">iso_triangle_vertex_angle x b c</span></a> below).</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}xa=xb\\ \widehat{xab}= \widehat{abx}\end{cases}\)</span>  (cong x a x b, eqangle a x a b b a b x)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-circle-x-o-a">
+<h3>on_circle x o a<a class="headerlink" href="#on-circle-x-o-a" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_circle.png"><img alt="on_circle" src="../../_images/on_circle.png" style="width: 100%;" /></a></p></td>
+<td><p>From two distinct points o, a, builds x a point on the circle of center o through a. Equivalent to eqdistance x a a o (see <a class="reference internal" href="#eqdistance-x-a-b-c"><span class="std std-ref">eqdistance x a b c</span></a> above).</p></td>
+<td><p><span class="math notranslate nohighlight">\(ox=oa\)</span>  (cong o x o a)</p></td>
+<td><p>Circle</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-line-x-a-b">
+<h3>on_line x a b<a class="headerlink" href="#on-line-x-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_line.png"><img alt="on_line" src="../../_images/on_line.png" style="width: 100%;" /></a></p></td>
+<td><p>From two distinct point a, b, builds x another point on the line ab.</p></td>
+<td><p><span class="math notranslate nohighlight">\(x, a, b\text{ collinear}\)</span>  (coll x a b)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-pline-x-a-b-c">
+<h3>on_pline x a b c<a class="headerlink" href="#on-pline-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_pline.png"><img alt="on_pline" src="../../_images/on_pline.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-colinear points a, b, c, with b different from c, builds x on the line parallel to bc through a. (Compare to the simpler <a class="reference internal" href="#on-pline0-x-a-b-c"><span class="std std-ref">on_pline0 x a b c</span></a> below).</p></td>
+<td><p><span class="math notranslate nohighlight">\(xa\parallel bc\)</span>  (para x a b c)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-tline-x-a-b-c">
+<h3>on_tline x a b c<a class="headerlink" href="#on-tline-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_tline.png"><img alt="on_tline" src="../../_images/on_tline.png" style="width: 100%;" /></a></p></td>
+<td><p>From three points a, b, c, with b different from c, builds x on the line through a perpendicular to bc.</p></td>
+<td><p><span class="math notranslate nohighlight">\(xa\perp bc\)</span>  (perp x a b c)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="orthocenter-x-a-b-c">
+<h3>orthocenter x a b c<a class="headerlink" href="#orthocenter-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/orthocenter.png"><img alt="orthocenter" src="../../_images/orthocenter.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, and c, builds x the orthocenter of the triangle abc.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}xa\perp bc\\ xb\perp ac\\ xb\perp ab\end{cases}\)</span>  (perp x a b c, perp x b c a; perp x c a b)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="parallelogram-a-b-c-x">
+<h3>parallelogram a b c x<a class="headerlink" href="#parallelogram-a-b-c-x" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/parallelogram.png"><img alt="parallelogram" src="../../_images/parallelogram.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, and c, builds x such that abcx is a parallelogram.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab\parallel cx\\ ax\parallel bc\\ ab=cx\\ ax=bc\end{cases}\)</span>  (para a b c x, para a x b c; cong a b c x, cong a x b c)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="pentagon-a-b-c-d-e">
+<h3>pentagon a b c d e<a class="headerlink" href="#pentagon-a-b-c-d-e" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/pentagon.png"><img alt="pentagon" src="../../_images/pentagon.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates five points a, b, c, d, e. The coordinates are a random conformal deformation (isometry combined with scaling) of a random inscribed convex pentagon.</p></td>
+<td><p>No statement added</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="psquare-x-a-b">
+<h3>psquare x a b<a class="headerlink" href="#psquare-x-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/psquare.png"><img alt="psquare" src="../../_images/psquare.png" style="width: 100%;" /></a></p></td>
+<td><p>From two points a, b that are distinct, builds x the image of b under a rotation of 90 degrees around a.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ax=ab\\ ax\perp ab\end{cases}\)</span>  (cong x a a b, perp x a a b)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="quadrangle-a-b-c-d">
+<h3>quadrangle a b c d<a class="headerlink" href="#quadrangle-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/quadrangle.png"><img alt="quadrangle" src="../../_images/quadrangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates four points, a, b, c, d which are vertices of a random convex quadrilateral.</p></td>
+<td><p>No statement added</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r-trapezoid-a-b-c-d">
+<h3>r_trapezoid a b c d<a class="headerlink" href="#r-trapezoid-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r_trapezoid.png"><img alt="r_trapezoid" src="../../_images/r_trapezoid.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates a, b, c, d, the four vertices of a trapezoid with parallel sides ab and cd, and a right angle at a.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab\parallel cd\\ ab\perp ad\end{cases}\)</span>  (para a b c d, perp a b a d)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r-triangle-a-b-c">
+<h3>r_triangle a b c<a class="headerlink" href="#r-triangle-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r_triangle.png"><img alt="r_triangle" src="../../_images/r_triangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates a, b, c the vertices of a right triangle with a right angle at a.</p></td>
+<td><p><span class="math notranslate nohighlight">\(ab\perp ac\)</span>  (perp a b a c)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rectangle-a-b-c-d">
+<h3>rectangle a b c d<a class="headerlink" href="#rectangle-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/rectangle.png"><img alt="rectangle" src="../../_images/rectangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates a, b, c, d the four vertices rectangle abcd.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab\perp bc\\ ab\parallel cd\\ ad\parallel bc\\ba\perp ad\\ ab=cd\\ ad=bc\\ ac=bd\end{cases}\)</span>  (perp a b b c, para a b c d, para a d b c, perp a b a d, cong a b c d, cong a d b c, cong a c b d)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="reflect-x-a-b-c">
+<h3>reflect x a b c<a class="headerlink" href="#reflect-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/reflect.png"><img alt="reflect" src="../../_images/reflect.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, c, in particular with b different from c, builds x the reflection of a by the line bc.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab=bx\\ ac=cx\\ bc\perp ax\end{cases}\)</span>  (cong b a b x, cong c a c x; perp b c a x)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="risos-a-b-c">
+<h3>risos a b c<a class="headerlink" href="#risos-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/risos.png"><img alt="risos" src="../../_images/risos.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, builds a, b, c such that the triangle abc is an isosceles right triangle with a right angle at a.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab\perp ac\\ ab=ac\\ \widehat{abc}=\widehat{bca}\end{cases}\)</span>  (perp a b a c, cong a b a c; eqangle b a b c c b c a)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="segment-a-b">
+<h3>segment a b<a class="headerlink" href="#segment-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/segment.png"><img alt="segment" src="../../_images/segment.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, adds two points a, b, with random coordinates.</p></td>
+<td><p>No statement added</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="shift-x-b-c-d">
+<h3>shift x b c d<a class="headerlink" href="#shift-x-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/shift.png"><img alt="shift" src="../../_images/shift.png" style="width: 100%;" /></a></p></td>
+<td><p>From three points b, c, d, with b different from d (prevents the building of two points with the same coordinates), build x, the translation of b by the vector from d to c.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}bx=cd\\ cx=bd\end{cases}\)</span>  (cong x b c d, cong x c b d)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="square-a-b-x-y">
+<h3>square a b x y<a class="headerlink" href="#square-a-b-x-y" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/square.png"><img alt="square" src="../../_images/square.png" style="width: 100%;" /></a></p></td>
+<td><p>From two points a, b, with a different from b, builds x, y, the other two vertices of a square with side ab.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab\perp bx\\ ab=bx\\ ab\parallel xy\\ ay\parallel bx\\ ay\perp yx\\ bx=xy\\ xy=ya\\ ax\perp by\\ ax=by\end{cases}\)</span>  (perp a b b x, cong a b b x, para a b x y, para a y b x, perp a y y x, cong b x x y, cong x y y a, perp a x b y, cong a x b y)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="isquare-a-b-c-d">
+<h3>isquare a b c d<a class="headerlink" href="#isquare-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/isquare.png"><img alt="isquare" src="../../_images/isquare.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates the four vertices of a square abcd.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab\perp bc\\ ab=bc\\ ab\parallel cd\\ ad\parallel bc\\ ad\perp dc\\ bc=cd\\ cd=da\\ ac\perp bd\\ ac=bd\end{cases}\)</span>  (perp a b b c, cong a b b c, para a b c d, para a d b c, perp a d d c, cong b c c d, cong c d d a, perp a c b d, cong a c b d)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="trapezoid-a-b-c-d">
+<h3>trapezoid a b c d<a class="headerlink" href="#trapezoid-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/trapezoid.png"><img alt="trapezoid" src="../../_images/trapezoid.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates four vertices of a trapezoid abcd, with ab parallel to cd.</p></td>
+<td><p><span class="math notranslate nohighlight">\(ab\parallel cd\)</span>  (para a b c d)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="triangle-a-b-c">
+<h3>triangle a b c<a class="headerlink" href="#triangle-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/triangle.png"><img alt="triangle" src="../../_images/triangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates three points a, b, and c, with random coordinates.</p></td>
+<td><p>No statement added</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="triangle12-a-b-c">
+<h3>triangle12 a b c<a class="headerlink" href="#triangle12-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/triangle12.png"><img alt="triangle12" src="../../_images/triangle12.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, builds the three vertices a, b, c of a triangle such that the proportion ab:ac is 1:2. <strong>The current statement of this definition was changed with respect to the original one to adapt to the new formulation of the rconst predicate.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{ab}{ac}=\frac{1}{2}\)</span>  (rconst a b a c 1/2)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="l1c-x-y-z-i-a-b-c-o">
+<h3>2l1c x y z i a b c o<a class="headerlink" href="#l1c-x-y-z-i-a-b-c-o" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/2l1c.png"><img alt="2l1c" src="../../_images/2l1c.png" style="width: 100%;" /></a></p></td>
+<td><p>Given three points o, a, b, with b in the center through a of center o, and c a point not in the line ab, builds i, the center of a circle tangent to the circle centered at o through a, to the line ac and to the line bc. It also builds the tangency points x to ac, y to bc and z to the circle of center o through a.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x, a, c\text{ collinear}\\y, b, c\text{ collinear}\\ i, o, z\text{ collinear}\\ oa=oz\\ ix=iy\\ iy=iz\\ ix\perp ac\\ iy\perp bc\end{cases}\)</span>  (coll x a c, coll y b c, coll i o z, cong o a o z, cong i y i z, perp i x a c, perp i y b c)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="e5128-x-y-a-b-c-d">
+<h3>e5128 x y a b c d<a class="headerlink" href="#e5128-x-y-a-b-c-d" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/e5128.png"><img alt="e5128" src="../../_images/e5128.png" style="width: 100%;" /></a></p></td>
+<td><p>Given four points a, b, c, d, with bc=cd and bc perpendicular to ba, builds y the midpoint of ab and x the intersection of line dy and the circle centered at c through b. It transfers the angle bad to axy in a specific way. <strong>It was created specifically for problem complete_015_7_Book_00EE_06_E051-28.gex in the</strong> <a class="reference internal" href="../problem_databases/jgex_ag_231.html#jgex-ag-231"><span class="std std-ref">jgex_ag_231</span></a> <strong>problem database, for which we do not have the original statement.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}bc=cx\\ y,a,b\ collinear\\ x,y,d\ collinear\\ \widehat{bad}=\widehat{axy}\end{cases}\)</span>  (cong c b c x, coll y a b, coll x y d, eqangle a b a d x a x y)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="peq-x-y-z-a-b-c">
+<h3>3peq x y z a b c<a class="headerlink" href="#peq-x-y-z-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/3peq.png"><img alt="3peq" src="../../_images/3peq.png" style="width: 100%;" /></a></p></td>
+<td><p>Given three non-collinear points a, b, c, builds points x on the extended side ab, y in the extended side ac, and z on the extended side bc of triangle abc in a way that z is the midpoint of xy. <strong>It was created specifically for problem complete_010_Other_Auxiliary_ye_aux_think.gex in the</strong> <a class="reference internal" href="../problem_databases/jgex_ag_231.html#jgex-ag-231"><span class="std std-ref">jgex_ag_231</span></a> <strong>problem database, for which we do not have the original statement.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}z,b,c\ collinear\\ x,a,b\ collinear\\ y,a,c\ collinear\\ x,y,z\ collinear\\ xz=yz\end{cases}\)</span>  (coll z b c, coll x a b, coll y a c, coll x y z, cong z x z y)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="trisect-x-y-a-b-c">
+<h3>trisect x y a b c<a class="headerlink" href="#trisect-x-y-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/trisect.png"><img alt="trisect" src="../../_images/trisect.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear point a, b, c, builds x, y, the points on segment ac that trisect the angle abc.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x, a, c\text{ collinear}\\y, a, c\text{ collinear}\\ \widehat{abx}=\widehat{xby}\\ \widehat{xby}=\widehat{ybc}\end{cases}\)</span>  (coll x a c, coll y a c, eqangle b a b x b x b y, eqangle b x b y b y b c)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="trisegment-x-y-a-b">
+<h3>trisegment x y a b<a class="headerlink" href="#trisegment-x-y-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/trisegment.png"><img alt="trisegment" src="../../_images/trisegment.png" style="width: 100%;" /></a></p></td>
+<td><p>Given two different points a, b, builds x, y the two points trisecting the segment ab.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}x, a, b\text{ collinear}\\y, a, b\text{ collinear}\\ ax=xy\\ xy=yb\end{cases}\)</span>  (coll x a b, coll y a b, cong x a x y, cong y x y b)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-dia-x-a-b">
+<h3>on_dia x a b<a class="headerlink" href="#on-dia-x-a-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_dia.png"><img alt="on_dia" src="../../_images/on_dia.png" style="width: 100%;" /></a></p></td>
+<td><p>Given two different points a, b, builds x a point such that the triangle axb is a right triangle with a right angle at x.</p></td>
+<td><p><span class="math notranslate nohighlight">\(xa\perp xb\)</span>  (perp x a x b)</p></td>
+<td><p>Circle</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="ieq-triangle-a-b-c">
+<h3>ieq_triangle a b c<a class="headerlink" href="#ieq-triangle-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/ieq_triangle.png"><img alt="ieq_triangle" src="../../_images/ieq_triangle.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates the three vertices of an equilateral triangle abc.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ab=bc\\ bc=ca\\ \widehat{bac}=\widehat{acb}\\ \widehat{acb}=\widehat{cba}\end{cases}\)</span>  (cong a b b c, cong b c c a, eqangle a b a c c a c b, eqangle c a c b b c b a)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="cc-tangent-x-y-z-i-o-a-w-b">
+<h3>cc_tangent x y z i o a w b<a class="headerlink" href="#cc-tangent-x-y-z-i-o-a-w-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/cc_tangent.png"><img alt="cc_tangent" src="../../_images/cc_tangent.png" style="width: 100%;" /></a></p></td>
+<td><p>From four points o, a, w, b, such that o is neither a nor w, and such that w and b are distinct, builds x, y, z, i on a pair of lines xy and zi that are simultaneously tangent to both the circle of center o through a and the circle of center w through b. x and z are the tangent points on the circle centered at o through a, and y and i are the tangent points on the circle centered at w through b.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ox=oa\\ wy=wb\\ ox\perp xy\\ wy\perp yx\\oz=oa\\wi=wb\\oz\perp zi\\wi\perp iz\end{cases}\)</span>  (cong o x o a, cong w y w b, perp x o x y, perp y w y x, cong o z o a, cong w i w b, perp z o z i, perp i w i z)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="eqangle3-x-a-b-d-e-f">
+<h3>eqangle3 x a b d e f<a class="headerlink" href="#eqangle3-x-a-b-d-e-f" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/eqangle3.png"><img alt="eqangle3" src="../../_images/eqangle3.png" style="width: 100%;" /></a></p></td>
+<td><p>From five points a, b, d, e, f disposed in a way that a is distinct from b and d, e, f form a non-degenerate triangle, builds x the vertex of an angle in such a way that the angles axb and edf are the same (up to a rotation and a translation).</p></td>
+<td><p><span class="math notranslate nohighlight">\(\widehat{axb}=\widehat{edf}\)</span>  (eqangle x a x b d e d f)</p></td>
+<td><p>Circle</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="tangent-x-y-a-o-b">
+<h3>tangent x y a o b<a class="headerlink" href="#tangent-x-y-a-o-b" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/tangent.png"><img alt="tangent" src="../../_images/tangent.png" style="width: 100%;" /></a></p></td>
+<td><p>From three different points a, b, c, builds x and y, the points of tangency of the two lines through a tangent to the circle of center o through b.</p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ox=ob\\ ax\perp ox\\ oy=ob\\ ay\perp yo\end{cases}\)</span>  (cong o x o b, perp a x o x, cong o y o b, perp a y o y)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-circum-x-a-b-c">
+<h3>on_circum x a b c<a class="headerlink" href="#on-circum-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_circum.png"><img alt="on_circum" src="../../_images/on_circum.png" style="width: 100%;" /></a></p></td>
+<td><p>From three non-collinear points a, b, and c, builds x a point on the circle through a, b, and c.</p></td>
+<td><p><span class="math notranslate nohighlight">\(x, a, b, c\text{ concyclic}\)</span>  (cyclic a b c x)</p></td>
+<td><p>Point</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="new-definitions">
+<h2>New Definitions<a class="headerlink" href="#new-definitions" title="Link to this heading"></a></h2>
+<section id="on-pline0-x-a-b-c">
+<h3>on_pline0 x a b c<a class="headerlink" href="#on-pline0-x-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_pline.png"><img alt="on_pline" src="../../_images/on_pline.png" style="width: 100%;" /></a></p></td>
+<td><p>From three points a, b, c, with b different from c, builds x on the line parallel to bc through a. (Compare to <a class="reference internal" href="#on-pline-x-a-b-c"><span class="std std-ref">on_pline x a b c</span></a> above). <strong>This definition was created to allow for the addition of a parallel statement on overlapping lines, by dismissing the restriction of a, b, c being non-collinear, without which r28 would be a rule that could not occur.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(xa\parallel bc\)</span>  (para x a b c)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="iso-triangle0-a-b-c">
+<h3>iso_triangle0 a b c<a class="headerlink" href="#iso-triangle0-a-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/iso_triangle0.png"><img alt="iso_triangle0" src="../../_images/iso_triangle0.png" style="width: 100%;" /></a></p></td>
+<td><p>From nothing, creates the three vertices a, b, c of an isosceles triangle with ab=ac. <strong>It was created as a simplified version of</strong> <a class="reference internal" href="#iso-triangle-a-b-c"><span class="std std-ref">iso_triangle a b c</span></a> <strong>above, without adding the statement about the equality of base angles, which should come from rule r13.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(ab= ac\)</span>  (cong a b a c)</p></td>
+<td><p>Points</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="iso-triangle-vertex-x-b-c">
+<h3>iso_triangle_vertex x b c<a class="headerlink" href="#iso-triangle-vertex-x-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/iso_triangle_vertex.png"><img alt="iso_triangle_vertex" src="../../_images/iso_triangle_vertex.png" style="width: 100%;" /></a></p></td>
+<td><p>From two points b, c that are distinct, builds a, the vertex of an isosceles triangle with base bc. <strong>It was created for explicitly creating isosceles triangles from a given base, but it is also a simplified version of</strong> <a class="reference internal" href="#on-bline-x-a-b"><span class="std std-ref">on_bline x a b</span></a> <strong>above, without adding the statement about the equality of base angles, which should come from rule r13. There is also a definition adding only the statement about the equality of the angles below (see</strong> <a class="reference internal" href="#iso-triangle-vertex-angle-x-b-c"><span class="std std-ref">iso_triangle_vertex_angle x b c</span></a> <strong>).</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(xb = xc\)</span>  (cong x b x c)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="iso-triangle-vertex-angle-x-b-c">
+<h3>iso_triangle_vertex_angle x b c<a class="headerlink" href="#iso-triangle-vertex-angle-x-b-c" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/iso_triangle_vertex_angle.png"><img alt="iso_triangle_vertex_angle" src="../../_images/iso_triangle_vertex_angle.png" style="width: 100%;" /></a></p></td>
+<td><p>From two points b, c that are distinct, builds a, the vertex of an isosceles triangle with base bc. <strong>It was created for explicitly creating isosceles triangles from a given base, but it is also a simplified version of</strong> <a class="reference internal" href="#on-bline-x-a-b"><span class="std std-ref">on_bline x a b</span></a> <strong>above, only adding the statement about the equality of base angles. The segment congruence statement in the on_bline definition should come from rule r14. Compare also to</strong> <a class="reference internal" href="#iso-triangle-vertex-x-b-c"><span class="std std-ref">iso_triangle_vertex x b c</span></a> <strong>above.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\widehat{xbc}=\widehat{bcx}\)</span>  (eqangle x b b c b c x c)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="on-aline0-x-a-b-c-d-e-f-g">
+<h3>on_aline0 x a b c d e f g<a class="headerlink" href="#on-aline0-x-a-b-c-d-e-f-g" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/on_aline0.png"><img alt="on_aline0" src="../../_images/on_aline0.png" style="width: 100%;" /></a></p></td>
+<td><p>From seven points a, b, c, d, e, f, g, with the constraint that a, b, c, and d do not lie all on the same line, build x such that the angle formed at the intersection of lines ef and gx is the same (up to a rotation and a translation) to the angle formed at the intersection between lines ab and cd. <strong>This definition was created as a base general case for the creation of congruent angles. Indeed,</strong> <a class="reference internal" href="#angle-mirror-x-a-b-c"><span class="std std-ref">angle_mirror x a b c</span></a> <strong>is equivalent to on_aline0 x b a b c b c b, and</strong> <a class="reference internal" href="#on-aline-x-a-b-c-d-e"><span class="std std-ref">on_aline x a b c d e</span></a> <strong>is equivalent to on_aline0 x d e d c a b a.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\angle (ab\times cd)=\angle (ef\times gx)\)</span>  (eqangle a b c d e f g x)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="eqratio-x-a-b-c-d-e-f-g">
+<h3>eqratio x a b c d e f g<a class="headerlink" href="#eqratio-x-a-b-c-d-e-f-g" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/eqratio.png"><img alt="eqratio" src="../../_images/eqratio.png" style="width: 100%;" /></a></p></td>
+<td><p>From seven points a, b, c, d, e, f, g, builds x, a point such that ab/cd=ef/gx. <strong>This definition was created to allow for the explicit prescription of eqratio statements on problems.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{ab}{cd}=\frac{ef}{gx}\)</span>  (eqratio a b c d e f g x)</p></td>
+<td><p>Circle</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="eqratio6-x-a-c-e-f-g-h">
+<h3>eqratio6 x a c e f g h<a class="headerlink" href="#eqratio6-x-a-c-e-f-g-h" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/eqratio6.png"><img alt="eqratio6" src="../../_images/eqratio6.png" style="width: 100%;" /></a></p></td>
+<td><p>From six points a, c, e, f, g, h, builds x,  a point such that ax/cx=ef/gh. <strong>This definition was created to allow a common case for prescription of eqratio statements, when the new point shows up twice in the ratio equality (particularly common when subdividing a segment).</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{ax}{cx}=\frac{ef}{gh}\)</span>  (eqratio a x c x e f g h)</p></td>
+<td><p>Line if ef=gh, Circle otherwise</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rconst-a-b-c-x-r">
+<h3>rconst a b c x r<a class="headerlink" href="#rconst-a-b-c-x-r" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/rconst.png"><img alt="rconst" src="../../_images/rconst.png" style="width: 100%;" /></a></p></td>
+<td><p>Given three points a, b, c such that a is different from b, and a fraction r, builds x a point such that ab/cx=r. r should be entered as a fraction m/n, m, n two integers separated by “/”. <strong>This definition was created to allow for the prescription of pairs of segments satisfying a given constant ratio.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{ab}{cx}=r=\frac{m}{n}\)</span>  (rconst a b c x r)</p></td>
+<td><p>Circle</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rconst2-x-a-b-r">
+<h3>rconst2 x a b r<a class="headerlink" href="#rconst2-x-a-b-r" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/rconst2.png"><img alt="rconst2" src="../../_images/rconst2.png" style="width: 100%;" /></a></p></td>
+<td><p>Given two points a, b that are distinct, and a fraction r, builds x a point such that ax/bx=r. r should be entered as a fraction m/n, m, n two integers separated by “/”. <strong>This definition was created to cover a different case of prescription of segments satisfying a constant ratio, in this case when the new point connects the segment which ratio we are taking. It is typically used to split a given segment into two pieces with the given ratio.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{ax}{bx}=r=\frac{m}{n}\)</span>  (rconst x a x b r)</p></td>
+<td><p>Line if r=1/1, Circle otherwise</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="aconst-a-b-c-x-r">
+<h3>aconst a b c x r<a class="headerlink" href="#aconst-a-b-c-x-r" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/aconst.png"><img alt="aconst" src="../../_images/aconst.png" style="width: 100%;" /></a></p></td>
+<td><p>Given three points a, b, c, with a, b distinct, and an angle r, builds x a point such that the angle from line ab to line cx taken in the conterclockwise direction is r. r should be entered either as a fraction in radians in the form mpi/n, m, n two integers separated by “pi/”, or in degrees in the from Ro, R an integer followed by the letter “o”. <strong>This definition was created to allow for the insertion of a prescribed angle between two lines without fixing the intersection of the lines. It was necessary for the effectivity of the aconst predicate.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\angle (ab\times cx)=r\)</span>  (aconst a b c x r)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="s-angle-a-b-x-y">
+<h3>s_angle a b x y<a class="headerlink" href="#s-angle-a-b-x-y" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/s_angle.png"><img alt="s_angle" src="../../_images/s_angle.png" style="width: 100%;" /></a></p></td>
+<td><p>Given two points a, b that are distinct, and an angle y, builds x a point such that the angle from line ab to line bx taken in the conterclockwise direction is y. y should be entered either as a fraction in radians in the form mpi/n, m, n two integers separated by “pi/”, or in degrees in the from Ro, R an integer followed by the letter “o”. <strong>This definition was created to allow for the insertion of a prescribed angle between two lines with a fixed vertex. It is a modification of the previous s_angle definition in accordance to the aconst predicate.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(\widehat{abx}=y\)</span>  (aconst a b b x y)</p></td>
+<td><p>Line</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="lconst-x-a-l">
+<h3>lconst x a l<a class="headerlink" href="#lconst-x-a-l" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 23.0%" />
+<col style="width: 2.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Added Statements</p></th>
+<th class="head"><p>Construction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/lconst.png"><img alt="lconst" src="../../_images/lconst.png" style="width: 100%;" /></a></p></td>
+<td><p>From a point a, builds x with an integer distance l from a to x. <strong>This definition was created as an entry point to add the manipulation of lengths to DDAR.</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(x, a, b, c\text{ concyclic}\)</span>  (lconst x a l)</p></td>
+<td><p>Circle</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Default Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rules.html" class="btn btn-neutral float-right" title="Rules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Mathïs Fédérico, Vladmir Sicca, Tianxiang Xia.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

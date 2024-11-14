@@ -1,0 +1,7 @@
+Constant Angle
+==============
+
+.. automodule:: geosolver.predicates.constant_angle
+   :members:
+   :undoc-members:
+   :show-inheritance:

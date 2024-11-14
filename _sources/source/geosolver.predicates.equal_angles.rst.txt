@@ -1,0 +1,7 @@
+Equal Angles
+============
+
+.. automodule:: geosolver.predicates.equal_angles
+   :members:
+   :undoc-members:
+   :show-inheritance:

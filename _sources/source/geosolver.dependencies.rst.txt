@@ -1,0 +1,17 @@
+Dependencies
+============
+
+.. automodule:: geosolver.dependencies
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   geosolver.dependencies.dependency
+   geosolver.dependencies.dependency_graph
+   geosolver.dependencies.symbols
+   geosolver.dependencies.symbols_graph

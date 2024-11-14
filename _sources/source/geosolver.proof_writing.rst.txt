@@ -1,0 +1,7 @@
+Proof Writing
+=============
+
+.. automodule:: geosolver.proof_writing
+   :members:
+   :undoc-members:
+   :show-inheritance:

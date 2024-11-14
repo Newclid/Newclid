@@ -1,0 +1,7 @@
+Triangles Congruent
+===================
+
+.. automodule:: geosolver.predicates.triangles_congruent
+   :members:
+   :undoc-members:
+   :show-inheritance:

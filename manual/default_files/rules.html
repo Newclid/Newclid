@@ -1,0 +1,2263 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rules &mdash; Newclid 0.1.dev1+gd05c737 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/styles/custom.css?v=12096124" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=b302d3c9"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Problems Datasets" href="../problem_databases/index.html" />
+    <link rel="prev" title="Definitions" href="definitions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff9900" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Newclid
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#proof-state">Proof State</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#deductive-agent">Deductive Agent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#how-is-a-problem-built">How is a Problem Built</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#problem-solving">Problem Solving</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../overview.html#matching-and-caching">Matching and Caching</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#writing-the-proof">Writing the Proof</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../overview.html#translating-to-natural-language">Translating to natural language</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_problems.html">Adding new problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../adding_problems.html#using-definitions">Using definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adding_problems.html#writing-a-new-problem">Writing a new problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adding_problems.html#ensuring-the-problem-can-be-built">Ensuring the problem can be built</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_rules.html">Adding new rules</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Default Files</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="definitions.html">Definitions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="definitions.html#legacy-definitions">Legacy definitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#angle-bisector-x-a-b-c">angle_bisector x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#angle-mirror-x-a-b-c">angle_mirror x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#circle-x-a-b-c">circle x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#circumcenter-x-a-b-c">circumcenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#eq-quadrangle-a-b-c-d">eq_quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#iso-trapezoid-a-b-c-d">iso_trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#eq-triangle-x-b-c">eq_triangle x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#eqangle2-x-a-b-c">eqangle2 x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#eqdia-quadrangle-a-b-c-d">eqdia_quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#eqdistance-x-a-b-c">eqdistance x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#foot-x-a-b-c">foot x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#free-a">free a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#incenter-x-a-b-c">incenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#incenter2-x-y-z-i-a-b-c">incenter2 x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#excenter-x-a-b-c">excenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#excenter2-x-y-z-i-a-b-c">excenter2 x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#centroid-x-y-z-i-a-b-c">centroid x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#ninepoints-x-y-z-i-a-b-c">ninepoints x y z i a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#intersection-cc-x-o-w-a">intersection_cc x o w a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#intersection-lc-x-a-o-b">intersection_lc x a o b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#intersection-ll-x-a-b-c-d">intersection_ll x a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#intersection-lp-x-a-b-c-m-n">intersection_lp x a b c m n</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#intersection-lt-x-a-b-c-d-e">intersection_lt x a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#intersection-pp-x-a-b-c-d-e-f">intersection_pp x a b c d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#intersection-tt-x-a-b-c-d-e-f">intersection_tt x a b c d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#iso-triangle-a-b-c">iso_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#lc-tangent-x-a-o">lc_tangent x a o</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#midpoint-x-a-b">midpoint x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#mirror-x-a-b">mirror x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#nsquare-x-a-b">nsquare x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-aline-x-a-b-c-d-e">on_aline x a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-bline-x-a-b">on_bline x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-circle-x-o-a">on_circle x o a</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-line-x-a-b">on_line x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-pline-x-a-b-c">on_pline x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-tline-x-a-b-c">on_tline x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#orthocenter-x-a-b-c">orthocenter x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#parallelogram-a-b-c-x">parallelogram a b c x</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#pentagon-a-b-c-d-e">pentagon a b c d e</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#psquare-x-a-b">psquare x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#quadrangle-a-b-c-d">quadrangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#r-trapezoid-a-b-c-d">r_trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#r-triangle-a-b-c">r_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#rectangle-a-b-c-d">rectangle a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#reflect-x-a-b-c">reflect x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#risos-a-b-c">risos a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#segment-a-b">segment a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#shift-x-b-c-d">shift x b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#square-a-b-x-y">square a b x y</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#isquare-a-b-c-d">isquare a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#trapezoid-a-b-c-d">trapezoid a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#triangle-a-b-c">triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#triangle12-a-b-c">triangle12 a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#l1c-x-y-z-i-a-b-c-o">2l1c x y z i a b c o</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#e5128-x-y-a-b-c-d">e5128 x y a b c d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#peq-x-y-z-a-b-c">3peq x y z a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#trisect-x-y-a-b-c">trisect x y a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#trisegment-x-y-a-b">trisegment x y a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-dia-x-a-b">on_dia x a b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#ieq-triangle-a-b-c">ieq_triangle a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#cc-tangent-x-y-z-i-o-a-w-b">cc_tangent x y z i o a w b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#eqangle3-x-a-b-d-e-f">eqangle3 x a b d e f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#tangent-x-y-a-o-b">tangent x y a o b</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-circum-x-a-b-c">on_circum x a b c</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="definitions.html#new-definitions">New Definitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-pline0-x-a-b-c">on_pline0 x a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#iso-triangle0-a-b-c">iso_triangle0 a b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#iso-triangle-vertex-x-b-c">iso_triangle_vertex x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#iso-triangle-vertex-angle-x-b-c">iso_triangle_vertex_angle x b c</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#on-aline0-x-a-b-c-d-e-f-g">on_aline0 x a b c d e f g</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#eqratio-x-a-b-c-d-e-f-g">eqratio x a b c d e f g</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#eqratio6-x-a-c-e-f-g-h">eqratio6 x a c e f g h</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#rconst-a-b-c-x-r">rconst a b c x r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#rconst2-x-a-b-r">rconst2 x a b r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#aconst-a-b-c-x-r">aconst a b c x r</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#s-angle-a-b-x-y">s_angle a b x y</a></li>
+<li class="toctree-l4"><a class="reference internal" href="definitions.html#lconst-x-a-l">lconst x a l</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#legacy-rules">Legacy rules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#r00-perpendiculars-give-parallel">r00 : Perpendiculars give parallel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r01-definition-of-circle">r01 : Definition of circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r02-parallel-from-inclination">r02 : Parallel from inclination</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r03-arc-determines-internal-angles">r03 : Arc determines internal angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r04-congruent-angles-are-in-a-circle">r04 : Congruent angles are in a circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r05-same-arc-same-chord">r05 : Same arc same chord</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r06-base-of-half-triangle">r06 : Base of half triangle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r07-thales-theorem-i">r07 : Thales Theorem I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r08-right-triangles-common-angle-i">r08 : Right triangles common angle I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r09-sum-of-angles-of-a-triangle">r09 : Sum of angles of a triangle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r10-ratio-cancellation">r10 : Ratio cancellation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r11-bisector-theorem-i">r11 : Bisector theorem I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r12-bisector-theorem-ii">r12 : Bisector theorem II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r13-isosceles-triangle-equal-angles">r13 : Isosceles triangle equal angles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r14-equal-base-angles-imply-isosceles">r14 : Equal base angles imply isosceles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r15-arc-determines-inscribed-angles-tangent">r15 : Arc determines inscribed angles (tangent)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r16-same-arc-giving-tangent">r16 : Same arc giving tangent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r17-central-angle-vs-inscribed-angle-i">r17 : Central angle vs inscribed angle I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r18-central-angle-vs-inscribed-angle-ii">r18 : Central angle vs inscribed angle II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r19-hypothenuse-is-diameter">r19 : Hypothenuse is diameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r20-diameter-is-hypotenuse">r20 : Diameter is hypotenuse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r21-cyclic-trapezoid">r21 : Cyclic trapezoid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r22-bisector-construction">r22 : Bisector Construction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r23-bisector-is-perpendicular">r23 : Bisector is perpendicular</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r24-cyclic-kite">r24 : Cyclic kite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r25-diagonals-of-parallelogram-i">r25 : Diagonals of parallelogram I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r26-diagonals-of-parallelogram-ii">r26 : Diagonals of parallelogram II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r27-thales-theorem-ii">r27 : Thales theorem II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r28-overlapping-parallels">r28 : Overlapping parallels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r29-midpoint-is-an-eqratio">r29 : Midpoint is an eqratio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r30-right-triangles-common-angle-ii">r30 : Right triangles common angle II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r31-denominator-cancelling">r31 : Denominator cancelling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r32-sss-triangle-congruence">r32 : SSS Triangle congruence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r33-sas-triangle-congruence">r33 : SAS Triangle congruence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r34-aa-similarity-of-triangles-direct">r34 : AA Similarity of triangles (direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r35-aa-similarity-of-triangles-reverse">r35 : AA Similarity of triangles (reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r36-asa-congruence-of-triangles-direct">r36 : ASA Congruence of triangles (direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r37-asa-congruence-of-triangles-reverse">r37 : ASA Congruence of triangles (reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r38-sss-triangle-similarity-original">r38 : SSS Triangle similarity (original)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r39-sas-triangle-similarity-original">r39 : SAS Triangle similarity (original)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r40-similarity-without-scaling">r40 : Similarity without scaling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r41-thales-theorem-iii">r41 : Thales theorem III</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r42-thales-theorem-iv">r42 : Thales theorem IV</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#new-rules">New rules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#r43-orthocenter-theorem">r43 : Orthocenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r44-pappus-s-theorem">r44 : Pappus’s theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r45-simson-s-line-theorem">r45 : Simson’s line theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r46-incenter-theorem">r46 : Incenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r47-circumcenter-theorem">r47 : Circumcenter theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r48-centroid-theorem">r48 : Centroid theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r49-recognize-center-of-cyclic-circle">r49 : Recognize center of cyclic (circle)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r50-recognize-center-of-cyclic-cong">r50 : Recognize center of cyclic (cong)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r51-midpoint-splits-in-two">r51 : Midpoint splits in two</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r52-properties-of-similar-triangles-direct">r52 : Properties of similar triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r53-properties-of-similar-triangles-reverse">r53 : Properties of similar triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r54-definition-of-midpoint">r54 : Definition of midpoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r55-properties-of-midpoint-cong">r55 : Properties of midpoint (cong)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r56-properties-of-midpoint-coll">r56 : Properties of midpoint (coll)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r57-pythagoras-theorem">r57 : Pythagoras theorem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r58-same-chord-same-arc-i">r58 : Same chord same arc I</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r59-same-chord-same-arc-ii">r59 : Same chord same arc II</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r60-sss-similarity-of-triangles-direct">r60 : SSS Similarity of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r61-sss-similarity-of-triangles-reverse">r61 : SSS Similarity of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r62-sas-similarity-of-triangles-direct">r62 : SAS Similarity of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r63-sas-similarity-of-triangles-reverse">r63 : SAS Similarity of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r64-sss-congruence-of-triangles-direct">r64 : SSS Congruence of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r65-sss-congruence-of-triangles-reverse">r65 : SSS Congruence of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r66-sas-congruence-of-triangles-direct">r66 : SAS Congruence of triangles (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r67-sas-congruence-of-triangles-reverse">r67 : SAS Congruence of triangles (Reverse)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r68-similarity-without-scaling-direct">r68 : Similarity without scaling (Direct)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r69-similarity-without-scaling-reverse">r69 : Similarity without scaling (Reverse)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../problem_databases/index.html">Problems Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../problem_databases/imo_ag_30.html">imo_ag_30</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../problem_databases/jgex_ag_231.html">jgex_ag_231</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../problem_databases/new_benchmark_50.html">new_benchmark_50</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../problem_databases/examples.html">examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/geosolver.html">Geosolver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.agent.html">Agent</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.agent.agents_interface.html">Agents Interface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.agents_interface.html#geosolver.agent.agents_interface.DeductiveAgent"><code class="docutils literal notranslate"><span class="pre">DeductiveAgent</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.agent.breadth_first_search.html">Breadth First Search</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.breadth_first_search.html#geosolver.agent.breadth_first_search.BFSDDAR"><code class="docutils literal notranslate"><span class="pre">BFSDDAR</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.agent.flemmard.html">Flemmard</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.flemmard.html#geosolver.agent.flemmard.Flemmard"><code class="docutils literal notranslate"><span class="pre">Flemmard</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.agent.human_agent.html">Human Agent</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.human_agent.html#geosolver.agent.human_agent.NamedFunction"><code class="docutils literal notranslate"><span class="pre">NamedFunction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.agent.human_agent.html#geosolver.agent.human_agent.HumanAgent"><code class="docutils literal notranslate"><span class="pre">HumanAgent</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.html">Algebraic Reasoning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.algebraic_manipulator.html">Algebraic Manipulator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.algebraic_manipulator.html#geosolver.algebraic_reasoning.algebraic_manipulator.AlgebraicManipulator"><code class="docutils literal notranslate"><span class="pre">AlgebraicManipulator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html">Tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.strip"><code class="docutils literal notranslate"><span class="pre">strip()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.plus"><code class="docutils literal notranslate"><span class="pre">plus()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.plus_all"><code class="docutils literal notranslate"><span class="pre">plus_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.mult"><code class="docutils literal notranslate"><span class="pre">mult()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.minus"><code class="docutils literal notranslate"><span class="pre">minus()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.recon"><code class="docutils literal notranslate"><span class="pre">recon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.replace"><code class="docutils literal notranslate"><span class="pre">replace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.report"><code class="docutils literal notranslate"><span class="pre">report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.algebraic_reasoning.tables.html#geosolver.algebraic_reasoning.tables.Table"><code class="docutils literal notranslate"><span class="pre">Table</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.dependencies.html">Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.dependencies.dependency.html">Dependency</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.dependency.html#geosolver.dependencies.dependency.Dependency"><code class="docutils literal notranslate"><span class="pre">Dependency</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.dependencies.dependency_graph.html">Dependency Graph</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.dependency_graph.html#geosolver.dependencies.dependency_graph.DependencyGraph"><code class="docutils literal notranslate"><span class="pre">DependencyGraph</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html">Symbols</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Symbol"><code class="docutils literal notranslate"><span class="pre">Symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Point"><code class="docutils literal notranslate"><span class="pre">Point</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Line"><code class="docutils literal notranslate"><span class="pre">Line</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols.html#geosolver.dependencies.symbols.Circle"><code class="docutils literal notranslate"><span class="pre">Circle</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.dependencies.symbols_graph.html">Symbols Graph</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.dependencies.symbols_graph.html#geosolver.dependencies.symbols_graph.SymbolsGraph"><code class="docutils literal notranslate"><span class="pre">SymbolsGraph</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.formulations.html">Formulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.formulations.clause.html">Clause</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.clause.html#geosolver.formulations.clause.Clause"><code class="docutils literal notranslate"><span class="pre">Clause</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.clause.html#geosolver.formulations.clause.translate_sentence"><code class="docutils literal notranslate"><span class="pre">translate_sentence()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.formulations.definition.html">Definition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.definition.html#geosolver.formulations.definition.DefinitionJGEX"><code class="docutils literal notranslate"><span class="pre">DefinitionJGEX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.formulations.problem.html">Problem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.problem.html#geosolver.formulations.problem.ProblemJGEX"><code class="docutils literal notranslate"><span class="pre">ProblemJGEX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.formulations.rule.html">Rule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.formulations.rule.html#geosolver.formulations.rule.Rule"><code class="docutils literal notranslate"><span class="pre">Rule</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.numerical.html">Numerical</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.html#geosolver.numerical.close_enough"><code class="docutils literal notranslate"><span class="pre">close_enough()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.html#geosolver.numerical.nearly_zero"><code class="docutils literal notranslate"><span class="pre">nearly_zero()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.html#geosolver.numerical.sign"><code class="docutils literal notranslate"><span class="pre">sign()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.angles.html">Angles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.angles.html#geosolver.numerical.angles.ang_of"><code class="docutils literal notranslate"><span class="pre">ang_of()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.angles.html#geosolver.numerical.angles.ang_between"><code class="docutils literal notranslate"><span class="pre">ang_between()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.check.html">Check</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.check.html#geosolver.numerical.check.same_clock"><code class="docutils literal notranslate"><span class="pre">same_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.check.html#geosolver.numerical.check.clock"><code class="docutils literal notranslate"><span class="pre">clock()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.distances.html">Distances</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.distances.html#geosolver.numerical.distances.PointTooCloseError"><code class="docutils literal notranslate"><span class="pre">PointTooCloseError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.distances.html#geosolver.numerical.distances.PointTooFarError"><code class="docutils literal notranslate"><span class="pre">PointTooFarError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.distances.html#geosolver.numerical.distances.check_too_close_numerical"><code class="docutils literal notranslate"><span class="pre">check_too_close_numerical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.distances.html#geosolver.numerical.distances.check_too_far_numerical"><code class="docutils literal notranslate"><span class="pre">check_too_far_numerical()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html">Draw Figure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.init_figure"><code class="docutils literal notranslate"><span class="pre">init_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_figure"><code class="docutils literal notranslate"><span class="pre">draw_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.fill_missing"><code class="docutils literal notranslate"><span class="pre">fill_missing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_circle"><code class="docutils literal notranslate"><span class="pre">draw_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_line"><code class="docutils literal notranslate"><span class="pre">draw_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_segment"><code class="docutils literal notranslate"><span class="pre">draw_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_segment_num"><code class="docutils literal notranslate"><span class="pre">draw_segment_num()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_angle"><code class="docutils literal notranslate"><span class="pre">draw_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_rectangle"><code class="docutils literal notranslate"><span class="pre">draw_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.draw_figure.html#geosolver.numerical.draw_figure.draw_point"><code class="docutils literal notranslate"><span class="pre">draw_point()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html">Geometries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.PointNum"><code class="docutils literal notranslate"><span class="pre">PointNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.FormNum"><code class="docutils literal notranslate"><span class="pre">FormNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.LineNum"><code class="docutils literal notranslate"><span class="pre">LineNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.CircleNum"><code class="docutils literal notranslate"><span class="pre">CircleNum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.perpendicular_bisector"><code class="docutils literal notranslate"><span class="pre">perpendicular_bisector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.InvalidIntersectError"><code class="docutils literal notranslate"><span class="pre">InvalidIntersectError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.InvalidReduceError"><code class="docutils literal notranslate"><span class="pre">InvalidReduceError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.solve_quad"><code class="docutils literal notranslate"><span class="pre">solve_quad()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.intersect"><code class="docutils literal notranslate"><span class="pre">intersect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.circle_circle_intersection"><code class="docutils literal notranslate"><span class="pre">circle_circle_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.line_circle_intersection"><code class="docutils literal notranslate"><span class="pre">line_circle_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.circle_segment_intersect"><code class="docutils literal notranslate"><span class="pre">circle_segment_intersect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.line_line_intersection"><code class="docutils literal notranslate"><span class="pre">line_line_intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.geometries.html#geosolver.numerical.geometries.reduce"><code class="docutils literal notranslate"><span class="pre">reduce()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html">Sketch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch"><code class="docutils literal notranslate"><span class="pre">sketch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aline"><code class="docutils literal notranslate"><span class="pre">sketch_aline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aline0"><code class="docutils literal notranslate"><span class="pre">sketch_aline0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_acircle"><code class="docutils literal notranslate"><span class="pre">sketch_acircle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_amirror"><code class="docutils literal notranslate"><span class="pre">sketch_amirror()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_bisect"><code class="docutils literal notranslate"><span class="pre">sketch_bisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_exbisect"><code class="docutils literal notranslate"><span class="pre">sketch_exbisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_bline"><code class="docutils literal notranslate"><span class="pre">sketch_bline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_dia"><code class="docutils literal notranslate"><span class="pre">sketch_dia()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_tangent"><code class="docutils literal notranslate"><span class="pre">sketch_tangent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_circle"><code class="docutils literal notranslate"><span class="pre">sketch_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_cc_tangent"><code class="docutils literal notranslate"><span class="pre">sketch_cc_tangent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_e5128"><code class="docutils literal notranslate"><span class="pre">sketch_e5128()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.random_rfss"><code class="docutils literal notranslate"><span class="pre">random_rfss()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.head_from"><code class="docutils literal notranslate"><span class="pre">head_from()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eq_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_eq_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_iso_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_iso_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqangle2"><code class="docutils literal notranslate"><span class="pre">sketch_eqangle2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqangle3"><code class="docutils literal notranslate"><span class="pre">sketch_eqangle3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqdia_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_eqdia_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.random_points"><code class="docutils literal notranslate"><span class="pre">random_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_free"><code class="docutils literal notranslate"><span class="pre">sketch_free()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isos"><code class="docutils literal notranslate"><span class="pre">sketch_isos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_line"><code class="docutils literal notranslate"><span class="pre">sketch_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_cyclic"><code class="docutils literal notranslate"><span class="pre">sketch_cyclic()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_midp"><code class="docutils literal notranslate"><span class="pre">sketch_midp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pentagon"><code class="docutils literal notranslate"><span class="pre">sketch_pentagon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pline"><code class="docutils literal notranslate"><span class="pre">sketch_pline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_pmirror"><code class="docutils literal notranslate"><span class="pre">sketch_pmirror()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_quadrangle"><code class="docutils literal notranslate"><span class="pre">sketch_quadrangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_r_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_r_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_r_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_r_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rectangle"><code class="docutils literal notranslate"><span class="pre">sketch_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_reflect"><code class="docutils literal notranslate"><span class="pre">sketch_reflect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_risos"><code class="docutils literal notranslate"><span class="pre">sketch_risos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rotaten90"><code class="docutils literal notranslate"><span class="pre">sketch_rotaten90()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rotatep90"><code class="docutils literal notranslate"><span class="pre">sketch_rotatep90()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_s_angle"><code class="docutils literal notranslate"><span class="pre">sketch_s_angle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_aconst"><code class="docutils literal notranslate"><span class="pre">sketch_aconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_segment"><code class="docutils literal notranslate"><span class="pre">sketch_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_shift"><code class="docutils literal notranslate"><span class="pre">sketch_shift()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_square"><code class="docutils literal notranslate"><span class="pre">sketch_square()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isquare"><code class="docutils literal notranslate"><span class="pre">sketch_isquare()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_tline"><code class="docutils literal notranslate"><span class="pre">sketch_tline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trapezoid"><code class="docutils literal notranslate"><span class="pre">sketch_trapezoid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_triangle12"><code class="docutils literal notranslate"><span class="pre">sketch_triangle12()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trisect"><code class="docutils literal notranslate"><span class="pre">sketch_trisect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_trisegment"><code class="docutils literal notranslate"><span class="pre">sketch_trisegment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_ieq_triangle"><code class="docutils literal notranslate"><span class="pre">sketch_ieq_triangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_incenter2"><code class="docutils literal notranslate"><span class="pre">sketch_incenter2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_excenter2"><code class="docutils literal notranslate"><span class="pre">sketch_excenter2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_centroid"><code class="docutils literal notranslate"><span class="pre">sketch_centroid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_ninepoints"><code class="docutils literal notranslate"><span class="pre">sketch_ninepoints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_2l1c"><code class="docutils literal notranslate"><span class="pre">sketch_2l1c()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_3peq"><code class="docutils literal notranslate"><span class="pre">sketch_3peq()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_isosvertex"><code class="docutils literal notranslate"><span class="pre">sketch_isosvertex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqratio"><code class="docutils literal notranslate"><span class="pre">sketch_eqratio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rconst"><code class="docutils literal notranslate"><span class="pre">sketch_rconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_eqratio6"><code class="docutils literal notranslate"><span class="pre">sketch_eqratio6()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_lconst"><code class="docutils literal notranslate"><span class="pre">sketch_lconst()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.numerical.sketch.html#geosolver.numerical.sketch.sketch_rconst2"><code class="docutils literal notranslate"><span class="pre">sketch_rconst2()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.predicates.html">Predicates</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.Pythagoras.html">Pythagoras</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.Pythagoras.html#geosolver.predicates.Pythagoras.PythagoreanPremises"><code class="docutils literal notranslate"><span class="pre">PythagoreanPremises</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.Pythagoras.html#geosolver.predicates.Pythagoras.PythagoreanConclusions"><code class="docutils literal notranslate"><span class="pre">PythagoreanConclusions</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.circumcenter.html">Circumcenter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.circumcenter.html#geosolver.predicates.circumcenter.Circumcenter"><code class="docutils literal notranslate"><span class="pre">Circumcenter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.collinearity.html">Collinearity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.collinearity.html#geosolver.predicates.collinearity.Coll"><code class="docutils literal notranslate"><span class="pre">Coll</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.collinearity.html#geosolver.predicates.collinearity.NColl"><code class="docutils literal notranslate"><span class="pre">NColl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.congruence.html">Congruence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.congruence.html#geosolver.predicates.congruence.Cong"><code class="docutils literal notranslate"><span class="pre">Cong</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.constant_angle.html">Constant Angle</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_angle.html#geosolver.predicates.constant_angle.ConstantAngle"><code class="docutils literal notranslate"><span class="pre">ConstantAngle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_angle.html#geosolver.predicates.constant_angle.ACompute"><code class="docutils literal notranslate"><span class="pre">ACompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.constant_length.html">Constant Length</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_length.html#geosolver.predicates.constant_length.ConstantLength"><code class="docutils literal notranslate"><span class="pre">ConstantLength</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_length.html#geosolver.predicates.constant_length.LCompute"><code class="docutils literal notranslate"><span class="pre">LCompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.constant_ratio.html">Constant Ratio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_ratio.html#geosolver.predicates.constant_ratio.ConstantRatio"><code class="docutils literal notranslate"><span class="pre">ConstantRatio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.constant_ratio.html#geosolver.predicates.constant_ratio.RCompute"><code class="docutils literal notranslate"><span class="pre">RCompute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.cyclic.html">Cyclic</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.cyclic.html#geosolver.predicates.cyclic.Cyclic"><code class="docutils literal notranslate"><span class="pre">Cyclic</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.different.html">Different</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.different.html#geosolver.predicates.different.Diff"><code class="docutils literal notranslate"><span class="pre">Diff</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.equal_angles.html">Equal Angles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.equal_angles.html#geosolver.predicates.equal_angles.EqAngle"><code class="docutils literal notranslate"><span class="pre">EqAngle</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.equal_ratios.html">Equal Ratios</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.equal_ratios.html#geosolver.predicates.equal_ratios.EqRatio"><code class="docutils literal notranslate"><span class="pre">EqRatio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.equal_ratios.html#geosolver.predicates.equal_ratios.EqRatio3"><code class="docutils literal notranslate"><span class="pre">EqRatio3</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.midpoint.html">Midpoint</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.midpoint.html#geosolver.predicates.midpoint.MidPoint"><code class="docutils literal notranslate"><span class="pre">MidPoint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.parallelism.html">Parallelism</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.parallelism.html#geosolver.predicates.parallelism.Para"><code class="docutils literal notranslate"><span class="pre">Para</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.parallelism.html#geosolver.predicates.parallelism.NPara"><code class="docutils literal notranslate"><span class="pre">NPara</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.perpendicularity.html">Perpendicularity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.perpendicularity.html#geosolver.predicates.perpendicularity.Perp"><code class="docutils literal notranslate"><span class="pre">Perp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.perpendicularity.html#geosolver.predicates.perpendicularity.NPerp"><code class="docutils literal notranslate"><span class="pre">NPerp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.predicate.html">Predicate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.predicate.html#geosolver.predicates.predicate.Predicate"><code class="docutils literal notranslate"><span class="pre">Predicate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.sameclock.html">Sameclock</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.sameclock.html#geosolver.predicates.sameclock.SameClock"><code class="docutils literal notranslate"><span class="pre">SameClock</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.sameside.html">Sameside</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.sameside.html#geosolver.predicates.sameside.SameSide"><code class="docutils literal notranslate"><span class="pre">SameSide</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.sameside.html#geosolver.predicates.sameside.NSameSide"><code class="docutils literal notranslate"><span class="pre">NSameSide</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.triangles_congruent.html">Triangles Congruent</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_congruent.html#geosolver.predicates.triangles_congruent.ContriClock"><code class="docutils literal notranslate"><span class="pre">ContriClock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_congruent.html#geosolver.predicates.triangles_congruent.ContriReflect"><code class="docutils literal notranslate"><span class="pre">ContriReflect</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.predicates.triangles_similar.html">Triangles Similar</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.two_triangles"><code class="docutils literal notranslate"><span class="pre">two_triangles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.SimtriClock"><code class="docutils literal notranslate"><span class="pre">SimtriClock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.predicates.triangles_similar.html#geosolver.predicates.triangles_similar.SimtriReflect"><code class="docutils literal notranslate"><span class="pre">SimtriReflect</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.api.html">Api</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver"><code class="docutils literal notranslate"><span class="pre">GeometricSolver</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.run"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.write_proof_steps"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_proof_steps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.draw_figure"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.draw_figure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.write_run_infos"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_run_infos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolver.write_all_outputs"><code class="docutils literal notranslate"><span class="pre">GeometricSolver.write_all_outputs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.defs"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.defs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.rules"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.rules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.build"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.del_goals"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.del_goals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_problem_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_problem_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_rules_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_rules_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_rules_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_rules_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_defs_from_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_defs_from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_defs_from_txt"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_defs_from_txt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.with_deductive_agent"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.with_deductive_agent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_geogebra"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_geogebra()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_goal"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_goal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.load_goals_file"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.load_goals_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.api.html#geosolver.api.GeometricSolverBuilder.with_problem_path"><code class="docutils literal notranslate"><span class="pre">GeometricSolverBuilder.with_problem_path()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.configs.html">Configs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.configs.html#geosolver.configs.default_configs_path"><code class="docutils literal notranslate"><span class="pre">default_configs_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.configs.html#geosolver.configs.default_defs_path"><code class="docutils literal notranslate"><span class="pre">default_defs_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.configs.html#geosolver.configs.default_rules_path"><code class="docutils literal notranslate"><span class="pre">default_rules_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.load_geogebra.html">Load Geogebra</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form"><code class="docutils literal notranslate"><span class="pre">Form</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form.Circle"><code class="docutils literal notranslate"><span class="pre">Form.Circle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.Form.Line"><code class="docutils literal notranslate"><span class="pre">Form.Line</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.dedup"><code class="docutils literal notranslate"><span class="pre">dedup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.load_geogebra.html#geosolver.load_geogebra.load_geogebra"><code class="docutils literal notranslate"><span class="pre">load_geogebra()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.match_theorems.html">Match Theorems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher"><code class="docutils literal notranslate"><span class="pre">Matcher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.update"><code class="docutils literal notranslate"><span class="pre">Matcher.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.cache_theorem"><code class="docutils literal notranslate"><span class="pre">Matcher.cache_theorem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.match_theorems.html#geosolver.match_theorems.Matcher.match_theorem"><code class="docutils literal notranslate"><span class="pre">Matcher.match_theorem()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.proof.html">Proof</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ConstructionError"><code class="docutils literal notranslate"><span class="pre">ConstructionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState"><code class="docutils literal notranslate"><span class="pre">ProofState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.add_construction"><code class="docutils literal notranslate"><span class="pre">ProofState.add_construction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.build_problemJGEX"><code class="docutils literal notranslate"><span class="pre">ProofState.build_problemJGEX()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.match_theorem"><code class="docutils literal notranslate"><span class="pre">ProofState.match_theorem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.apply_dep"><code class="docutils literal notranslate"><span class="pre">ProofState.apply_dep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.proof.html#geosolver.proof.ProofState.check_goals"><code class="docutils literal notranslate"><span class="pre">ProofState.check_goals()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.proof_writing.html">Proof Writing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.proof_writing.html#geosolver.proof_writing.write_proof_steps"><code class="docutils literal notranslate"><span class="pre">write_proof_steps()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.run_loop.html">Run Loop</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.run_loop.html#geosolver.run_loop.run_loop"><code class="docutils literal notranslate"><span class="pre">run_loop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.statement.html">Statement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement"><code class="docutils literal notranslate"><span class="pre">Statement</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.check"><code class="docutils literal notranslate"><span class="pre">Statement.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.check_numerical"><code class="docutils literal notranslate"><span class="pre">Statement.check_numerical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.why"><code class="docutils literal notranslate"><span class="pre">Statement.why()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.from_tokens"><code class="docutils literal notranslate"><span class="pre">Statement.from_tokens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.pretty"><code class="docutils literal notranslate"><span class="pre">Statement.pretty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.with_new"><code class="docutils literal notranslate"><span class="pre">Statement.with_new()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../source/geosolver.statement.html#geosolver.statement.Statement.draw"><code class="docutils literal notranslate"><span class="pre">Statement.draw()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.tools.html">Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.InfQuotientError"><code class="docutils literal notranslate"><span class="pre">InfQuotientError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.notNone"><code class="docutils literal notranslate"><span class="pre">notNone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.get_quotient"><code class="docutils literal notranslate"><span class="pre">get_quotient()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.atomize"><code class="docutils literal notranslate"><span class="pre">atomize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.str_to_fraction"><code class="docutils literal notranslate"><span class="pre">str_to_fraction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.fraction_to_len"><code class="docutils literal notranslate"><span class="pre">fraction_to_len()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.fraction_to_ratio"><code class="docutils literal notranslate"><span class="pre">fraction_to_ratio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.fraction_to_angle"><code class="docutils literal notranslate"><span class="pre">fraction_to_angle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.reshape"><code class="docutils literal notranslate"><span class="pre">reshape()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.add_edge"><code class="docutils literal notranslate"><span class="pre">add_edge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.runtime_cache_path"><code class="docutils literal notranslate"><span class="pre">runtime_cache_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.run_static_server"><code class="docutils literal notranslate"><span class="pre">run_static_server()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.tools.html#geosolver.tools.boring_statement"><code class="docutils literal notranslate"><span class="pre">boring_statement()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../source/geosolver.webapp.html">Webapp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../source/geosolver.webapp.html#geosolver.webapp.pull_to_server"><code class="docutils literal notranslate"><span class="pre">pull_to_server()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff9900" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Newclid</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Default Files</a></li>
+      <li class="breadcrumb-item active">Rules</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/manual/default_files/rules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="definitions.html" class="btn btn-neutral float-left" title="Definitions" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../problem_databases/index.html" class="btn btn-neutral float-right" title="Problems Datasets" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rules">
+<h1>Rules<a class="headerlink" href="#rules" title="Link to this heading"></a></h1>
+<p>Rules are the deduction rules that allow, from a given set of true facts, the derivation of new ones. Each rule asks for a collection of arguments, demanded by its premise predicates, that has to be “matched”. Next, the rule is “applied”, at which point the corresponding predicate is added to the proof state.</p>
+<p>Rules are labelled in order (r00 to r63) to keep consistency through sources (documentation. papers, code), and a more specific name, for readability. The naming shows in the proof step, as the reason a proof step is true.</p>
+<p>Through development, different combinations of rules have been tried, and some have been abandoned, typically for efficiency considerations. r00 through r42 are the ones from the original AlphaGeometry paper, while our standard rules are in the rules.txt file in the codebase.</p>
+<p>The default_configs folder also contains the file unabridged_rules.txt, with all the rules that have been tried, abandoned or not, and empty_rules.txt, a blank txt file that can be used for testing the intrinsic working of the engine.</p>
+<p>From the original rules, our version of rules.txt contains changes in the statements of r07, r26, r34, r35, and r42 if compared to the original AlphaGeometry work.</p>
+<section id="legacy-rules">
+<h2>Legacy rules<a class="headerlink" href="#legacy-rules" title="Link to this heading"></a></h2>
+<section id="r00-perpendiculars-give-parallel">
+<h3>r00 : Perpendiculars give parallel<a class="headerlink" href="#r00-perpendiculars-give-parallel" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 45.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r00.png"><img alt="r00" src="../../_images/r00.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB \perp CD\\ CD \perp EF \\ABE \text{ non-collinear}\end{cases} \implies AB \parallel EF\)</span></p></td>
+<td><p>Two lines AB, EF, that are orthogonal to a same line CD are parallel to one another. <strong>This rule is not in the final rules.txt file because it is covered by AR.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r01-definition-of-circle">
+<h3>r01 : Definition of circle<a class="headerlink" href="#r01-definition-of-circle" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r01.png"><img alt="r01" src="../../_images/r01.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(|OA|=|OB|=|OC|=|OD|\implies ABCD\text{ on a circle}\)</span></p></td>
+<td><p>Four points A, B, C, D equidistant from a center O all lie on a same circle. (One side of the definition of a circle.)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r02-parallel-from-inclination">
+<h3>r02 : Parallel from inclination<a class="headerlink" href="#r02-parallel-from-inclination" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r02.png"><img alt="r02" src="../../_images/r02.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\angle (AB \times PQ)=\angle (CD \times PQ)\implies AB \parallel CD\)</span></p></td>
+<td><p>If two lines AB and CD define the same angle with respect to a fixed transverse line PQ, they are parallel. <strong>This rule is not in the final rules.txt file because it is covered by AR.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r03-arc-determines-internal-angles">
+<h3>r03 : Arc determines internal angles<a class="headerlink" href="#r03-arc-determines-internal-angles" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r03.png"><img alt="r03" src="../../_images/r03.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(ABPQ\text{ on a circle}\implies \angle (PA\times PB)=\angle (QA\times QB)\)</span></p></td>
+<td><p>Two angles with the vertices P, Q on a circle that determine the same arc AB on that same circle are congruent.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r04-congruent-angles-are-in-a-circle">
+<h3>r04 : Congruent angles are in a circle<a class="headerlink" href="#r04-congruent-angles-are-in-a-circle" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r04.png"><img alt="r04" src="../../_images/r04.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (PA\times PB)=\angle (QA\times QB)\\ ABPQ\text{ non-collinear} \end{cases}\implies ABPQ\text{ on a circle}\)</span></p></td>
+<td><p>Reverse direction of r03: If P, Q are vertices of congruent angles, and A and B are the intersections of the legs of the angles with vertices P and Q, there is a circle through A, B, P, and Q.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r05-same-arc-same-chord">
+<h3>r05 : Same arc same chord<a class="headerlink" href="#r05-same-arc-same-chord" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r05.png"><img alt="r05" src="../../_images/r05.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ABCPQR\text{ on a circle}\\ \angle (CA\times CB)=\angle (RP\times RQ)\end{cases}\implies |AB|=|PQ|\)</span></p></td>
+<td><p>From r03, two congruent angles on a circle determine arcs on that circle of the same length. This rule says that arcs of the same length determine chords of the same length on the same circle.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r06-base-of-half-triangle">
+<h3>r06 : Base of half triangle<a class="headerlink" href="#r06-base-of-half-triangle" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r06.png"><img alt="r06" src="../../_images/r06.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}E\text{ midpoint of } AB\\ F\text{ midpoint of }AC\end{cases} \implies EF \parallel BC\)</span></p></td>
+<td><p>The line connecting the midpoints of two sides of a triangle is parallel to the third side of the same triangle. (This is a special instance of Thales’ Theorem with “midpoint” predicates).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r07-thales-theorem-i">
+<h3>r07 : Thales Theorem I<a class="headerlink" href="#r07-thales-theorem-i" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r07.png"><img alt="r07" src="../../_images/r07.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB\parallel CD\\ OAC \text{ collinear}\\ OBD\text{ collinear}\\ OAB\text{ non-collinear}\end{cases}\implies \begin{cases}\frac{OA}{OC}=\frac{OB}{OD}\\ \frac{AO}{AC}=\frac{BO}{BD}\\ \frac{OC}{AC}=\frac{OD}{BD}\end{cases}\)</span></p></td>
+<td><p>This is an instance of Thales’s theorem, saying that two parallel lines AB and CD cut by two intersecting transverse lines AC and BD, will determine a collection of proportional segments. <strong>The original statement of this rule did not have the non-degeneracy condition ncoll O A B as a hypothesis.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r08-right-triangles-common-angle-i">
+<h3>r08 : Right triangles common angle I<a class="headerlink" href="#r08-right-triangles-common-angle-i" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r08.png"><img alt="r08" src="../../_images/r08.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(AB \perp CD \wedge EF \perp GH \implies \angle (AB\times EF) = \angle (CD\times GH)\)</span></p></td>
+<td><p>This rule says that if two right triangles share an acute angle, the third angles of both triangles are congruent, as a consequence of the theorem for the sum of angles of a triangle being <span class="math notranslate nohighlight">\(180^\circ\)</span>. <strong>This rule is not in the final rules.txt file because it is covered by AR.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r09-sum-of-angles-of-a-triangle">
+<h3>r09 : Sum of angles of a triangle<a class="headerlink" href="#r09-sum-of-angles-of-a-triangle" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r09.png"><img alt="r09" src="../../_images/r09.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (AB\times CD)=\angle (MN\times PQ)\\ \angle (CD\times EF)=\angle (PQ\times RU)\end{cases}\implies \angle(AB\times EF)=\angle(MN\times RU)\)</span></p></td>
+<td><p>This rule says that if two triangles have two pairs of congruent angles, the third pair of angles will be congruent as well. It is a non-numerical version of the statement that the angles of a triangle always add to a given constant. <strong>This rule is not in the final rules.txt file because it is covered by AR.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r10-ratio-cancellation">
+<h3>r10 : Ratio cancellation<a class="headerlink" href="#r10-ratio-cancellation" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(Just a multiplication)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{AB}{CD} = \frac{MN}{PQ} \wedge \frac{CD}{EF} = \frac{PQ}{RU} \implies \frac{AB}{EF} = \frac{MN}{RU}\)</span></p></td>
+<td><p>This is a simple algebraic fact: if you multiply the two equalities from the hypothesis together, there will be a cancellation of numerators and denominators giving you the consequence. <strong>This rule is not in the final rules.txt file because it is covered by AR.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r11-bisector-theorem-i">
+<h3>r11 : Bisector theorem I<a class="headerlink" href="#r11-bisector-theorem-i" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r11.png"><img alt="r11" src="../../_images/r11.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{DB}{DC} = \frac{AB}{AC} \\DBC\text{ collinear}\\ ABC\text{ non-collinear} \end{cases}\implies \angle (AB\times AD)=\angle(AD\times AC)\)</span></p></td>
+<td><p>One direction of the bisector theorem: if a line through a vertex of a triangle cuts the opposite side into two segments that are in proportion as the neighboring sides of the triangle, the line bisects the angle at the vertex it cuts.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r12-bisector-theorem-ii">
+<h3>r12 : Bisector theorem II<a class="headerlink" href="#r12-bisector-theorem-ii" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r12.png"><img alt="r12" src="../../_images/r12.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (AB\times AD) = \angle (AD\times AC) \\ DBC\text{ collinear}\\ ABC\text{ non-collinear}\end{cases} \implies \frac{DB}{DC} = \frac{AB}{AC}\)</span></p></td>
+<td><p>Opposite direction of the bisector theorem: the internal bisector of a vertex of a triangle divides the opposite side into two segments that are in proportion to the neighboring sides of the triangle.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r13-isosceles-triangle-equal-angles">
+<h3>r13 : Isosceles triangle equal angles<a class="headerlink" href="#r13-isosceles-triangle-equal-angles" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r13.png"><img alt="r13" src="../../_images/r13.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}|OA|=|OB|\\ OAB\text{ non-collinear} \end{cases}\implies \angle (OA\times AB) = \angle (AB\times OB)\)</span></p></td>
+<td><p>The theorem says that the base angles of an isosceles triangle are congruent.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r14-equal-base-angles-imply-isosceles">
+<h3>r14 : Equal base angles imply isosceles<a class="headerlink" href="#r14-equal-base-angles-imply-isosceles" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r14.png"><img alt="r14" src="../../_images/r14.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (AO\times AB) = \angle (BA\times BO)\\ OAB\text{ non-collinear}\end{cases} \implies |OA|=|OB|\)</span></p></td>
+<td><p>This is the reverse direction of r13, saying that if the base angles of a triangle are congruent, the triangle is isosceles.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r15-arc-determines-inscribed-angles-tangent">
+<h3>r15 : Arc determines inscribed angles (tangent)<a class="headerlink" href="#r15-arc-determines-inscribed-angles-tangent" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r15.png"><img alt="r15" src="../../_images/r15.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases} O\text{ center of circle }ABC \\ OA \perp AX\end{cases} \implies \angle (AX\times AB) = \angle (CA\times CB)\)</span></p></td>
+<td><p>This rule corresponds to r03 in the case the arc is determined by a tangent line. An inscribed angle determining that same arc will be congruent to the angle determining that arc with one leg being the tangent line at the vertex of the arc.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r16-same-arc-giving-tangent">
+<h3>r16 : Same arc giving tangent<a class="headerlink" href="#r16-same-arc-giving-tangent" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r16.png"><img alt="r16" src="../../_images/r16.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases} O\text{ center of circle }ABC \\ \angle (AX\times AB)=\angle(CA\times CB)\end{cases} \implies OA\perp AX\)</span></p></td>
+<td><p>Reverse direction of r15: if two angles with vertices on a circle see the same arc, but one vertex is also an extremal point of the arc, a leg of the angle through this extremal point is the tangent to the circle at that same point.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r17-central-angle-vs-inscribed-angle-i">
+<h3>r17 : Central angle vs inscribed angle I<a class="headerlink" href="#r17-central-angle-vs-inscribed-angle-i" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r17.png"><img alt="r17" src="../../_images/r17.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases} O\text{ center of circle }ABC \\ M\text{ midpoint of }BC\end{cases} \implies \angle(AB\times AC)=\angle(OB\times OM)\)</span></p></td>
+<td><p>This rule implies that the central angle doubles the inscribed angle when both determine the same arc in a circle. It mentions “bisects the chord” as an hypotheis instead of “halves the angle” because midpoint of a segment is a predicate, while bisector of an angle is not.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r18-central-angle-vs-inscribed-angle-ii">
+<h3>r18 : Central angle vs inscribed angle II<a class="headerlink" href="#r18-central-angle-vs-inscribed-angle-ii" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r18.png"><img alt="r18" src="../../_images/r18.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases} O\text{ center of circle }ABC \\ MBC\text{ collinear}\\ \angle(AB\times AC)=\angle(OB\times OM)\end{cases} \implies M\text{ midpoint of }BC\)</span></p></td>
+<td><p>This is the other direction of rule r17. It also has a statement about the bisection of a chord in the circle. Specifically, it says that if a central angle has the same measure as a given inscribed angle on a circle, it will cut the chord corresponding to that angle in half.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r19-hypothenuse-is-diameter">
+<h3>r19 : Hypothenuse is diameter<a class="headerlink" href="#r19-hypothenuse-is-diameter" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r19.png"><img alt="r19" src="../../_images/r19.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB\perp BC \\ M\text{ midpoint of}AC\end{cases} \implies |AM|=|BM|\)</span></p></td>
+<td><p>This rule says that the hypothenuse of a right triangle is a diameter of its circumcircle, or that the midpoint of the hypothenuse is the circumcenter of the right triangle.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r20-diameter-is-hypotenuse">
+<h3>r20 : Diameter is hypotenuse<a class="headerlink" href="#r20-diameter-is-hypotenuse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r20.png"><img alt="r20" src="../../_images/r20.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}O \text{ center of the circle } ABC \\ OAC\text{ collinear} \end{cases}\implies AB \perp BC\)</span></p></td>
+<td><p>This theorem is the reverse direction of r19. It says that if two points are the edges of the diameter of a circle, and at the same time are vertices of an inscribed triangle, the triangle has a right angle at the third vertex.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r21-cyclic-trapezoid">
+<h3>r21 : Cyclic trapezoid<a class="headerlink" href="#r21-cyclic-trapezoid" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r21.png"><img alt="r21" src="../../_images/r21.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ABCD\text{ on a circle} \\ AB \parallel CD\end{cases} \implies \angle (AD\times CD) = \angle (CD\times CB)\)</span></p></td>
+<td><p>This rule says that a cyclic trapezoid is isosceles (refering specifically to the congruence of the angles on a base).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r22-bisector-construction">
+<h3>r22 : Bisector Construction<a class="headerlink" href="#r22-bisector-construction" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r22.png"><img alt="r22" src="../../_images/r22.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}M \text{ midpoint of }AB \\ OM\perp AB \end{cases} \implies |OA|=|OB|\)</span></p></td>
+<td><p>This rule says that the perpendicular line through the midpoint of the segment is the perpendicular bisector of the segment (the locus of all equidistant points to the vertices of the segment).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r23-bisector-is-perpendicular">
+<h3>r23 : Bisector is perpendicular<a class="headerlink" href="#r23-bisector-is-perpendicular" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r23.png"><img alt="r23" src="../../_images/r23.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(|AP|=|BP| \wedge |AQ|=|BQ| \implies AB\perp PQ\)</span></p></td>
+<td><p>This rule is the reverse direction of r22. It says that the locus of the points that are equidistant to the two vertices of a segment AB is a straight line perpendicular to AB.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r24-cyclic-kite">
+<h3>r24 : Cyclic kite<a class="headerlink" href="#r24-cyclic-kite" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r24.png"><img alt="r24" src="../../_images/r24.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}|AP|=|BP| \\ |AQ|=|BQ| \\ ABPQ\text{ on a circle}\end{cases} \implies PA\perp AQ\)</span></p></td>
+<td><p>This theorem says that a cyclic kite is always formed by two symmetric right triangles.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r25-diagonals-of-parallelogram-i">
+<h3>r25 : Diagonals of parallelogram I<a class="headerlink" href="#r25-diagonals-of-parallelogram-i" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r25.png"><img alt="r25" src="../../_images/r25.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}M\text{ midpoint of }AB \\M \text{ midpoint of }CD\end{cases} \implies AC \parallel BD\)</span></p></td>
+<td><p>If two segments intersect at their common midpoint, the vertices of the segments are the vertices of a parallelogram.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r26-diagonals-of-parallelogram-ii">
+<h3>r26 : Diagonals of parallelogram II<a class="headerlink" href="#r26-diagonals-of-parallelogram-ii" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r26.png"><img alt="r26" src="../../_images/r26.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}M \text{ midpoint of }AB \\ AC \parallel BD \\ AD \parallel BC\\ ABD\text{ non-collinear} \end{cases}\implies M \text{ midpoint of }CD\)</span></p></td>
+<td><p>The other direction of the previous rule, it says the diagonals of a parallelogram meet at their common midpoint. <strong>The original statement of this rule did not have the non-degeneracy condition ncoll A B D as a hypothesis.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r27-thales-theorem-ii">
+<h3>r27 : Thales theorem II<a class="headerlink" href="#r27-thales-theorem-ii" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r27.png"><img alt="r27" src="../../_images/r27.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{OA}{AC}=\frac{OB}{BD}\\ OAC\text{ collinear}\\OBD\text{ collinear}\\ ABC \text{ non-collinear}\\ A\text{ to the same side of }O\to C\text{ as }B\text{ to }O\to D\end{cases}\implies AB\parallel CD\)</span></p></td>
+<td><p>This is another instance of Thales theorem, one saying that if two points C and D split to legs of a triangle on the same ratio, the line CD will be parallel to the base of the triangle.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r28-overlapping-parallels">
+<h3>r28 : Overlapping parallels<a class="headerlink" href="#r28-overlapping-parallels" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r28.png"><img alt="r28" src="../../_images/r28.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(AB \parallel AC \implies ABC\text{ collinear}\)</span></p></td>
+<td><p>This rule encompasses the fact that two intersecting parallel lines are actually the same.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r29-midpoint-is-an-eqratio">
+<h3>r29 : Midpoint is an eqratio<a class="headerlink" href="#r29-midpoint-is-an-eqratio" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r29.png"><img alt="r29" src="../../_images/r29.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases} M \text{ midpoint of }AB \\ N\text{ midpoint of } CD \end{cases}\implies \frac{MA}{AB} = \frac{NC}{CD}\)</span></p></td>
+<td><p>This rule exists to help the solver process the fact that is obvious to humans: midpoints split segments in the same ratio (1:2).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r30-right-triangles-common-angle-ii">
+<h3>r30 : Right triangles common angle II<a class="headerlink" href="#r30-right-triangles-common-angle-ii" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r30.png"><img alt="r30" src="../../_images/r30.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (AB\times PQ)=\angle (CD\times UV) \\ PQ\perp UV \end{cases}\implies AB\perp CD\)</span></p></td>
+<td><p>This rule is the reverse direction of rule r08 (as can be seen by renaming Q-&gt;E, P-&gt;F, U-&gt;H, and V-&gt;G), and it is also a consequence of two triangles sharing a same vertex. <strong>This rule is not in the final rules.txt file because it is covered by AR.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r31-denominator-cancelling">
+<h3>r31 : Denominator cancelling<a class="headerlink" href="#r31-denominator-cancelling" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r06.png"><img alt="r31" src="../../_images/r06.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{AB}{PQ} = \frac{CD}{UV} \wedge |PQ| = |UV| \implies |AB| = |CD|\)</span></p></td>
+<td><p>This rule simply eliminates equal denominators in an equality of ratios. <strong>This rule is not in the final rules.txt file because it is covered by AR.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r32-sss-triangle-congruence">
+<h3>r32 : SSS Triangle congruence<a class="headerlink" href="#r32-sss-triangle-congruence" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r32.png"><img alt="r32" src="../../_images/r32.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}|AB| = |PQ| \\ |BC| = |QR| \\ |CA| = |RP|\end{cases}\implies \Delta ABC\cong^\ast \Delta PQR\)</span></p></td>
+<td><p>This rule covers the congruence case for two triangles when both have corresponding equal sides. The * in the congruence sign denotes the matching function checks both for triangles that have the same vertex orientation and a different one. <strong>This rule has been replaced by rules r64 and r65 to prevent hiding the orientation checking inside the matching funtion.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r33-sas-triangle-congruence">
+<h3>r33 : SAS Triangle congruence<a class="headerlink" href="#r33-sas-triangle-congruence" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r33.png"><img alt="r33" src="../../_images/r33.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}|AB| = |PQ| \\ |BC| = |QR| \\ \angle (BA\times BC) = \angle (QP\times QR)\end{cases}\implies \Delta ABC\cong^\ast\Delta PQR\)</span></p></td>
+<td><p>This rule covers the congruence case for two triangles when both have two corresponding equal sides and an equal angle between them. The * in the congruence sign denotes the matching function checks both for triangles that have the same vertex orientation and a different one. <strong>This rule has been replaced by rules r66 and r67 to prevent hiding the orientation checking inside the matching funtion.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r34-aa-similarity-of-triangles-direct">
+<h3>r34 : AA Similarity of triangles (direct)<a class="headerlink" href="#r34-aa-similarity-of-triangles-direct" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r34.png"><img alt="r34" src="../../_images/r34.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (BA\times BC) = \angle (QP\times QR) \\ \angle (CA\times CB) = \angle (RP\times RQ)\\ \Delta ABC\text{ has the same orientation as }\Delta PQR\end{cases}\implies \Delta ABC\sim \Delta PQR\)</span></p></td>
+<td><p>This is a similarity condition for a pair of triangles: that of two pairs of congruent angles between the triangles (angle-angle similarity). This rule covers the case of direct similarity, that is, both triangles have the same orientation of vertices. <strong>The original statement of this rule did not have the orientation check sameclock A B C P Q R as an explicit hypothesis, it was done in the background.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r35-aa-similarity-of-triangles-reverse">
+<h3>r35 : AA Similarity of triangles (reverse)<a class="headerlink" href="#r35-aa-similarity-of-triangles-reverse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r35.png"><img alt="r35" src="../../_images/r35.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (BA\times BC) = \angle (QR\times QP) \\ \angle (CA\times CB) = \angle (RQ\times RP)\\ \Delta ABC\text{ has the same orientation as }\Delta PRQ\end{cases}\implies \Delta ABC\sim^r \Delta PQR\)</span></p></td>
+<td><p>This is a similarity condition for a pair of triangles: that of two pairs of congruent angles between the triangles (angle-angle similarity). This rule covers the case of reverse similarity, that is, the triangles have reversed orientation for the vertices. <strong>The original statement of this rule did not have the orientation check sameclock A B C P R Q as an explicit hypothesis, it was done in the background.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r36-asa-congruence-of-triangles-direct">
+<h3>r36 : ASA Congruence of triangles (direct)<a class="headerlink" href="#r36-asa-congruence-of-triangles-direct" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r36.png"><img alt="r36" src="../../_images/r36.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (BA\times BC) = \angle (QP\times QR) \\ \angle (CA\times CB) = \angle (RP\times RQ)\\ |AB| = |PQ| \\ ABC\text{ non-collinear} \end{cases}\implies \Delta ABC\cong \Delta PQR\)</span></p></td>
+<td><p>This rule covers the congruence case for two triangles when both have two corresponding equal angles and an equal side. This rule covers the case of direct congruence, that is, both triangles have the same orientation of vertices.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r37-asa-congruence-of-triangles-reverse">
+<h3>r37 : ASA Congruence of triangles (reverse)<a class="headerlink" href="#r37-asa-congruence-of-triangles-reverse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r37.png"><img alt="r37" src="../../_images/r37.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle (BA\times BC) = \angle (QP\times QR) \\ \angle (CA\times CB) = \angle (RP\times RQ)\\ |AB| = |PQ| \\ ABC\text{ non-collinear} \end{cases}\implies \Delta ABC\cong^r \Delta PQR\)</span></p></td>
+<td><p>This rule covers the congruence case for two triangles when both have two corresponding equal angles and an equal side. This rule covers the case of reverse congruence, that is, both triangles have the opposite orientation for the vertices.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r38-sss-triangle-similarity-original">
+<h3>r38 : SSS Triangle similarity (original)<a class="headerlink" href="#r38-sss-triangle-similarity-original" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r38.png"><img alt="r38" src="../../_images/r38.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{BA}{BC} = \frac{QP}{QR} \\ \frac{CA}{CB} = \frac{RP}{RQ}\\ ABC\text{ non-collinear} \end{cases}\implies \Delta ABC\sim^\ast \Delta PQR\)</span></p></td>
+<td><p>This rule covers the similarity case for two triangles when both have corresponding proportional sides. The * in the similarity sign denotes the matching function checks both for triangles that have the same vertex orientation and a different one. <strong>This rule has been replaced by rules r60 and r61 to prevent hiding the orientation checking inside the matching funtion.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r39-sas-triangle-similarity-original">
+<h3>r39 : SAS Triangle similarity (original)<a class="headerlink" href="#r39-sas-triangle-similarity-original" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r39.png"><img alt="r39" src="../../_images/r39.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{BA}{BC} = \frac{QP}{QR} \\ \angle (BA\times BC)\rangle = \angle (QP\times QR)\\ ABC\text{ non-collinear}\end{cases} \implies \Delta ABC\sim^\ast \Delta PQR\)</span></p></td>
+<td><p>This rule covers the similarity case for two triangles when both have a corresponding pair of proportional sides, with an equal angle between them. The * in the similarity sign denotes the matching function checks both for triangles that have the same vertex orientation and a different one. <strong>This rule has been replaced by rules r62 and r63 to prevent hiding the orientation checking inside the matching funtion.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r40-similarity-without-scaling">
+<h3>r40 : Similarity without scaling<a class="headerlink" href="#r40-similarity-without-scaling" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r40.png"><img alt="r40" src="../../_images/r40.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{BA}{BC} = \frac{QP}{QR} \\ \frac{CA}{CB} = \frac{RP}{RQ}\\ ABC\text{ non-collinear} \\ |AB| = |PQ|\end{cases}\implies \Delta ABC\cong^\ast \Delta PQR\)</span></p></td>
+<td><p>This rule encompasses the fact that if the ratio of similarity of two similar triangles is one (they have corresponding congruent sides), the triangles are congruent. <strong>This rule has been replaced by rules r68 and r69 to prevent hiding the orientation checking inside the matching funtion.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r41-thales-theorem-iii">
+<h3>r41 : Thales theorem III<a class="headerlink" href="#r41-thales-theorem-iii" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r41.png"><img alt="r41" src="../../_images/r41.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB\parallel CD \\ MAD\text{ collinear} \\ NBC \text{ collinear} \\ \frac{MA}{MD}=\frac{NB}{NC}\\ M\text{ to the same side of } A\to D\text{ as }N\text{ to }B\to C \end{cases}\implies MN\parallel A B\)</span></p></td>
+<td><p>This is still another instance of Thales theorem, one that saying that if two transverse lines cross three lines, two of which are parallel, with proportional pairs of segments in the proper configuration, the third line crossed is also parallel to the other two.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r42-thales-theorem-iv">
+<h3>r42 : Thales theorem IV<a class="headerlink" href="#r42-thales-theorem-iv" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r42.png"><img alt="r42" src="../../_images/r42.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB\parallel CD \\ MAD\text{ collinear} \\ NBC\text{ collinear}\\ MN\parallel AB\\ ABC\text{ non-collinear}\end{cases}\implies \frac{MA}{MD}=\frac{NB}{NC}\)</span></p></td>
+<td><p>This is probably the most common version of Thales theorem: if three parallel lines are cut by two other lines, there is a corresponding pair of proportional segments determined by the intersection points. It is the other direction of the theorem in rule r41. <strong>The original version of this rule did not contain the non-degeneracy condition ncoll a b c as a hypothesis.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="new-rules">
+<h2>New rules<a class="headerlink" href="#new-rules" title="Link to this heading"></a></h2>
+<section id="r43-orthocenter-theorem">
+<h3>r43 : Orthocenter theorem<a class="headerlink" href="#r43-orthocenter-theorem" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r43.png"><img alt="r43" src="../../_images/r43.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(AB\perp CD \wedge AC\perp BD\implies AD\perp BC\)</span></p></td>
+<td><p>This rule says that the three heights of a triangle meet at a single point (the orthocenter).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r44-pappus-s-theorem">
+<h3>r44 : Pappus’s theorem<a class="headerlink" href="#r44-pappus-s-theorem" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r44.png"><img alt="r44" src="../../_images/r44.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ABC\text{ collinear} \\ PQR\text{ collinear} \\ XAQ\text{ collinear}\\ XPB\text{ collinear} \\ YAR\text{ collinear} \\ YPC\text{ collinear}\\ ZBR\text{ collinear} \\ ZCQ\text{ collinear}\end{cases}\implies XYZ\text{ collinear}\)</span></p></td>
+<td><p>This rule is Pappus’s hexagon theorem.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r45-simson-s-line-theorem">
+<h3>r45 : Simson’s line theorem<a class="headerlink" href="#r45-simson-s-line-theorem" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r45.png"><img alt="r45" src="../../_images/r45.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases} ABCP\text{ on a circle} \\ ALC\text{ collinear} \\ PL\perp AC\\ MBC\text{ collinear} \\ PM\perp BC\\ NAB\text{ collinear} \\ PN\perp AB\end{cases}\implies LMN\text{ collinear}\)</span></p></td>
+<td><p>This rule is Simson’s line theorem: The orthogonal projections of a point on the circumcircle of a triangle onto its three sides lie on a same line (Simson’s line).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r46-incenter-theorem">
+<h3>r46 : Incenter theorem<a class="headerlink" href="#r46-incenter-theorem" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r46.png"><img alt="r46" src="../../_images/r46.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\angle(AB\times AX)=\angle (AX\times AC) \\ \angle(BA\times BX)=\angle (BX\times BC)\\ ABC\text{ non-collinear}\end{cases}\implies \angle (CB\times CX)=\angle (CX\times CA)\)</span></p></td>
+<td><p>The three bisectors of a triangle meet at a single point (the incenter).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r47-circumcenter-theorem">
+<h3>r47 : Circumcenter theorem<a class="headerlink" href="#r47-circumcenter-theorem" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r47.png"><img alt="r47" src="../../_images/r47.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}M\text{ midpoint of }AB \\ XM\perp AB \\ N\text{ midpoint of }BC\\ XN\perp BC \\ P\text{ midpoint of }CA\end{cases}\implies XP\perp CA\)</span></p></td>
+<td><p>The three perpendicular bisectors of the sides of a triangle meet at a single point (the circumcenter).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r48-centroid-theorem">
+<h3>r48 : Centroid theorem<a class="headerlink" href="#r48-centroid-theorem" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r48.png"><img alt="r48" src="../../_images/r48.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}M\text{ midpoint of }AB \\ MXC\text{ collinear}\\ N\text{ midpoint of }BC \\ NXC\text{ collinear}\\ P\text{ midpoint of }CA\end{cases}\implies XPB\text{ collinear}\)</span></p></td>
+<td><p>The three medians of a triangle meet at a single point (the centroid).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r49-recognize-center-of-cyclic-circle">
+<h3>r49 : Recognize center of cyclic (circle)<a class="headerlink" href="#r49-recognize-center-of-cyclic-circle" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_images/r49.png"><img alt="r49" src="../../_images/r49.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}O\text{ center of the circle }ABC \\ABCD\text{ on a circle}\end{cases}\implies OA= OD\)</span></p></td>
+<td><p>This rule gives an information that is immediate for humans, but previously undetected to the solver: if three points lie on a circle with a known center, and there is a fourth point on that circle, the distance of the center of the circle to this fourth point is the same as to other points in a circle.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r50-recognize-center-of-cyclic-cong">
+<h3>r50 : Recognize center of cyclic (cong)<a class="headerlink" href="#r50-recognize-center-of-cyclic-cong" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r50.png"><img alt="r50" src="_static/images/rules/r50.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ABCD\text{ on a circle}\\ OA=OB\\ OC=OD\\ AB\not\parallel CD\end{cases}\implies OA=OC\)</span></p></td>
+<td><p>The intersection of the bisectors of two segments of points that lie on a circle is the center of the circle (if the bisectors do not overlap).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r51-midpoint-splits-in-two">
+<h3>r51 : Midpoint splits in two<a class="headerlink" href="#r51-midpoint-splits-in-two" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>(Feeds algebraic module)</p></td>
+<td><p><span class="math notranslate nohighlight">\(M\text{ midpoint of AB}\implies \frac{MA}{AB}=\frac{1}{2}\)</span></p></td>
+<td><p>This rule converts a symbolic statement (M is the midpoint of AB) into an algebraic one (the ratio between AM and AB is 1:2). This allows AR to process information from midpoints.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r52-properties-of-similar-triangles-direct">
+<h3>r52 : Properties of similar triangles (Direct)<a class="headerlink" href="#r52-properties-of-similar-triangles-direct" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r52.png"><img alt="r52" src="_static/images/rules/r52.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta ABC\sim \Delta PQR\implies \begin{cases}\angle(BA\times BC)=\angle(QP\times QR)\\ \frac{BA}{BC}=\frac{QP}{QR}\end{cases}\)</span></p></td>
+<td><p>This rule was created to explicitate the definition of what a similar triangle is, by going from the pure statement that two triangles are similar to spilling out the corresponding statements about the proportion of the lengths of the sides and the equivalence of angles on both triangles. This rule covers the case where the vertices of both triangles have the same orientation, and is the reverse direction of rule r62.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r53-properties-of-similar-triangles-reverse">
+<h3>r53 : Properties of similar triangles (Reverse)<a class="headerlink" href="#r53-properties-of-similar-triangles-reverse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r53.png"><img alt="r53" src="_static/images/rules/r53.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta ABC\sim^r \Delta PQR\implies \begin{cases}\angle(BA\times BC)=\angle(QR\times QP)\\ \frac{BA}{BC}=\frac{QP}{QR}\end{cases}\)</span></p></td>
+<td><p>This rule was created to explicitate the definition of what a similar triangle is, by going from the pure statement that two triangles are similar to spilling out the corresponding statements about the proportion of the lengths of the sides and the equivalence of angles on both triangles. This rule covers the case where the vertices of both triangles have the opposite orientation, and is the reverse direction of rule r63.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r54-definition-of-midpoint">
+<h3>r54 : Definition of midpoint<a class="headerlink" href="#r54-definition-of-midpoint" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r54.png"><img alt="r54" src="_static/images/rules/r54.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}MA=MB\\ MAB\text{ collinear}\end{cases}\implies M\text{ midpoint of AB}\)</span></p></td>
+<td><p>This rule was created to detect midpoints by their defining axiomatic properties. It solidifies midp as a predicate.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r55-properties-of-midpoint-cong">
+<h3>r55 : Properties of midpoint (cong)<a class="headerlink" href="#r55-properties-of-midpoint-cong" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r55.png"><img alt="r55" src="_static/images/rules/r55.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(M\text{ midpoint of }AB\implies MA=MB\)</span></p></td>
+<td><p>This rule extracts from the midp predicate the property that the midpoint is equidistant from the extremes of the segment. <strong>This was done previously inside the definition of a midpoint. Our change makes this implication explicit.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r56-properties-of-midpoint-coll">
+<h3>r56 : Properties of midpoint (coll)<a class="headerlink" href="#r56-properties-of-midpoint-coll" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r56.png"><img alt="r56" src="_static/images/rules/r56.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(M\text{ midpoint of }AB\implies MAB\text{ collinear}\)</span></p></td>
+<td><p>This rule extracts symbolically from the midp predicate the property that the midpoint is on the line of the segment. <strong>This was done previously inside the definition of a midpoint. Our change makes this implication explicit.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r57-pythagoras-theorem">
+<h3>r57 : Pythagoras theorem<a class="headerlink" href="#r57-pythagoras-theorem" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r57.png"><img alt="r57" src="_static/images/rules/r57.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{array}{c}\Delta ABC\text{ is a right triangle with hypotenuse }BC\\ \Downarrow\\\text{ Missing information from Pythagoras theorem}\end{array}\)</span></p></td>
+<td><p>This rule behaves differently from the others, as both directions of Pythagoras theorem are checked at the same time. If we have a right triangle ABC, it will verify what conditions are already in the proof state. If the proof state symbolically knows the three lengths of the sides, and they satisfy that the sum of the squares of the lengths of the legs is equal to the square of the hypothenuse, it will add the proper orthogonal relation to the proof state. If the proof state has a perpendicular statement and two lengths of sides of the correspoding right triangle, it will add the lconst predicate corresponding to the missing length. The operation does not solve the algebra, it verifies if enough information exists and if that is the case it numerically gets the missing side when using the famous formula.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r58-same-chord-same-arc-i">
+<h3>r58 : Same chord same arc I<a class="headerlink" href="#r58-same-chord-same-arc-i" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r58.png"><img alt="r58" src="_static/images/rules/r58.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ABCPQR\text{ on a circle}\\ AB=PQ\\ \Delta CAB\text{ has the same orientation as }\Delta RPQ\\ C\text{ to the same side of }A\to B\text{ as }R\text{ to }P\to Q\end{cases}\implies \angle(CA\times CB)=\angle(RP\times RQ)\)</span></p></td>
+<td><p>This is one of the rules that gives the opposite direction of r05, giving conditions for inscribed angles on a circle defining chords of the same length to have the same measure. It has to consider two different configurations to account for complications of using full angles. The other configuration is given in r59.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r59-same-chord-same-arc-ii">
+<h3>r59 : Same chord same arc II<a class="headerlink" href="#r59-same-chord-same-arc-ii" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r59.png"><img alt="r59" src="_static/images/rules/r59.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}ABCPQR\text{ on a circle}\\ AB=PQ\\ \Delta CBA\text{ has the same orientation as }\Delta RPQ\\ C\text{ not to the same side of }A\to B\text{ as }R\text{ to }P\to Q\end{cases}\implies \angle(CA\times CB)=\angle(RP\times RQ)\)</span></p></td>
+<td><p>This is one of the rules that gives the opposite direction of r05, giving conditions for inscribed angles on a circle defining chords of the same length to have the same measure. It has to consider two different configurations to account for complications of using full angles. The other configuration is given in r58.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r60-sss-similarity-of-triangles-direct">
+<h3>r60 : SSS Similarity of triangles (Direct)<a class="headerlink" href="#r60-sss-similarity-of-triangles-direct" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r60.png"><img alt="r60" src="_static/images/rules/r60.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{BA}{BC}=\frac{QP}{QR}\\ \frac{CA}{CB}=\frac{RP}{RQ}\\ \Delta ABC\text{ has the same orientation as }\Delta PQR\end{cases}\implies \Delta ABC\sim \Delta PQR\)</span></p></td>
+<td><p>This rule covers the similarity case for two triangles when both have corresponding proportional sides and have the same orientation. <strong>This rule, together with r61, replaces the original r38.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r61-sss-similarity-of-triangles-reverse">
+<h3>r61 : SSS Similarity of triangles (Reverse)<a class="headerlink" href="#r61-sss-similarity-of-triangles-reverse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r61.png"><img alt="r61" src="_static/images/rules/r61.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{BA}{BC}=\frac{QP}{QR}\\ \frac{CA}{CB}=\frac{RP}{RQ}\\ \Delta ABC\text{ has the same orientation as }\Delta PRQ\end{cases}\implies \Delta ABC\sim^r \Delta PQR\)</span></p></td>
+<td><p>This rule covers the similarity case for two triangles when both have corresponding proportional sides and have opposite orientations. <strong>This rule, together with r60, replaces the original r38.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r62-sas-similarity-of-triangles-direct">
+<h3>r62 : SAS Similarity of triangles (Direct)<a class="headerlink" href="#r62-sas-similarity-of-triangles-direct" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r62.png"><img alt="r62" src="_static/images/rules/r62.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{BA}{BC}=\frac{QP}{QR}\\ \angle (BA\times BC)=\angle (QP\times QR)\\ \Delta ABC\text{ has the same orientation as }\Delta PQR\end{cases}\implies \Delta ABC\sim \Delta PQR\)</span></p></td>
+<td><p>This rule covers the similarity case for two triangles when both have a corresponding pair of proportional sides, with an equal angle between them, and have the same orientation. <strong>This rule, together with r63, replaces the original r39.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r63-sas-similarity-of-triangles-reverse">
+<h3>r63 : SAS Similarity of triangles (Reverse)<a class="headerlink" href="#r63-sas-similarity-of-triangles-reverse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r63.png"><img alt="r63" src="_static/images/rules/r63.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{BA}{BC}=\frac{QP}{QR}\\ \angle (BA\times BC)=\angle (QR\times QP)\\ \Delta ABC\text{ has the same orientation as }\Delta PRQ\end{cases}\implies \Delta ABC\sim^r \Delta PQR\)</span></p></td>
+<td><p>This rule covers the similarity case for two triangles when both have a corresponding pair of proportional sides, with an equal angle between them, and have opposite orientations. <strong>This rule, together with r62, replaces the original r39.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r64-sss-congruence-of-triangles-direct">
+<h3>r64 : SSS Congruence of triangles (Direct)<a class="headerlink" href="#r64-sss-congruence-of-triangles-direct" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r64.png"><img alt="r64" src="_static/images/rules/r64.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB=PQ\\ BC=QR\\ AC=RP\\ ABC\text{ non-collinear}\\ \Delta ABC\text{ has the same orientation as }\Delta PQR\end{cases}\implies \Delta ABC\cong \Delta PQR\)</span></p></td>
+<td><p>This rule covers the congruence case for two triangles when both have corresponding equal sides, and have the same orientation. <strong>This rule, together with r65, replaces the original r32.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r65-sss-congruence-of-triangles-reverse">
+<h3>r65 : SSS Congruence of triangles (Reverse)<a class="headerlink" href="#r65-sss-congruence-of-triangles-reverse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r65.png"><img alt="r65" src="_static/images/rules/r65.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB=PQ\\ BC=QR\\ AC=RP\\ ABC\text{ non-collinear}\\ \Delta ABC\text{ has the same orientation as }\Delta PRQ\end{cases}\implies \Delta ABC\cong^r \Delta PQR\)</span></p></td>
+<td><p>This rule covers the congruence case for two triangles when both have corresponding equal sides, and have opposite orientations. <strong>This rule, together with r64, replaces the original r32.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r66-sas-congruence-of-triangles-direct">
+<h3>r66 : SAS Congruence of triangles (Direct)<a class="headerlink" href="#r66-sas-congruence-of-triangles-direct" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r66.png"><img alt="r66" src="_static/images/rules/r66.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB=PQ\\ BC=QR\\ \angle (BA\times BC)=\angle (QP\times QR)\\ ABC\text{ non-collinear}\\ \Delta ABC\text{ has the same orientation as }\Delta PQR\end{cases}\implies \Delta ABC\cong \Delta PQR\)</span></p></td>
+<td><p>This rule covers the congruence case for two triangles when both have a pair of corresponding equal sides, and a congruent angle between them, and have the same orientation. <strong>This rule, together with r67, replaces the original r33.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r67-sas-congruence-of-triangles-reverse">
+<h3>r67 : SAS Congruence of triangles (Reverse)<a class="headerlink" href="#r67-sas-congruence-of-triangles-reverse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r67.png"><img alt="r67" src="_static/images/rules/r67.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}AB=PQ\\ BC=QR\\ \angle (BA\times BC)=\angle (QP\times QR)\\ ABC\text{ non-collinear}\\ \Delta ABC\text{ has the same orientation as }\Delta PRQ\end{cases}\implies \Delta ABC\cong^r \Delta PQR\)</span></p></td>
+<td><p>This rule covers the congruence case for two triangles when both have a pair of corresponding equal sides, and a congruent angle between them, and have opposite orientations. <strong>This rule, together with r66, replaces the original r33.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r68-similarity-without-scaling-direct">
+<h3>r68 : Similarity without scaling (Direct)<a class="headerlink" href="#r68-similarity-without-scaling-direct" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r68.png"><img alt="r68" src="_static/images/rules/r68.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{AB}{BC}=\frac{PQ}{QR}\\ \frac{AC}{BC}=\frac{PR}{QR}\\ ABC\text{ non-collinear}\\ AB=PQ\\ \Delta ABC\text{ has the same orientation as }\Delta PQR\end{cases}\implies \Delta ABC\cong \Delta PQR\)</span></p></td>
+<td><p>This rule encompasses the fact that if the ratio of similarity of two similar triangles is one (they have corresponding congruent sides), the triangles are congruent. It considers the case when triangles have the same orientation. <strong>This rule, together with r69, replaces the original r40.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r69-similarity-without-scaling-reverse">
+<h3>r69 : Similarity without scaling (Reverse)<a class="headerlink" href="#r69-similarity-without-scaling-reverse" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Figure</p></th>
+<th class="head"><p>Formal Statement</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="_static/images/rules/r69.png"><img alt="r69" src="_static/images/rules/r69.png" style="width: 100%;" /></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\begin{cases}\frac{AB}{BC}=\frac{PQ}{QR}\\ \frac{AC}{BC}=\frac{PR}{QR}\\ ABC\text{ non-collinear}\\ AB=PQ\\ \Delta ABC\text{ has the same orientation as }\Delta PRQ\end{cases}\implies \Delta ABC\cong^r \Delta PQR\)</span></p></td>
+<td><p>This rule encompasses the fact that if the ratio of similarity of two similar triangles is one (they have corresponding congruent sides), the triangles are congruent. It considers the case when triangles have opposite orientation. <strong>This rule, together with r68, replaces the original r40.</strong></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="definitions.html" class="btn btn-neutral float-left" title="Definitions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../problem_databases/index.html" class="btn btn-neutral float-right" title="Problems Datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Mathïs Fédérico, Vladmir Sicca, Tianxiang Xia.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

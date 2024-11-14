@@ -1,0 +1,35 @@
+Geosolver
+=========
+
+.. automodule:: geosolver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   geosolver.agent
+   geosolver.algebraic_reasoning
+   geosolver.dependencies
+   geosolver.formulations
+   geosolver.numerical
+   geosolver.predicates
+
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   geosolver.api
+   geosolver.configs
+   geosolver.load_geogebra
+   geosolver.match_theorems
+   geosolver.proof
+   geosolver.proof_writing
+   geosolver.run_loop
+   geosolver.statement
+   geosolver.tools
+   geosolver.webapp
