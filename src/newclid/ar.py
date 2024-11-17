@@ -19,9 +19,9 @@ from collections import defaultdict
 from fractions import Fraction as frac
 from typing import Any, Generator
 
-import geosolver.geometry as gm
+import newclid.geometry as gm
 import numpy as np
-import geosolver.problem as pr
+import newclid.problem as pr
 from scipy import optimize
 
 

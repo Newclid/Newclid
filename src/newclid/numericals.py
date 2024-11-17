@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """Numerical representation of geometry."""
+
 from __future__ import annotations
 from typing import Any, Optional, Union
 
@@ -27,7 +28,7 @@ import numpy as np
 from numpy.random import uniform as unif
 
 
-import geosolver.geometry as gm
+import newclid.geometry as gm
 
 ATOM = 1e-12
 

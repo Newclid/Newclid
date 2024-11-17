@@ -15,13 +15,12 @@
 
 """Unit testing for the trace_back code."""
 
-
 import pytest
 import pytest_check as check
 
-from geosolver.api import GeometricSolverBuilder
-import geosolver.problem as pr
-import geosolver.trace_back as tb
+from newclid.api import GeometricSolverBuilder
+import newclid.problem as pr
+import newclid.trace_back as tb
 
 
 class TestTraceback:

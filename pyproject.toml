@@ -2,7 +2,7 @@
 requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 
 [project]
-name = "geosolver"
+name = "newclid"
 authors = [
     {name = "Mathis Federico", email = "mathfederico@gmail.com"}
 ]

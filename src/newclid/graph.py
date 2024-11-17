@@ -15,22 +15,21 @@
 
 """Implements the graph representation of the proof state."""
 
-
 from __future__ import annotations
 
 from collections import defaultdict
 from typing import Callable, Generator, Optional, Type, Union
 import logging
 
-import geosolver.ar as ar
-import geosolver.geometry as gm
-from geosolver.geometry import Angle, Direction, Length, Ratio
-from geosolver.geometry import Circle, Line, Point, Segment
-from geosolver.geometry import Measure, Value
-import geosolver.graph_utils as utils
-import geosolver.numericals as nm
-import geosolver.problem as problem
-from geosolver.problem import Dependency, EmptyDependency
+import newclid.ar as ar
+import newclid.geometry as gm
+from newclid.geometry import Angle, Direction, Length, Ratio
+from newclid.geometry import Circle, Line, Point, Segment
+from newclid.geometry import Measure, Value
+import newclid.graph_utils as utils
+import newclid.numericals as nm
+import newclid.problem as problem
+from newclid.problem import Dependency, EmptyDependency
 
 
 np = nm.np

@@ -13,11 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Unit tests for geosolver.py."""
+"""Unit tests for newclid.py."""
+
 import pytest
 import pytest_check as check
 
-from geosolver.api import GeometricSolverBuilder
+from newclid.api import GeometricSolverBuilder
 
 
 class TestDDAR:

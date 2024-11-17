@@ -17,7 +17,7 @@
 
 import pytest_check as check
 
-import geosolver.numericals as nm
+import newclid.numericals as nm
 
 np = nm.np
 

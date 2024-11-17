@@ -8,14 +8,14 @@ import traceback
 from typing import Optional
 from typing_extensions import Self
 
-from geosolver.auxiliary_constructions import insert_aux_to_premise
-from geosolver.configs import default_defs_path, default_rules_path
-from geosolver.graph import Graph
-from geosolver.numericals import draw
-from geosolver.ddar import solve
-from geosolver.problem import Problem, Theorem, Definition, Clause
-from geosolver.geometry import Point, Circle, Line, Segment
-from geosolver.write_proof import write_solution
+from newclid.auxiliary_constructions import insert_aux_to_premise
+from newclid.configs import default_defs_path, default_rules_path
+from newclid.graph import Graph
+from newclid.numericals import draw
+from newclid.ddar import solve
+from newclid.problem import Problem, Theorem, Definition, Clause
+from newclid.geometry import Point, Circle, Line, Segment
+from newclid.write_proof import write_solution
 
 
 class GeometricSolver:

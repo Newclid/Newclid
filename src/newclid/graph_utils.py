@@ -18,7 +18,7 @@
 Mainly for listing combinations and permutations of elements.
 """
 
-from geosolver.geometry import Point
+from newclid.geometry import Point
 
 
 def _cross(elems1, elems2):

@@ -17,9 +17,9 @@
 
 import pytest
 import pytest_check as check
-from geosolver.api import GeometricSolverBuilder
-import geosolver.ar as ar
-import geosolver.problem as pr
+from newclid.api import GeometricSolverBuilder
+import newclid.ar as ar
+import newclid.problem as pr
 
 
 class TestAR:

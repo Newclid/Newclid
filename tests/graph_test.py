@@ -14,11 +14,12 @@
 # ==============================================================================
 
 """Unit tests for graph.py."""
+
 import pytest
 import pytest_check as check
 
-from geosolver.api import GeometricSolverBuilder
-import geosolver.numericals as nm
+from newclid.api import GeometricSolverBuilder
+import newclid.numericals as nm
 
 
 MAX_LEVEL = 10

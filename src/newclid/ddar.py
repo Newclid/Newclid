@@ -14,15 +14,16 @@
 # ==============================================================================
 
 """Implements the combination DD+AR."""
+
 from __future__ import annotations
 import time
 import logging
 
-import geosolver.dd as dd
-import geosolver.graph as gh
-import geosolver.problem as pr
-from geosolver.problem import Dependency
-import geosolver.trace_back as trace_back
+import newclid.dd as dd
+import newclid.graph as gh
+import newclid.problem as pr
+from newclid.problem import Dependency
+import newclid.trace_back as trace_back
 
 
 def saturate_or_goal(

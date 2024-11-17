@@ -1,11 +1,11 @@
 import logging
 from typing import TYPE_CHECKING
-from geosolver.ddar import get_proof_steps
-from geosolver.graph import Graph
-from geosolver.pretty import pretty_nl
+from newclid.ddar import get_proof_steps
+from newclid.graph import Graph
+from newclid.pretty import pretty_nl
 
 if TYPE_CHECKING:
-    from geosolver.problem import Dependency, Problem
+    from newclid.problem import Dependency, Problem
 
 
 def write_solution(proof: "Graph", problem: "Problem", out_file: str) -> None:

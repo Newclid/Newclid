@@ -1,5 +1,5 @@
 """DDAR geometric symbolic solver package"""
 
-from geosolver.api import GeometricSolver, GeometricSolverBuilder
+from newclid.api import GeometricSolver, GeometricSolverBuilder
 
 __all__ = ["GeometricSolver", "GeometricSolverBuilder"]

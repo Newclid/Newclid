@@ -15,7 +15,6 @@
 
 """Implements Deductive Database (DD)."""
 
-
 from __future__ import annotations
 from typing import Any, Callable, Generator
 
@@ -23,12 +22,12 @@ from collections import defaultdict
 import time
 
 
-import geosolver.geometry as gm
-import geosolver.graph as gh
-import geosolver.graph_utils as utils
-import geosolver.numericals as nm
-import geosolver.problem as pr
-from geosolver.problem import Dependency, EmptyDependency
+import newclid.geometry as gm
+import newclid.graph as gh
+import newclid.graph_utils as utils
+import newclid.numericals as nm
+import newclid.problem as pr
+from newclid.problem import Dependency, EmptyDependency
 
 
 def intersect1(set1: set[Any], set2: set[Any]) -> Any:

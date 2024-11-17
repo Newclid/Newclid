@@ -14,9 +14,10 @@
 # ==============================================================================
 
 """Unit tests for graph_utils.py."""
+
 import unittest
 
-import geosolver.graph_utils as gu
+import newclid.graph_utils as gu
 
 
 class TestGraphUtils(unittest.TestCase):

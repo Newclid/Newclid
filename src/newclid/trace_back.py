@@ -17,9 +17,9 @@
 
 from typing import Any
 
-import geosolver.geometry as gm
-import geosolver.pretty as pt
-import geosolver.problem as problem
+import newclid.geometry as gm
+import newclid.pretty as pt
+import newclid.problem as problem
 
 
 pretty = pt.pretty

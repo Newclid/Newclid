@@ -14,11 +14,12 @@
 # ==============================================================================
 
 """Unit tests for dd."""
+
 import pytest
 import pytest_check as check
 
-from geosolver.api import GeometricSolverBuilder
-from geosolver.dd import bfs_one_level
+from newclid.api import GeometricSolverBuilder
+from newclid.dd import bfs_one_level
 
 
 MAX_LEVEL = 10

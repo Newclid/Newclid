@@ -1,11 +1,11 @@
-import geosolver
+import newclid
 
 
 from pathlib import Path
 
 
 def default_configs_path() -> Path:
-    return Path(geosolver.__file__).parent.joinpath("default_configs")
+    return Path(newclid.__file__).parent.joinpath("default_configs")
 
 
 def default_defs_path() -> Path:

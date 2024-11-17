@@ -14,9 +14,10 @@
 # ==============================================================================
 
 """Unit tests for geometry.py."""
+
 import pytest_check as check
 
-import geosolver.geometry as gm
+import newclid.geometry as gm
 
 
 class TestGeometry:

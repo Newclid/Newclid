@@ -1,4 +1,4 @@
-from geosolver.auxiliary_constructions import insert_aux_to_premise
+from newclid.auxiliary_constructions import insert_aux_to_premise
 
 
 class TestAlphaGeometry:
