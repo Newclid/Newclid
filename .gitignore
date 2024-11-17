@@ -28,20 +28,45 @@ pyvenv.cfg
 bin/
 share/
 venv/
+.venv/
 
 # Models
 ag_ckpt_vocab/
 
 # IDEs
-
+.idea/
 .vscode/
 
 # Coverage data
 .coverage
 
-# Results
+# TODO
+TODO.md
+
+# Swap files
+**/*.nfs*c*
+
+# local env
+.conda/
+
+# local files
+run.log
+
+# Local scripts
+benchmark.py
+individual_rules_out
+_build
+
+# Documentation
+docs/source
+
+
+# Experiment data
 ddar_results/
-
-# Profiling
-*.prof
-
+run_results/
+tests_output
+exp/
+tests-exp/*
+!tests-exp/*.ggb
+!tests-exp/*.ggb
+!tests-exp/runtime_cache.json
