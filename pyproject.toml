@@ -6,7 +6,8 @@ name = "newclid"
 authors = [
     {name = "Mathis Federico", email = "mathfederico@gmail.com"}
 ]
-dynamic = ["version", "readme", "dependencies"]
+readme = "README.md"
+dynamic = ["version", "dependencies"]
 description = "Symbolic solver for geometric problems."
 requires-python = ">=3.6"
 classifiers=[
@@ -30,7 +31,6 @@ license-files = ['LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*']
 
 
 [tool.setuptools.dynamic]
-readme = { file = ["README.md"] }
 dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools_scm]
