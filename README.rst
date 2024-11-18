@@ -27,7 +27,7 @@ Using pip
 
 .. code:: bash
 
-  pip install 'newclid>=2,newclid<3'
+  pip install 'newclid>=2,<3'
 
 
 From source
