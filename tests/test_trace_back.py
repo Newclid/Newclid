@@ -1,13 +1,12 @@
 """Unit testing for the trace_back code."""
 
-
 import pytest
 import pytest_check as check
 
-from geosolver.predicates import Predicate
-from geosolver.statements.statement import Statement
-from geosolver.trace_back import get_logs
-from geosolver.api import GeometricSolverBuilder
+from newclid.predicates import Predicate
+from newclid.statements.statement import Statement
+from newclid.trace_back import get_logs
+from newclid.api import GeometricSolverBuilder
 
 
 class TestTraceback:

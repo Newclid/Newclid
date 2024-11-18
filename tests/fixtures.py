@@ -1,5 +1,5 @@
-from geosolver.api import GeometricSolver, GeometricSolverBuilder
-from geosolver.numerical.distances import PointTooCloseError, PointTooFarError
+from newclid.api import GeometricSolver, GeometricSolverBuilder
+from newclid.numerical.distances import PointTooCloseError, PointTooFarError
 
 
 def build_until_works(

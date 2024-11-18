@@ -11,15 +11,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from geosolver import AGENTS_REGISTRY
-from geosolver.api import GeometricSolverBuilder
-from geosolver.configs import default_configs_path
+from newclid import AGENTS_REGISTRY
+from newclid.api import GeometricSolverBuilder
+from newclid.configs import default_configs_path
 
 
-from geosolver.numerical.geometries import Circle, Line, Point, Angle, Segment
+from newclid.numerical.geometries import Circle, Line, Point, Angle, Segment
 
 from typing import Any
-from geosolver.theorem import Theorem
+from newclid.theorem import Theorem
 
 
 def seed(k):
@@ -536,7 +536,7 @@ def demo_draw_rule(k, save_to=None, block=True):
     )
     solver_builder.load_defs_from_file(resolve_config_path(None))
 
-    relative_path = r"..\src\geosolver\default_configs\new_rules.txt"
+    relative_path = r"..\src\newclid\default_configs\new_rules.txt"
     absolute_path = os.path.abspath(relative_path)
     solver_builder.load_rules_from_file(absolute_path)
 

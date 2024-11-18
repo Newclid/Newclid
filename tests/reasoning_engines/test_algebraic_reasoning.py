@@ -1,16 +1,16 @@
 import pytest
 import pytest_check as check
-from geosolver.predicates import Predicate
-from geosolver.reasoning_engines.algebraic_reasoning.algebraic_manipulator import (
+from newclid.predicates import Predicate
+from newclid.reasoning_engines.algebraic_reasoning.algebraic_manipulator import (
     AlgebraicManipulator,
 )
-import geosolver.reasoning_engines.algebraic_reasoning.geometric_tables as geometric_tables
-from geosolver.dependencies.dependency import Dependency, Reason
-from geosolver.dependencies.dependency_building import DependencyBody
-from geosolver.numerical.check import clock
-from geosolver.api import GeometricSolverBuilder
-from geosolver.statements.statement import Statement
-from geosolver.symbols_graph import SymbolsGraphBuilder
+import newclid.reasoning_engines.algebraic_reasoning.geometric_tables as geometric_tables
+from newclid.dependencies.dependency import Dependency, Reason
+from newclid.dependencies.dependency_building import DependencyBody
+from newclid.numerical.check import clock
+from newclid.api import GeometricSolverBuilder
+from newclid.statements.statement import Statement
+from newclid.symbols_graph import SymbolsGraphBuilder
 from tests.fixtures import build_until_works
 
 

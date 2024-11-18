@@ -3,9 +3,9 @@ import logging
 from pathlib import Path
 
 
-from geosolver.api import GeometricSolverBuilder
-from geosolver.problem import Problem
-from geosolver.statements.adder import IntrinsicRules
+from newclid.api import GeometricSolverBuilder
+from newclid.problem import Problem
+from newclid.statements.adder import IntrinsicRules
 
 
 def main():

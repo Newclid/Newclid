@@ -12,7 +12,7 @@
    manual/adding_problems
    manual/adding_rules
    manual/default_files/index
-   source/geosolver
+   source/newclid
 
 Indices and tables
 ==================

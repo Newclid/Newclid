@@ -1,10 +1,10 @@
 Adding new rules
 ----------------
 
-Rules (represented by :class:`geosolver.problem.Theorem`) allow to create new statements
+Rules (represented by :class:`newclid.problem.Theorem`) allow to create new statements
 given that a list of other statements are true.
 
-In geosolver, statements are expressed as a predicate and a list of points.
+In newclid, statements are expressed as a predicate and a list of points.
 The list of predicates used by GeoSolver are enumerated in :ref:`Predicates`.
 
 Rules can be initialized from a text representation as such:

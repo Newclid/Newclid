@@ -8,7 +8,7 @@ pip install -e .[doc]
 ## Update the source code docs with sphinx-apidoc
 
 ```bash
-sphinx-apidoc -M -e -f -o docs/source/ src/geosolver --implicit-namespaces --ext-autodoc
+sphinx-apidoc -M -e -f -o docs/source/ src/newclid --implicit-namespaces --ext-autodoc
 ```
 
 ## Reformat the source code docs with the custom reformat.py script

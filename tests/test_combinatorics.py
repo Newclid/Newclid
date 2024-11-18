@@ -1,9 +1,8 @@
 """Unit tests for graph_utils.py."""
 
-
 import pytest_check as check
 
-from geosolver.combinatorics import (
+from newclid.combinatorics import (
     cross_product,
     arrangement_pairs,
     arrangement_triplets,

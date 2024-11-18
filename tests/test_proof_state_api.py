@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 import pytest_check as check
-from geosolver.api import GeometricSolverBuilder
+from newclid.api import GeometricSolverBuilder
 
 
 MAX_LEVEL = 10

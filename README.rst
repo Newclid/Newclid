@@ -27,7 +27,7 @@ Using pip
 
 .. code:: bash
 
-  pip install git+https://rnd-gitlab-eu.huawei.com/Noahs-Ark/libraries/geosolver
+  pip install 'newclid>=2,newclid<3'
 
 
 From source
@@ -35,32 +35,32 @@ From source
 
 .. code:: bash
 
-  git clone git+https://rnd-gitlab-eu.huawei.com/Noahs-Ark/libraries/geosolver
+  git clone https://github.com/LMCRC/Newclid.git
   pip install -e . 
 
 
 Quickstart
 ----------
 
-To simply solve a problem using geosolver, use the command line:
+To simply solve a problem using newclid, use the command line:
 
 .. code:: bash
 
-  geosolver --problem path/to/problem:problem_name
+  newclid --problem path/to/problem:problem_name
 
 
 For example:
 
 .. code:: bash
 
-  geosolver --problem problems_datasets/examples.txt:orthocenter_consequence_aux
+  newclid --problem problems_datasets/examples.txt:orthocenter_consequence_aux
 
 
 See other command line interface options with:
 
 .. code:: bash
 
-  geosolver --help 
+  newclid --help 
 
 For more complex applications, use the python interface.
 Below is a minimal example to load a specific problem,
@@ -68,7 +68,7 @@ then uses the built solver to solve it:
 
 .. code:: python
 
-    from geosolver import GeometricSolverBuilder, GeometricSolver
+    from newclid import GeometricSolverBuilder, GeometricSolver
 
     solver_builder = GeometricSolverBuilder()
     solver_builder.load_problem_from_txt(
@@ -98,9 +98,8 @@ are displayed in the folder ``examples`` or used in ``tests``.
 Documentation
 -------------
 
-See `the online documentation 
-<https://ddar-noahs-ark-libraries-d1a330533fb77a761c85bd7785b7974dd32b06.rnd-gitlab-eu.huawei.com/>`_
-for more detailed informations about geosolver.
+See `the online documentation <https://lmcrc.github.io/Newclid/>`_
+for more detailed informations about newclid.
 
 
 Contributing
@@ -110,7 +109,7 @@ Contributing
 
 .. code:: bash
 
-  git clone git+https://rnd-gitlab-eu.huawei.com/Noahs-Ark/libraries/ddar
+  git clone https://github.com/LMCRC/Newclid.git
   cd path/to/repo
 
 2. (Optional) Create a virtual environment, for example with venv:

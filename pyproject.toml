@@ -2,11 +2,12 @@
 requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 
 [project]
-name = "geosolver"
+name = "newclid"
 authors = [
     {name = "Mathis Federico", email = "mathfederico@gmail.com"}
 ]
-dynamic = ["version", "readme", "dependencies"]
+readme = "README.rst"
+dynamic = ["version", "dependencies"]
 description = "Symbolic solver for geometric problems."
 requires-python = ">=3.6"
 classifiers=[
@@ -28,10 +29,9 @@ doc = ['numpy', 'sphinx-autoapi', 'autoapi', 'sphinx_rtd_theme', 'sphinx-autodoc
 license-files = ['LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*']
 
 [project.scripts]
-geosolver = "geosolver.__main__:main"
+newclid = "newclid.__main__:main"
 
 [tool.setuptools.dynamic]
-readme = { file = ["README.md"] }
 dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools_scm]

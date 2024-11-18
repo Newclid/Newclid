@@ -1,8 +1,8 @@
 import pytest
 import pytest_check as check
 
-from geosolver.agent.breadth_first_search import BFSDD, BFSDDAR
-from geosolver.api import GeometricSolverBuilder
+from newclid.agent.breadth_first_search import BFSDD, BFSDDAR
+from newclid.api import GeometricSolverBuilder
 
 
 class TestDD:

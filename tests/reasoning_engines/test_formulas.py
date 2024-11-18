@@ -1,18 +1,18 @@
 from fractions import Fraction
 import pytest
 
-from geosolver.api import GeometricSolverBuilder
-from geosolver.dependencies.dependency import Dependency, Reason
-from geosolver.dependencies.dependency_building import DependencyBody
-from geosolver.predicates import Predicate
-from geosolver.reasoning_engines.formulas import (
+from newclid.api import GeometricSolverBuilder
+from newclid.dependencies.dependency import Dependency, Reason
+from newclid.dependencies.dependency_building import DependencyBody
+from newclid.predicates import Predicate
+from newclid.reasoning_engines.formulas import (
     MenelausFormula,
     PythagoreanFormula,
     make_rconst_hashs_from_colls,
 )
-from geosolver.reasoning_engines.engines_interface import Derivation, ReasoningEngine
-from geosolver.statements.statement import Statement
-from geosolver.symbols_graph import SymbolsGraphBuilder
+from newclid.reasoning_engines.engines_interface import Derivation, ReasoningEngine
+from newclid.statements.statement import Statement
+from newclid.symbols_graph import SymbolsGraphBuilder
 
 
 class TestPythagorean:

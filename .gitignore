@@ -28,6 +28,7 @@ pyvenv.cfg
 bin/
 share/
 venv/
+.venv/
 
 # Models
 ag_ckpt_vocab/
@@ -39,18 +40,8 @@ ag_ckpt_vocab/
 # Coverage data
 .coverage
 
-# Profiling data
-*.prof
-
-# Experiment data
-ddar_results/
-run_results/
-
 # TODO
 TODO.md
-
-# builds
-**/_build
 
 # Swap files
 **/*.nfs*c*
@@ -63,6 +54,19 @@ run.log
 
 # Local scripts
 benchmark.py
+individual_rules_out
+_build
 
-# Docs autobuilt
+# Documentation
 docs/source
+
+
+# Experiment data
+ddar_results/
+run_results/
+tests_output
+exp/
+tests-exp/*
+!tests-exp/*.ggb
+!tests-exp/*.ggb
+!tests-exp/runtime_cache.json

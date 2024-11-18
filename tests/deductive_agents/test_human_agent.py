@@ -2,12 +2,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable, Optional
 import pytest
 
-from geosolver.agent.human_agent import HumanAgent
-from geosolver.api import GeometricSolverBuilder
+from newclid.agent.human_agent import HumanAgent
+from newclid.api import GeometricSolverBuilder
 from tests.fixtures import build_until_works
 
 if TYPE_CHECKING:
-    from geosolver.proof import Proof
+    from newclid.proof import Proof
 
 
 class HumanAgentWithPredefinedInput(HumanAgent):

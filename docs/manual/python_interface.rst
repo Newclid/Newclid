@@ -3,20 +3,20 @@ Python interface
 
 GeoSolver's interface is made of two main elements.
 
-First :class:`geosolver.GeometricSolver` that contains all high level logic for the
+First :class:`newclid.GeometricSolver` that contains all high level logic for the
 solver to run and write outputs.
 
-Second is :class:`geosolver.GeometricSolverBuilder` that allows to build 
-a :class:`geosolver.GeometricSolver` with custom elements 
+Second is :class:`newclid.GeometricSolverBuilder` that allows to build 
+a :class:`newclid.GeometricSolver` with custom elements 
 (specific problem, definitions, rules).
 
-Below is a minimal example that uses a :class:`geosolver.GeometricSolverBuilder` to 
+Below is a minimal example that uses a :class:`newclid.GeometricSolverBuilder` to 
 load a specific problem,
-then uses the built :class:`geosolver.GeometricSolver` to solve it:
+then uses the built :class:`newclid.GeometricSolver` to solve it:
 
 .. code:: python
 
-    from geosolver import GeometricSolverBuilder, GeometricSolver
+    from newclid import GeometricSolverBuilder, GeometricSolver
 
     solver_builder = GeometricSolverBuilder()
     solver_builder.load_problem_from_txt(

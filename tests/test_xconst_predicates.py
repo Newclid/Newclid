@@ -1,8 +1,8 @@
 import pytest
 import pytest_check as check
 
-from geosolver.api import GeometricSolverBuilder
-from geosolver.theorem import Theorem
+from newclid.api import GeometricSolverBuilder
+from newclid.theorem import Theorem
 from tests.fixtures import build_until_works
 
 

@@ -1,8 +1,9 @@
 """Unit tests for graph.py."""
+
 import pytest
 import pytest_check as check
-from geosolver.api import GeometricSolverBuilder
-from geosolver.numerical.check import (
+from newclid.api import GeometricSolverBuilder
+from newclid.numerical.check import (
     check_circle_numerical,
     check_coll_numerical,
     check_cong_numerical,
@@ -13,7 +14,7 @@ from geosolver.numerical.check import (
     check_perp_numerical,
     check_midp_numerical,
 )
-from geosolver.predicates import Predicate
+from newclid.predicates import Predicate
 
 
 class TestProof:

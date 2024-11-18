@@ -2,9 +2,9 @@ import logging
 from pathlib import Path
 
 
-from geosolver.agent.human_agent import HumanAgent
-from geosolver.api import GeometricSolverBuilder
-from geosolver.statements.adder import IntrinsicRules
+from newclid.agent.human_agent import HumanAgent
+from newclid.api import GeometricSolverBuilder
+from newclid.statements.adder import IntrinsicRules
 
 
 def main():

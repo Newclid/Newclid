@@ -57,7 +57,7 @@ How is a Problem Built
 ----------------------
 
 With given problem (as text or from a file), 
-geosolver will load the definitions (default to src/default_configs/defs.txt)
+newclid will load the definitions (default to src/default_configs/defs.txt)
 and the rules to be used (default to src/default_configs/rules.txt). 
 
 Next, the builder will construct the problem itself.
@@ -89,7 +89,7 @@ Writing the Proof
 
 Once the goal statement is check symbolically by the solver, 
 in general it will have covered a wide graph of statements that do not necessarily contribute to the proof.
-To have a clean and coherently written proof, the geosolver uses a traceback, 
+To have a clean and coherently written proof, the newclid uses a traceback, 
 that tries to find the shortest straight path from the premises to the goal through the proof graph
 (for more details see :ref:`Trace back`).
 

@@ -1,6 +1,6 @@
 import pytest
-from geosolver.api import GeometricSolverBuilder
-from geosolver.proof import DepCheckFailError
+from newclid.api import GeometricSolverBuilder
+from newclid.proof import DepCheckFailError
 
 
 def test_construction_attempts_limit():

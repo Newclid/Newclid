@@ -2,10 +2,10 @@
 
 import numpy as np
 import pytest_check as check
-from geosolver.geometry import Angle
-from geosolver.numerical.angles import ang_between
-from geosolver.numerical.check import check_coll_numerical, check_eqangle_numerical
-from geosolver.numerical.geometries import (
+from newclid.geometry import Angle
+from newclid.numerical.angles import ang_between
+from newclid.numerical.check import check_coll_numerical, check_eqangle_numerical
+from newclid.numerical.geometries import (
     CircleNum,
     HalfLine,
     LineNum,
@@ -13,7 +13,7 @@ from geosolver.numerical.geometries import (
     line_circle_intersection,
     line_line_intersection,
 )
-from geosolver.numerical.sketch import (
+from newclid.numerical.sketch import (
     head_from,
     sketch_2l1c,
     sketch_3peq,
@@ -49,8 +49,8 @@ from geosolver.numerical.sketch import (
     sketch_trisect,
     sketch_trisegment,
 )
-import geosolver.numerical.sketch
-from geosolver.ratios import simplify
+import newclid.numerical.sketch
+from newclid.ratios import simplify
 
 
 class TestNumerical:
@@ -84,7 +84,7 @@ class TestNumerical:
 
     def test_sketch_3peq(self):
         rnd_gen = np.random.default_rng()
-        a, b, c = geosolver.numerical.sketch.random_points(3, rnd_gen)
+        a, b, c = newclid.numerical.sketch.random_points(3, rnd_gen)
         x, y, z = sketch_3peq([a, b, c], rnd_gen=rnd_gen)
 
         check.is_true(check_coll_numerical([a, b, x]))
@@ -95,7 +95,7 @@ class TestNumerical:
 
     def test_sketch_aline(self):
         rnd_gen = np.random.default_rng()
-        a, b, c, d, e = geosolver.numerical.sketch.random_points(5, rnd_gen)
+        a, b, c, d, e = newclid.numerical.sketch.random_points(5, rnd_gen)
         ex = sketch_aline([a, b, c, d, e])
         check.is_instance(ex, HalfLine)
         check.equal(ex.tail, e)
@@ -104,7 +104,7 @@ class TestNumerical:
 
     def test_sketch_amirror(self):
         rnd_gen = np.random.default_rng()
-        a, b, c = geosolver.numerical.sketch.random_points(3, rnd_gen)
+        a, b, c = newclid.numerical.sketch.random_points(3, rnd_gen)
         bx = sketch_amirror([a, b, c])
         check.is_instance(bx, HalfLine)
         assert bx.tail == b
@@ -116,7 +116,7 @@ class TestNumerical:
 
     def test_sketch_bisect(self):
         rnd_gen = np.random.default_rng()
-        a, b, c = geosolver.numerical.sketch.random_points(3, rnd_gen)
+        a, b, c = newclid.numerical.sketch.random_points(3, rnd_gen)
         line = sketch_bisect([a, b, c])
         check.almost_equal(b.distance(line), 0.0)
 
@@ -131,7 +131,7 @@ class TestNumerical:
 
     def test_sketch_bline(self):
         rnd_gen = np.random.default_rng()
-        a, b = geosolver.numerical.sketch.random_points(2, rnd_gen)
+        a, b = newclid.numerical.sketch.random_points(2, rnd_gen)
         line_ab = sketch_bline([a, b])
         check.is_true(LineNum(a, b).is_perp(line_ab))
         check.almost_equal(a.distance(line_ab), b.distance(line_ab))
@@ -161,7 +161,7 @@ class TestNumerical:
 
     def test_sketch_circle(self):
         rnd_gen = np.random.default_rng()
-        a, b, c = geosolver.numerical.sketch.random_points(3, rnd_gen)
+        a, b, c = newclid.numerical.sketch.random_points(3, rnd_gen)
         circle = sketch_circle([a, b, c])
         check.almost_equal(circle.center.distance(a), 0.0)
         check.almost_equal(circle.radius, b.distance(c))
@@ -196,14 +196,14 @@ class TestNumerical:
 
     def test_sketch_eqangle3(self):
         rnd_gen = np.random.default_rng()
-        points = geosolver.numerical.sketch.random_points(5, rnd_gen=rnd_gen)
+        points = newclid.numerical.sketch.random_points(5, rnd_gen=rnd_gen)
         x = sketch_eqangle3(points).sample_within(points, rnd_gen=rnd_gen)[0]
         a, b, d, e, f = points
         check.is_true(check_eqangle_numerical([x, a, x, b, d, e, d, f]))
 
     def test_sketch_eqangle2(self):
         rnd_gen = np.random.default_rng()
-        a, b, c = geosolver.numerical.sketch.random_points(3, rnd_gen)
+        a, b, c = newclid.numerical.sketch.random_points(3, rnd_gen)
         x = sketch_eqangle2([a, b, c], rnd_gen=rnd_gen)
         ang1 = ang_between(a, b, x)
         ang2 = ang_between(c, x, b)
@@ -250,7 +250,7 @@ class TestNumerical:
 
     def test_sketch_reflect(self):
         rnd_gen = np.random.default_rng()
-        a, b, c = geosolver.numerical.sketch.random_points(3, rnd_gen)
+        a, b, c = newclid.numerical.sketch.random_points(3, rnd_gen)
         x = sketch_reflect([a, b, c])
         check.is_true(LineNum(a, x).is_perp(LineNum(b, c)))
         check.almost_equal(x.distance(LineNum(b, c)), a.distance(LineNum(b, c)))
@@ -263,7 +263,7 @@ class TestNumerical:
 
     def test_sketch_rotaten90(self):
         rnd_gen = np.random.default_rng()
-        a, b = geosolver.numerical.sketch.random_points(2, rnd_gen)
+        a, b = newclid.numerical.sketch.random_points(2, rnd_gen)
         x = sketch_rotaten90([a, b])
         check.almost_equal(a.distance(x), a.distance(b))
         check.is_true(LineNum(a, x).is_perp(LineNum(a, b)))
@@ -274,7 +274,7 @@ class TestNumerical:
 
     def test_sketch_rotatep90(self):
         rnd_gen = np.random.default_rng()
-        a, b = geosolver.numerical.sketch.random_points(2, rnd_gen)
+        a, b = newclid.numerical.sketch.random_points(2, rnd_gen)
         x = sketch_rotatep90([a, b])
         check.almost_equal(a.distance(x), a.distance(b))
         check.is_true(LineNum(a, x).is_perp(LineNum(a, b)))
@@ -285,7 +285,7 @@ class TestNumerical:
 
     def test_sketch_s_angle(self):
         rnd_gen = np.random.default_rng()
-        a, b = geosolver.numerical.sketch.random_points(2, rnd_gen)
+        a, b = newclid.numerical.sketch.random_points(2, rnd_gen)
         num = rnd_gen.uniform(0.0, 180.0)
         num, den = simplify(int(num), 180)
         ang = num * np.pi / den
@@ -302,13 +302,13 @@ class TestNumerical:
 
     def test_sketch_shift(self):
         rnd_gen = np.random.default_rng()
-        a, b, c = geosolver.numerical.sketch.random_points(3, rnd_gen)
+        a, b, c = newclid.numerical.sketch.random_points(3, rnd_gen)
         x = sketch_shift([a, b, c])
         check.is_true((b - a).close(x - c))
 
     def test_sketch_square(self):
         rnd_gen = np.random.default_rng()
-        a, b = geosolver.numerical.sketch.random_points(2, rnd_gen)
+        a, b = newclid.numerical.sketch.random_points(2, rnd_gen)
         c, d = sketch_square([a, b])
         check.is_true(LineNum(a, b).is_perp(LineNum(b, c)))
         check.is_true(LineNum(b, c).is_perp(LineNum(c, d)))
@@ -338,7 +338,7 @@ class TestNumerical:
 
     def test_sketch_trisect(self):
         rnd_gen = np.random.default_rng()
-        a, b, c = geosolver.numerical.sketch.random_points(3, rnd_gen)
+        a, b, c = newclid.numerical.sketch.random_points(3, rnd_gen)
         x, y = sketch_trisect([a, b, c])
         check.almost_equal(ang_between(b, a, x), ang_between(b, x, y))
         check.almost_equal(ang_between(b, x, y), ang_between(b, y, c))
@@ -346,7 +346,7 @@ class TestNumerical:
 
     def test_sketch_trisegment(self):
         rnd_gen = np.random.default_rng()
-        a, b = geosolver.numerical.sketch.random_points(2, rnd_gen)
+        a, b = newclid.numerical.sketch.random_points(2, rnd_gen)
         x, y = sketch_trisegment([a, b])
         check.almost_equal(a.distance(x) + x.distance(y) + y.distance(b), a.distance(b))
         check.almost_equal(a.distance(x), x.distance(y))

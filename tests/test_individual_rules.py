@@ -1,9 +1,9 @@
 import pytest
 
-from geosolver.api import GeometricSolverBuilder
-from geosolver.theorem import Theorem
-from geosolver.proof_writing import get_proof_steps, proof_step_string
-from geosolver.statements.adder import ALL_INTRINSIC_RULES
+from newclid.api import GeometricSolverBuilder
+from newclid.theorem import Theorem
+from newclid.proof_writing import get_proof_steps, proof_step_string
+from newclid.statements.adder import ALL_INTRINSIC_RULES
 
 
 EXPECTED_TO_FAIL = [

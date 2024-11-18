@@ -1,7 +1,7 @@
 """Unit tests for problem.py."""
 
 import pytest
-from geosolver.api import GeometricSolverBuilder
+from newclid.api import GeometricSolverBuilder
 
 
 class TestProblem:
