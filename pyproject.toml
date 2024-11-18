@@ -9,7 +9,7 @@ authors = [
 readme = "README.rst"
 dynamic = ["version", "dependencies"]
 description = "Symbolic solver for geometric problems."
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 classifiers=[
     'Intended Audience :: Science/Research',
     'Intended Audience :: Developers',
