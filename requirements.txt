@@ -5,3 +5,4 @@ networkx
 pyvis
 seaborn
 colorama
+typing-extension
