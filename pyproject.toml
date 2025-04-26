@@ -10,7 +10,7 @@ authors = [
 ]
 dynamic = ["version", "readme", "dependencies"]
 description = "Symbolic solver for geometric problems."
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 classifiers=[
     'Intended Audience :: Science/Research',
     'Intended Audience :: Developers',
@@ -23,8 +23,10 @@ classifiers=[
 ]
 
 [project.optional-dependencies]
-dev = ['black', 'ruff', 'pytest', 'pytest-cov', 'pytest-check', 'pytest-mock', 'pre-commit']
 doc = ['numpy', 'sphinx-autoapi', 'autoapi', 'sphinx_rtd_theme', 'sphinx-autodoc-typehints', 'sphinx-autobuild']
+
+[dependency-groups]
+dev = ['black', 'ruff', 'pytest', 'pytest-cov', 'pytest-check', 'pytest-mock', 'pre-commit']
 
 [tool.setuptools]
 license-files = ['LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*']
