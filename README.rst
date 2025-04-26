@@ -82,21 +82,24 @@ then uses the built solver to solve it:
 
     from newclid import GeometricSolverBuilder, GeometricSolver
 
-    solver_builder = GeometricSolverBuilder()
-    solver_builder.load_problem_from_txt(
-        "a b c = triangle a b c; "
-        "d = on_tline d b a c, on_tline d c a b "
-        "? perp a d b c"
-    )
-
     # We now obtain the GeometricSolver with the build method
-    solver: GeometricSolver = solver_builder.build()
+    solver: GeometricSolver = (
+        GeometricSolverBuilder()
+        .load_problem_from_txt(
+            "a b c = triangle a b c; "
+            "d = on_tline d b a c, on_tline d c a b; "
+            "e = on_line e a c, on_line e b d "  # Remove this line to see the solver fail
+            "? perp a d b c"
+        )
+        .build()
+    )
 
     # And run the GeometricSolver
     success = solver.run()
 
     if success:
-        print("Successfuly solved the problem!")
+        print("Successfuly solved the problem! Proof:")
+        solver.write_proof_steps()
     else:
         print("Failed to solve the problem...")
 
@@ -124,25 +127,15 @@ Contributing
   git clone https://github.com/LMCRC/Newclid.git
   cd Newclid
 
-2. (Optional) Create a virtual environment, for example with venv:
+2. Install uv
 
-.. code:: bash
-
-  python -m venv venv
-
-  # On UNIX
-  source ./bin/activate
-
-  # On Windows
-  .\venv\Scripts\activate
-
+Follow `the installation instructions <https://docs.astral.sh/uv/getting-started/installation/>`_`
 
 3. Install as an editable package with dev requirements
 
 .. code:: bash
 
-  pip install -e .[dev]
-
+  uv sync
 
 4. Install pre-commit and pre-push checks
 

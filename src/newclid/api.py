@@ -43,13 +43,13 @@ class GeometricSolver:
         self.run_infos = infos
         return infos["success"]
 
-    def write_proof_steps(self, out_file: Optional[Path]):
+    def write_proof_steps(self, out_file: Optional[Path] = None):
         write_proof_steps(self.proof, out_file)
 
-    def draw_figure(self, *, out_file: Optional[Path]):
+    def draw_figure(self, *, out_file: Optional[Path] = None):
         draw_figure(self.proof, save_to=out_file, rng=self.rng)
 
-    def write_run_infos(self, out_file: Optional[Path]):
+    def write_run_infos(self, out_file: Optional[Path] = None):
         if out_file is None:
             print(self.run_infos)
         else:
@@ -68,7 +68,7 @@ class GeometricSolver:
 
 
 class GeometricSolverBuilder:
-    def __init__(self, seed: int) -> None:
+    def __init__(self, seed: Optional[int] = None) -> None:
         self.problemJGEX: Optional[ProblemJGEX] = None
         self._defs: Optional[dict[str, DefinitionJGEX]] = None
         self._rules: Optional[list[Rule]] = None

@@ -12,7 +12,9 @@ if TYPE_CHECKING:
     from newclid.proof import ProofState
 
 
-def write_proof_steps(proof_state: "ProofState", out_file: Optional[Path]) -> None:
+def write_proof_steps(
+    proof_state: "ProofState", out_file: Optional[Path] = None
+) -> None:
     """Output the solution to out_file.
 
     Args:
