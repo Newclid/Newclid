@@ -6,18 +6,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.12'
+    - uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e .[dev]
+        uv sync
     - name: Build coverage using pytest-cov
       run: |
-        pytest --cov=src --cov-fail-under=76 --cov-report=xml tests
+        uv run pytest --cov=src --cov-fail-under=76 --cov-report=xml tests
     - name: Codacy Coverage Reporter
       uses: codacy/codacy-coverage-reporter-action@v1.3.0
       with:

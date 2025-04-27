@@ -41,7 +41,7 @@ class TestDDAR:
             "a b c = triangle a b c; "
             "d = on_tline d b a c, on_tline d c a b; "
             "e = on_line e a c, on_line e b d "
-            "? simtri a b e d c e"
+            "? perp a d b c"
         ).build()
         assert Statement.from_tokens(
             (EqAngle.NAME, "e", "a", "a", "b", "e", "b", "d", "c"),
