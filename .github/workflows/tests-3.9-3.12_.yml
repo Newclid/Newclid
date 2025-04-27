@@ -20,4 +20,4 @@ jobs:
         uv sync
     - name: Test with pytest
       run: |
-        pytest tests
+        uv run pytest tests

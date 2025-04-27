@@ -14,7 +14,7 @@ jobs:
         uv sync
     - name: Build coverage using pytest-cov
       run: |
-        pytest --cov=src --cov-fail-under=76 --cov-report=xml tests
+        uv run pytest --cov=src --cov-fail-under=76 --cov-report=xml tests
     - name: Codacy Coverage Reporter
       uses: codacy/codacy-coverage-reporter-action@v1.3.0
       with:
