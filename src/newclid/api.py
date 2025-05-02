@@ -26,6 +26,8 @@ from newclid.statement import Statement
 from newclid.tools import atomize
 from newclid.webapp import pull_to_server
 
+LOGGER = logging.getLogger(__name__)
+
 
 class GeometricSolver:
     def __init__(
@@ -64,7 +66,7 @@ class GeometricSolver:
         self.write_proof_steps(out_folder_path / "proof_steps.txt")
         self.draw_figure(out_file=out_folder_path / "proof_figure.svg")
         pull_to_server(self.proof, server_path=out_folder_path / "html")
-        logging.info("Written all outputs at %s", out_folder_path)
+        LOGGER.info("Written all outputs at %s", out_folder_path)
 
 
 class GeometricSolverBuilder:
@@ -77,6 +79,7 @@ class GeometricSolverBuilder:
         self.deductive_agent: Optional[DeductiveAgent] = None
         self.seed = seed or 998244353
         self.problem_path: Optional[Path] = None
+        self.draw_figure: bool = True
 
     @property
     def defs(self) -> dict[str, DefinitionJGEX]:
@@ -94,22 +97,24 @@ class GeometricSolverBuilder:
 
     def build(self, max_attempts: int = 10000) -> "GeometricSolver":
         if self.problemJGEX:
-            logging.info(f"Use problemJGEX {self.problemJGEX} to build the proof state")
+            LOGGER.info(f"Use problemJGEX {self.problemJGEX} to build the proof state")
             proof_state = ProofState.build_problemJGEX(
                 problemJGEX=self.problemJGEX,
                 defsJGEX=self.defs,
                 problem_path=self.problem_path,
                 rng=np.random.default_rng(self.seed),
                 max_attempts=max_attempts,
+                draw_figure=self.draw_figure,
             )
         else:
-            logging.info("Use dep_graph to build the proof state")
+            LOGGER.info("Use dep_graph to build the proof state")
             proof_state = ProofState(
                 rng=np.random.default_rng(self.seed),
                 dep_graph=self.dep_graph,
                 problem_path=self.problem_path,
                 goals=self.goals,
                 defs=self.defs,
+                draw_figure=self.draw_figure,
             )
         if self.deductive_agent is None:
             self.deductive_agent = DDARN()
@@ -185,4 +190,8 @@ class GeometricSolverBuilder:
 
     def with_problem_path(self, path: Path) -> Self:
         self.problem_path = path
+        return self
+
+    def without_figure(self) -> Self:
+        self.draw_figure = False
         return self

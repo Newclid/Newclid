@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from newclid.dependencies.dependency_graph import DependencyGraph
     from newclid.statement import Statement
 
+LOGGER = logging.getLogger(__name__)
+
 PythagorasVerification = "Pythagoras Verification"
 
 
@@ -130,7 +132,7 @@ class PythagoreanConclusions(Predicate):
                 ConstantLength, (b, c, get_quotient(b.num.distance(c.num)))
             )
         except InfQuotientError:
-            logging.info(
+            LOGGER.warning(
                 "lconst result could be added, but the irrational number len cannot be represented."
             )
             return

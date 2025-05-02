@@ -42,6 +42,8 @@ from newclid.tools import atomize, notNone, runtime_cache_path
 if TYPE_CHECKING:
     from numpy.random import Generator
 
+LOGGER = logging.getLogger(__name__)
+
 
 class ConstructionError(Exception):
     pass
@@ -58,6 +60,7 @@ class ProofState:
         problem_path: Optional[Path] = None,
         goals: Optional[list[Statement]] = None,
         defs: dict[str, DefinitionJGEX],
+        draw_figure: bool = True,
     ):
         self.dep_graph = dep_graph or DependencyGraph(AlgebraicManipulator())
         self.symbols_graph = self.dep_graph.symbols_graph
@@ -68,7 +71,7 @@ class ProofState:
         self.runtime_cache = runtime_cache_path(self.problem_path)
         self.matcher = Matcher(self.dep_graph, self.runtime_cache, self.rng)
 
-        self.fig = init_figure()
+        self.fig = init_figure() if draw_figure else None
         self.defs = defs
 
     def add_construction(self, construction: Clause):
@@ -155,17 +158,18 @@ class ProofState:
             raise PointTooFarError()
 
         # draw some specific figures (to be refactored, if there are multiple branches)
-        if construction.sentences[0][0] == "triangle":
-            (ax,) = self.fig.axes
-            triangle = patches.Polygon(
-                (
-                    (new_points[0].num.x, new_points[0].num.y),
-                    (new_points[1].num.x, new_points[1].num.y),
-                    (new_points[2].num.x, new_points[2].num.y),
-                ),
-                closed=True,
-            )
-            ax.add_artist(triangle)
+        if self.fig is not None:
+            if construction.sentences[0][0] == "triangle":
+                (ax,) = self.fig.axes
+                triangle = patches.Polygon(
+                    (
+                        (new_points[0].num.x, new_points[0].num.y),
+                        (new_points[1].num.x, new_points[1].num.y),
+                        (new_points[2].num.x, new_points[2].num.y),
+                    ),
+                    closed=True,
+                )
+                ax.add_artist(triangle)
         for add in adds:
             if not add.statement.check_numerical():
                 raise ConstructionError(
@@ -184,9 +188,10 @@ class ProofState:
         max_attempts: int,
         *,
         rng: "Generator",
+        draw_figure: bool,
     ) -> ProofState:
         """Build a problem into a Proof state object."""
-        logging.info(
+        LOGGER.info(
             f"Building proof state from problem '{problemJGEX.name}': {problemJGEX}"
         )
 
@@ -194,7 +199,7 @@ class ProofState:
         for _ in range(max_attempts):
             # Search for coordinates that checks premises conditions numerically.
             try:
-                proof = ProofState(rng=rng, defs=defsJGEX)
+                proof = ProofState(rng=rng, defs=defsJGEX, draw_figure=draw_figure)
                 for construction in problemJGEX.constructions:
                     proof.add_construction(construction)
                 if problem_path:
@@ -207,7 +212,6 @@ class ProofState:
                 ConstructionError,
                 PointTooCloseError,
                 PointTooFarError,
-                ValueError,
             ) as e:
                 err = e
                 continue

@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from newclid.formulations.rule import Rule
     from newclid.dependencies.dependency import Dependency
 
+LOGGER = logging.getLogger(__name__)
+
 
 class DDARN(DeductiveAgent):
     """Apply Deductive Derivation to exhaustion by Breadth-First Search.
@@ -32,13 +34,13 @@ class DDARN(DeductiveAgent):
             return False
         if self.rule_buffer:
             theorem = self.rule_buffer.pop()
-            logging.info("ddarn matching" + str(theorem))
+            LOGGER.debug("ddarn matching" + str(theorem))
             deps = proof.match_theorem(theorem)
-            logging.info("ddarn matched " + str(len(deps)))
+            LOGGER.debug("ddarn matched " + str(len(deps)))
             self.application_buffer.extend(deps)
         elif self.application_buffer:
             dep = self.application_buffer.pop()
-            # logging.info(f"ddarn : apply {dep}")
+            # LOGGER.debug(f"ddarn : apply {dep}")
             if proof.apply_dep(dep):
                 self.any_new_statement_has_been_added = True
         else:
@@ -46,5 +48,5 @@ class DDARN(DeductiveAgent):
                 return False
             self.any_new_statement_has_been_added = False
             self.rule_buffer = list(rules)
-            logging.info("ddarn : reload")
+            LOGGER.debug("ddarn : reload")
         return True

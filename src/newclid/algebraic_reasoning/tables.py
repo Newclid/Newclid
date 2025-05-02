@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from newclid.dependencies.dependency import Dependency
     from newclid.dependencies.symbols import Point
 
+LOGGER = logging.getLogger(__name__)
+
 ATOM: float = 1e-9
 NLOGATOM: int = 9
 
@@ -108,7 +110,7 @@ def report(eqdict: EqDict):
                     table_str += "   "
         table_str += "\n"
     table_str += "table ends<<<<<<<<<<<\n"
-    logging.info(table_str)
+    LOGGER.debug(table_str)
 
 
 class Table:
@@ -187,7 +189,7 @@ class Table:
 
         self._register(vc, dep)
         if self.verbose:
-            logging.info(f"By {dep.pretty()} the table updates:")
+            LOGGER.debug(f"By {dep.pretty()} the table updates:")
             report(self.v2e)
         return True
 

@@ -17,6 +17,8 @@ if TYPE_CHECKING:
     from newclid.formulations.rule import Rule
     from newclid.dependencies.dependency_graph import DependencyGraph
 
+LOGGER = logging.getLogger(__name__)
+
 
 class Matcher:
     def __init__(
@@ -60,7 +62,7 @@ class Matcher:
         self.cache[theorem] = ()
         points = [p.name for p in self.dep_graph.symbols_graph.nodes_of_type(Point)]
         variables = theorem.variables()
-        logging.info(
+        LOGGER.debug(
             f"{theorem} matching cache : before {len(self.cache[theorem])=} {read=} {write=} {len(mappings)=}"
         )
         for mapping in (
@@ -104,16 +106,16 @@ class Matcher:
         if self.runtime_cache_path is not None and write:
             with open(self.runtime_cache_path, "w") as f:
                 json.dump(file_cache, f)
-        logging.info(
+        LOGGER.info(
             f"{theorem} matching cache : now {len(self.cache[theorem])=} {read=} {write=} {len(mappings)=}"
         )
 
     def match_theorem(self, theorem: "Rule") -> Generator["Dependency", None, None]:
-        logging.info("Start caching")
+        LOGGER.debug("Start caching")
         if theorem not in self.cache:
             self.cache_theorem(theorem)
-        logging.info("Finish caching")
-        logging.info("Start matching")
+        LOGGER.debug("Finish caching")
+        LOGGER.debug("Start matching")
         for dep in self.cache[theorem]:
             if dep.statement in dep.statement.dep_graph.hyper_graph:
                 continue
@@ -123,4 +125,4 @@ class Matcher:
                     applicable = False
             if applicable:
                 yield dep
-        logging.info("Finish matching")
+        LOGGER.debug("Finish matching")
