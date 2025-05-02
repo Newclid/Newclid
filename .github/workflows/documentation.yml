@@ -39,8 +39,8 @@ jobs:
           uv sync --extra doc
       - name: Sphinx build
         run: |
-          python ./docs/reformat.py
-          sphinx-build -b html ./docs ./_build
+          uv run python ./docs/reformat.py
+          uv run sphinx-build -b html ./docs ./_build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
