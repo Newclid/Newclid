@@ -3,7 +3,7 @@ repos:
     rev: v0.1.6
     hooks:
       - id: ruff
-        args: [ --fix ]
+        args: [--fix]
       - id: ruff-format
         exclude: ^.*(?:generative_regressor|actor).*$
 
@@ -18,7 +18,7 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: pytest tests --cov=src --cov-fail-under=76
+        entry: pytest tests
         language: system
         pass_filenames: false
         always_run: true

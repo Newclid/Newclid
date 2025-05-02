@@ -18,6 +18,8 @@ from newclid.predicates.perpendicularity import Perp
 from newclid.dependencies.dependency_graph import DependencyGraph
 from newclid.statement import Statement
 
+LOGGER = logging.getLogger(__name__)
+
 
 class Form(Enum):
     Circle = 0
@@ -41,7 +43,7 @@ def load_geogebra(path: Path, dep_graph: DependencyGraph):
                 float, (coords.attrib["x"], coords.attrib["y"], coords.attrib["z"])
             )
             p.num = PointNum(x / z, y / z)
-            logging.info(f"Find coordinates of {p} ({p.num})")
+            LOGGER.info(f"Find coordinates of {p} ({p.num})")
     # associating points with forms
     # points in a form
     ensemble: dict[str, tuple[str, ...]] = defaultdict(lambda: ())

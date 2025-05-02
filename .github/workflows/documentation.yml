@@ -36,7 +36,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
       - name: Install dependencies
         run: |
-          uv sync --optional doc
+          uv sync --extra doc
       - name: Sphinx build
         run: |
           python ./docs/reformat.py

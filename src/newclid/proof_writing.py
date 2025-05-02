@@ -11,6 +11,8 @@ from newclid.statement import Statement
 if TYPE_CHECKING:
     from newclid.proof import ProofState
 
+LOGGER = logging.getLogger(__name__)
+
 
 def write_proof_steps(
     proof_state: "ProofState", out_file: Optional[Path] = None
@@ -63,4 +65,4 @@ def write_proof_steps(
         out_file.parent.mkdir(parents=True, exist_ok=True)
         with open(out_file, "w", encoding="utf-8") as f:
             f.write(solution)
-        logging.info("Solution written to %s.", out_file)
+        LOGGER.info("Solution written to %s.", out_file)

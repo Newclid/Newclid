@@ -63,6 +63,11 @@ def draw_figure(
     format: str = "svg",
 ) -> None:
     """Draw everything on the same canvas."""
+    if proof.fig is None:
+        raise ValueError(
+            "Cannot draw the figure if the ProofState was built without it."
+        )
+
     symbols_graph = proof.symbols_graph
     points: list[Point] = list(symbols_graph.nodes_of_type(Point))
     fig = deepcopy(proof.fig)

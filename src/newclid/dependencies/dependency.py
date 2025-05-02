@@ -5,8 +5,15 @@ from typing import TYPE_CHECKING, NamedTuple
 if TYPE_CHECKING:
     from newclid.statement import Statement
 
+LOGGER = logging.getLogger(__name__)
+
+
 NUMERICAL_CHECK = "Numerical Check"
 IN_PREMISES = "Premise"
+
+
+class NumericalyFalseDependencyError(Exception):
+    """Raised if adding a numericaly false dependency"""
 
 
 class Dependency(NamedTuple):
@@ -24,11 +31,9 @@ class Dependency(NamedTuple):
     why: tuple[Statement, ...]
 
     def add(self):
-        if self.reason == IN_PREMISES:
-            logging.info(f"Adding premise: {self.statement.pretty()}")
         if not self.statement.check_numerical():
-            raise Exception(
-                f"Adding a dependency {self.pretty()} the conclusion of which is numerically false"
+            raise NumericalyFalseDependencyError(
+                f"Added dependency {self.pretty()} the conclusion of which is numerically false"
             )
         dep_graph = self.statement.dep_graph
         if self.statement in dep_graph.hyper_graph:

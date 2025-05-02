@@ -7,6 +7,8 @@ from newclid import AGENTS_REGISTRY
 from newclid.api import GeometricSolverBuilder
 from newclid.algebraic_reasoning import algebraic_manipulator
 
+LOGGER = logging.getLogger(__name__)
+
 
 def find_ggb_files(directory: Path):
     for entry in os.listdir(directory):
@@ -53,7 +55,7 @@ def cli_arguments() -> Namespace:
         "--log-level",
         default=logging.WARNING,
         type=int,
-        help="Logging level c.f. https://docs.python.org/3/library/logging.html#logging-levels",
+        help="Logging level c.f. https://docs.python.org/3/library/LOGGER.html#logging-levels",
     )
     parser.add_argument(
         "--ar-verbose",
@@ -111,20 +113,20 @@ def main() -> None:
     if (ggb_files0 or ggb_files1) and args.problems_file:
         raise Exception("Ambigious problem source: ggb and jgex")
     if ggb_files0:
-        logging.info(f"Use geogebra setting {problem_path / ggb_files0[0]}")
+        LOGGER.info(f"Use geogebra setting {problem_path / ggb_files0[0]}")
         solver_builder.load_geogebra(problem_path / ggb_files0[0])
     elif ggb_files1:
-        logging.info(f"Use geogebra setting {problem_path / ggb_files1[0]}")
+        LOGGER.info(f"Use geogebra setting {problem_path / ggb_files1[0]}")
         solver_builder.load_geogebra(problem_path / ggb_files1[0])
     elif args.problems_file:
-        logging.info(f"Use problem description in {args.problems_file}")
+        LOGGER.info(f"Use problem description in {args.problems_file}")
         solver_builder.load_problem_from_file(args.problems_file, args.problem_name)
     else:
         raise Exception("No way to find the problem setting")
 
     goals_file = problem_path / "goals.txt"
     if Path.exists(goals_file):
-        logging.info(f"Load goals in {goals_file}")
+        LOGGER.info(f"Load goals in {goals_file}")
         solver_builder.load_goals_file(goals_file)
 
     if (
@@ -142,7 +144,7 @@ def main() -> None:
         solver.draw_figure(out_file=problem_path / "construction_figure.svg")
     solver.run()
 
-    logging.info(f"Run infos: {solver.run_infos}")
+    LOGGER.info(f"Run infos: {solver.run_infos}")
     if not args.quiet:
         solver.write_all_outputs(problem_path)
 
