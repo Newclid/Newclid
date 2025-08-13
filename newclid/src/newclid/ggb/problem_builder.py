@@ -96,16 +96,22 @@ def _load_geogebra_setup(ggb_file_path: Path) -> GGBSetup:
         tree = parse(ggb)
     root = tree.getroot()
     points, lines, conics = read_elements(root)
+    points_str = "\n" + "\n".join(
+        pt.model_dump_json(indent=2) for pt in points.values()
+    )
+    lines_str = "\n" + "\n".join(
+        line.model_dump_json(indent=2) for line in lines.values()
+    )
+    conics_str = "\n" + "\n".join(
+        conic.model_dump_json(indent=2) for conic in conics.values()
+    )
     LOGGER.debug(
-        f"GGB Elements:\nPoints: {'\n' + '\n'.join(pt.model_dump_json(indent=2) for pt in points.values())}\n"
-        f"Lines: {'\n' + '\n'.join(line.model_dump_json(indent=2) for line in lines.values())}\n"
-        f"Conics: {'\n' + '\n'.join(conic.model_dump_json(indent=2) for conic in conics.values())}"
+        f"GGB Elements:\nPoints: {points_str}\nLines: {lines_str}\nConics: {conics_str}"
     )
 
     commands = read_commands(root, points, lines, conics)
-    LOGGER.debug(
-        f"GGB Commands: {'\n' + '\n'.join(c.model_dump_json(indent=2) for c in commands)}"
-    )
+    commands_str = "\n" + "\n".join(c.model_dump_json(indent=2) for c in commands)
+    LOGGER.debug(f"GGB Commands: {commands_str}")
     apply_commands_effects_on_elements(commands, lines, conics)
     relationships = relationships_from_commands(commands, points, lines, conics)
     return GGBSetup(
