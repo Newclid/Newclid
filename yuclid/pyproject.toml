@@ -1,7 +1,7 @@
 [project]
 name = "py-yuclid"
 description = "Python interface to Yuclid geometry solver"
-version = "3.0.0rc2"
+version = "3.0.0rc3"
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [
     {name = "Yury Kudryashov", email = "yury@harmonic.fun"},

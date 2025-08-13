@@ -989,7 +989,7 @@ wheels = [
 
 [[package]]
 name = "ncdgen"
-version = "3.0.0rc2"
+version = "3.0.0rc3"
 source = { editable = "ncdgen" }
 dependencies = [
     { name = "google-cloud-batch" },
@@ -1027,7 +1027,7 @@ wheels = [
 
 [[package]]
 name = "newclid"
-version = "3.0.0rc2"
+version = "3.0.0rc3"
 source = { editable = "newclid" }
 dependencies = [
     { name = "cairosvg" },
@@ -1355,7 +1355,7 @@ wheels = [
 
 [[package]]
 name = "py-yuclid"
-version = "3.0.0rc2"
+version = "3.0.0rc3"
 source = { editable = "yuclid" }
 dependencies = [
     { name = "newclid" },
