@@ -39,8 +39,9 @@ jobs:
 
     - name: type checking newclid
       run: |
-        cd newclid/src &&
+        cd newclid/src
         uv run mypy .
+        cd ../..
 
     - name: Test with pytest
       run: uv run --no-sync pytest -n auto --durations=0 -vv --timeout=24
