@@ -1,4 +1,4 @@
-name: Build Yuclid C++ engine
+name: Build Yuclid C++
 
 on:
   push:
