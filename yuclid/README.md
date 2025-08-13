@@ -1,6 +1,6 @@
 # Yuclid
 
-Yuclid is a fast planar geometry solver written in C++. It solves planar
+Yuclid is a fast plane geometry solver written in C++. It solves plane
 geometry problems like the ones that appear at
 [IMO](https://www.imo-official.org/) and other contests.
 
@@ -39,7 +39,7 @@ and can change in the future versions.
 ## How does it work
 
 Similarly to Alpha Geometry and Newclid 2.0, Yuclid uses deduction
-database (i.e., theorems from planar geometry) and algebraic reasoning,
+database (i.e., theorems from plane geometry) and algebraic reasoning,
 see [below](#features) for more details.
 
 First, it finds all theorems that match *numerically* on the diagram.
