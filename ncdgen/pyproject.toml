@@ -19,6 +19,13 @@ dependencies = [
     "types-networkx>=3.5.0.20250709",
 ]
 
+license = "Apache-2.0"
+license-files = ['LICEN[CS]E*', 'NOTICE*']
+
+[project.urls]
+Homepage = "https://newclid.github.io/Newclid/"
+Repository = "https://github.com/Newclid/Newclid.git"
+
 [project.scripts]
 ncdgen = "ncdgen.__main__:main"
 

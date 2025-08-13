@@ -1,5 +1,5 @@
-Newclid — NOTICE
-================
+Ncdgen — NOTICE
+===============
 
 This product includes software developed by the Newclid project (https://github.com/Newclid/Newclid).
 
@@ -7,23 +7,15 @@ Additional attributions for this distribution:
 - Portions contributed by Concordance Inc. dba Harmonic
   
   Modifications:
-  
-    - Profiling performance of Newclid, and finding the rule matcher as the main bottleneck.
-    - Searching and building alternative matching stategies, especially the FilterMapper.
-    - Refactoring the Algebraic Module to use sympy for symbols manipulation and linear equation resolution.
-    - Creation of yuclid a C++ engine finding deductions to apply with a dramatic speedup, made compatible with Newclid.
     - Creation of the ncdgen library for synthetic JGEX problems data generation based on Newclid.
-    - Sponsored major refactoring to simplify architecture, decouple components, and align with mathematical terminology
-    - Added animation output, GeoGebra support, standardized data formats, and plugin-based configuration system
 
 
 Licensed under the Apache License, Version 2.0. You must preserve this NOTICE in redistributions.
 
-
 THIRD-PARTY SOFTWARE NOTICES
 ============================
 
-The yuclid component, when built with static linking enabled, incorporates the
+The yuclid executable, when built with static linking enabled, incorporates the
 GNU C Library (glibc), which is licensed under the GNU Lesser General Public
 License version 2.1 (LGPL-2.1).
 
