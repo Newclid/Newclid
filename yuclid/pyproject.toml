@@ -8,7 +8,7 @@ authors = [
     {name = "AutoMathis", email = "automathis@protonmail.com"}
 ]
 dependencies = [
-    "newclid>2",
+    "newclid>=3.0.0rc0",
     "pydantic>=2.11.7",
 ]
 classifiers=[
