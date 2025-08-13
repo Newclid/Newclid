@@ -1,0 +1,23 @@
+point a -0.5650370613745379 -0.706368858312268
+point b 0.05350914208056867 -0.1861824666628611
+point c -0.5158571554716881 -0.13700256076001122
+point d -0.2557639596469848 -0.4462756624875647
+point e -0.23117400669555982 -0.16159251371143613
+point f -0.6142169672773877 -1.275735155864525
+point j -0.5814303633421545 -0.8961576241630204
+point k -0.5486437594069213 -0.5165800924615158
+assume perp a c b c
+assume cong b c a c
+assume eqangle a b a c b c a b
+assume perp a d c d
+assume coll a b d
+assume perp b c d e
+assume coll b c e
+assume coll a c f
+assume cong a f a c
+assume coll c f j
+assume coll c f k
+assume cong f j j k
+assume cong c k j k
+assume rconst c f f j 3/1
+prove eqangle a e e k b f b j

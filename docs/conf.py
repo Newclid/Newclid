@@ -6,19 +6,20 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-from importlib.metadata import metadata
 import os
 import sys
+from importlib.metadata import metadata
 from typing import Any
 
 sys.path.insert(0, os.path.abspath("../"))
 
 package_metadata = metadata("newclid")
 
+
 project = "Newclid"
-copyright = "2024, Mathïs Fédérico, Vladmir Sicca, Tianxiang Xia"
-author = package_metadata["Author-email"]
-release = package_metadata["Version"]
+copyright = "2024-2025, Mathïs Fédérico, Vladmir Sicca, Tianxiang Xia, Yury Kudryashov, Harmonic.fun"
+author = "AutoMathis <automathis@protonmail.com>, Vladmir Sicca <vsiccag@gmail.com>, Tianxiang Xia <xia.tianxiang00@gmail.com>, Yury Kudryashov <yury.kudryashov@harmonic.fun>"
+release = "3.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -58,7 +59,6 @@ html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     "canonical_url": "",
     "logo_only": False,
-    "display_version": True,
     "prev_next_buttons_location": "both",
     "style_external_links": "#ff9900",
     "style_nav_header_background": "#ff9900",

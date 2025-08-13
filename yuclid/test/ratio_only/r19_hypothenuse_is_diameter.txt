@@ -1,0 +1,7 @@
+point m 0 0
+point a 5 0
+point b 3 4
+point c -5 0
+assume perp a b b c
+assume midp m a c
+prove cong a m b m

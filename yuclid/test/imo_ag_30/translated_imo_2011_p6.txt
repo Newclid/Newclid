@@ -1,0 +1,44 @@
+point a 0 0
+point b 1 0
+point c -0.31223675724807076204 1.3813611482132852615
+point o 0.5 0.83898666710586400352
+point p -0.45492863928319282607 0.63402344733666726739
+point q -0.21145866932814452732 -0.50030908011533981039
+point pa 0.44143608805582146282 1.485533383486460135
+point pb 0.13801044322708277967 0.76804877200148768956
+point pc -0.45492863928319282607 -0.63402344733666726739
+point qa 1.5617876803251165008 1.1842026369549685239
+point qb 0.40608250457290412383 -0.36072280765108855061
+point qc -0.21145866932814447181 0.50030908011533981039
+point a1 -0.015370321649849475604 1.4138894738980936072
+point b1 0.024099553289202456374 1.5977805837795118205
+point c1 -0.064715763992379243819 1.6216684293849092935
+point o1 -0.045378679081256950711 1.5165117909186134337
+point x -0.11242238996555053987 1.5998003393346753587
+assume cong o a o b
+assume cong o b o c
+assume cong o p o a
+assume perp q p o p
+assume cong b p b pa
+assume cong c p c pa
+assume cong c p c pb
+assume cong a p a pb
+assume cong a p a pc
+assume cong b p b pc
+assume cong b q b qa
+assume cong c q c qa
+assume cong c q c qb
+assume cong a q a qb
+assume cong a q a qc
+assume cong b q b qc
+assume coll a1 pb qb
+assume coll a1 pc qc
+assume coll b1 pa qa
+assume coll b1 pc qc
+assume coll c1 pa qa
+assume coll c1 pb qb
+assume cong o1 a1 o1 b1
+assume cong o1 b1 o1 c1
+assume cong o x o a
+assume cong o1 x o1 a1
+prove coll x o o1

@@ -1,0 +1,84 @@
+name: Publish Yuclid
+description: |
+  Builds and publishes Yuclid to PyPI with pre-built wheels for all platforms.
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build_wheels:
+    name: Build wheels for ${{ matrix.os }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false # Allows other matrix jobs to complete even if one fails
+      matrix:
+        include:
+          - os: linux
+            runs-on: ubuntu-latest
+          - os: pyodide
+            runs-on: ubuntu-latest
+            platform: pyodide
+          - os: windows
+            runs-on: windows-latest
+          - os: macos
+            runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install cibuildwheel and uv
+        run: |
+          pip install cibuildwheel uv
+
+      - name: Build wheels
+        # Use a single step to run cibuildwheel with the environment variables
+        # needed for your custom g++ and Boost setup.
+        run: cibuildwheel --output-dir wheelhouse
+        working-directory: ./yuclid
+
+      - name: Upload wheels as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibuildwheel-wheels-${{ matrix.os }}
+          path: ./yuclid/wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build sdist
+        run: pipx run build --sdist
+        working-directory: ./yuclid
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: dist/*.tar.gz
+
+  upload_pypi:
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cibuildwheel-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/

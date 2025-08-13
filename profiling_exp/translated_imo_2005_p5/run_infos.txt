@@ -1,1 +1,0 @@
-{'runtime': 1377.0051019191742, 'success': True, 'steps': 2601, 'MPQR are cyclic succeeded': True}

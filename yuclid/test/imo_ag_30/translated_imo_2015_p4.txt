@@ -1,0 +1,33 @@
+point a 0 0
+point b 1 0
+point c -0.20494883793176699172 1.0045619200544209093
+point o 0.5 0.62519666047899069561
+point d 0.037031992329008889264 0.80282329032108667999
+point e 0.78306198915012081851 0.18086051278841272505
+point f 0.79480464481072121696 -0.11908896055107243139
+point g -0.29088362113503729578 0.74918844284545638157
+point o1 0.58417207193257136844 0.48016459270966665995
+point o2 0.35642009465219182118 0.67351220277124579372
+point k 0.16834414386514268136 -0
+point l -0.030401639276910870369 0.14901440492667336613
+point x 0.022215963016311391504 0.027778691774245162227
+assume cong o a o b
+assume cong o b o c
+assume coll d b c
+assume coll e b c
+assume cong a e a d
+assume cong o f o a
+assume cong a f a d
+assume cong o g o a
+assume cong a g a d
+assume cong o1 f o1 b
+assume cong o1 b o1 d
+assume cong o2 g o2 c
+assume cong o2 c o2 e
+assume cong o1 k o1 b
+assume coll k a b
+assume cong o2 l o2 c
+assume coll l a c
+assume coll x f k
+assume coll x l g
+prove coll x o a

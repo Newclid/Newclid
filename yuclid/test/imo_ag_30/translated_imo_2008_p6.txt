@@ -1,0 +1,48 @@
+point x 4.9599999999999999645 -0.13000000000000000444
+point y -1.0068968328888159292 -1.2534881080682769294
+point z -2.8402847238575121835 -4.9117762734006831238
+point o 2.8799999999999985612 -5.489999999999999325
+point w 6.9090049230038772521 -1.3884003936987552308
+point a -2.080746196980963969 2.6022298674851520595
+point b -1.6356942531718725586 7.0050651687393736822
+point c 3.0150944694953740743 2.4365912907211022542
+point d 1.6272716728279750242 1.1632975597980999005
+point i1 -0.53368591385854025066 3.9557741308126188606
+point i2 1.4937014337487792837 1.8726952212475092008
+point f1 -0.57926880267738711794 2.5534248527852305699
+point f2 1.5136170751917972233 2.485396305421024632
+point q 0.69992871915400156624 4.6242471927637653906
+point t 2.0326805846221578378 2.1647581018833399469
+point p -1.235335267227594791 2.7407229046275665141
+point s 1.1871434839892263113 1.3418266172024895244
+point k 3.0667847835076225138 0.2563998681478850683
+assume cong o x o y
+assume cong o y o z
+assume cong o w o x
+assume perp a z o z
+assume perp a x o x
+assume perp b z o z
+assume perp b w o w
+assume perp c y o y
+assume perp c w o w
+assume perp d x o x
+assume perp d y o y
+assume equal_angles b a i1 i1 a c
+assume equal_angles a c i1 i1 c b
+assume equal_angles c a i2 i2 a d
+assume equal_angles a d i2 i2 d c
+assume perp f1 i1 a c
+assume coll f1 a c
+assume perp f2 i2 a c
+assume coll f2 a c
+assume cong i1 q i1 f1
+assume cong i2 t i2 f2
+assume perp q i1 q t
+assume perp t i2 t q
+assume cong i1 p i1 f1
+assume cong i2 s i2 f2
+assume perp p i1 p s
+assume perp s i2 s p
+assume coll k q t
+assume coll k p s
+prove cong o k o x

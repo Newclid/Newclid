@@ -1,1 +1,0 @@
-{'runtime': 96.20866560935974, 'success': True, 'steps': 785, '∠(CE,CJ) = ∠(CJ,CF) succeeded': True}

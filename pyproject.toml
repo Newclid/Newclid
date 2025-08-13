@@ -1,46 +1,81 @@
-[build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
-
-[project]
-name = "newclid"
-authors = [
-    {name = "Mathis Federico", email = "mathfederico@gmail.com"},
-    {name = "Vladmir Sicca", email = "vsiccag@gmail.com"},
-    {name = "Tianxiang Xia", email = "xia.tianxiang00@gmail.com"}
-]
-dynamic = ["version", "readme", "dependencies"]
-description = "Symbolic solver for geometric problems."
-requires-python = ">=3.9"
-classifiers=[
-    'Intended Audience :: Science/Research',
-    'Intended Audience :: Developers',
-    'Topic :: Software Development',
-    'Topic :: Scientific/Engineering',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: POSIX',
-    'Operating System :: Unix',
-    'Operating System :: MacOS',
-]
-
-[project.optional-dependencies]
-doc = ['numpy', 'sphinx-autoapi', 'autoapi', 'sphinx_rtd_theme', 'sphinx-autodoc-typehints', 'sphinx-autobuild']
 
 [dependency-groups]
-dev = ['black', 'ruff', 'pytest', 'pytest-cov', 'pytest-check', 'pytest-mock', 'pre-commit']
+dev = [
+ 'ruff',
+ 'pytest',
+ 'pytest-cov',
+ 'pytest-profiling',
+ 'pytest-timeout',
+ 'pre-commit',
+ 'snakeviz',
+ 'py-spy',
+ 'flameprof',
+ 'mypy',
+ 'mypy-extensions',
+ "pytest-xdist>=3.7.0",
+ "types-pyyaml>=6.0.12.20250516",
+ "pytest-mock>=3.14.1",
+]
+
 
 [tool.setuptools]
 license-files = ['LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*']
 
-[project.scripts]
-newclid = "newclid.__main__:main"
+[tool.ruff]
+line-length = 88
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
 
-[tool.setuptools.dynamic]
-readme = { file = ["README.md"] }
-dependencies = { file = ["requirements.txt"] }
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "NPY",
+]
+preview = true
+fixable = ["A", "B", "C", "D", "E", "F", "W", "I"]
+exclude = ["**/gql/**", "scripts/**"]
+ignore = ["E501"]
 
-[tool.setuptools_scm]
+[tool.ruff.lint.per-file-ignores]
+"**/test_*.py" = [
+    "D", # Don't care about docstrings in tests
+    "S101", # Allow asserts in tests
+    "E501",  # Allow long lines in tests
+]
+
 
 [tool.pytest.ini_options]
+log_cli_level = "DEBUG"
 filterwarnings = [
     'ignore:distutils Version classes are deprecated:DeprecationWarning',
     'ignore:`np.bool8` is a deprecated alias for `np.bool_`:DeprecationWarning',
@@ -51,7 +86,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ['src']
+source = ['newclid/src', 'ncdgen/src', 'yuclid/python']
 
 [tool.coverage.report]
 exclude_also = [
@@ -75,4 +110,11 @@ exclude_also = [
 
     # Don't complain about optional imports, they don't matter for now:
     "except ImportError:"
+]
+
+[tool.uv.workspace]
+members = [
+    "newclid",
+    "ncdgen",
+    "yuclid",
 ]

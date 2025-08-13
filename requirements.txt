@@ -1,9 +1,0 @@
-numpy>=1.23.5, <2.0
-matplotlib>=3.7.0
-scipy>=1.10.0
-typing-extensions
-networkx
-pyvis
-seaborn
-colorama
-pillow

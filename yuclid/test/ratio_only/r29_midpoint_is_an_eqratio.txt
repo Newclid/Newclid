@@ -1,0 +1,9 @@
+point a 0 0
+point b 4 0
+point m 2 0
+point c 3 3
+point d 7 9
+point n 5 6
+assume midp m a b
+assume midp n c d
+prove eqratio m a a b n c c d

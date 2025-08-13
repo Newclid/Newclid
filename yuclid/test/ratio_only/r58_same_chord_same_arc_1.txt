@@ -1,0 +1,11 @@
+point a 5 0
+point b 4 3
+point c 3 -4
+point q -5 0
+point p -4 3
+point r 0 -5
+assume cyclic a b c p
+assume cyclic b c p q
+assume cyclic c p q r
+assume cong a b p q
+prove eqangle c a c b r p r q

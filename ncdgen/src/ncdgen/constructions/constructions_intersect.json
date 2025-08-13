@@ -1,0 +1,50 @@
+{
+    "angle_bisector": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "eqdistance": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "on_bline": {
+        "in_args": 3,
+        "out_args": 1
+    },
+    "on_line": {
+        "in_args": 3,
+        "out_args": 1
+    },
+    "on_pline": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "on_tline": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "on_dia": {
+        "in_args": 3,
+        "out_args": 1
+    },
+    "eqangle3": {
+        "in_args": 6,
+        "out_args": 1
+    },
+    "eqratio6": {
+        "in_args": 7,
+        "out_args": 1
+    },
+    "eqratio": {
+        "in_args": 8,
+        "out_args": 1
+    },
+    "on_aline0": {
+        "in_args": 8,
+        "out_args": 1
+    },
+    "on_circum": {
+        "in_args": 4,
+        "out_args": 1
+    }
+}

@@ -1,0 +1,117 @@
+point a -92.09835753157614 -33.6707090237624
+point b -76.22285093451562 22.481227368508385
+point c -20.070914542244843 6.60572077144786
+point d -35.94642113930537 -49.54621562082292
+point e -73.38104540081922 -38.96254455611591
+point f -54.663733270062295 -44.25438008846941
+point g -42.57999580529092 -29.012182557137727
+point h -46.10788616019311 -41.490390644308384
+point i -79.06465646821202 83.92499929313269
+point j 108.10846483935572 31.00664396959748
+point k -23.246015861657394 -4.624666507007906
+point l -38.686647316683825 -59.238442137933404
+point m -25.3627500745983 -12.111591359308928
+point n -102.6820285962832 -71.10533328527639
+point o -115.8172474016716 79.76216509595746
+point p 26.38914845371277 -195.7067416438572
+point q 180.6054994532616 -123.20970702995136
+point r -237.82257074115182 -80.74730844140439
+point s -99.02941224133893 -8.425247918617668
+point t 109.98788372864958 -67.65507010672238
+point u -53.27231119796603 -92.89433441133801
+point v -185.97036032579123 -41.23419049088216
+point w -109.1351768338736 3.01374654985726
+point x -105.89801073044754 -34.16744998019764
+point y -59.550163391791884 -0.9097635735849039
+point z -155.97433005889957 71.76964688765946
+point a1 -49.75900197278776 5.40839603091766
+point b1 -79.44708940333066 4.21107129038746
+point c1 -39.1478858917054 -30.263862856494764
+point d1 -34.09734273142071 -46.50418501226403
+point e1 75.92643667698154 98.39544112344564
+point f1 -116.69533943222451 -129.36675971424881
+point g1 -150.45544848313688 -67.0096544247443
+point h1 -81.57263543020227 25.347043893563708
+assume circle h1 c o x
+assume cong h1 o c h1
+assume cong c h1 h1 x
+assume coll a d e
+assume coll a d f
+assume coll a j m
+assume coll a j r
+assume coll a1 c w
+assume coll b e i
+assume coll b1 c w
+assume coll c d k
+assume coll c j s
+assume coll c1 e r
+assume coll c1 g s
+assume coll f g k
+assume coll k l m
+assume coll n o w
+assume coll n o x
+assume cong a b b c
+assume cong a n d m
+assume cong a1 b1 a1 c
+assume cong a1 b1 b1 w
+assume cong b c c d
+assume cong b d a c
+assume cong b g b e
+assume cong b i b e
+assume cong b1 u b1 g1
+assume cong c d a d
+assume cong d f e f
+assume cong d k d u
+assume cong d n a m
+assume cong d q i r
+assume cong d1 y f x
+assume cong e f a e
+assume cong e f f g
+assume cong e1 s c1 r
+assume cong g1 u b1 u
+assume cong h j h p
+assume cong h p p q
+assume cong h v h o
+assume cong i j e j
+assume cong j p h q
+assume cong k q q u
+assume cong o v h o
+assume cong p q j q
+assume cong s z o y
+assume cyclic b f j l
+assume eqangle a k g i c o e n
+assume eqangle b o c e1 b1 i t u
+assume eqangle b1 f1 f1 h e1 v g v
+assume eqangle b1 g1 b1 u b1 u g1 u
+assume eqangle b1 g1 g1 u g1 u b1 u
+assume eqangle e i e j i j e i
+assume eqangle g n g x g x g w
+assume eqangle g o g w g w g x
+assume eqangle h o h v h v o v
+assume eqangle h o h v o v h o
+assume eqratio a1 s d1 e o p i t
+assume midp y c s
+assume para a b c d
+assume para a n d m
+assume para b c a d
+assume para d n a m
+assume para h j p q
+assume para h p j q
+assume perp a b b c
+assume perp a c b d
+assume perp a d c d
+assume perp a f k l
+assume perp b f e g
+assume perp c j o s
+assume perp d f g h
+assume perp d g f h
+assume perp d h f g
+assume perp d q k u
+assume perp e n k o
+assume perp g h i j
+assume perp h j h p
+assume perp h q j p
+assume perp j q p q
+assume perp o t p t
+assume rconst a d a e 3/1
+assume rconst a1 c c w 1/3

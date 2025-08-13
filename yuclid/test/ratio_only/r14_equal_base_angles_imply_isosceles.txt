@@ -1,0 +1,5 @@
+point o 0 0
+point a 5 0
+point b 4 3
+assume eqangle o a b a b o
+prove cong o a o b

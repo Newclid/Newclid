@@ -1,0 +1,11 @@
+point o 0 0
+point a 1 0
+point b 1 1
+point c 5 0
+point d 5 5
+assume para a b c d
+assume coll o a c
+assume coll o b d
+prove simtri o a b o c d
+prove eqratio o a c a o b b d
+prove eqratio o c a c o d b d

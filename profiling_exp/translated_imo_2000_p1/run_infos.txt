@@ -1,1 +1,0 @@
-{'runtime': 811.9390771389008, 'success': True, 'steps': 1934, 'EP = EQ succeeded': True}

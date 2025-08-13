@@ -1,0 +1,7 @@
+point a 0 0
+point b 3 0
+point c 0 4
+point x 1 1
+assume eqangle a b a x a x a c
+assume eqangle b a b x b x b c
+prove eqangle c b c x c x c a

@@ -1,5 +1,7 @@
-Newclid: A User-Friendly Replacement for AlphaGeometry with Agentic Support
-=================================================
+Newclid
+=======
+
+Newclid is an open-source, easy-to-use fast solver for plane geometry problems.
 
 .. image:: https://badge.fury.io/py/newclid.svg
   :alt: Fury - PyPi stable version
@@ -15,15 +17,9 @@ Newclid: A User-Friendly Replacement for AlphaGeometry with Agentic Support
 
 
 
-.. image:: https://app.codacy.com/project/badge/Grade/93afee3e7ee8464fb70f20fa9b5bf95e
-  :target: https://app.codacy.com/gh/LMCRC/Newclid/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
-
-.. image:: https://app.codacy.com/project/badge/Coverage/93afee3e7ee8464fb70f20fa9b5bf95e    
-  :target: https://app.codacy.com/gh/LMCRC/Newclid/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage
-
-.. image:: https://github.com/LMCRC/Newclid/actions/workflows/tests-3.9-3.12_.yml/badge.svg
-  :alt: Tests 3.9-3.12
-  :target: https://github.com/LMCRC/Newclid/actions/workflows/tests-3.9-3.12_.yml
+.. image:: https://github.com/harmonic-ai/newclid/actions/workflows/tests.yml/badge.svg
+  :alt: Tests
+  :target: https://github.com/Newclid/Newclid/actions/workflows/tests.yml
 
 .. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v1.json
   :alt: CodeStyle - Ruff
@@ -38,7 +34,7 @@ Using pip
 
 .. code:: bash
 
-  pip install git+https://github.com/LMCRC/Newclid.git
+  pip install newclid[yuclid]
 
 
 From source
@@ -46,55 +42,61 @@ From source
 
 .. code:: bash
 
-  git clone https://github.com/LMCRC/Newclid.git
+  git clone https://github.com/Newclid/Newclid.git
   cd Newclid
-  pip install -e .
+  pip install -e .[yuclid]
 
 
 Quickstart
 ----------
 
-To simply solve a problem using Newclid, use the command line:
+To simply solve a problem using Newclid, use the command line.
+
+For example with a JGEX problem:
 
 .. code:: bash
 
-  newclid --problem-name problem_name --problems-file path/to/problem
+  newclid jgex --problem-id orthocenter_consequence_aux --file ./problems_datasets/examples.txt
 
-
-For example:
+Or with a ggb problem:
 
 .. code:: bash
 
-  newclid --problem-name orthocenter_consequence_aux --problems-file ./problems_datasets/examples.txt
+  newclid ggb --file ./notebooks/ggb_exports/incenter.ggb --goals "eqangle C B B D B D B A"
 
 
 See other command line interface options with:
 
 .. code:: bash
 
-  newclid --help
+  uv run newclid --help
+  uv run newclid jgex --help
+  uv run newclid ggb --help
+
 
 For more complex applications, use the Python interface.
-Below is a minimal example to load a specific problem,
-then uses the built solver to solve it:
+Below is a minimal example to build a problem setup from a JGEX string, then solve it:
 
 .. code:: python
 
     from newclid import GeometricSolverBuilder, GeometricSolver
+    import numpy as np
 
-    # We now obtain the GeometricSolver with the build method
-    solver: GeometricSolver = (
-        GeometricSolverBuilder()
-        .load_problem_from_txt(
-            "a b c = triangle a b c; "
-            "d = on_tline d b a c, on_tline d c a b; "
-            "e = on_line e a c, on_line e b d "  # Remove this line to see the solver fail
-            "? perp a d b c"
-        )
-        .build()
-    )
+    # Set the random generator
+    rng = np.random.default_rng()
 
-    # And run the GeometricSolver
+    # Build the problem setup from JGEX string
+    problem_setup = JGEXProblemBuilder(rng=rng).with_problem_from_txt(
+      "a b c = triangle a b c; "
+      "d = on_tline d b a c, on_tline d c a b; "
+      "e = on_line e a c, on_line e b d "
+      "? perp a d b c"
+    ).build()
+
+    # We now build the solver on the problem
+    solver: GeometricSolver = GeometricSolverBuilder().build(problem_setup)
+
+    # And run the solver
     success = solver.run()
 
     if success:
@@ -105,16 +107,20 @@ then uses the built solver to solve it:
 
     print(f"Run infos {solver.run_infos}")
 
+In the ``notebooks`` folder you will find more tutorials, for example:
 
-Some more advanced examples of script using the Python interface
-are displayed in the folder ``examples`` or used in ``tests``.
+- The Jupyter tutorial notebook ``geogebra_problems.ipynb`` to run and solve a problem from a ggb file.
+- The Jupyter tutorial notebook ``jgex_problems.ipynb`` to run and solve a problem from a JGEX string.
+- The Jupyter tutorial notebook ``multiple_JGEX_problems.ipynb`` to run and solve problems from a file with multiple JGEX problems, one at a time or in bulk.
+- The Jupyter tutorial notebook ``heuristics_implementation.ipynb`` to run a collection of problems and try to solve them using human-made heuristics to add auxiliary points to a problem.
 
+You can also check ``tests`` to see some more advanced examples of scripts using the Python interface.
 
 Documentation
 -------------
 
-See `the online documentation <https://lmcrc.github.io/Newclid/>`_
-for more detailed informations about Newclid.
+See `the online documentation <https://newclid.github.io/Newclid/>`_
+for more detailed information about Newclid.
 
 
 Contributing
@@ -124,12 +130,12 @@ Contributing
 
 .. code:: bash
 
-  git clone https://github.com/LMCRC/Newclid.git
+  git clone https://github.com/Newclid/Newclid.git
   cd Newclid
 
 2. Install uv
 
-Follow `the installation instructions <https://docs.astral.sh/uv/getting-started/installation/>`_`
+Follow `installation instructions <https://docs.astral.sh/uv/getting-started/installation/>`_
 
 3. Install as an editable package with dev requirements
 

@@ -1,1 +1,0 @@
-{'runtime': 91.67831301689148, 'success': False, 'steps': 702, 'KM = LM succeeded': False}

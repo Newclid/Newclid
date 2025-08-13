@@ -1,0 +1,18 @@
+point a 1 0
+point b 3 0
+point c 8 0
+point p 0 3
+point q 0 7
+point r 0 10
+point x 0.6666666666666 2.33333333333333
+point y 0.7272727272727 2.72727272727272
+point z 1.22033898305085 5.93220338983051
+assume coll a b c
+assume coll p q r
+assume coll x a q
+assume coll x p b
+assume coll y a r
+assume coll y p c
+assume coll z b r
+assume coll z c q
+prove coll x y z

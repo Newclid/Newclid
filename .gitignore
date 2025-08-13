@@ -35,7 +35,6 @@ ag_ckpt_vocab/
 
 # IDEs
 .idea/
-.vscode/
 
 # Coverage data
 .coverage
@@ -43,6 +42,7 @@ ag_ckpt_vocab/
 # Experiment data
 ddar_results/
 run_results/
+Test_results/
 
 # TODO
 TODO.md
@@ -55,6 +55,8 @@ TODO.md
 
 # local files
 run.log
+**/local_data.jsonl
+**/.DS_Store
 
 # Local scripts
 benchmark.py
@@ -72,3 +74,48 @@ tests-exp/*
 !tests-exp/*.ggb
 !tests-exp/*.ggb
 !tests-exp/runtime_cache.json
+
+# Profiling
+*_profiling*/
+*.prof
+
+# Videos
+*.mp4
+
+# Hydra outputs
+outputs/
+
+# Datagen
+datagen.jsonl
+datagen_examples.jsonl
+
+# Harmonic stuff
+regression_test_results
+*.pstats
+*.pstats.svg
+.mypy_cache
+
+/state_logs.txt
+/img/
+
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
+*.folded
+*.perf
+*.svg
+*.data
+*.old
+
+*.so
+*.cmake
+
+*.tar
+/*.out
+/*.err
+
+/logs/
+/job_output/
+/job_output_bak/

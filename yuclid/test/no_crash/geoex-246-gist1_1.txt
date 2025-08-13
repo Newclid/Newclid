@@ -1,0 +1,74 @@
+point a 0.1639033745155538 -0.3341408954854792
+point b -1.1494312280060865 -0.9850748866607911
+point c -0.9510418261344471 0.979700975110257
+point o -0.8061406774370865 -0.027334057030076353
+point ma -1.050236527070267 -0.0026869557752670636
+point mb -0.39356922580944664 0.3227800398123889
+point mc -0.49276392674526637 -0.6596078910731351
+point ta -1.8183999478602746 0.07487684402265649
+point tb -0.030408560059725673 0.6309634296132594
+point tc -0.3543290429133411 -0.9389162780944618
+point oa -1.4343182374652708 0.03609494412369471
+point ob -0.21198889293458617 0.4768717347128241
+point oc -0.42354648482930374 -0.7992620845837984
+point xc -1.262887270681736 -0.30978685598638245
+point yc -0.10623059679632343 0.2634921421502608
+point xc' -1.523088729888001 0.41178443784790153
+point yc' -0.26675272120977156 0.7086401338462692
+point xb' -0.5002106841560029 -0.9349711431322234
+point yb' -1.6241926021408413 -0.30001593290764056
+point xb -0.30470449698737234 -0.698411056050215
+point yb -1.1399820657391524 0.28587287355969954
+point xa -0.4489345745192658 0.5007968617261824
+point ya -0.5786243799088939 -0.7836033972765244
+point xa' 0.02000161576667764 0.42305657331045965
+point ya' -0.2717116865446259 -0.8344834142059827
+point a' -0.8205463615147175 -0.09054742308683018
+point b' -0.49221271088430707 0.07218607470699803
+point c' -0.541810061352217 -0.4190078907357647
+assume circle o a b c
+assume cong a o b o
+assume cong a o c o
+assume midp ma b c
+assume midp mb a c
+assume midp mc a b
+assume eqangle a b a ta a ta a c
+assume cong o ta a o
+assume eqangle a b b tb b tb b c
+assume cong o tb a o
+assume eqangle a c c tc c tc b c
+assume cong o tc a o
+assume midp oa ma ta
+assume midp ob mb tb
+assume midp oc mc tc
+assume cong ma oa oa xc
+assume cong ob yc mb ob
+assume perp oa xc xc yc
+assume perp ob yc xc yc
+assume cong ma oa oa xc'
+assume cong mb ob ob yc'
+assume perp oa xc' xc' yc'
+assume perp ob yc' xc' yc'
+assume cong oc xb' mc oc
+assume cong ma oa oa yb'
+assume perp oc xb' xb' yb'
+assume perp oa yb' xb' yb'
+assume cong oc xb mc oc
+assume cong ma oa oa yb
+assume perp oc xb xb yb
+assume perp oa yb xb yb
+assume cong ob xa mb ob
+assume cong mc oc oc ya
+assume perp ob xa xa ya
+assume perp oc ya xa ya
+assume cong mb ob ob xa'
+assume cong oc ya' mc oc
+assume perp ob xa' xa' ya'
+assume perp oc ya' xa' ya'
+assume coll a' xb yb
+assume coll a' xc yc
+assume coll b' xa ya
+assume coll b' xc yc
+assume coll c' xa ya
+assume coll c' xb yb
+prove simtri a b c a' b' c'

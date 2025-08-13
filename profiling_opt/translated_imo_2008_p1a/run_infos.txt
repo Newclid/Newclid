@@ -1,1 +1,0 @@
-{'runtime': 1914.4817657470703, 'success': False, 'steps': 2753, 'B₁B₂C₁C₂ are cyclic succeeded': False}

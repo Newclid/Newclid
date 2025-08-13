@@ -1,0 +1,11 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "dependencies": [
+        "boost-json",
+        "boost-log",
+        "boost-program-options",
+        "boost-safe-numerics",
+        "boost-system",
+        "boost-test"
+    ]
+}

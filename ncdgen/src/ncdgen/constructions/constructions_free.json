@@ -1,0 +1,54 @@
+{
+    "segment": {
+        "in_args": 2,
+        "out_args": 2
+    },
+    "r_triangle": {
+        "in_args": 3,
+        "out_args": 3
+    },
+    "iso_trapezoid": {
+        "in_args": 4,
+        "out_args": 4
+    },
+    "triangle": {
+        "in_args": 3,
+        "out_args": 3
+    },
+    "ieq_triangle": {
+        "in_args": 3,
+        "out_args": 3
+    },
+    "eqdia_quadrangle": {
+        "in_args": 4,
+        "out_args": 4
+    },
+    "quadrangle": {
+        "in_args": 4,
+        "out_args": 4
+    },
+    "r_trapezoid": {
+        "in_args": 4,
+        "out_args": 4
+    },
+    "rectangle": {
+        "in_args": 4,
+        "out_args": 4
+    },
+    "isquare": {
+        "in_args": 4,
+        "out_args": 4
+    },
+    "trapezoid": {
+        "in_args": 4,
+        "out_args": 4
+    },
+    "pentagon": {
+        "in_args": 5,
+        "out_args": 5
+    },
+    "iso_triangle": {
+        "in_args": 3,
+        "out_args": 3
+    }
+}

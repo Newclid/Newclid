@@ -1,0 +1,24 @@
+point m 0 0
+point l 1 0
+point k -0.12572861487519804147 1.0707584702223269524
+point w 0.5 0.60147084372773895744
+point q 0.58260057420540956041 -0.48431323004339071892
+point p -0.58260057420540956041 0.48431323004339071892
+point b 0.33114334445501347748 1.6572037104012631303
+point c 1.4173994257945903286 0.48431323004339071892
+point a 0.46886431477344753249 0.48431323004339060789
+point o 0.94313187028401879175 1.134532643532498275
+assume cong w m w l
+assume cong w l w k
+assume perp q m w m
+assume coll p q m
+assume cong m q m p
+assume coll b p k
+assume cong k p k b
+assume coll c q l
+assume cong l q l c
+assume coll a b q
+assume coll a c p
+assume cong o a o b
+assume cong o b o c
+prove cong o p o q

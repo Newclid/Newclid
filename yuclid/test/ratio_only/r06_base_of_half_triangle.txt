@@ -1,0 +1,8 @@
+point a 0 0
+point b 2 0
+point c 0 4
+point e 1 0
+point f 0 2
+assume midp e a b
+assume midp f a c
+prove para e f b c

@@ -1,0 +1,7 @@
+point a 0 0
+point b 5 0
+point c 0 3
+point d 1.875 1.875
+assume eqangle a b a d a d a c
+assume coll d b c
+prove eqratio d b d c a b a c

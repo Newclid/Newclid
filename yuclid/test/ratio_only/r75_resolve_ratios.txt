@@ -1,0 +1,10 @@
+point b 0 0
+point a 3 0
+point c 4 0
+point e 0 1
+point d 6 1
+point f 8 1
+assume eqratio a b a c d e d f
+assume coll a b c
+assume coll d e f
+prove eqratio a b b c d e e f

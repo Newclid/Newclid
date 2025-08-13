@@ -1,0 +1,7 @@
+min_pts: 10
+max_pts: 30
+random_seed: 2
+debug: True
+attempts_per_clause: 1
+attempts_per_diagram_build: 1
+emit_only_double_checked_aux_subproblems: True

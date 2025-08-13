@@ -1,0 +1,7 @@
+point o 0 0
+point a 5 0
+point b 3 4
+point c -5 0
+assume circle o a b c
+assume coll o a c
+prove perp a b b c

@@ -1,0 +1,9 @@
+point a 5 0
+point b 0 5
+point p 4 3
+point q -5 0
+assume cyclic a b p q
+prove eqangle a p b a q b
+prove eqangle q a p q b p
+prove eqangle a b q a p q
+prove eqangle b a p b q p

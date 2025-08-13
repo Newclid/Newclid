@@ -1,0 +1,148 @@
+orthocenter
+a b c = triangle a b c; h = on_tline h b a c, on_tline h c a b ? perp a h b c
+orthocenter_aux
+a b c = triangle a b c; d = on_tline d b a c, on_tline d c a b; e = on_line e a c, on_line e b d ? perp a d b c
+incenter_excenter
+a b c = triangle a b c; d1 d2 d3 d = incenter2 d1 d2 d3 d a b c; e1 e2 e3 e = excenter2 e1 e2 e3 e a b c ? perp d c c e
+orthocenter_consequence
+a b c = triangle a b c; h = on_tline h b a c, on_tline h c a b; f = on_tline f c c b ? para a h f c
+orthocenter_consequence_aux
+a b c = triangle a b c; d = on_tline d b a c, on_tline d c a b; e = on_line e a c, on_line e b d; f = on_tline f c b c ? para a d f c
+not_always_good
+a b c = triangle a b c; o = free o; m = on_circle m o b, on_line m a b; n = on_circle n o b, on_line n a c; r = angle_bisector r b a c, angle_bisector r m o n ? perp n m o r
+rule_r29_not_found_disguise
+a b = segment a b; m = midpoint m a b; m1 = midpoint m1 m a ? eqratio m a a b m1 m m a
+rule_r29_not_found_explicit
+a b = segment a b; m = midpoint m a b; c d = segment c d; n = midpoint n c d ? eqratio m a a b n c c d
+find_r22
+a b = segment a b; m = midpoint m a b; o = on_tline o m a b ? cong o a o b
+two_paths_problem_aux
+a b c = triangle a b c; p q = segment p q; s = on_aline s p q c a b; t = on_aline t q p c b a; r = on_line r p s, on_line r q t ? eqangle c a c b s p t q
+two_paths_problem
+a b c = triangle a b c; p q = segment p q; s = on_aline s p q c a b; t = on_aline t q p c b a ? eqangle c a c b s p t q
+b23_may_need_BUILT_IN_FNS
+a x = segment a x; m = midpoint m a x; p q r = triangle12 p q r; n = midpoint n m a; u = midpoint u p q ? eqratio a x a n p r p u
+ratio_chase_incorrect_on_step_one
+a b e = triangle12 a b e; c = midpoint c a e ? cong a c a b
+forcing_ratio
+a b c = triangle12 a b c; m = midpoint m a c ? cong a m a b
+check_r00
+c d = segment c d; b = on_tline b c c d; f = on_tline f d c d ? para b c f d
+angles_in_triangle
+a b = segment a b; x = s_angle a b x 63o; y = s_angle b a y 153o ? perp b x a y
+testing_aline0
+a = free a; b = free b; c = free c; d = free d; e = free e; f = free f; g = free g; h = on_aline0 h a b c d e f g ? eqangle a b c d e f g h
+testing_iso_triangle_vertex_angle
+b = free b; c = free c; a = iso_triangle_vertex_angle a b c ? cong a b a c
+numerical_check_npara
+a b = segment a b; c d = segment c d ? npara a b c d
+numerical_check_ncoll
+a b = segment a b; c = free c ? ncoll a b c
+angles_eq_triangle
+b c = segment b c; a = eq_triangle a b c ? aconst a b a c 1pi/3
+angles_double_eq_triangle
+b c = segment b c; a = eq_triangle a b c; d = eqdistance d a a b, eqdistance d b b c ? aconst d a a b 2pi/3
+suplementary_angles
+a b = segment a b; c = s_angle a b c 30o ? aconst b c b a 5pi/6
+geometric_ratios
+a b = segment a b; m = midpoint m a b; n = midpoint n m a ? rconst a m b m 1/1
+concatenating_ratios
+a b = segment a b; c = free c; d = rconst a b c d 2/1; e = rconst c d a e 2/1 ? rconst a b a e 4/1
+test_get_two_intersections
+a b = segment a b; c = eqdistance c a a b, eqdistance c b a b; d = eqdistance d a a b, eqdistance d b a b ? perp c d a b
+ar_two_triangles_angle_chasing
+a b = segment a b; c = s_angle a b c 150o, s_angle b a c 30o; d = s_angle c a d 20o, on_line d c b ? aconst a d b c 5pi/9
+ar_three_triangles_angle_chasing
+a b = segment a b; c = s_angle a b c 150o, s_angle b a c 30o; d = s_angle c a d 20o, on_line d c b; e = s_angle d a e 20o, on_line e c b ? aconst a e b c 4pi/9
+cong2_problem
+p = free p; q = free q; u = free u; v = eqdistance v u p q; a = free a; b = free b; c = free c; d = eqratio d p q a b u v c ? cong a b c d
+point_on_circle_eqdistant_from_center
+a b c = triangle a b c; d = on_circum d a b c; o = circle o a b c ? cong o a o d
+midpoint_splits_in_two
+a b = segment a b; m = midpoint m a b ? rconst a m a b 1/2
+central_angle_vs_internal_angle
+a o = segment a o; b = eqdistance b o a o; c = eqdistance c o a o; x = angle_bisector x a o b ? eqangle o a o x c a c b
+checking_rconst2
+a b = segment a b; x = rconst2 x a b 1/3 ? rconst a x b x 1/3
+frac1_cong
+a b = segment a b; c = free c; d = rconst a b c d 1/1 ? cong a b c d
+eqratio_lconst_check
+a = free a; b = lconst b a 3; c = free c; d = lconst d c 4; e = free e; f = lconst f e 6; g = free g; h = eqratio h a b c d e f g ? lconst h g 8
+cong_lconst_check
+a = free a; b = lconst b a 4; c = free c; d = eqdistance d c a b ? lconst d c 4
+lconst_cong_check
+a = free a; b = lconst b a 4; c = free c; d = lconst d c 4 ? cong a b c d
+lconst_eqratio_check
+a = free a; b = lconst b a 4; c = free c; d = lconst d c 6; e = free e; f = lconst f e 2; g = free g; h = lconst h g 3 ? eqratio a b c d e f g h
+rconst_lconst_check
+a = free a; b = lconst b a 12; c = free c; d = rconst a b c d 3/4 ? lconst c d 16
+lconst_rconst_check
+a = free a; b = lconst b a 8; c = free c; d = lconst d c 4 ? rconst a b c d 2/1
+pyt_test_formula_to_perp
+a = free a; b = lconst b a 4; c = lconst c a 5, lconst c b 3 ? perp a b b c
+pyt_test_perp_to_formula
+a = free a; b = lconst b a 4; c = on_tline c b a b, lconst c b 3 ? lconst a c 5
+two_goals_cong_aconst
+a b = segment a b; c = on_tline c b a b, eqdistance c b a b; d = on_circum d a b c, eqdistance d c a b ? cong a b d a; aconst d a a b 1pi/2
+acompute_test
+a = free a; b = lconst b a 3; c = eq_triangle c a b ? acompute a b b c; acompute b c a b
+tangents_to_circle
+o a = segment o a; b = eqdistance b o a o; c = on_tline c b o b, on_tline c a o a ? cong c b a c
+miquel_theorem
+a b c = triangle a b c; a1 = on_line a1 b c; b1 = on_line b1 a c; c1 = on_line c1 a b; m = on_circum m a b1 c1, on_circum m b a1 c1 ? cyclic m c a1 b1
+two_perps_at_point_are_collinear
+o a = segment o a; b = on_tline b a a o; o1 = on_tline o1 a a b ? coll o1 a o
+pappus
+a b = segment a b; p q = segment p q; c = on_line c a b; r = on_line r p q; x = on_line x a q, on_line x p b; y = on_line y a r, on_line y p c; z = on_line z b r, on_line z c q ? coll x y z
+ar_construction_tester
+a b = segment a b; c = s_angle a b c 1o; d = s_angle b c d 1o; e = s_angle c d e 1o; f = s_angle d e f 1o; g = s_angle e f g 1o ? aconst a b f g 5o
+basic_cc_tangent
+o a = segment o a; a1 = on_circle a1 o a; a2 = on_circle a2 o a; a3 = on_circum a3 a2 a1 a; w b = segment w b; b1 = on_circle b1 w b; b2 = on_circle b2 w b; b3 = on_circum b3 b2 b1 b; x y z i = cc_tangent x y z i o a w b; p = on_line p x y, on_line p z i ? cyclic b b1 b2 b3; cyclic a a1 a2 a3; coll p x y; coll p z i
+breaking_cc_tangent
+o = free o; w = lconst w o 1; a = lconst a o 5; b = lconst b w 2; x y z i = cc_tangent x y z i o a w b ? perp x y y o
+breaking_cc_tangent_by_kiss
+o = free o; w = lconst w o 1; a = lconst a o 3; b = lconst b w 2; x y z i = cc_tangent x y z i o a w b ? perp x y y o
+basic_cc_itangent
+o a = segment o a; a1 = on_circle a1 o a; a2 = on_circle a2 o a; a3 = on_circum a3 a2 a1 a; w b = segment w b; b1 = on_circle b1 w b; b2 = on_circle b2 w b; b3 = on_circum b3 b2 b1 b; x y z i = cc_itangent x y z i o a w b; p = on_line p x y, on_line p z i ? cyclic b b1 b2 b3; cyclic a a1 a2 a3; coll p x y; coll p z i
+breaking_cc_itangent
+o = free o; w = lconst w o 5; a = lconst a o 4; b = lconst b w 2; x y z i = cc_tangent x y z i o a w b ? perp x y y o
+breaking_cc_itangent_by_kiss
+o = free o; w = lconst w o 5; a = lconst a o 3; b = lconst b w 2; x y z i = cc_tangent x y z i o a w b ? perp x y y o
+repro_example_1
+a b c = triangle a b c; d = on_tline d b a c, on_tline d c a b; e = on_line e a c, on_line e b d ? perp a d b c
+testing_on_aline0
+a b = segment a b; x = free x; y = on_aline0 y a b a x a b b ? para a x b y
+testing_circumcenter
+a b c = triangle a b c; d = on_circum d a b c; e = on_circum e c b d; f = on_circum f c d e; o = circle o a b c ? circle o a b c; circle o c d e; circle o d e f
+menelaus_test
+a b c = triangle a b c; f = on_line f a b, rconst2 f a b 1/2; d = on_line d b c, rconst2 d b c 1/2; e = on_line e d f, on_line e c a ? rconst c e a e 4/1
+menelaus_frac1_test
+a b c = triangle a b c; f = on_line f a b, rconst2 f a b 1/1; d = on_line d b c; e = on_line e d f, on_line e c a ? eqratio b d d c e a e c
+menelaus_crossed_cong_test
+a b c = triangle a b c; d = on_line d b c; e = on_line e c a, eqdistance e c d c; f = on_line f a b, on_line f d e ? eqratio b d e a f b a f
+ar_example_paper_angle_chasing
+a b c = triangle a b c; d = on_circum d a b c; e = on_line e a d, on_line e b c; f = on_line f a b, on_line f c d; x = angle_bisector x a e b, angle_bisector x a f d ? perp e x x f
+ar_example_paper_ratio_chasing
+a b c = triangle a b c; d = midpoint d a c; e = angle_bisector e b a c, on_line e b d; f = on_pline f b e c, on_line f a c ? cong f c a b
+regular_triangle_side
+a b = segment a b; c = s_angle a b c 60o, eqdistance c b a b ? cong a c a b
+testing_problem
+a b c = triangle a b c; p q = segment p q; r = eqratio r b a b c q p q, on_aline0 r b a b c q p q ? sameclock a b c p r q
+test_between_coll
+a b c = between a b c ? coll a b c
+test_between_bound_coll
+a b = segment a b; c = between_bound c a b ? coll a b c
+test_between_obtuse
+a b c = between a b c ? obtuse_angle b a c
+test_between_bound_obtuse
+a b = segment a b; c = between_bound c a b ? obtuse_angle b c a
+test_simtri_numerical
+t@0.5836888922459208_0.5576927068059065 = free t; u@0.7723407203328203_0.5439549362191064 = free u; v@0.6779450028873817_0.5498652569980763 = on_bline v u t ? simtrir t u v u t v
+test_eqratio_numercial
+k@-0.8870735209716645_-0.8263212627969092 = free k; m@-0.8846126165166995_-0.8261830227847464 = free m; i@-0.8858626388710084_-0.8259037616561784 = on_bline i k m; n@-0.8855989428229293_-0.8305979943125005 = on_bline n k m ? eqratio i k i m k n m n
+test_contri_numerical
+l@-0.5856131259123771_0.6781681108963162 = free l; m@-0.5868782522776554_0.6803812051343027 = free m; h@-0.5865720216188368_0.6790881083995501 = on_bline h l m ? contrir h l m h m l
+test_r2const
+a b c d = isquare a b c d; o = intersection_ll o a c b d ? r2const a b a o 2/1
+test_l2const
+a = free a; b = l2const b a 4 ? lconst a b 2

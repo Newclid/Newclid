@@ -1,0 +1,9 @@
+point o 0 0
+point a 2 0
+point c 5 0
+point b 4 6
+point d 10 15
+assume eqratio o a a c o b b d
+assume coll o a c
+assume coll o b d
+prove para a b c d

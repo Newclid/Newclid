@@ -1,0 +1,94 @@
+{
+    "circle": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "eq_triangle": {
+        "in_args": 3,
+        "out_args": 1
+    },
+    "eqangle2": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "foot": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "incenter2": {
+        "in_args": 7,
+        "out_args": 4
+    },
+    "excenter2": {
+        "in_args": 7,
+        "out_args": 4
+    },
+    "centroid": {
+        "in_args": 7,
+        "out_args": 4
+    },
+    "intersection_cc": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "intersection_lc": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "intersection_ll": {
+        "in_args": 5,
+        "out_args": 1
+    },
+    "intersection_lp": {
+        "in_args": 6,
+        "out_args": 1
+    },
+    "intersection_lt": {
+        "in_args": 6,
+        "out_args": 1
+    },
+    "intersection_pp": {
+        "in_args": 7,
+        "out_args": 1
+    },
+    "intersection_tt": {
+        "in_args": 7,
+        "out_args": 1
+    },
+    "midpoint": {
+        "in_args": 3,
+        "out_args": 1
+    },
+    "mirror": {
+        "in_args": 3,
+        "out_args": 1
+    },
+    "orthocenter": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "parallelogram": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "reflect": {
+        "in_args": 4,
+        "out_args": 1
+    },
+    "square": {
+        "in_args": 4,
+        "out_args": 2
+    },
+    "trisect": {
+        "in_args": 5,
+        "out_args": 2
+    },
+    "trisegment": {
+        "in_args": 4,
+        "out_args": 2
+    },
+    "cc_tangent": {
+        "in_args": 8,
+        "out_args": 4
+    }
+}
