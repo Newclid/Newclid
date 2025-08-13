@@ -11,6 +11,10 @@ on:
       - "yuclid/**"
       - ".github/workflows/compile-cpp.yml"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }} 
+  cancel-in-progress: true
+
 jobs:
   build_and_test:
     # Define a matrix for different OS and compiler combinations
