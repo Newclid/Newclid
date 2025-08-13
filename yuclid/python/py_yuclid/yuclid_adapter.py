@@ -182,7 +182,7 @@ class YuclidAdapter(DeductionProvider):
 
     def _run_yuclid(self) -> YuclidOutput:
         t0 = time.perf_counter()
-        with tempfile.TemporaryDirectory(delete=True) as temp_dir:
+        with tempfile.TemporaryDirectory() as temp_dir:
             input_file_path = Path(temp_dir) / f"problem_{self.problem_name}.txt"
             input_file_path.write_text(self.precomputation_input_str)
             command = [
