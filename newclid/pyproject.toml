@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "newclid"
-version = "3.0.0rc3"
-readme = {file = "../README.rst", content-type = "text/x-rst"}
+version = "3.0.0rc4"
+readme = {file = "README.rst", content-type = "text/x-rst"}
 authors = [
     {name = "AutoMathis", email = "automathis@protonmail.com"},
     {name = "Vladmir Sicca", email = "vsiccag@gmail.com"},
