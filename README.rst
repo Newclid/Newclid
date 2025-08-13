@@ -16,7 +16,7 @@ Newclid is an open-source, easy-to-use fast solver for plane geometry problems.
   :target: https://pepy.tech/project/newclid
 
 
-.. image:: https://github.com/harmonic-ai/newclid/actions/workflows/tests.yml/badge.svg
+.. image:: https://github.com/Newclid/Newclid/actions/workflows/tests.yml/badge.svg
   :alt: Python - Tests
   :target: https://github.com/Newclid/Newclid/actions/workflows/tests.yml
 
