@@ -16,10 +16,17 @@ Newclid is an open-source, easy-to-use fast solver for plane geometry problems.
   :target: https://pepy.tech/project/newclid
 
 
-
 .. image:: https://github.com/harmonic-ai/newclid/actions/workflows/tests.yml/badge.svg
-  :alt: Tests
+  :alt: Python - Tests
   :target: https://github.com/Newclid/Newclid/actions/workflows/tests.yml
+
+.. image:: https://app.codacy.com/project/badge/Grade/93afee3e7ee8464fb70f20fa9b5bf95e
+  :alt: Codacy - Grade
+  :target: https://app.codacy.com/gh/LMCRC/Newclid/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
+
+.. image:: https://app.codacy.com/project/badge/Coverage/93afee3e7ee8464fb70f20fa9b5bf95e   
+  :alt: Codacy - Coverage
+  :target: https://app.codacy.com/gh/LMCRC/Newclid/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage
 
 .. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v1.json
   :alt: CodeStyle - Ruff
