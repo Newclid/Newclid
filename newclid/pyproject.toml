@@ -12,7 +12,7 @@ authors = [
     {name = "Tianxiang Xia", email = "xia.tianxiang00@gmail.com"}
 ]
 description = "Solver for planar geometric problems."
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers=[
     'Intended Audience :: Science/Research',
     'Intended Audience :: Developers',

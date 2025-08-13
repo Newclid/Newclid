@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "AutoMathis", email = "automathis@protonmail.com" }
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "newclid[yuclid]",
     "hydra-core>=1.3.2",
