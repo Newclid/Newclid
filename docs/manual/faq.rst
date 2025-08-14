@@ -8,10 +8,35 @@ Given a problem already turned into a ggb file, or translated into a JGEX string
 
 In the ``notebooks`` folder you will find:
 
+- ``imo_2025.ipynb`` to run and solve a problem from the IMO 2025 P2 problem and build the animated proof.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open IMO notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/imo_2025.ipynb
+
 - The Jupyter tutorial notebook ``geogebra_problems.ipynb`` to run and solve a problem from a ggb file.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open Geogebra notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/geogebra_problem.ipynb
+
 - The Jupyter tutorial notebook ``jgex_problems.ipynb`` to run and solve a problem from a JGEX string.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open JGEX notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/JGEX_problem.ipynb
+
 - The Jupyter tutorial notebook ``multiple_JGEX_problems.ipynb`` to run and solve problems from a file with multiple JGEX problems, one at a time or in bulk.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open Multiple JGEX problems notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/multiple_JGEX_problems.ipynb
+
 - The Jupyter tutorial notebook ``heuristics_implementation.ipynb`` to run a collection of problems and try to solve them using human-made heuristics to add auxiliary points to a problem.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open Heuristics implementation notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/heuristics_implementation.ipynb
 
 You can also run problems from the command line.
 
