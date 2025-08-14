@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import io
 from enum import Enum
 from typing import Any, Iterable, cast
 
-import cairosvg  # pyright: ignore
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -166,11 +164,8 @@ class ProofAnimation:
 
         if image_path:
             try:
-                # Convert SVG to PNG in memory
-                png_data = cairosvg.svg2png(url=image_path, scale=0.5)  # pyright: ignore
-
-                # Read the PNG data from memory
-                img = mpimg.imread(io.BytesIO(png_data))  # pyright: ignore
+                # Read the PNG image
+                img = mpimg.imread(image_path)  # pyright: ignore
 
                 # Place the image on the figure
                 self.fig.figimage(  # pyright: ignore
