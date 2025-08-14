@@ -89,7 +89,6 @@ class GeometricSolver:
         return ProofAnimation(
             proof_data=proof_data,
             symbols=self.proof_state.symbols,
-            image_path=None,
             jgex_problem=jgex_problem,
             theme=theme if theme is not None else DrawTheme(),
         ).animate()

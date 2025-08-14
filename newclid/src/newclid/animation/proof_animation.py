@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import io
 from enum import Enum
 from typing import Any, Iterable, cast
 
-import cairosvg  # pyright: ignore
-import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.artist import Artist
@@ -42,7 +39,6 @@ class ProofAnimation:
         theme: DrawTheme,
         jgex_problem: JGEXFormulation | None = None,
         figure_kwargs: dict[str, Any] | None = None,
-        image_path: str | None = None,
     ):
         self.jgex_problem = jgex_problem
         self.symbols = symbols
@@ -163,26 +159,6 @@ class ProofAnimation:
             color=self.theme.title_color,
             family=["DejaVu Sans", "STIXGeneral"],
         )
-
-        if image_path:
-            try:
-                # Convert SVG to PNG in memory
-                png_data = cairosvg.svg2png(url=image_path, scale=0.5)  # pyright: ignore
-
-                # Read the PNG data from memory
-                img = mpimg.imread(io.BytesIO(png_data))  # pyright: ignore
-
-                # Place the image on the figure
-                self.fig.figimage(  # pyright: ignore
-                    img,  # pyright: ignore
-                    15,
-                    int(self.fig.get_figheight() * self.fig.dpi) - img.shape[0] - 15,
-                )
-
-            except FileNotFoundError:
-                print(f"Image file not found at: {image_path}")
-            except Exception as e:
-                print(f"An error occurred while loading the SVG: {e}")
 
     def animate(self) -> FuncAnimation:
         return FuncAnimation(
