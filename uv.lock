@@ -1160,7 +1160,7 @@ requires-dist = [
     { name = "autoapi", marker = "extra == 'doc'" },
     { name = "cairosvg", specifier = ">=2.8.2" },
     { name = "colorama", specifier = ">=0.4.6" },
-    { name = "matplotlib", specifier = ">=3.10.3" },
+    { name = "matplotlib", specifier = ">=3.9" },
     { name = "numpy", specifier = ">=1.23.5" },
     { name = "numpy", marker = "extra == 'doc'" },
     { name = "py-yuclid", marker = "extra == 'yuclid'", editable = "yuclid" },
@@ -1173,7 +1173,7 @@ requires-dist = [
     { name = "sphinx-autodoc-typehints", marker = "extra == 'doc'" },
     { name = "sphinx-rtd-theme", marker = "extra == 'doc'" },
     { name = "symengine", specifier = ">=0.14.1" },
-    { name = "sympy", specifier = ">=1.14.0" },
+    { name = "sympy", specifier = ">=1.13" },
     { name = "typing-extensions", specifier = ">=4.14.0" },
 ]
 provides-extras = ["doc", "yuclid"]
