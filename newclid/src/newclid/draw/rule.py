@@ -33,6 +33,7 @@ from newclid.all_rules import (
     R69_SIMILARITY_WITHOUT_SCALING_REVERSE,
     R71_RESOLUTION_OF_RATIOS,
     R72_DISASSEMBLING_A_CIRCLE,
+    R73_DEFINITION_OF_CIRCLE,
     R74_INTERSECTION_BISECTORS,
     R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1,
     R82_PARA_OF_COLL,
@@ -148,7 +149,9 @@ def draw_rule_application(
         case R71_RESOLUTION_OF_RATIOS.id:
             return _draw_resolution_of_ratios(ax, application, symbols, theme)
         case R72_DISASSEMBLING_A_CIRCLE.id:
-            return _draw_disassembling_a_circle(ax, application, symbols, theme)
+            return _draw_disassembling_a_circle(ax, application, theme)
+        case R73_DEFINITION_OF_CIRCLE.id:
+            return _draw_assembling_a_circle(ax, application, theme)
         case R74_INTERSECTION_BISECTORS.id:
             return _draw_intersection_bisectors(ax, application, theme)
         case R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1.id:
@@ -1619,7 +1622,6 @@ def _draw_reverse_congruence(
 def _draw_disassembling_a_circle(
     ax: Axes,
     application: RuleApplication,
-    symbols: SymbolsRegistry,
     theme: DrawTheme,
 ) -> list[Artist]:
     circle_premise: Circumcenter | None = None
@@ -1675,6 +1677,54 @@ def _draw_disassembling_a_circle(
             ax,
             circle_premise.center.num,
             circle_points[1].num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+    ]
+
+
+def _draw_assembling_a_circle(
+    ax: Axes,
+    application: RuleApplication,
+    theme: DrawTheme,
+) -> list[Artist]:
+    if application.predicate.predicate_type != PredicateType.CIRCUMCENTER:
+        raise ValueError(
+            f"Unexpected conclusion for rule {application.rule}: {application.predicate}"
+        )
+
+    circle_premise = application.predicate
+
+    center = circle_premise.center
+    p1, p2, p3 = circle_premise.points
+    radius = center.num.distance(p1.num)
+
+    return [
+        draw_circle(
+            ax,
+            center=(center.num.x, center.num.y),
+            radius=radius,
+            line_color=theme.circle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            center.num,
+            p1.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            center.num,
+            p2.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            center.num,
+            p3.num,
             line_color=theme.line_color,
             line_width=theme.thick_line_width,
         ),
