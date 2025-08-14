@@ -116,15 +116,46 @@ Below is a minimal example to build a problem setup from a JGEX string, then sol
 
 In the ``notebooks`` folder you will find more tutorials, for example:
 
-- ``imo_2025.ipynb`` to run and solve a problem from the IMO 2025 P2 problem and build the animated proof. :raw-html:`<a target="_blank" href="https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/imo_2025.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>`
 
-- ``geogebra_problems.ipynb`` to run and solve a problem from a ggb file. :raw-html:`<a target="_blank" href="https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/geogebra_problems.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>`
+- ``imo_2025.ipynb`` to run and solve a problem from the IMO 2025 P2 problem and build the animated proof.
 
-- ``jgex_problems.ipynb`` to run and solve a problem from a JGEX string. :raw-html:`<a target="_blank" href="https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/jgex_problems.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>`
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open IMO notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/imo_2025.ipynb
 
-- ``multiple_JGEX_problems.ipynb`` to run and solve problems from a file with multiple JGEX problems, one at a time or in bulk. :raw-html:`<a target="_blank" href="https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/multiple_JGEX_problems.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>`
 
-- ``heuristics_implementation.ipynb`` to run a collection of problems and try to solve them using human-made heuristics to add auxiliary points to a problem. :raw-html:`<a target="_blank" href="https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/heuristics_implementation.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>`
+
+- ``geogebra_problems.ipynb`` to run and solve a problem from a ggb file.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open Geogebra notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/geogebra_problems.ipynb
+
+
+
+- ``jgex_problems.ipynb`` to run and solve a problem from a JGEX string.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open JGEX notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/jgex_problems.ipynb
+
+
+
+
+- ``multiple_JGEX_problems.ipynb`` to run and solve problems from a file with multiple JGEX problems, one at a time or in bulk. 
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open Multiple JGEX problems notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/multiple_JGEX_problems.ipynb
+
+
+
+
+- ``heuristics_implementation.ipynb`` to run a collection of problems and try to solve them using human-made heuristics to add auxiliary points to a problem.
+
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+  :alt: Open Heuristics implementation notebook in Colab
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/heuristics_implementation.ipynb
 
 
 You can also check ``tests`` to see some more advanced examples of scripts using the Python interface.
