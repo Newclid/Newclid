@@ -1,6 +1,6 @@
 [project]
 name = "ncdgen"
-version = "3.0.0rc4"
+version = "3.0.0rc5"
 description = "Plane geometry diagram generation using Newclid"
 readme = "README.md"
 authors = [
