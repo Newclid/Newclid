@@ -26,7 +26,7 @@ classifiers=[
 dependencies = [
     "colorama>=0.4.6",
     "matplotlib>=3.10.3",
-    "numpy>=1.23.5,<2.0",
+    "numpy>=1.23.5",
     "pybind11>=2.13.6",
     "pydantic>=2.11.5",
     "pyvis>=0.3.2",
@@ -34,7 +34,7 @@ dependencies = [
     "symengine>=0.14.1",
     "sympy>=1.14.0",
     "typing-extensions>=4.14.0",
-    "cairosvg>=2.8.2"
+    "cairosvg>=2.8.2",
 ]
 
 license = "Apache-2.0"

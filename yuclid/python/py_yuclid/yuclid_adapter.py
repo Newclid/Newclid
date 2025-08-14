@@ -4,6 +4,7 @@ import collections
 import json
 import logging
 import os
+import shutil
 import subprocess
 import tempfile
 import time
@@ -77,25 +78,27 @@ class YuclidError(Exception):
     pass
 
 
-if "UV_PROJECT_ENVIRONMENT" not in os.environ:
-    # If we don't have a custom project environment set, then we use the one in
-    # .venv at the root of the repository.
-    YUCLID_PATH = Path(__file__).parents[3] / ".venv/bin/yuclid"
-else:
-    # If we do have a custom project environment set, then we use the one in the
+# Try to find yuclid binary in PATH first (works for pip installs, system installs, etc.)
+yuclid_binary_path = shutil.which("yuclid")
+if yuclid_binary_path is not None:
+    _yuclid_path = Path(yuclid_binary_path)
+elif "UV_PROJECT_ENVIRONMENT" in os.environ:
+    # If we have a custom project environment set, then we use the one in the
     # environment variable. This is used in the docker setup, where we are running
     # uv sync in the docker newclid folder, but the build files are written to
     # the environment on the SSD.
-    YUCLID_PATH = (  # pyright: ignore
-        Path(os.environ["UV_PROJECT_ENVIRONMENT"]) / "bin/yuclid"
-    )
+    _yuclid_path = Path(os.environ["UV_PROJECT_ENVIRONMENT"]) / "bin/yuclid"
+else:
+    # Fall back to the .venv at the root of the repository.
+    _yuclid_path = Path(__file__).parents[3] / ".venv/bin/yuclid"
+
+YUCLID_PATH = _yuclid_path
 
 # We need to keep this here to fail fast. There's no way to use this module
 # without having the binary installed.
 if not YUCLID_PATH.is_file():
     raise YuclidError(
-        f"yuclid binary not found at {YUCLID_PATH}. "
-        "Run `uv sync --reinstall` to install it."
+        f"yuclid binary not found at {YUCLID_PATH}. Check your yuclid installation."
     )
 
 
