@@ -125,19 +125,19 @@ In the ``notebooks`` folder you will find more tutorials, for example:
 
 
 
-- ``geogebra_problems.ipynb`` to run and solve a problem from a ggb file.
+- ``geogebra_problem.ipynb`` to run and solve a problem from a ggb file.
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg
   :alt: Open Geogebra notebook in Colab
-  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/geogebra_problems.ipynb
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/geogebra_problem.ipynb
 
 
 
-- ``jgex_problems.ipynb`` to run and solve a problem from a JGEX string.
+- ``jgex_problem.ipynb`` to run and solve a problem from a JGEX string.
 
 .. image:: https://colab.research.google.com/assets/colab-badge.svg
   :alt: Open JGEX notebook in Colab
-  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/jgex_problems.ipynb
+  :target: https://colab.research.google.com/github/Newclid/Newclid/blob/main/notebooks/JGEX_problem.ipynb
 
 
 
