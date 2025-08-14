@@ -36,6 +36,16 @@ Newclid is an open-source, easy-to-use fast solver for plane geometry problems.
 Installation
 ------------
 
+Using uv (recommended)
+^^^^^^^^^^^^^^^^^^^^^^
+
+Follow `uv installation instructions <https://docs.astral.sh/uv/getting-started/installation/>`_
+
+
+.. code:: bash
+
+  uv add newclid[yuclid]
+
 Using pip
 ^^^^^^^^^
 
@@ -44,14 +54,20 @@ Using pip
   pip install newclid[yuclid]
 
 
-From source
-^^^^^^^^^^^
+Building from source
+^^^^^^^^^^^^^^^^^^^^
+
+Follow `uv installation instructions <https://docs.astral.sh/uv/getting-started/installation/>`_
+
 
 .. code:: bash
 
   git clone https://github.com/Newclid/Newclid.git
   cd Newclid
-  pip install -e .[yuclid]
+  uv sync
+
+If you run into issues to build yuclid, you might need to set an environment variable like `CXX=/usr/bin/g++-14`, try adding environment variable that are present in `.env`.
+If you still have issues, `submit an issue <https://github.com/Newclid/Newclid/issues>`_.
 
 
 Quickstart
@@ -76,9 +92,9 @@ See other command line interface options with:
 
 .. code:: bash
 
-  uv run newclid --help
-  uv run newclid jgex --help
-  uv run newclid ggb --help
+  newclid --help
+  newclid jgex --help
+  newclid ggb --help
 
 
 For more complex applications, use the Python interface.
