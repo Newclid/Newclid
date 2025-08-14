@@ -34,6 +34,7 @@ from newclid.all_rules import (
     R71_RESOLUTION_OF_RATIOS,
     R72_DISASSEMBLING_A_CIRCLE,
     R74_INTERSECTION_BISECTORS,
+    R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1,
     R82_PARA_OF_COLL,
 )
 from newclid.draw.geometries import draw_arrow, draw_circle, draw_segment, draw_triangle
@@ -58,6 +59,7 @@ from newclid.predicates.equal_angles import EqAngle
 from newclid.predicates.triangles_similar import SimtriClock, SimtriReflect
 from newclid.symbols.points_registry import Point, Segment
 from newclid.symbols.symbols_registry import SymbolsRegistry
+from sympy import li
 
 
 def draw_rule_application(
@@ -149,6 +151,8 @@ def draw_rule_application(
             return _draw_disassembling_a_circle(ax, application, symbols, theme)
         case R74_INTERSECTION_BISECTORS.id:
             return _draw_intersection_bisectors(ax, application, theme)
+        case R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1.id:
+            return _draw_same_chord_same_arc_four_points_1(ax, application, symbols, theme)
         case R82_PARA_OF_COLL.id:
             return _draw_para_of_coll(ax, application, theme)
         case _:
@@ -965,14 +969,14 @@ def _draw_center_and_concyclics(
     
     if application.premises[2].predicate_type != PredicateType.CYCLIC:
         raise ValueError(
-            f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
+            f"Unexpected premise 2 for rule {application.rule}: {application.premises[2]}"
         )
     
     cyclic = application.premises[2]
 
     if application.premises[0].predicate_type != PredicateType.CONGRUENT:
         raise ValueError(
-            f"Unexpected premise 1 for rule {application.rule}: {application.premises[1]}"
+            f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
         )
     
     congruent = application.premises[0]
@@ -1677,6 +1681,71 @@ def _draw_disassembling_a_circle(
     ]
 
 
+def _draw_same_chord_same_arc_four_points_1(
+    ax: Axes,
+    application: RuleApplication,
+    symbols: SymbolsRegistry,
+    theme: DrawTheme,
+) -> list[Artist]:
+    if len(application.premises) != 3:
+        raise ValueError(
+            f"Unexpected number of premises for rule {application.rule}: {application.premises}"
+        )
+    if application.premises[0].predicate_type != PredicateType.CONGRUENT:
+        raise ValueError(
+            f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
+        )
+    cong = application.premises[0]
+
+    if application.predicate.predicate_type != PredicateType.EQUAL_ANGLES:
+        raise ValueError(
+            f"Unexpected conclusion for rule {application.rule}: {application.predicate}"
+        )
+    eqangle = application.predicate
+
+    points: List[Point] = []
+    for point in cong.segment1:
+        if point not in points:
+            points.append(point)
+
+    for point in cong.segment2:
+        if point not in points:
+            points.append(point)
+
+    if len(points) != 4:
+        raise ValueError(
+            f"Unexpected number of points for congruence in rule {application.rule}: {points}"
+        )
+    
+    center = _circumcenter_of_triangle((points[0], points[1], points[2]))
+    radius = center.distance(points[0].num)
+    
+    return list(draw_predicate(ax, eqangle, symbols, theme=theme)) + [
+        draw_segment(
+            ax,
+            points[0].num,
+            points[1].num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            points[2].num,
+            points[3].num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_circle(
+            ax,
+            (center.x, center.y),
+            radius,
+            line_color=theme.circle_color,
+            line_width=theme.thick_line_width,
+        ),
+    ]
+    
+
+
 def _draw_intersection_bisectors(
     ax: Axes,
     application: RuleApplication,
@@ -1805,7 +1874,6 @@ def _midpoint_of_segment(segment: tuple[Point, Point]) -> PointNum:
     return PointNum(x=midpoint_x, y=midpoint_y)
 
 
-# FINISH THIS
 def _circumcenter_of_triangle(
     triangle: tuple[Point, Point, Point],
 ) -> PointNum:
