@@ -3,7 +3,6 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Iterable, cast
 
-import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.artist import Artist
@@ -40,7 +39,6 @@ class ProofAnimation:
         theme: DrawTheme,
         jgex_problem: JGEXFormulation | None = None,
         figure_kwargs: dict[str, Any] | None = None,
-        image_path: str | None = None,
     ):
         self.jgex_problem = jgex_problem
         self.symbols = symbols
@@ -161,23 +159,6 @@ class ProofAnimation:
             color=self.theme.title_color,
             family=["DejaVu Sans", "STIXGeneral"],
         )
-
-        if image_path:
-            try:
-                # Read the PNG image
-                img = mpimg.imread(image_path)
-
-                # Place the image on the figure
-                self.fig.figimage(
-                    img,
-                    15,
-                    int(self.fig.get_figheight() * self.fig.dpi) - img.shape[0] - 15,
-                )
-
-            except FileNotFoundError:
-                print(f"Image file not found at: {image_path}")
-            except Exception as e:
-                print(f"An error occurred while loading the SVG: {e}")
 
     def animate(self) -> FuncAnimation:
         return FuncAnimation(
