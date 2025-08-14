@@ -1031,7 +1031,7 @@ wheels = [
 
 [[package]]
 name = "newclid"
-version = "3.0.0"
+version = "3.0.1"
 source = { editable = "newclid" }
 dependencies = [
     { name = "colorama" },
