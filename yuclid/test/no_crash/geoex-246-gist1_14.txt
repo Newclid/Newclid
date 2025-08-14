@@ -1,0 +1,25 @@
+point a 0.269147163193474 -0.5721528943341295
+point b -0.5191227935149447 -0.2794537475051265
+point c 0.5774843524164796 -1.7654898215356918
+point o -0.4883513680033405 -1.4043800443973748
+point d -0.4311894739161709 -2.5282744219667665
+point e 4.818170603449056 -2.261289044375765
+point f 1.0835241082992682 -2.451235245432893
+point t -0.2097644912336049 -6.063540438302656
+point k -0.34816547240896606 -2.524051775003169
+point x -0.8169936336267898 3.631465632032858
+assume circle o a b c
+assume cong a o b o
+assume cong a o c o
+assume cong d o a o
+assume perp d e d o
+assume coll a b e
+assume perp d f d o
+assume coll b c f
+assume para c d e t
+assume para a d f t
+assume coll d f k
+assume cong d t k t
+assume coll a c x
+assume coll d t x
+prove coll b k x

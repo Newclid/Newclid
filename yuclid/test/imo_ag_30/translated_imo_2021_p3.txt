@@ -1,0 +1,25 @@
+point a 0 0
+point b 1 0
+point c -0.41199165916052676861 0.31513258392000448316
+point d 0.20913346311501390673 0.61763832060296475213
+point e 0.59672271871213167227 -0.4564334448291689772
+point f -0.38968183379751603068 -0
+point x 0.22109440409182931631 -0.16911519760783377819
+point o1 -0.05021460062652546158 0.36122840199749817192
+point o2 0.82680064907201000768 0.2335609780628201404
+point y -1.6844620584785614525 0.59912638961799091764
+assume equal_angles b a d d a c
+assume equal_angles e d a d c b
+assume coll e a c
+assume equal_angles f d a d b c
+assume coll f a b
+assume cong x b x c
+assume equal_angles x b c b c x
+assume coll x a c
+assume cong o1 a o1 d
+assume cong o1 d o1 c
+assume cong o2 e o2 x
+assume cong o2 x o2 d
+assume coll y e f
+assume coll y b c
+prove coll o1 o2 y

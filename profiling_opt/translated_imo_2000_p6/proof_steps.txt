@@ -1,6 +1,0 @@
-==========================
-* From problem construction:
-Points : A, B, C, H, I, T₁, T₂, T₃, H₁, H₂, H₃, X₁, X₂, Y₂, Y₃, Z
-* Proof steps:
-
-==========================

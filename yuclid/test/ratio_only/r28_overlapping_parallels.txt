@@ -1,0 +1,5 @@
+point a 0 0
+point b 1 0
+point c 10 0
+assume para a b a c
+prove coll a b c

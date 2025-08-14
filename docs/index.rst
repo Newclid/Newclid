@@ -2,16 +2,26 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   manual/overview
-   manual/python_interface
-   manual/adding_problems
-   manual/adding_rules
-   manual/default_files/index
-   manual/problem_databases/index
-   manual/algo
+   manual/readme
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Documentation
+
+   manual/building_a_problem_setup/index
+   manual/concepts/index
+   manual/faq
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Source code API
+
    source/newclid
+   source/yuclid
+   source/ncdgen
 
 Indices and tables
 ==================

@@ -1,0 +1,74 @@
+point a -1.8585908342015314 0.89137288384886
+point b -0.8836326600295745 -0.30851606105443774
+point c 0.30728758155700286 2.2708772870261127
+point ma -0.28817253923628583 0.9811806129858375
+point mb -0.7756516263222643 1.5811250854374863
+point mc -1.371111747115553 0.29142841139721115
+point w -0.4374212779232313 1.050089584960126
+point p 0.8438434488203574 0.41505053190387553
+point d -2.713571556722359 2.0575288072616456
+point e -0.32259044223232847 2.2463995165258854
+point f 0.0342980557373046 -0.24273775900598207
+point oa -0.07718016595376158 3.0939322204463258
+point ob -0.383205267413429 0.9206517919714763
+point oc -0.36190438725535196 1.0719229972942788
+point u -1.7021613544366812 0.7735598931556658
+point a1 -0.5982967119516459 0.3094880845967896
+point b1 -1.7086858655357777 0.9868512647348575
+point c1 -1.672436681735793 0.662271456209476
+point h -1.5600933568276405 0.7535549399002829
+point x -1.7669884276415597 1.224521234851518
+point y -2.516019081108472 1.3058692213847511
+point z -2.428762541609352 1.369842363987584
+point o -2.1773215613467314 0.9353943749548534
+assume midp ma b c
+assume midp mb a c
+assume midp mc a b
+assume circle w a b c
+assume cong b w a w
+assume cong c w a w
+assume cong p w a w
+assume cong d mb mb p
+assume cong d mc mc p
+assume perp d p mb mc
+assume cong mc p e mc
+assume cong ma p e ma
+assume perp e p ma mc
+assume cong ma p f ma
+assume cong mb p f mb
+assume perp f p ma mb
+assume circle oa a d p
+assume cong d oa a oa
+assume cong a oa oa p
+assume circle ob b e p
+assume cong e ob b ob
+assume cong ob p b ob
+assume circle oc c f p
+assume cong f oc c oc
+assume cong oc p c oc
+assume cong oa u oa p
+assume cong ob p ob u
+assume perp a a1 b c
+assume coll a1 b c
+assume perp a c b b1
+assume coll a b1 c
+assume perp a b c c1
+assume coll a b c1
+assume coll a a1 h
+assume coll b b1 h
+assume cong e x b x
+assume eqangle b e b x e x b e
+assume cong f x c x
+assume eqangle c f c x f x c f
+assume cong a y d y
+assume eqangle a d a y d y a d
+assume cong f y c y
+assume eqangle c f c y f y c f
+assume cong d z a z
+assume eqangle a d a z d z a d
+assume cong b z e z
+assume eqangle b e b z e z b e
+assume circle o x y z
+assume cong o y o x
+assume cong o z o x
+prove cong o u o x

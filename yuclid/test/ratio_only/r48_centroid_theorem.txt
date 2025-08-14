@@ -1,0 +1,13 @@
+point a 0 0
+point b 4 0
+point c 6 8
+point m 2 0
+point n 5 4
+point p 3 4
+point x 3.3333333333333 2.666666666666666
+assume midp m a b
+assume coll m x c
+assume midp n b c
+assume coll n x a
+assume midp p c a
+prove coll x p b

@@ -1,0 +1,42 @@
+point a 1.1356024512756777 -1.254232419381728
+point b 1.0665157848404825 -0.309017145642689
+point c 0.12130051110144346 -0.37810381207788435
+point d 0.1903871775366388 -1.3233190858169235
+point e 2.011731058579521 -0.23993047920749389
+point f 1.5736667549275993 -0.747081449294611
+point g 0.6629948144061583 -1.2887757525993258
+point h 1.10105911805808 -0.7816247825122087
+point i 1.1125735624639463 -0.9391606614687145
+point j 2.408853706553389 -1.6728503875951752
+point k 2.3319056470227566 -0.6200787761416302
+point l 0.7744729157392013 -0.6471177923674338
+point m 0.4824300466379201 -0.9852184390921787
+assume perp a b b c
+assume cong b c a b
+assume para a b c d
+assume para b c a d
+assume perp a d c d
+assume cong b c c d
+assume cong c d a d
+assume perp a c b d
+assume cong b d a c
+assume cong a c a e
+assume cong b c b e
+assume perp a b c e
+assume coll a e f
+assume cong e f a f
+assume coll a d g
+assume cong a g d g
+assume coll d e h
+assume cong e h d h
+assume coll d f i
+assume coll e g i
+assume coll a h i
+assume eqratio a h d i f j c j
+assume cyclic a e i j
+assume perp a d j k
+assume coll b d l
+assume coll b d m
+assume cong l m b l
+assume cong d m l m
+assume rconst b d b l 3/1

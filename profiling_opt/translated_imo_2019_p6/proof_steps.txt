@@ -1,6 +1,0 @@
-==========================
-* From problem construction:
-Points : A, B, C, I, D, E, F, R, P, O₁, O₂, Q, T
-* Proof steps:
-
-==========================

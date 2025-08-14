@@ -1,0 +1,129 @@
+name: Build Yuclid C++
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "yuclid/**"
+      - ".github/workflows/compile-cpp.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }} 
+  cancel-in-progress: true
+
+jobs:
+  build_and_test:
+    # Define a matrix for different OS and compiler combinations
+    strategy:
+      fail-fast: false # Allows other matrix jobs to complete even if one fails
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cxx_compiler: [g++, clang++] # Default compilers for Linux and macOS (clang)
+        build_type: [RelWithDebInfo] # Could add Debug here if needed
+        exclude: #TODO: enable g++ build on MacOS
+          - os: macos-latest
+            cxx_compiler: g++
+        include:
+          - os: windows-2025
+            cxx_compiler: cl
+            build_type: RelWithDebInfo
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies (Linux)
+      # This step runs only on Ubuntu runners
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        if [ "${{ matrix.cxx_compiler }}" == "g++" ]; then
+          compiler="g++-14"
+        fi
+        if [ "${{ matrix.cxx_compiler }}" == "clang++" ]; then
+          compiler="clang-19"
+        fi
+        sudo apt-get install -y build-essential cmake libboost-all-dev ${compiler}
+
+    - name: Install Dependencies (macOS - Clang++)
+      # This step runs only on macOS runners
+      if: runner.os == 'macOS' && matrix.cxx_compiler == 'clang++'
+      run: |
+        brew update
+        brew install boost llvm
+        echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
+
+    - name: Install Dependencies (macOS - g++)
+      # This step runs only on macOS runners
+      if: runner.os == 'macOS' && matrix.cxx_compiler == 'g++'
+      run: |
+        brew update
+        brew install boost
+
+    - name: Update vcpkg
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: vcpkg update
+
+#     - name: Add NuGet sources
+#       if: runner.os == 'Windows'
+#       env:
+#         USERNAME: ${{ github.repository_owner }}
+#         VCPKG_EXE: C:/vcpkg/vcpkg.exe
+#         FEED_URL: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+#         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite"
+#       shell: pwsh
+#       run: |
+#         .$(${{ env.VCPKG_EXE }} fetch nuget) `
+#           sources add `
+#           -Source "${{ env.FEED_URL }}" `
+#           -StorePasswordInClearText `
+#           -Name GitHubPackages `
+#           -UserName "${{ env.USERNAME }}" `
+#           -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
+#         .$(${{ env.VCPKG_EXE }} fetch nuget) `
+#           setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" `
+#           -Source "${{ env.FEED_URL }}"
+
+    - name: Configure and Build CMake Project
+      uses: threeal/cmake-action@v2.1.0 # Using a specific version for stability
+#       env:
+#         VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite"
+      with:
+        source-dir: yuclid
+        cxx-compiler: ${{ matrix.cxx_compiler == 'g++' && 'g++-14' || matrix.os == 'ubuntu-latest' && matrix.cxx_compiler == 'clang++' && 'clang++-19' || matrix.cxx_compiler }}
+        build-dir: build
+        build-args: "--config ${{ matrix.build_type }}"
+        options: |
+          CMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          BUILD_DOC=OFF
+          ${{ runner.os == 'Windows' && 'CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake' || '' }}
+
+    - name: Upload executable as artifact
+      if: matrix.build_type == 'RelWithDebInfo'
+      uses: actions/upload-artifact@v4
+      with:
+        name: yuclid-${{ runner.os }}-${{ matrix.cxx_compiler }}
+        path: ${{ runner.os == 'Windows' && format('build/src/{0}/yuclid.exe', matrix.build_type) || 'build/src/yuclid' }}
+        retention-days: 7
+
+    - name: Run CTest
+      uses: threeal/ctest-action@v1.1.0
+      with:
+        test-dir: build
+        build-config: ${{ matrix.build_type }}
+        args: "--output-on-failure"
+
+    - name: Upload CMake logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cmake-configure-log-${{ runner.os }}-${{ matrix.cxx_compiler }}
+        path: build/CMakeFiles/CMakeConfigureLog.yaml
+        retention-days: 7

@@ -1,0 +1,12 @@
+point a 0 0
+point b 4 0
+point c 1 3
+point p 0.5 0.5
+point q 4.5 4.5
+point r -1.5 4.5
+assume simtri a b c p q r
+prove eqangle b a b c q p q r
+prove eqangle a b a c p q p r
+prove eqangle a c b c p r q r
+prove eqratio b a b c q p q r
+prove eqratio b c a c q r p r

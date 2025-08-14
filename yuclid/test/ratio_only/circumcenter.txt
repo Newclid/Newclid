@@ -1,0 +1,10 @@
+point o 0 0
+point a 5 0
+point b 3 4
+point c 0 5
+point m 2.5 2.5
+assume cong o a o b
+assume cong o b o c
+assume coll a m c
+assume cong a m m c
+prove perp o m a c

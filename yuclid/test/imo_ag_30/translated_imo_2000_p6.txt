@@ -1,0 +1,43 @@
+point a 0 0
+point b 1 0
+point c 1.085997149765491443 1.5058381054672271837
+point h 1.085997149765491443 -0.062020385321768838061
+point t1 1.0185787062200146735 0.32531919781840562544
+point t2 0.39433828511269736206 0.54678745362777958494
+point t3 0.67415072687817678698 -0
+point i 0.674150726878176898 0.34498919050576376533
+point h1 0.99674914632557132244 -0.056923506786003198743
+point h2 0.34215577353814596862 0.47443144939249015657
+point h3 1.085997149765491443 -0
+point x1 1.2425323874152216508 0.63585222921376916005
+point x2 0.39942469965957960731 0.63585222921376916005
+point y2 0.48354818289946432941 0.54678745362777969596
+point y3 0.43324493881613967972 -0.33403873626165819788
+point z 0.48863459744634663018 0.63585222921376916005
+assume perp h a b c
+assume perp h b c a
+assume equal_angles b a i i a c
+assume equal_angles a c i i c b
+assume coll t1 b c
+assume perp i t1 b c
+assume coll t2 c a
+assume perp i t2 c a
+assume coll t3 a b
+assume perp i t3 a b
+assume perp h1 a b c
+assume coll h1 b c
+assume perp h2 b c a
+assume coll h2 c a
+assume perp h3 c a b
+assume coll h3 a b
+assume cong t1 h1 t1 x1
+assume cong t2 h1 t2 x1
+assume cong t1 h2 t1 x2
+assume cong t2 h2 t2 x2
+assume cong t2 h2 t2 y2
+assume cong t3 h2 t3 y2
+assume cong t2 h3 t2 y3
+assume cong t3 h3 t3 y3
+assume coll z x1 x2
+assume coll z y2 y3
+prove cong i z i t1

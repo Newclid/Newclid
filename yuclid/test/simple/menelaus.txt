@@ -1,0 +1,12 @@
+point a 0 0
+point b 2 0
+point c 0 2
+point d 0 1
+point e 3 0
+point f 1.5 0.5
+assume coll a c d
+assume coll a b e
+assume coll b c f
+assume coll d e f
+assume cong a d d c
+prove eqratio c f f b a e b e

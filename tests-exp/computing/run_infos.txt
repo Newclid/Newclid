@@ -1,1 +1,0 @@
-{'runtime': 3.0279159545898438e-05, 'success': True, 'steps': 1, '∠(AB,BC) = 1pi/3 succeeded': True, '∠(BC,AB) = 2pi/3 succeeded': True}

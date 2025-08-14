@@ -1,0 +1,7 @@
+point a 0 0
+point b 3 0
+point c 1 1
+point h 1 2
+assume perp a b c h
+assume perp a c b h
+prove perp b c a h

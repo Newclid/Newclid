@@ -1,0 +1,15 @@
+point a 0 0
+point b 1 0
+point c 5 5
+point d 6 6
+point m 10 10
+point n 9 11
+point p 3 7
+point q 5 7
+point e -3 -3
+point f -4 -2
+point r -7 -7
+point u -7 -10
+assume eqangle a b c d m n p q
+assume eqangle c d e f p q r u
+prove eqangle a b e f m n r u

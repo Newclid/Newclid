@@ -1,1 +1,0 @@
-{'runtime': 8371.561145067215, 'success': False, 'steps': 5893, 'IT₁ = IZ succeeded': False}

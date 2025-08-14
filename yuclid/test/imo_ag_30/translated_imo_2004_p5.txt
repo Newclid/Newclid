@@ -1,0 +1,12 @@
+point a 0 0
+point b 1 0
+point c -0.97894375451378101705 1.1883802174304904931
+point o 0.5 1.4092805152200271745
+point d 0.869544778628208892 2.8582485021567478611
+point p 3.6725287981816134852 4.0226926264635052277
+assume cong o a o b
+assume cong o b o c
+assume cong o d o a
+assume equal_angles p b c a b d
+assume equal_angles p d c a d b
+prove cong a p c p

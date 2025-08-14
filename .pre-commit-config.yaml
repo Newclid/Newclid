@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.11.13
     hooks:
       - id: ruff
         args: [--fix]
@@ -14,11 +14,22 @@ repos:
         types: [file, python]
       - id: trailing-whitespace
         types: [file, python]
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: bash -c "cd newclid/src && uv run mypy ."
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
   - repo: local
     hooks:
       - id: pytest
         name: pytest
-        entry: pytest tests
+        entry: uv run pytest -n auto -vv
         language: system
         pass_filenames: false
         always_run: true

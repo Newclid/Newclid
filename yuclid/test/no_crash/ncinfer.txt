@@ -1,0 +1,42 @@
+point a 0.29662911713597645 -1.3789713903267908
+point b 0.45471137209779405 -0.6658630446914687
+point c 1.5557191287740997 -0.8282774669631005
+point d 0.6867451530556272 -0.7000913525787206
+point e 0.7509498517395199 -1.1802630648761026
+point f 0.4039496698201773 -0.8948488568028105
+point i 0.6499704888797129 -0.9493868889020359
+point r 0.41245394789732837 -1.033568437448876
+point p 0.5112217906956164 -0.7390313824178953
+point o1 1.0372901823744343 -0.7389500530694156
+point o2 0.39262707969559935 -0.7722195114594946
+point q 0.5140081721304461 -0.7930230636990163
+point t 0.5552244539380973 -1.591670486171361
+point g 0.4044905610973511 -1.0063100424684661
+assume eqangle a b a i a i a c
+assume eqangle a c c i c i b c
+assume eqangle a b b i b i b c
+assume coll b c d
+assume perp b c d i
+assume coll a c e
+assume perp a c e i
+assume coll a b f
+assume perp a b f i
+assume cong e i d i
+assume cong f i e i
+assume perp d r e f
+assume cong i r d i
+assume coll a p r
+assume cong i p d i
+assume circle o1 c e p
+assume cong e o1 c o1
+assume cong o1 p c o1
+assume circle o2 b f p
+assume cong f o2 b o2
+assume cong b o2 o2 p
+assume cong o1 p o1 q
+assume cong o2 q o2 p
+assume coll p q t
+assume coll d i t
+assume cyclic d e f g
+assume perp b g c d
+prove perp a i a t

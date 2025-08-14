@@ -1,0 +1,8 @@
+point o 0 0
+point a 0 5
+point b -4 3
+point c 3 -4
+point x 7 5
+assume circle o a b c
+assume perp o a a x
+prove eqangle a x a b c a c b

@@ -1,0 +1,7 @@
+point a 0 0
+point b 10 0
+point c 7 4
+point d 3 4
+assume cyclic a b c d
+assume para a b c d
+prove eqangle a d c d c d c b

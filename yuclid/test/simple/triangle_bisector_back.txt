@@ -1,0 +1,7 @@
+point a 0 0
+point b 4 0
+point c 0 1
+point d 0.8 0.8
+assume eqratio a b a c d b d c
+assume eqangle b a d d a c
+prove coll b c d

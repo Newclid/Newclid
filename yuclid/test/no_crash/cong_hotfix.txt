@@ -1,0 +1,29 @@
+point a -1.3659581394889708 0.93941168147457
+point b 0.12406543422443593 1.8768720790034035
+point c 1.4951950639834173 -0.22936974767919138
+point o 0.05556973791150371 0.3328698734813373
+point m -0.6209463526322675 1.4081418802389867
+point n 0.06461846224722323 0.3550209668976893
+point t 1.3508191010291337 1.1760564236668902
+point x -1.0725706740294683 -2.4287949451739332
+point y 0.04282740851774175 0.35312285828024187
+point k 0.051604092044510934 0.37501281177795975
+point d1 1.201785268773513 -0.09011409045623815
+assume circle o a b c
+assume cong a o b o
+assume cong a o c o
+assume midp m a b
+assume midp n a c
+assume eqangle a b a t a t a c
+assume cong a o o t
+assume cyclic a m t x
+assume cong c x a x
+assume eqangle a c a x c x a c
+assume cyclic a n t y
+assume cong b y a y
+assume eqangle a b a y b y a b
+assume coll k m n
+assume coll k x y
+assume para d1 t m x
+assume perp a d1 k y
+prove cong k t a k

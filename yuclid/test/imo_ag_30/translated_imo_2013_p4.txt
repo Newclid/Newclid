@@ -1,0 +1,27 @@
+point a 0 0
+point b 1 0
+point c -0.93718639453301721964 1.0817156764141988567
+point h -0.93718639453301721964 -1.6783566811651160489
+point m 0.42877694782980940724 -0.49490127989283105858
+point n -0.93718639453301733067 -0
+point w -0.33185683577727065341 0.74370252757581511993
+point o1 0.031406802733491334667 -0.1701748023025377865
+point o2 -1.6608580094670810645 -0.92530151634594148824
+point x 0.39467044124425332274 -1.0840521321808906929
+point y -2.9898591831568914756 -2.5943055602676978744
+assume perp h a b c
+assume perp h b c a
+assume coll m h b
+assume coll m a c
+assume coll n h c
+assume coll n a b
+assume coll w b c
+assume cong o1 b o1 n
+assume cong o1 n o1 w
+assume cong o2 c o2 m
+assume cong o2 m o2 w
+assume coll x o1 w
+assume cong o1 x o1 w
+assume coll y o2 w
+assume cong o2 y o2 w
+prove coll x h y

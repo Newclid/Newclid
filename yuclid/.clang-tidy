@@ -1,0 +1,24 @@
+---
+Checks:
+  - 'boost-*'
+  - 'bugprone-*'
+  - 'clang-analyzier-*'
+  - 'cppcoreguidelines-*'
+  - 'performance-*'
+  - 'portability-*'
+  - 'readability-*'
+  - 'modernize-*'
+  - '-modernize-use-trailing-return-type'
+  - 'misc-*'
+  - '-bugprone-easily-swappable-parameters'
+WarningsAsErrors: ''
+HeaderFileExtensions:
+  - hpp
+ImplementationFileExtensions:
+  - cpp
+HeaderFilterRegex: '.*'
+User:            yury@harmonic_fun
+SystemHeaders:   false
+readability-identifier-length.AllowedShortNames:
+  - 'x'
+  - 'y'

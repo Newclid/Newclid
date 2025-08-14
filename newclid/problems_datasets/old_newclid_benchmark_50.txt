@@ -1,0 +1,72 @@
+2009_sl_g3
+a b c = triangle a b c; x y z i = incenter2 x y z i a b c; g = on_line g b y, on_line g c z; r = parallelogram r b c y; s = parallelogram s z b c ? cong g r g s
+2009_sl_g6
+a b c d = quadrangle a b c d; p = on_line p a d, on_line p b c; o1 = circle o1 a b p; o2 = circle o2 d c p; h1 = orthocenter h1 a b p; h2 = orthocenter h2 d c p; e1 = midpoint e1 o1 h1; e2 = midpoint e2 o2 h2; z = on_tline z e1 c d, on_tline z e2 a b ? coll z h1 h2
+2010_sl_g1
+a b c = triangle a b c; d = foot d a b c; e = foot e b a c; f = foot f c a b; o = circle o a b c; p = on_line p e f, on_circle p o a; q = on_line q b p, on_line q d f ? cong a p a q
+2010_sl_g2
+m l k = iso_triangle m l k; o = circle o m l k; p = free p; a = on_circle a o m, on_line a k p; b = on_circle b o m, on_line b l p; c = on_circle c o m, on_line c m p; s = on_line s a b, on_tline s c c o ? cong s c s p
+2011_sl_g6
+a b c = iso_triangle a b c; d = midpoint d a c; o = circle o d b c; e = on_circle e o d, angle_bisector e b a c; o2 = circle o2 a e b; f = on_line f b d, on_circle f o2 a; i = on_line i a f, on_line i b e; k = on_line k c i, on_line k b d; x = foot x i a b; y = foot y i b k; z = foot z i a k ? circle i x y z
+2012_sl_g2
+a b c = triangle a b c; o = circle o a b c; d = on_circle d o a; e = on_line e a c, on_line e b d; f = on_line f b c, on_line f a d; g = parallelogram g d e c; h = reflect h e a d ? cyclic d h f g
+2012_sl_g3
+a b c = triangle a b c; d = foot d a b c; e = foot e b a c; f = foot f c a b; i1 = incenter i1 a e f; i2 = incenter i2 b d f; o1 = circle o1 a c i1; o2 = circle o2 b c i2 ? para o1 o2 i1 i2
+2012_sl_g4
+a b c = triangle a b c; o = circle o a b c; d = angle_bisector d b a c, on_line d b c; m = midpoint m b c; e = mirror e d m; x = on_tline x d b c, on_line x a o; y = on_tline y e b c, on_line y a d ? cyclic b x c y
+2013_sl_g2
+a b c = triangle a b c; w = circle w a b c; m = midpoint m a b; n = midpoint n a c; t = on_bline t b c, on_circle t w a; w2 = circle w2 a m t; w3 = circle w3 a n t; x = on_circle x w2 a, on_bline x a c; y = on_circle y w3 a, on_bline y a b; k = on_line k m n, on_line k x y ? cong k a k t
+2013_sl_g4
+a b c = triangle a b c; p = on_line p a c, on_aline p b a b c a; q = on_line q a c, on_aline q b a a c b; d = on_line d b q, on_circle d p b; o = circle o a b c; r = on_circle r o a, on_line r a d ? cong q b q r
+2014_sl_g3
+a b c = triangle a b c; o = circle o a b c; m = angle_bisector m a b c, on_circle m o a; f = midpoint f b m; p = angle_bisector p a o b, on_circle p f b; q = angle_bisector q b o c, on_circle q f b; r = on_line r p q, on_bline r b m ? para a c b r
+2015_sl_g1
+a b c = triangle a b c; h = orthocenter h a b c; g = parallelogram g h a b; i1 = on_line i1 a c, on_line i1 h g; i = mirror i h i1; o = circle o g c i; j = on_circle j o g, on_line j a c ? cong i j a h
+2015_sl_g3
+c a b = r_triangle c a b; h = foot h c a b; z = on_line z c h; d = mirror d a z; p = on_line p b d, on_line p c h; o = midpoint o b d; q = on_dia q p o, on_circle q o b; y = on_line y a d, on_line y c q ? cong o y o b
+2015_sl_g5
+a b c = triangle a b c; d = midpoint d a b; f = midpoint f a c; g = midpoint g b c; o = on_bline o d c, on_tline o d a b; h = on_line h a f, on_circle h o d; i = on_line i b g, on_circle i o d; h1 = mirror h1 h f; i1 = mirror i1 i g; q = on_line q h1 i1, on_line q c d; m = on_line m h1 i1, on_line m f g; p = on_line p c m, on_circle p o d ? cong c q q p
+2016_sl_g2
+a b c = triangle a b c; i = incenter i a b c; w = circle w a b c; m = midpoint m b c; d = foot d i b c; f = on_line f a b, on_tline f i a i; e = on_line e a c, on_tline e i a i; o = circle o a e f; x = on_circle x o a, on_circle x w a; y = on_line y x d, on_line y a m ? cyclic y a b c
+2016_sl_g4
+a b c = iso_triangle a b c; i = incenter i a b c; d = on_line d b i, on_line d a c; e = on_tline e d a c, on_line e a i; z = reflect z i a c ? cyclic z b d e
+2016_sl_g5
+a b c = triangle a b c; o = circle o a b c; i = orthocenter i a b c; d = foot d a o i; x = on_line x a b; s = circle s x a d; y = on_line y a c, on_circle y s a; p = foot p a b c; m = midpoint m b c; w2 = circle w2 x s y ? cong w2 p w2 m
+2016_sl_g6
+d b c = triangle d b c; a = eqangle2 a b c d; e = on_line e a c, angle_bisector e a b c; f = on_line f a c, angle_bisector f a d c; p = on_line p e b, on_line p d f; m = midpoint m a c; o = circle o b p d; x = on_line x b m, on_circle x o b; y = on_line y d m, on_circle y o b; q = on_line q x e, on_line q y f ? perp a c p q
+2017_sl_g3
+a b c = triangle a b c; o = circle o a b c; z = foot z b c a; p = on_line p b z, on_line p o a; y = foot y c a b; q = on_line q o a, on_line q c y; h = on_line h b z, on_line h c y; o2 = circle o2 p q h; m = midpoint m b c ? coll o2 a m
+2017_sl_g4
+a b c = triangle a b c; d e f o = excenter2 d e f o a b c; o2 = circle o2 a e f; p = on_line p b c, on_circle p o2 a; q = on_line q b c, on_circle q o2 a; m = midpoint m a d; o3 = circle o3 m p q; z = on_circle z o3 m, on_circle z o d ? coll z o o3
+2017_sl_g7
+r s t = triangle r s t; i = circle i r s t; q = on_circle q i r; a = on_tline a r r i, on_tline a s s i; b = on_tline b s s i, on_tline b t t i; c = on_tline c t t i, on_tline c q q i; d = on_tline d q q i, on_tline d r r i; ia = incenter ia d a b; ib = incenter ib a b c; ic = incenter ic b c d; id = incenter id c d a; oa = circle oa a ib id; oc = circle oc ib id c; x1 x2 x3 x4 = cc_tangent x1 x2 x3 x4 oa a oc c; x = on_line x x1 x2, on_line x x3 x4; ob = circle ob b ia ic; od = circle od d ia ic; y1 y2 y3 y4 = cc_tangent y1 y2 y3 y4 ob b od d; y = on_line y y1 y2, on_line y y3 y4 ? perp x i i y
+2018_sl_g2
+a b c = iso_triangle a b c; m = midpoint m b c; p = on_pline p a b c; x = on_line x p b; y = on_line y p c, eqangle3 y p m x p m ? cyclic a p x y
+2018_sl_g4a
+a b c = triangle a b c; t = free t; a1 = reflect a1 t b c; b1 = reflect b1 t a c; c1 = reflect c1 t a b; o = circle o a1 b1 c1; a2 = on_line a2 a1 t, on_circle a2 o a1; b2 = on_line b2 b1 t, on_circle b2 o a1; c2 = on_line c2 c1 t, on_circle c2 o a1; z = on_line z a a2, on_line z b b2 ? coll z c c2
+2018_sl_g4b
+a b c = triangle a b c; t = free t; a1 = reflect a1 t b c; b1 = reflect b1 t a c; c1 = reflect c1 t a b; o = circle o a1 b1 c1; a2 = on_line a2 a1 t, on_circle a2 o a1; b2 = on_line b2 b1 t, on_circle b2 o a1; c2 = on_line c2 c1 t, on_circle c2 o a1; z = on_line z a a2, on_line z b b2 ? cyclic z a1 b1 c1
+2018_sl_g5
+a b c = triangle a b c; o = circle o a b c; i = incenter i a b c; d = on_line d a i; e = on_line e b i; f = on_line f c i, on_line f d e; x1 = on_bline x1 b e, on_bline x1 c f; y1 = on_bline y1 a d, on_bline y1 c f; z1 = on_bline z1 a d, on_bline z1 b e; o2 = circle o2 x1 y1 z1; t = on_circle t o2 x1, on_circle t o a ? coll t o2 o
+2018_sl_g7
+a b c = triangle a b c; o = circle o a b c; p = on_circle p o a; oa = circle oa a o p; ob = circle ob b o p; oc = circle oc c o p; la = on_tline la oa b c; lb = on_tline lb ob c a; lc = on_tline lc oc a b; z = on_line z la oa, on_line z lb ob; y = on_line y lb ob, on_line y lc oc; x = on_line x lc oc, on_line x la oa; o2 = circle o2 x y z ? perp o p o2 p
+2019_sl_g1
+a b c = triangle a b c; d = on_line d a b; e = on_line e a c; o = circle o a d e; f = on_line f b c, on_circle f o a; g = on_line g b c, on_circle g o a; o2 = circle o2 b d f; o3 = circle o3 c e g; t = on_tline t f f o2, on_tline t g g o3 ? para a t b c
+2019_sl_g2
+a b c = triangle a b c; d = foot d a b c; e = foot e b a c; f = foot f c a b; ob = incenter ob b d f; oc = incenter oc c d e; m = on_line m d f, on_tline m ob d f; n = on_line n d e, on_tline n oc d e; p = on_line p m n, on_circle p ob m; q = on_line q m n, on_circle q oc n ? cong m p n q
+2019_sl_g7
+a b c = triangle a b c; d e f i = incenter2 d e f i a b c; r = on_tline r d e f, on_circle r i d; p = on_line p a r, on_circle p i d; o2 = circle o2 p c e; o3 = circle o3 p b f; q = on_circle q o2 p, on_circle q o3 p; z = on_line z d i, on_line z p q ? eqangle b a a z a z a c
+2020_sl_g7a
+a b c = triangle a b c; o = circle o a b c; p = on_circle p o a; ma = midpoint ma b c; mb = midpoint mb a c; mc = midpoint mc a b; d = reflect d p mb mc; e = reflect e p ma mc; f = reflect f p ma mb; wa = circle wa a d p; wb = circle wb b e p; wc = circle wc c f p; x = on_bline x a d, on_bline x b e; y = on_bline y c f, on_bline y b e; z = on_bline z c f, on_bline z a d; w = circle w x y z; q = on_circle q wa a, on_circle q wb b ? cyclic q c f p
+2020_sl_g7b
+a b c = triangle a b c; o = circle o a b c; p = on_circle p o a; ma = midpoint ma b c; mb = midpoint mb a c; mc = midpoint mc a b; d = reflect d p mb mc; e = reflect e p ma mc; f = reflect f p ma mb; wa = circle wa a d p; wb = circle wb b e p; wc = circle wc c f p; x = on_bline x a d, on_bline x b e; y = on_bline y c f, on_bline y b e; z = on_bline z c f, on_bline z a d; q = on_circle q wa a, on_circle q wb b ? cyclic q x y z
+2020_sl_g8
+a b c = triangle a b c; i = incenter i a b c; o = circle o a b c; wb = on_bline wb b i; wc = on_bline wc c i, on_line wc i wb; p = on_circle p wb i, on_circle p o a; m = on_circle m wb i, on_line m a b; q = on_circle q wc i, on_circle q o a; n = on_circle n wc i, on_line n a c; x = on_line x p m, on_line x q n; y = on_tline y b b wb, on_tline y c c wc ? coll a x y
+2021_sl_g1
+c a b = iso_triangle c a b; d = parallelogram d a b c; p = on_line p a b; o = circle o a c d; q = on_line q p d, on_circle q o a; o2 = circle o2 a p q; r = on_line r p c, on_circle r o2 a; y = on_line y c d, on_line y a q ? coll y b r
+2021_sl_g4
+a b c = triangle a b c; o = circle o a b c; d = on_circle d o a; e = on_tline e d d o, on_line e b a; f = on_tline f d d o, on_line f b c; t = on_pline t e c d, on_pline t f a d; k = on_line k d f, on_circle k t d; z = on_line z a c, on_line z d t ? coll z b k
+2022_sl_g2
+a b c = triangle a b c; f = foot f a b c; p = on_line p a f; d = on_pline d p a c, on_line d b c; e = on_pline e p a b, on_line e b c; o1 = circle o1 a b d; o2 = circle o2 a c e; x = on_circle x o1 a, on_circle x d a; y = on_circle y o2 a, on_circle y e a ? cyclic b c x y
+2022_sl_g3
+a b c = triangle a b c; d = on_circum d a b c; o1 = on_tline o1 a a c, on_bline o1 a d; o2 = on_tline o2 b b d, on_bline o2 b c; q = on_circle q o1 a, on_line q a b; p = on_circle p o2 b, on_line p a b; m = midpoint m b c; n = midpoint n a d; w1 = circle w1 a n q; x = on_line x c d, on_tline x a a w1; w2 = circle w2 b m p ? perp x b b w2

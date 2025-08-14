@@ -1,0 +1,15 @@
+point a 5 0
+point b 3 4
+point c -4 3
+point p -3 4
+point l -3.4 2.8
+point m -2.88 3.16
+point n 1.8 6.4
+assume cyclic a b c p
+assume coll a l c
+assume perp p l a c
+assume coll m b c
+assume perp p m b c
+assume coll n a b
+assume perp p n a b
+prove coll l m n

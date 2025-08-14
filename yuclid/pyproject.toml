@@ -1,0 +1,106 @@
+[project]
+name = "py-yuclid"
+description = "Python interface to Yuclid geometry solver"
+version = "3.0.0"
+readme = {file = "README.md", content-type = "text/markdown"}
+authors = [
+    {name = "Yury Kudryashov", email = "yury@harmonic.fun"},
+    {name = "AutoMathis", email = "automathis@protonmail.com"}
+]
+dependencies = [
+    "newclid>=3.0.0rc0",
+    "pydantic>=2.11.7",
+]
+classifiers=[
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development',
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+]
+license = "Apache-2.0"
+license-files = ['LICEN[CS]E*', 'NOTICE*']
+
+[project.urls]
+Homepage = "https://github.com/Newclid/Newclid/tree/main/yuclid"
+Repository = "https://github.com/Newclid/Newclid.git"
+
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+cmake.source-dir = "."
+cmake.args = [
+  "-DUSE_STATIC_LINK=ON",
+  "-DBUILD_DOC=OFF"
+]
+build-dir = "build/{wheel_tag}"
+
+[tool.uv.sources]
+newclid = { workspace = true }
+
+[tool.cibuildwheel]
+# Configure cibuildwheel to build for specific platforms and Python versions.
+# For example, this will build wheels for all supported Python versions on
+# Linux (manylinux), macOS, and Windows.
+build = "cp31{0..4}-*"
+build-frontend = "build[uv]"
+build-verbosity = 1
+
+[tool.cibuildwheel.linux.environment]
+Boost_DIR = "/opt/boost/1.88.0/lib/cmake/Boost-1.88.0/"
+
+[tool.cibuildwheel.linux]
+before-all = """
+    set -ex
+    # Update package lists and install g++-14
+    dnf update -y || apt-get update -y
+    dnf install -y gcc-toolset-14 gcc-c++ glibc-static || apt-get install -y g++-14
+
+    source /opt/rh/gcc-toolset-14/enable
+
+    # Define Boost version and install directory
+    BOOST_VERSION="1.88.0"
+    BOOST_MAJOR_VERSION="1_88_0"
+    BOOST_INSTALL_DIR="/opt/boost/${BOOST_VERSION}"
+
+    # Download Boost from the official site
+    curl -L "https://archives.boost.io/release/${BOOST_VERSION}/source/boost_${BOOST_MAJOR_VERSION}.tar.gz" -o boost.tar.gz
+
+    # Extract Boost
+    tar -xzf boost.tar.gz
+    cd boost_${BOOST_MAJOR_VERSION}
+
+    # Bootstrap the Boost build system
+    ./bootstrap.sh
+
+    ./b2 --with-program_options --with-json --with-log --with-test --with-system --prefix="${BOOST_INSTALL_DIR}" link=static install
+
+    cd ..
+"""
+[[tool.cibuildwheel.overrides]]
+select = "*musllinux*"
+
+# The 'before-all' command here will replace the default one for musllinux.
+# It uses the 'apk' package manager.
+before-all = """
+    set -ex
+    apk update
+    apk add g++ boost-dev boost1.84-static
+"""
+
+[tool.cibuildwheel.macos]
+before-all = """
+    brew update
+    brew install boost llvm
+"""
+
+[tool.cibuildwheel.macos.environment]
+CXX="/opt/homebrew/opt/llvm/bin/clang++"
+
+[tool.cibuildwheel.windows.environment]
+CMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"

@@ -1,0 +1,9 @@
+point a 0 0
+point b 0 1
+point c 1 0
+point d 3 0
+point e 5 5
+point f 5 7
+assume perp a b c d
+assume perp c d e f
+prove para a b e f

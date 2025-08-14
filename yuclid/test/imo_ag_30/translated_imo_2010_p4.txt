@@ -1,0 +1,44 @@
+point s 0.36540361223946404845 -0.076360472776242804827
+point c 1.5462644351216456862 0.65236106218985334682
+point p 0.84407928969329004687 1.2260745368712431258
+point o 1.0601650137872140611 1.4400635454247361356
+point a 0.85650689231723420303 2.3429983266107248241
+point b 0.520560971622251345 0.68800282500696086085
+point m 0.19136551475113375287 1.7593679143123623909
+point l 1.4713470648719411127 2.2693386327038767014
+point k 0.83646654957944022168 0.54188380471180219722
+assume equal_angles s c p c p s
+assume cong s c s p
+assume perp o c s c
+assume cong o a o c
+assume cong o b o c
+assume coll b s a
+assume coll m c p
+assume cong o m o c
+assume coll l b p
+assume cong o l o c
+assume coll k a p
+assume cong o k o c
+prove cyclic b k l m
+prove para c m c p
+prove circumcenter o c k m
+prove equal_angles s c m c k m
+prove equal_angles p c s m k c
+prove equal_angles m k c s p c
+prove equal_angles m k c s p m
+prove cyclic b c k m
+prove equal_angles c m b c k b
+prove coll c m p
+prove equal_angles c k b p m b
+prove circumcenter o a b c
+prove equal_angles s c b c a b
+prove equal_angles c s a c s b
+prove equal_angles p s b p s a
+prove eqratio a s c s c s b s
+prove eqratio a s p s p s b s
+prove simtrir b p s p a s
+prove equal_angles s p b p a s
+prove cyclic a b k m
+prove equal_angles k a b k m b
+prove equal_angles k b m m b l
+prove cong m k m l

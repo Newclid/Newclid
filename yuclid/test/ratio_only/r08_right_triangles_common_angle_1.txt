@@ -1,0 +1,11 @@
+point a 0 0
+point b 1 0
+point c 3 1
+point d 3 5
+point e 1 1
+point f 4 5
+point g -1 -1
+point h -5 2
+assume perp a b c d
+assume perp e f g h
+prove eqangle a b e f c d g h

@@ -1,0 +1,11 @@
+point a 2 0
+point b 0 3
+point d 6 0
+point c 0 9
+point m 10 0
+point n 0 15
+assume para a b c d
+assume coll m a d
+assume coll n b c
+assume eqratio m a m d n b n c
+prove para m n a b

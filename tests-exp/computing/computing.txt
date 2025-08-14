@@ -1,2 +1,0 @@
-computing
-a = free a; b = lconst b a 3; c = eq_triangle c a b ? acompute a b b c; acompute b c a b

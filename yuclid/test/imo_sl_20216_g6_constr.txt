@@ -1,0 +1,66 @@
+name IMO SL 2016 G6 with aux
+point a 0 0
+point b 1 0
+point c 0.56989583279791278247 1.4111704241145401895
+point d -0.71916922034094710181 0.89348820124061512082
+point p 0.07316617280255144351 0.68644127222066708693
+point e 0.23023677204217454784 0.57011001757005319579
+point f 0.25773877082059315491 0.63821019491228814235
+point m 0.28494791639895639124 0.70558521205727009473
+point o -0.97200876220831022856 -1.6936818831720716894
+point x 0.69524164997523685283 0.30072352764224913324
+point y -0.27221267761852374623 0.80984808860866497326
+point q -0.07122692310018084727 0.74475387729910069723
+point o1 0.5 0.61873724232629767616
+point z 1.6094304019223573121 -1.9995392380027472434
+point b' -0.23762991407280467659 0.91662629030641140648
+point s -1.8727906013164465904 -4.1321176436432400791
+point o2 0.069895832797912949008 0.79243318178824240228
+point x' -0.12534581717732407036 1.1104468964722911117
+point v 1.2376299140728046488 0.32084819434618377931
+point n 0.80752574687071732029 0.49454413380812867196
+point t -1.1991247714362041066 -2.9692608980243742067
+point p' 0.89150969895017218025 0.35595633760243328148
+point w -2.9440175244166222335 0
+assume equal_angles a d c c b a
+assume equal_angles a b p p b c
+assume equal_angles a d p p d c
+assume coll e b p
+assume coll e a c
+assume coll f d p
+assume coll f a c
+assume coll m a c
+assume cong m a m c
+assume cong o b o p
+assume cong o p o d
+assume coll x m b
+assume cong o b o x
+assume coll y m d
+assume cong o d o y
+assume coll q x e
+assume coll q y f
+assume cong o1 a o1 b
+assume cong o1 b o1 c
+assume coll z b c
+assume coll z a d
+assume coll b' b e
+assume cong o1 b' o1 a
+assume para s p a c
+assume cong o s o b
+assume cong o2 a o2 d
+assume cong o2 d o2 c
+assume coll x' x m
+assume cong m x m x'
+assume cong v a v c
+assume equal_angles v a c a c v
+assume cong o1 v o1 a
+assume cong n a n c
+assume equal_angles n a c a c n
+assume cong o2 n o2 a
+assume perp t b b e
+assume coll t a c
+assume perp p' p a c
+assume coll p' b c
+assume coll w a b
+assume coll w c d
+prove perp p q a c

@@ -1,0 +1,8 @@
+point a 0 0
+point b 4 6
+point m 2 3
+point c 1 -1
+point d 3 7
+assume midp m a b
+assume midp m c d
+prove para a c b d

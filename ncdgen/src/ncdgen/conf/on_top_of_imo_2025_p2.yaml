@@ -1,0 +1,10 @@
+initial_jgex_problem: "a m n = triangle a m n; b = on_circle b m a, on_circle b n a; c = on_line c m n, on_circle c m a; d = on_line d m n, on_circle d n a; p = circle p a c d; e = on_line e a p, on_circle e m a; f = on_line f a p, on_circle f n a; h = orthocenter h p m n; o = circle o b e f; x = on_dia x o h, on_pline x h a p ? cong o x o b; obtuse_angle c m n; obtuse_angle m n d"
+min_pts: 1
+max_pts: 50
+random_seed: null
+debug: False
+emit_only_double_checked_aux_subproblems: True
+double_check_probability: 1.0
+attempts_per_clause: 1
+attempts_per_diagram_build: 1
+log_level: WARNING

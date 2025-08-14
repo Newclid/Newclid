@@ -1,0 +1,10 @@
+min_pts: 20
+max_pts: 40
+random_seed: null
+debug: False
+emit_only_double_checked_aux_subproblems: True
+double_check_probability: 1.0
+attempts_per_clause: 1
+attempts_per_diagram_build: 1
+max_check_per_predicate: 10
+log_level: WARNING

@@ -1,0 +1,74 @@
+ninepoints
+a b c = triangle a b c; m = midpoint m a b; n = midpoint n b c; p = midpoint p a c; f1 = foot f1 a b c; f2 = foot f2 b a c; f3 = foot f3 c a b ? cyclic m n p f1 f2 f3
+finding_center_giving_cyclic
+a b c = triangle a b c; d = on_circum d a b c; o = iso_triangle_vertex o a b, iso_triangle_vertex o c d ? cong o a o c
+finding_mutual_circles
+a b = segment a b; c = free c; d = on_circum d c a b; o = circle o a b c; e = eqdistance e o d o; f = on_circum f e d c ? cyclic a b c d e f
+miquel_theorem_angles
+a b c = triangle a b c; a1 = on_line a1 b c; b1 = on_line b1 a c; c1 = on_line c1 a b; m = on_circum m a b1 c1, on_circum m b a1 c1 ? eqangle a1 m b c b1 m a c; eqangle a1 m b c c1 m a b
+miquel_quadrangle_theorem1
+a b c d = quadrangle a b c d; e = on_line e a b, on_line e c d; f = on_line f b c, on_line f a d; o1 = circle o1 b c e; o2 = circle o2 c d f; o3 = circle o3 a d e; o4 = circle o4 a b f; m = intersection_cc m o1 o2 c ? cyclic m a b f
+miquel_quadrangle_theorem2
+a b c d = quadrangle a b c d; e = on_line e a b, on_line e c d; f = on_line f b c, on_line f a d; o1 = circle o1 b c e; o2 = circle o2 c d f; o3 = circle o3 a d e; o4 = circle o4 a b f; m = intersection_cc m o1 o2 c ? cyclic m a d e
+miquel_theorem_circumcenter_implies_line
+a b c = triangle a b c; f = on_circum f a b c; pa = on_line pa b c; pb = on_circum pb pa f c, on_line pb c a; pc = on_circum pc pb a f, on_line pc a b ? coll pa pb pc
+miquel_theorem_line_implies_circumcenter
+a b c = triangle a b c; a1 = on_line a1 b c; b1 = on_line b1 a c; c1 = on_line c1 a b, on_line c1 b1 a1; m = on_circum m a b1 c1, on_circum m b a1 c1 ? cyclic m a b c
+miquels_circles_centers_are_concyclic
+a b c = triangle a b c; pa = on_line pa b c; pb = on_line pb a c; pc = on_line pc a b, on_line pc pa pb; p = on_circum p a b c, on_circum p pa pb c; oa = circle oa pb pc a; ob = circle ob pa pc b; oc = circle oc pa pb c; o = circle o a b c ? cyclic o oa ob oc p
+two_goals_perp_cong
+a b c = triangle a b c; p = s_angle c b p 45o, s_angle b c p 150o; q = s_angle a c q 30o, s_angle c a q 135o; r = s_angle b a r 15o, s_angle a b r 165o; t = eq_triangle t b r ? perp q r r p; cong q r r p
+pre_reflection_of_points_is_on_circumcenter_of_mirrors
+pa pb = segment pa pb; pc = on_line pc pa pb; p = free p; a1 = on_bline a1 p pb; a2 = on_bline a2 p pc; b1 = on_bline b1 p pa; b2 = on_bline b2 p pc; c1 = on_bline c1 p pa; c2 = on_bline c2 p pb; a = on_line a a1 c2, on_line a a2 b2; b = on_line b b1 c1, on_line b b2 a2; c = on_line c c1 b1, on_line c c2 a1 ? cyclic a b c p
+euler_simplified
+a b c = triangle a b c; h = orthocenter h a b c; g1 g2 g3 g = centroid g1 g2 g3 g a b c; o = circle o a b c ? coll h g o
+euler
+a b c = triangle a b c; h = orthocenter h a b c; h1 = foot h1 a b c; h2 = foot h2 b c a; h3 = foot h3 c a b; g1 g2 g3 g = centroid g1 g2 g3 g a b c; o = circle o a b c ? coll h g o
+worlds_hardest_easy_geometry_problem1
+a b = segment a b; o = s_angle b a o 70o, s_angle a b o 120o; c = s_angle o a c 10o, s_angle o b c 160o; d = on_line d o b, on_line d c a; e = on_line e o a, on_line e c b ? aconst d e a e 1pi/9
+worlds_hardest_easy_geometry_problem1_with_construction
+a b = segment a b; o = s_angle b a o 70o, s_angle a b o 120o; c = s_angle o a c 10o, s_angle o b c 160o; d = on_line d o b, on_line d c a; e = on_line e o a, on_line e c b; f = on_pline f d a b, on_line f b c; g = on_line g f a, on_line g d b ? aconst c a c b 1pi/9
+worlds_hardest_easy_geometry_problem2
+a b = segment a b; o = s_angle b a o 60o, s_angle a b o 130o; c = s_angle o a c 20o, s_angle o b c 150o; d = on_line d o b, on_line d c a; e = on_line e o a, on_line e c b ? aconst d e a e 1pi/6
+double_angle_implies_central_angle
+a o x = triangle a o x; c = eqdistance c o o a; y = angle_mirror y a o x; b = on_aline b c a x o a, on_line b o y ? cong o b o a
+double_angle_implies_central_angle_2
+a o = segment a o; b = eqdistance b o o a; x = angle_bisector x a o b; c = eqangle3 c a b o a x ? cong o c o a
+r50_vs_square_cyclic
+a b = segment a b; c = eqdistance c b a b, on_tline c b a b; d = eqdistance d c c b, eqdistance d a a b; o = on_line o a c, on_line o b d ? cyclic a b c d
+r50_vs_square_center
+a b = segment a b; c = eqdistance c b a b, on_tline c b a b; d = eqdistance d c c b, eqdistance d a a b; o = on_line o a c, on_line o b d ? cong o a o b
+r50_vs_square
+a b = segment a b; c = eqdistance c b a b, on_tline c b a b; d = eqdistance d c c b, eqdistance d a a b; o = on_line o a c, on_line o b d ? cong o a o d
+r50_vs_trapezoid
+a b c = triangle a b c; d = on_circum d a b c, on_pline d c a b; e = on_tline e b b a, on_circum e b c d; o = midpoint o a e ? cong o a o d
+checking_ordering_r27_oac_obd
+o c = segment o c; d = free d; a x = trisegment a x o c; b y = trisegment b y o d; a1 = mirror a1 a o; c1 = mirror c1 c o; b1 = mirror b1 b o; d1 = mirror d1 d o ? para a b c d
+checking_ordering_r27_aoc_bod
+o c = segment o c; d = free d; a x = trisegment a x o c; b y = trisegment b y o d; a1 = mirror a1 a o; c1 = mirror c1 c o; b1 = mirror b1 b o; d1 = mirror d1 d o ? para a1 b1 c d
+checking_ordering_r27_aoc_bod_eqratio
+o c = segment o c; d = free d; a x = trisegment a x o c; b y = trisegment b y o d; a1 = mirror a1 a o; c1 = mirror c1 c o; b1 = mirror b1 b o; d1 = mirror d1 d o ? eqratio o a1 a1 c o b1 b1 d
+checking_ordering_r27_aoc_dob_sameside
+o c = segment o c; d = free d; a x = trisegment a x o c; b y = trisegment b y o d; a1 = mirror a1 a o; c1 = mirror c1 c o; b1 = mirror b1 b o; d1 = mirror d1 d o ? sameside a1 o c b o d1
+regular_square
+a b = segment a b; c = on_tline c b a b, eqdistance c b a b; d = on_circum d a b c, eqdistance d c a b ? cong a b d a; aconst d a a b 1pi/2
+regular_pentagon
+a b = segment a b; c = s_angle a b c 108o, eqdistance c b a b; d = on_circum d a b c, eqdistance d c b c; e = on_circum e b c d, eqdistance e d c d ? cong e a a b; aconst a e b a 3pi/5
+regular_hexagon
+o a = segment o a; b = eqdistance b a o a, eqdistance b o o a; c = on_circle c o a, eqdistance c b a b; d = on_circum d a b c, eqdistance d c b c; e = on_circum e b c d, eqdistance e d c d; f = on_circum f e d c, eqdistance f e e d ? cong a b f a; aconst f a a b 1pi/3
+ar_example_paper_distance_chasing
+a b c = triangle a b c; f g e d = incenter2 f g e d a b c; j k i h = excenter2 j k i h a b c ? cong c j f b
+obm_phase1_2016_p10
+o = free o; a = lconst a o 1; b = s_angle a o b 60o, on_circle b o a; c = s_angle b o c 60o, on_circle c o a; d = s_angle c o d 60o, on_circle d o a; e = s_angle d o e 60o, on_circle e o a; f = s_angle e o f 60o, on_circle f o a; x = s_angle a o x 90o, on_circle x o a; y = s_angle d o y 90o, on_circle y o a; r = on_line r b f, on_line r a x; s = on_line s b f, on_line s a y; t = on_line t b d, on_line t a x; u = on_line u b d, on_line u a y ? lconst r s 1
+imo_2004_p1
+a b c = triangle a b c; o = midpoint o b c; m = on_circle m o b, on_line m a b; n = on_circle n o b, on_line n a c; r = angle_bisector r b a c, angle_bisector r m o n; o1 = circle o1 b m r; o2 = circle o2 c n r; p = on_circle p o1 r, on_circle p o2 r; k = on_bline k m n; l = eqdistance l k k a, eqdistance l o o a ? coll p b c
+imo_2004_p1_generalized
+a b c = triangle a b c; o = free o; m = on_circle m o b, on_line m a b; n = on_circle n o b, on_line n a c; r = angle_bisector r b a c, angle_bisector r m o n; o1 = circle o1 b m r; o2 = circle o2 c n r; p = on_circle p o1 r, on_circle p o2 r; k = on_bline k m n; l = eqdistance l k k a, eqdistance l o o a ? coll p b c
+imo_2009_p2_angle_chase_verification
+m l k = triangle m l k; w = circle w m l k; q = on_tline q m w m; p = mirror p q m; b = mirror b p k; c = mirror c q l; a = on_line a b q, on_line a c p; o = circle o a b c; d = eqdistance d l m k, eqdistance d m l k ? eqangle l d c o q b b o
+2009_sl_g3_excenters
+a b c = triangle a b c; x y z i = incenter2 x y z i a b c; g = on_line g b y, on_line g c z; r = parallelogram r b c y; s = parallelogram s z b c; m n p j = excenter2 m n p j a b c ? cong g r g s
+1995_p1
+a b = segment a b; c = s_angle b a c 30o; h = orthocenter h a b c; m = midpoint m b c; t = eqdistance t m m h, on_line t h m ? rconst a t b c 2/1; perp h a b c
+minimal_example_2l1c
+a b c = triangle a b c; o = circle o a b c; x y z i = 2l1c x y z i a b c o ? cong c x c y

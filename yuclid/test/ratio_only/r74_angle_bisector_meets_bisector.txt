@@ -1,0 +1,7 @@
+point a 4 -3
+point b -4 -3
+point c 3 4
+point d 0 -5
+assume eqangle c a c d c d c b
+assume cong d a d b
+prove cyclic a b c d

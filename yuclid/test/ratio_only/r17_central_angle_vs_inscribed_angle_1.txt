@@ -1,0 +1,8 @@
+point o 0 0
+point a 0 5
+point b -4 3
+point c 3 -4
+point m -0.5 -0.5
+assume circle o a b c
+assume midp m b c
+prove eqangle a b a c o b o m

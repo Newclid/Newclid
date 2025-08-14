@@ -1,0 +1,82 @@
+point p1 -0.7371140266822743 -0.30827356039758924
+point a -0.6660541601845922 -0.954575853732279
+point b -0.8199042784487165 0.4447187011929006
+point i -1.2359967450772766 -0.3631248888436597
+point p2 -1.4810220898607058 0.07488791389074395
+point c -1.808127015298318 -0.10809531544720871
+point p3 -1.7255548388425643 -0.4736939069924328
+point p4 -1.3092822023034187 -0.8596345833156217
+point d -1.6497378883426228 -0.8093828945884605
+point ia -1.05975412586968 -0.546018516987726
+point ib -1.1270850225300928 -0.15167276222266884
+point ic -1.542907222477276 -0.22631819953497645
+point id -1.4743783162954245 -0.6202414128097044
+point oa -0.9972164520151462 -0.6109162251491856
+point oc -1.475693579836201 -0.25627897508099406
+point p5 -0.791155289362494 -0.18044067288800086
+point p6 -1.3185462880793493 0.0720122290184974
+point p7 -1.3491434037282841 -0.9332791022089262
+point p8 -1.7440816964809085 -0.5021208039863169
+point x -3.012913665419976 0.8830764344108094
+point ob -1.060059673802467 -0.021543037024079822
+point od -1.4109396023748524 -0.551816905307791
+point p9 -1.5597576803065536 0.13775707201065424
+point p10 -1.745579785778248 -0.44513603604335006
+point p11 -0.7180705575091002 -0.41918366218644687
+point p12 -1.1819146731000114 -0.8181108068262617
+point y -2.1223177209291237 -1.626900419696793
+assume perp a p1 i p1
+assume perp b p2 i p2
+assume cong i p1 i p2
+assume coll b c p2
+assume perp c p3 i p3
+assume cong i p1 i p3
+assume perp a p4 i p4
+assume cong i p1 i p4
+assume coll a d p4
+assume coll c d p3
+assume eqangle a d d ia d ia b d
+assume eqangle a b b ia b ia b d
+assume eqangle a b a ia a ia a d
+assume eqangle a b a ib a ib a c
+assume eqangle a c c ib c ib b c
+assume eqangle a b b ib b ib b c
+assume eqangle b c b ic b ic b d
+assume eqangle b d d ic d ic c d
+assume eqangle b c c ic c ic c d
+assume eqangle a c c id c id c d
+assume eqangle a c a id a id a d
+assume eqangle a d d id d id c d
+assume circle oa a ib id
+assume cong ib oa a oa
+assume cong a oa id oa
+assume circle oc c ib id
+assume cong ib oc c oc
+assume cong id oc c oc
+assume cong oa p5 a oa
+assume cong oc p6 c oc
+assume perp oa p5 p5 p6
+assume perp oc p6 p5 p6
+assume cong oa p7 a oa
+assume cong oc p8 c oc
+assume perp oa p7 p7 p8
+assume perp oc p8 p7 p8
+assume coll p5 p6 x
+assume coll p7 p8 x
+assume circle ob b ia ic
+assume cong ia ob b ob
+assume cong ic ob b ob
+assume circle od d ia ic
+assume cong d od ia od
+assume cong d od ic od
+assume cong ob p9 b ob
+assume cong d od od p10
+assume perp ob p9 p10 p9
+assume perp od p10 p10 p9
+assume cong b ob ob p11
+assume cong od p12 d od
+assume perp ob p11 p11 p12
+assume perp od p12 p11 p12
+assume coll p10 p9 y
+assume coll p11 p12 y
+prove perp i x i y

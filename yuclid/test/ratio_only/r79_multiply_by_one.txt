@@ -1,0 +1,8 @@
+point a 0 0
+point b 5 0
+point c 1 1
+point d 5 4
+point x -5 -7
+point y 10 10
+assume cong a b c d
+prove eqratio a b x y c d x y

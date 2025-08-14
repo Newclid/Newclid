@@ -1,0 +1,10 @@
+point a 0 0
+point b 4 0
+point c 3 1
+point p 1 1
+point q 1 5
+point r 2 4
+assume cong a b p q
+assume cong b c q r
+assume cong c a r p
+prove contrir a b c p q r

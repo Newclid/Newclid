@@ -1,0 +1,5 @@
+{
+    "python.testing.pytestArgs": ["-n", "auto", "--durations=0", "--log-level=DEBUG", "--log-cli-level=DEBUG", "-vv", "--durations-min=0.01"],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

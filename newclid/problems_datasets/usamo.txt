@@ -1,0 +1,22 @@
+1988_p4
+a b c = triangle a b c; i = incenter i a b c; a1 = circle a1 i b c; b1 = circle b1 i c a; c1 = circle c1 i a b; o = circle o a b c ? circle o a1 b1 c1
+1990_p5
+a b c = triangle a b c; o = midpoint o a b; c1 = foot c1 c a b; m = on_circle m o a, on_line m c c1; n = on_circle n o a, on_line n c c1; o2 = midpoint o2 a c; b1 = foot b1 b a c; p = on_circle p o2 a, on_line p b b1; q = on_circle q o2 a, on_line q b b1 ? cyclic m n p q
+1997_p2
+a b c = triangle a b c; d = on_bline d b c; e = on_bline e c a; f = on_bline f a b; z = on_tline z a e f, on_tline z b f d ? perp z c d e
+1999_p6
+a b c = triangle a b c; d = on_pline d c a b, eqdistance d a b c; e y z o = incenter2 e y z o b c d; f = angle_bisector f d a c, on_tline f e c d; o2 = circle o2 a c f; g = on_line g c d, on_circle g o2 a ? cong f g f a
+2001_p2
+a b c = triangle a b c; d1 e1 z o = incenter2 d1 e1 z o a b c; d2 = on_line d2 b c, eqdistance d2 c b d1; e2 = on_line e2 a c, eqdistance e2 c a e1; p = on_line p a d2, on_line p b e2; q = on_circle q o d1, on_line q a d2 ? cong a q d2 p
+2005_p3
+a b c = triangle a b c; p = on_line p b c; q = on_line p b c; o = circle o a p b; c1 = on_circle c1 o a, on_pline c1 q c a; o2 = circle o2 a p c; b1 = on_circle b1 o2 a, on_pline b1 q b a ? cyclic b1 c1 p q
+2008_p2
+a b c = triangle a b c; m = midpoint m b c; n = midpoint n c a; p = midpoint p a b; d = on_bline d a b, on_line d a m; e = on_bline e a c, on_line e a m; f = on_line f c e, on_line f b d ? cyclic a n f p
+2012_p5
+a b c = triangle a b c; p = free p; r = free r; a1 = reflect a1 a p r; b1 = reflect b1 b p r; c1 = reflect c1 c p r; a2 = on_line a2 b c, on_line a2 p a1; b2 = on_line b2 a c, on_line b2 p b1; c2 = on_line c2 a b, on_line c2 p c1 ? coll a2 b2 c2
+2013_p1
+a b c = triangle a b c; p = on_line p b c; q = on_line q c a; r = on_line r a b; o1 = circle o1 a q r; o2 = circle o2 b r p; o3 = circle o3 c p q; x = on_line x a p, on_circle x o1 a; y = on_line y a p, on_circle y o2 b; z = on_line z a p, on_circle z o3 c ? eqratio y x x z b p p c
+2014_p5
+a b c = triangle a b c; h = orthocenter h a b c; o = circle o a h c; p = on_circle p o a, angle_bisector p b a c; x = circle x a p b; y = orthocenter y a p c; o2 = circle o2 a b c ? cong o2 a x y
+2023_p1
+a b c = triangle a b c; m = midpoint m b c; p = foot p c a m; o = circle o a b p; q = on_line q b c, on_circle q o a; n = midpoint n a q ? cong n b n c

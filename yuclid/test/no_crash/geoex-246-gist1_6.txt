@@ -1,0 +1,49 @@
+point a 0.1867331021849155 -0.5260436726580263
+point b 0.3387375219404339 -1.237958481831985
+point c 0.0462437507277632 -1.3054410769019962
+point d -0.30548240466938603 -0.5801266423101623
+point o1 0.2627353120626747 -0.8820010772450058
+point o2 -0.1296193269708114 -0.9427838596060792
+point e 0.15384185573440456 -1.2293110612009592
+point f 0.05385908138476282 -0.5839193266389191
+point xe 0.32891005254518696 -1.1919313925510753
+point ye 0.1650805706785787 -1.278023682791686
+point ze 0.0368398464602363 -1.2860487530668367
+point oe 0.0778760965498807 -0.9131518166938042
+point xf -0.23557982734269364 -0.7242767078433119
+point yf 0.049160793336612094 -0.5411596511284474
+point zf 0.19275819862081484 -0.5542622954212124
+point of 0.08755533968941764 -0.9138012113727624
+point m 0.10385046855958369 -0.9066151939199392
+point u 0.07824269015298771 -1.288299740301204
+point v 0.12834539521597235 -0.5414142553967296
+assume midp o1 a b
+assume midp o2 c d
+assume cong e o1 a o1
+assume cong c o2 e o2
+assume cong f o1 e o1
+assume cong f o2 e o2
+assume perp a b e xe
+assume coll a b xe
+assume perp b c e ye
+assume coll b c ye
+assume perp c d e ze
+assume coll c d ze
+assume circle oe xe ye ze
+assume cong oe xe oe ye
+assume cong oe ze oe xe
+assume perp c d f xf
+assume coll c d xf
+assume perp a d f yf
+assume coll a d yf
+assume perp a b f zf
+assume coll a b zf
+assume circle of xf yf zf
+assume cong of yf of xf
+assume cong of zf of xf
+assume midp m e f
+assume cong oe xe oe u
+assume cong of u of xf
+assume cong oe u oe v
+assume cong of u of v
+prove coll m u v

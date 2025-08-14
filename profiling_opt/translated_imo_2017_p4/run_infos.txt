@@ -1,1 +1,0 @@
-{'runtime': 233.74405241012573, 'success': True, 'steps': 1205, 'KT ⟂ O₁T succeeded': True}

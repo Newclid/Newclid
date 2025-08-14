@@ -1,0 +1,81 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "newclid"
+version = "3.0.0"
+readme = {file = "README.rst", content-type = "text/x-rst"}
+authors = [
+    {name = "AutoMathis", email = "automathis@protonmail.com"},
+    {name = "Vladmir Sicca", email = "vsiccag@gmail.com"},
+    {name = "Tianxiang Xia", email = "xia.tianxiang00@gmail.com"}
+]
+description = "Solver for plane geometric problems."
+requires-python = ">=3.11"
+classifiers=[
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development',
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+]
+dependencies = [
+    "colorama>=0.4.6",
+    "matplotlib>=3.9",
+    "numpy>=1.23.5",
+    "pybind11>=2.13.6",
+    "pydantic>=2.11.5",
+    "pyvis>=0.3.2",
+    "scipy>=1.10.0",
+    "symengine>=0.14.1",
+    "sympy>=1.13",
+    "typing-extensions>=4.14.0",
+    "cairosvg>=2.8.2",
+]
+
+license = "Apache-2.0"
+license-files = ['LICEN[CS]E*', 'NOTICE*']
+
+[project.urls]
+Homepage = "https://newclid.github.io/Newclid/"
+Repository = "https://github.com/Newclid/Newclid.git"
+
+[project.scripts]
+newclid = "newclid.__main__:main"
+
+[project.optional-dependencies]
+doc = [
+ 'numpy',
+ 'sphinx-autoapi',
+ 'autoapi',
+ 'sphinx_rtd_theme',
+ 'sphinx-autodoc-typehints',
+ 'sphinx-autobuild',
+]
+yuclid = ['py-yuclid']
+
+[tool.uv.sources]
+py-yuclid = {workspace = true}
+
+
+[tool.setuptools.dynamic]
+readme = { file = ["README.md"] }
+
+[tool.mypy]
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "newclid.ggb.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["sympy.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["cairosvg.*"]
+ignore_missing_imports = true

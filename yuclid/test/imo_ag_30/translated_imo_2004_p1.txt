@@ -1,0 +1,36 @@
+point a 0 0
+point b 1 0
+point c -0.25014976956273116127 1.205404383864000506
+point o 0.37492511521863441937 0.60270219193200025298
+point m -0.2501497695627313278 -0
+point n 0.041287908712696427815 -0.19895531484941159084
+point r -0.22667201652323140659 -0.27854127454543997633
+point o1 0.37492511521863436386 -0.087573626279651844984
+point o2 -0.3009504749218784303 0.46244210544985298039
+point p 0.43966779497763547324 0.54027678346922225483
+assume coll o b c
+assume cong o b o c
+assume cong o m o b
+assume coll m a b
+assume cong o n o b
+assume coll n a c
+assume equal_angles b a r r a c
+assume equal_angles m o r r o n
+assume cong o1 b o1 m
+assume cong o1 m o1 r
+assume cong o2 c o2 n
+assume cong o2 n o2 r
+assume cong o1 p o1 r
+assume cong o2 p o2 r
+prove coll p b c
+prove cyclic c n p r
+prove equal_angles n c p n r p
+prove equal_angles m a r r a n
+prove cong o m o n
+prove cong m r n r
+prove cyclic a m n r
+prove equal_angles n a m n r m
+prove cyclic p r b m
+prove equal_angles p r m p b m
+prove para b p c p
+prove coll b c p

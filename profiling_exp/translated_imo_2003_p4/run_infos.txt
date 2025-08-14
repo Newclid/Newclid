@@ -1,1 +1,0 @@
-{'runtime': 798.7773571014404, 'success': True, 'steps': 2004, 'PQ = QR succeeded': True}

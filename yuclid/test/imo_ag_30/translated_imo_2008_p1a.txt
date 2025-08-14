@@ -1,0 +1,34 @@
+point a 0 0
+point b 1 0
+point c -1.1475529743702681529 0.83410368241729226924
+point h -1.1475529743702683749 -2.9545856891726227644
+point d -0.073776487185134076441 0.41705184120864613462
+point e -0.57377648718513407644 0.41705184120864613462
+point f 0.5 0
+point a1 -3.3722163568315255411 1.6981568357482204057
+point a2 3.2246633824612578323 -0.86405315333092824748
+point b1 -3.3402943292776292594 2.4279069137849607074
+point b2 2.1927413549073615506 -1.5938032313676686602
+point c1 -2.8828992592183380061 -0
+point c2 3.8828992592183380061 -0
+assume perp h a b c
+assume perp h b c a
+assume coll d b c
+assume cong d b d c
+assume coll e a c
+assume cong e a e c
+assume coll f a b
+assume cong f a f b
+assume cong d a1 d h
+assume coll a1 b c
+assume cong d a2 d h
+assume coll a2 b c
+assume cong e b1 e h
+assume coll b1 c a
+assume cong e b2 e h
+assume coll b2 c a
+assume cong f c1 f h
+assume coll c1 a b
+assume cong f c2 f h
+assume coll c2 a b
+prove cyclic c1 c2 b1 b2

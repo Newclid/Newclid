@@ -1,1 +1,0 @@
-{'runtime': 654.4989140033722, 'success': True, 'steps': 1678, 'KK₁:LL₁ = QR:PR succeeded': True}

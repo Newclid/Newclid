@@ -1,0 +1,7 @@
+point a 0 0
+point b 6 0
+point p 3 5
+point q 3 -4
+assume cong a p b p
+assume cong a q b q
+prove perp a b p q

@@ -1,7 +1,7 @@
 import os
-from pathlib import Path
 import shutil
 import subprocess
+from pathlib import Path
 
 
 def rename_modules(filepath: Path):
@@ -48,10 +48,20 @@ if __name__ == "__main__":
         pass
     os.mkdir(docsfolder / "source")
     run_command(
-        f"sphinx-apidoc -M -e -f --implicit-namespaces -o {docsfolder / 'source'} {projfolder / 'src' / 'newclid'}"
+        f"sphinx-apidoc -M -e -f --implicit-namespaces -o {docsfolder / 'source'} {projfolder / 'newclid' / 'src' / 'newclid'}"
+    )
+    run_command(
+        f"sphinx-apidoc -M -e -f --implicit-namespaces -o {docsfolder / 'source'} {projfolder / 'ncdgen' / 'src' / 'ncdgen'}"
+    )
+    run_command(
+        f"sphinx-apidoc -M -e -f --implicit-namespaces -o {docsfolder / 'source'} {projfolder / 'yuclid' / 'python' / 'yuclid'}"
     )
     run_command(f"ls {docsfolder / 'source'}")
-    os.remove(docsfolder / "source" / "modules.rst")
+
+    try:
+        os.remove(docsfolder / "source" / "modules.rst")
+    except FileNotFoundError:
+        pass
 
     for folderpath, folders, files in os.walk(docsfolder / "source"):
         for filename in [file for file in files if file.endswith(".rst")]:

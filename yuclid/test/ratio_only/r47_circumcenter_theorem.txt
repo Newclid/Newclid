@@ -1,0 +1,13 @@
+point a 5 0
+point b 4 3
+point c -3 -4
+point m 4.5 1.5
+point x 0 0
+point n 0.5 -0.5
+point p 1 -2
+assume midp m a b
+assume perp x m a b
+assume midp n b c
+assume perp x n b c
+assume midp p c a
+prove perp x p c a

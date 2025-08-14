@@ -1,0 +1,16 @@
+point a 0 0
+point b 5 0
+point d 3 0
+point c 15 0
+point l 2 6
+point m 1 3
+point n 3.8 2.4
+point k 2.714285714285714285 1.714285714285714285
+assume coll a l m
+assume coll a k n
+assume coll b k m
+assume coll b l n
+assume coll c m n
+assume coll d k l
+assume coll a b c d
+prove eqratio a c a d b c b d

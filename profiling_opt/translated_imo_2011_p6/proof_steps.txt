@@ -1,6 +1,0 @@
-==========================
-* From problem construction:
-Points : A, B, C, O, P, Q, P_a, P_b, P_c, Q_a, Q_b, Q_c, A₁, B₁, C₁, O₁, X
-* Proof steps:
-
-==========================

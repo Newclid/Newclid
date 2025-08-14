@@ -1,0 +1,36 @@
+point a -0.5455225564304462 0.1091695740316696
+point c -0.8723654877916494 0.6552623439851641
+point b -0.924339571095228 0.14798175725327242
+point d -0.40270534845709305 0.4686958905112384
+point h -0.6667549985282695 0.3063513759367156
+point k -1.2736209801680172 0.1837678321127368
+point s -0.6577223713053846 0.1206651500057571
+point l -0.28430061287669595 0.766766543488155
+point t -0.5052683095422996 0.21050512954158224
+point o -0.6111991523277669 0.21599105925402962
+point m -0.7695602431599594 0.48080685996093986
+point w -0.7089440221110478 0.3822159590084169
+point p1 -0.7658232231529891 0.48300905645914094
+assume perp a b b c
+assume perp a d c d
+assume perp a h b d
+assume coll b d h
+assume coll a b k
+assume cong h k c k
+assume eqangle c h c k h k c h
+assume cong h k k s
+assume coll a b s
+assume coll a d l
+assume cong c l h l
+assume eqangle c h c l h l c h
+assume cong h l l t
+assume coll a d t
+assume circle o h s t
+assume cong o s h o
+assume cong o t h o
+assume coll k l m
+assume coll c h m
+assume midp w a c
+assume perp a p1 k l
+assume coll k l p1
+prove perp b d h o

@@ -1,0 +1,1 @@
+"""Yuclid plugin for Newclid."""

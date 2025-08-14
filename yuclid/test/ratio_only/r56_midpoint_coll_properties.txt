@@ -1,0 +1,5 @@
+point a 0 0
+point m 1 0
+point b 2 0
+assume midp m a b
+prove coll m a b
