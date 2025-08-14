@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "newclid"
-version = "3.0.0"
+version = "3.0.1"
 readme = {file = "README.rst", content-type = "text/x-rst"}
 authors = [
     {name = "AutoMathis", email = "automathis@protonmail.com"},
@@ -34,7 +34,6 @@ dependencies = [
     "symengine>=0.14.1",
     "sympy>=1.13",
     "typing-extensions>=4.14.0",
-    "cairosvg>=2.8.2",
 ]
 
 license = "Apache-2.0"
@@ -74,8 +73,4 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = ["sympy.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["cairosvg.*"]
 ignore_missing_imports = true

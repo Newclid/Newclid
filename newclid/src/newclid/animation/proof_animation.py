@@ -165,11 +165,11 @@ class ProofAnimation:
         if image_path:
             try:
                 # Read the PNG image
-                img = mpimg.imread(image_path)  # pyright: ignore
+                img = mpimg.imread(image_path)
 
                 # Place the image on the figure
-                self.fig.figimage(  # pyright: ignore
-                    img,  # pyright: ignore
+                self.fig.figimage(
+                    img,
                     15,
                     int(self.fig.get_figheight() * self.fig.dpi) - img.shape[0] - 15,
                 )
