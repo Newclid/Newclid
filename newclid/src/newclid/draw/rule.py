@@ -19,6 +19,7 @@ from newclid.all_rules import (
     R43_ORTHOCENTER_THEOREM,
     R46_INCENTER_THEOREM,
     R49_RECOGNIZE_CENTER_OF_CIRCLE_CYCLIC,
+    R50_RECOGNIZE_CENTER_OF_CYCLIC_CONG,
     R51_MIDPOINT_SPLITS_IN_TWO,
     R52_SIMILAR_TRIANGLES_DIRECT_PROPERTIES,
     R53_SIMILAR_TRIANGLES_REVERSE_PROPERTIES,
@@ -110,6 +111,8 @@ def draw_rule_application(
             return _draw_incenter_theorem(ax, application, symbols, theme)
         case R49_RECOGNIZE_CENTER_OF_CIRCLE_CYCLIC.id:
             return _draw_recognize_center_of_circle(ax, application, theme)
+        case R50_RECOGNIZE_CENTER_OF_CYCLIC_CONG.id:
+            return _draw_center_and_concyclics(ax, application, theme)
         case R51_MIDPOINT_SPLITS_IN_TWO.id:
             return _draw_midpoint(ax, application, theme)
         case R52_SIMILAR_TRIANGLES_DIRECT_PROPERTIES.id:
@@ -948,6 +951,81 @@ def _draw_recognize_center_of_circle(
         ),
     ]
 
+
+def _draw_center_and_concyclics(
+    ax: Axes,
+    application: RuleApplication,
+    theme: DrawTheme,
+) -> list[Artist]:
+    print(application.premises)
+    if len(application.premises) != 4:
+        raise ValueError(
+            f"Unexpected number of premises for rule {application.rule}: {application.premises}"
+        )
+    
+    if application.premises[2].predicate_type != PredicateType.CYCLIC:
+        raise ValueError(
+            f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
+        )
+    
+    cyclic = application.premises[2]
+
+    if application.premises[0].predicate_type != PredicateType.CONGRUENT:
+        raise ValueError(
+            f"Unexpected premise 1 for rule {application.rule}: {application.premises[1]}"
+        )
+    
+    congruent = application.premises[0]
+
+    for point in congruent.segment1:
+        if point not in cyclic.points:
+            center = point
+            break
+    
+    if len(cyclic.points) < 4:
+        raise ValueError(
+            f"Unexpected number of points in cyclic for rule {application.rule}: {cyclic.points}"
+        )
+
+    radius = center.num.distance(cyclic.points[0].num)
+
+    return [
+        draw_circle(
+            ax,
+            (center.num.x, center.num.y),
+            radius,
+            line_color=theme.circle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            cyclic.points[0].num,
+            center.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            cyclic.points[1].num,
+            center.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            cyclic.points[2].num,
+            center.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            cyclic.points[3].num,
+            center.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+    ]
 
 def _draw_midpoint_consequence(
     ax: Axes,
