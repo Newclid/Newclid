@@ -7,9 +7,10 @@ from newclid.api import GeometricSolverBuilder
 from newclid.deductors.sympy_ar.algebraic_manipulator import SympyARDeductor
 from newclid.jgex.problem_builder import JGEXProblemBuilder
 from newclid.justifications._index import JustificationType
-from newclid.predicates import predicate_from_construction
 from newclid.problem import PredicateConstruction, predicate_to_construction
 from newclid.proof_justifications import goals_justifications
+
+from newclid.predicates import predicate_from_construction
 
 
 class ArCase(NamedTuple):

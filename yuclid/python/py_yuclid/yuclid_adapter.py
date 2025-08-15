@@ -65,11 +65,12 @@ from newclid.all_rules import (
 from newclid.deductors import ARReason
 from newclid.deductors.deductor_interface import ARCoefficient
 from newclid.predicate_types import PredicateArgument
-from newclid.predicates import NUMERICAL_PREDICATES
 from newclid.predicates._index import PredicateType
 from newclid.problem import PredicateConstruction, ProblemSetup
 from newclid.rule import Rule
 from pydantic import BaseModel, Field
+
+from newclid.predicates import NUMERICAL_PREDICATES
 
 LOGGER = logging.getLogger(__name__)
 

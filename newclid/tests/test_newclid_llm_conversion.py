@@ -18,7 +18,6 @@ from newclid.llm_input import (
 )
 from newclid.numerical.geometries import PointNum
 from newclid.predicate_types import PredicateArgument
-from newclid.predicates import predicate_from_construction
 from newclid.problem import PredicateConstruction
 from newclid.proof_data import (
     PredicateInProof,
@@ -28,6 +27,8 @@ from newclid.proof_data import (
 )
 from newclid.rule import Rule, RuleApplication
 from newclid.symbols.points_registry import Point, PointsRegisty
+
+from newclid.predicates import predicate_from_construction
 
 
 def p(name: str) -> PredicateArgument:

@@ -64,7 +64,6 @@ from newclid.predicates.triangles_congruent import ContriClock, ContriReflect
 from newclid.predicates.triangles_similar import SimtriClock, SimtriReflect
 from newclid.symbols.points_registry import Point, Segment
 from newclid.symbols.symbols_registry import SymbolsRegistry
-from sympy import li
 
 
 def draw_rule_application(
@@ -163,7 +162,9 @@ def draw_rule_application(
         case R78_CONGRUENT_TRIANGLES_REVERSE_PROPERTIES.id:
             return _draw_congruent_triangles_reverse_properties(ax, application, theme)
         case R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1.id:
-            return _draw_same_chord_same_arc_four_points_1(ax, application, symbols, theme)
+            return _draw_same_chord_same_arc_four_points_1(
+                ax, application, symbols, theme
+            )
         case R82_PARA_OF_COLL.id:
             return _draw_para_of_coll(ax, application, theme)
         case R91_ANGLES_OF_ISO_TRAPEZOID.id:
@@ -643,7 +644,6 @@ def _draw_iso_trapezoid_base_angles(
     symbols: SymbolsRegistry,
     theme: DrawTheme,
 ) -> list[Artist]:
-    
     if application.predicate.predicate_type != PredicateType.EQUAL_ANGLES:
         raise ValueError(
             f"Unexpected conclusion for rule {application.rule}: {application.predicate}"
@@ -654,7 +654,7 @@ def _draw_iso_trapezoid_base_angles(
         raise ValueError(
             f"Unexpected number of premises for rule {application.rule}: {application.premises}"
         )
-    
+
     if application.premises[0].predicate_type != PredicateType.CONGRUENT:
         raise ValueError(
             f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
@@ -672,7 +672,6 @@ def _draw_iso_trapezoid_base_angles(
 
     q1, q2 = para.line1
     q3, q4 = para.line2
-
 
     return list(draw_predicate(ax, eqangle, symbols, theme)) + [
         draw_segment(
@@ -1046,26 +1045,26 @@ def _draw_center_and_concyclics(
         raise ValueError(
             f"Unexpected number of premises for rule {application.rule}: {application.premises}"
         )
-    
+
     if application.premises[2].predicate_type != PredicateType.CYCLIC:
         raise ValueError(
             f"Unexpected premise 2 for rule {application.rule}: {application.premises[2]}"
         )
-    
+
     cyclic = application.premises[2]
 
     if application.premises[0].predicate_type != PredicateType.CONGRUENT:
         raise ValueError(
             f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
         )
-    
+
     congruent = application.premises[0]
 
     for point in congruent.segment1:
         if point not in cyclic.points:
             center = point
             break
-    
+
     if len(cyclic.points) < 4:
         raise ValueError(
             f"Unexpected number of points in cyclic for rule {application.rule}: {cyclic.points}"
@@ -1110,6 +1109,7 @@ def _draw_center_and_concyclics(
             line_width=theme.thick_line_width,
         ),
     ]
+
 
 def _draw_midpoint_consequence(
     ax: Axes,
@@ -2001,10 +2001,10 @@ def _draw_same_chord_same_arc_four_points_1(
         raise ValueError(
             f"Unexpected number of points for congruence in rule {application.rule}: {points}"
         )
-    
+
     center = _circumcenter_of_triangle((points[0], points[1], points[2]))
     radius = center.distance(points[0].num)
-    
+
     return list(draw_predicate(ax, eqangle, symbols, theme=theme)) + [
         draw_segment(
             ax,
@@ -2028,7 +2028,6 @@ def _draw_same_chord_same_arc_four_points_1(
             line_width=theme.thick_line_width,
         ),
     ]
-    
 
 
 def _draw_intersection_bisectors(

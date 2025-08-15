@@ -1,5 +1,4 @@
 from newclid.justifications.justification import Justification, justify_dependency
-from newclid.predicates import Predicate
 from newclid.proof_state import ProofState
 
 from ncdgen.aux_discriminators._interface import (
@@ -8,6 +7,7 @@ from ncdgen.aux_discriminators._interface import (
     predicate_point_names,
 )
 from ncdgen.build_diagram import Diagram
+from newclid.predicates import Predicate
 
 
 class AuxFromNewclidTraceback(AuxDiscriminator):
