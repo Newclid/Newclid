@@ -166,6 +166,7 @@ def draw_rule_application(
         case R82_PARA_OF_COLL.id:
             return _draw_para_of_coll(ax, application, theme)
         case _:
+            print(f"Rule {rule_applied.id} not implemented for drawing.")
             return []
 
 
@@ -896,8 +897,6 @@ def _draw_incenter_theorem(
         )
     eqangle3 = application.predicate
 
-    print(application.premises)
-
     return (
         list(draw_predicate(ax, eqangle1, symbols, theme=theme))
         + list(draw_predicate(ax, eqangle2, symbols, theme=theme))
@@ -971,7 +970,6 @@ def _draw_center_and_concyclics(
     application: RuleApplication,
     theme: DrawTheme,
 ) -> list[Artist]:
-    print(application.premises)
     if len(application.premises) != 4:
         raise ValueError(
             f"Unexpected number of premises for rule {application.rule}: {application.premises}"
