@@ -209,7 +209,7 @@ def _draw_parallel(
     lines: tuple[Line, Line],
     theme: DrawTheme,
 ) -> set[Line2D]:
-    setattr(ax, "para_color", (getattr(ax, "angle_color", 0) + 1) % len(PALETTE))
+    setattr(ax, "para_color", (getattr(ax, "para_color", 0) + 1) % len(PALETTE))
     seglen: int | float = 100
     lines_artists: set[Line2D] = set()
 
