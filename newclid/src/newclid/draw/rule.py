@@ -36,6 +36,7 @@ from newclid.all_rules import (
     R73_DEFINITION_OF_CIRCLE,
     R74_INTERSECTION_BISECTORS,
     R77_CONGRUENT_TRIANGLES_DIRECT_PROPERTIES,
+    R78_CONGRUENT_TRIANGLES_REVERSE_PROPERTIES,
     R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1,
     R82_PARA_OF_COLL,
 )
@@ -58,7 +59,7 @@ from newclid.predicates._index import PredicateType
 from newclid.predicates.circumcenter import Circumcenter
 from newclid.predicates.collinearity import Coll
 from newclid.predicates.equal_angles import EqAngle
-from newclid.predicates.triangles_congruent import ContriClock
+from newclid.predicates.triangles_congruent import ContriClock, ContriReflect
 from newclid.predicates.triangles_similar import SimtriClock, SimtriReflect
 from newclid.symbols.points_registry import Point, Segment
 from newclid.symbols.symbols_registry import SymbolsRegistry
@@ -158,6 +159,8 @@ def draw_rule_application(
             return _draw_intersection_bisectors(ax, application, theme)
         case R77_CONGRUENT_TRIANGLES_DIRECT_PROPERTIES.id:
             return _draw_congruent_triangles_direct_properties(ax, application, theme)
+        case R78_CONGRUENT_TRIANGLES_REVERSE_PROPERTIES.id:
+            return _draw_congruent_triangles_reverse_properties(ax, application, theme)
         case R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1.id:
             return _draw_same_chord_same_arc_four_points_1(ax, application, symbols, theme)
         case R82_PARA_OF_COLL.id:
@@ -1743,6 +1746,85 @@ def _draw_congruent_triangles_direct_properties(
     contri: ContriClock | None = None
     for premise in application.premises:
         if premise.predicate_type == PredicateType.CONTRI_CLOCK:
+            contri = premise
+            break
+
+    if contri is None:
+        raise ValueError(
+            f"Unexpected premises for rule {application.rule}: {application.premises}"
+        )
+    a, b, c = contri.triangle1
+    p, q, r = contri.triangle2
+    return [
+        draw_triangle(
+            ax,
+            a.num,
+            b.num,
+            c.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_triangle(
+            ax,
+            p.num,
+            q.num,
+            r.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            a.num,
+            b.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            b.num,
+            c.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            c.num,
+            a.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            p.num,
+            q.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            q.num,
+            r.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            r.num,
+            p.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+    ]
+
+
+def _draw_congruent_triangles_reverse_properties(
+    ax: Axes,
+    application: RuleApplication,
+    theme: DrawTheme,
+) -> list[Artist]:
+    contri: ContriReflect | None = None
+    for premise in application.premises:
+        if premise.predicate_type == PredicateType.CONTRI_REFLECT:
             contri = premise
             break
 
