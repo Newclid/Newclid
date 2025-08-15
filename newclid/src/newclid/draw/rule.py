@@ -19,6 +19,7 @@ from newclid.all_rules import (
     R43_ORTHOCENTER_THEOREM,
     R46_INCENTER_THEOREM,
     R49_RECOGNIZE_CENTER_OF_CIRCLE_CYCLIC,
+    R50_RECOGNIZE_CENTER_OF_CYCLIC_CONG,
     R51_MIDPOINT_SPLITS_IN_TWO,
     R52_SIMILAR_TRIANGLES_DIRECT_PROPERTIES,
     R53_SIMILAR_TRIANGLES_REVERSE_PROPERTIES,
@@ -32,8 +33,13 @@ from newclid.all_rules import (
     R69_SIMILARITY_WITHOUT_SCALING_REVERSE,
     R71_RESOLUTION_OF_RATIOS,
     R72_DISASSEMBLING_A_CIRCLE,
+    R73_DEFINITION_OF_CIRCLE,
     R74_INTERSECTION_BISECTORS,
+    R77_CONGRUENT_TRIANGLES_DIRECT_PROPERTIES,
+    R78_CONGRUENT_TRIANGLES_REVERSE_PROPERTIES,
+    R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1,
     R82_PARA_OF_COLL,
+    R91_ANGLES_OF_ISO_TRAPEZOID,
 )
 from newclid.draw.geometries import draw_arrow, draw_circle, draw_segment, draw_triangle
 from newclid.draw.predicates import (
@@ -54,6 +60,7 @@ from newclid.predicates._index import PredicateType
 from newclid.predicates.circumcenter import Circumcenter
 from newclid.predicates.collinearity import Coll
 from newclid.predicates.equal_angles import EqAngle
+from newclid.predicates.triangles_congruent import ContriClock, ContriReflect
 from newclid.predicates.triangles_similar import SimtriClock, SimtriReflect
 from newclid.symbols.points_registry import Point, Segment
 from newclid.symbols.symbols_registry import SymbolsRegistry
@@ -110,6 +117,8 @@ def draw_rule_application(
             return _draw_incenter_theorem(ax, application, symbols, theme)
         case R49_RECOGNIZE_CENTER_OF_CIRCLE_CYCLIC.id:
             return _draw_recognize_center_of_circle(ax, application, theme)
+        case R50_RECOGNIZE_CENTER_OF_CYCLIC_CONG.id:
+            return _draw_center_and_concyclics(ax, application, theme)
         case R51_MIDPOINT_SPLITS_IN_TWO.id:
             return _draw_midpoint(ax, application, theme)
         case R52_SIMILAR_TRIANGLES_DIRECT_PROPERTIES.id:
@@ -143,12 +152,25 @@ def draw_rule_application(
         case R71_RESOLUTION_OF_RATIOS.id:
             return _draw_resolution_of_ratios(ax, application, symbols, theme)
         case R72_DISASSEMBLING_A_CIRCLE.id:
-            return _draw_disassembling_a_circle(ax, application, symbols, theme)
+            return _draw_disassembling_a_circle(ax, application, theme)
+        case R73_DEFINITION_OF_CIRCLE.id:
+            return _draw_assembling_a_circle(ax, application, theme)
         case R74_INTERSECTION_BISECTORS.id:
             return _draw_intersection_bisectors(ax, application, theme)
+        case R77_CONGRUENT_TRIANGLES_DIRECT_PROPERTIES.id:
+            return _draw_congruent_triangles_direct_properties(ax, application, theme)
+        case R78_CONGRUENT_TRIANGLES_REVERSE_PROPERTIES.id:
+            return _draw_congruent_triangles_reverse_properties(ax, application, theme)
+        case R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1.id:
+            return _draw_same_chord_same_arc_four_points_1(
+                ax, application, symbols, theme
+            )
         case R82_PARA_OF_COLL.id:
             return _draw_para_of_coll(ax, application, theme)
+        case R91_ANGLES_OF_ISO_TRAPEZOID.id:
+            return _draw_iso_trapezoid_base_angles(ax, application, symbols, theme)
         case _:
+            print(f"Rule {rule_applied.id} not implemented for drawing.")
             return []
 
 
@@ -616,6 +638,73 @@ def _draw_para_of_coll(
     ]
 
 
+def _draw_iso_trapezoid_base_angles(
+    ax: Axes,
+    application: RuleApplication,
+    symbols: SymbolsRegistry,
+    theme: DrawTheme,
+) -> list[Artist]:
+    if application.predicate.predicate_type != PredicateType.EQUAL_ANGLES:
+        raise ValueError(
+            f"Unexpected conclusion for rule {application.rule}: {application.predicate}"
+        )
+    eqangle = application.predicate
+
+    if len(application.premises) != 3:
+        raise ValueError(
+            f"Unexpected number of premises for rule {application.rule}: {application.premises}"
+        )
+
+    if application.premises[0].predicate_type != PredicateType.CONGRUENT:
+        raise ValueError(
+            f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
+        )
+    cong = application.premises[0]
+
+    if application.premises[2].predicate_type != PredicateType.PARALLEL:
+        raise ValueError(
+            f"Unexpected premise 2 for rule {application.rule}: {application.premises[2]}"
+        )
+    para = application.premises[2]
+
+    p1, p2 = cong.segment1
+    p3, p4 = cong.segment2
+
+    q1, q2 = para.line1
+    q3, q4 = para.line2
+
+    return list(draw_predicate(ax, eqangle, symbols, theme)) + [
+        draw_segment(
+            ax,
+            p1.num,
+            p2.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            p3.num,
+            p4.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            q1.num,
+            q2.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            q3.num,
+            q4.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thick_line_width,
+        ),
+    ]
+
+
 def _draw_thales_configuration(
     ax: Axes,
     application: RuleApplication,
@@ -879,8 +968,6 @@ def _draw_incenter_theorem(
         )
     eqangle3 = application.predicate
 
-    print(application.premises)
-
     return (
         list(draw_predicate(ax, eqangle1, symbols, theme=theme))
         + list(draw_predicate(ax, eqangle2, symbols, theme=theme))
@@ -944,6 +1031,81 @@ def _draw_recognize_center_of_circle(
             point3.num,
             point4.num,
             line_color=theme.triangle_color,
+            line_width=theme.thick_line_width,
+        ),
+    ]
+
+
+def _draw_center_and_concyclics(
+    ax: Axes,
+    application: RuleApplication,
+    theme: DrawTheme,
+) -> list[Artist]:
+    if len(application.premises) != 4:
+        raise ValueError(
+            f"Unexpected number of premises for rule {application.rule}: {application.premises}"
+        )
+
+    if application.premises[2].predicate_type != PredicateType.CYCLIC:
+        raise ValueError(
+            f"Unexpected premise 2 for rule {application.rule}: {application.premises[2]}"
+        )
+
+    cyclic = application.premises[2]
+
+    if application.premises[0].predicate_type != PredicateType.CONGRUENT:
+        raise ValueError(
+            f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
+        )
+
+    congruent = application.premises[0]
+
+    for point in congruent.segment1:
+        if point not in cyclic.points:
+            center = point
+            break
+
+    if len(cyclic.points) < 4:
+        raise ValueError(
+            f"Unexpected number of points in cyclic for rule {application.rule}: {cyclic.points}"
+        )
+
+    radius = center.num.distance(cyclic.points[0].num)
+
+    return [
+        draw_circle(
+            ax,
+            (center.num.x, center.num.y),
+            radius,
+            line_color=theme.circle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            cyclic.points[0].num,
+            center.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            cyclic.points[1].num,
+            center.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            cyclic.points[2].num,
+            center.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            cyclic.points[3].num,
+            center.num,
+            line_color=theme.line_color,
             line_width=theme.thick_line_width,
         ),
     ]
@@ -1537,7 +1699,6 @@ def _draw_reverse_congruence(
 def _draw_disassembling_a_circle(
     ax: Axes,
     application: RuleApplication,
-    symbols: SymbolsRegistry,
     theme: DrawTheme,
 ) -> list[Artist]:
     circle_premise: Circumcenter | None = None
@@ -1594,6 +1755,276 @@ def _draw_disassembling_a_circle(
             circle_premise.center.num,
             circle_points[1].num,
             line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+    ]
+
+
+def _draw_assembling_a_circle(
+    ax: Axes,
+    application: RuleApplication,
+    theme: DrawTheme,
+) -> list[Artist]:
+    if application.predicate.predicate_type != PredicateType.CIRCUMCENTER:
+        raise ValueError(
+            f"Unexpected conclusion for rule {application.rule}: {application.predicate}"
+        )
+
+    circle_premise = application.predicate
+
+    center = circle_premise.center
+    p1, p2, p3 = circle_premise.points
+    radius = center.num.distance(p1.num)
+
+    return [
+        draw_circle(
+            ax,
+            center=(center.num.x, center.num.y),
+            radius=radius,
+            line_color=theme.circle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            center.num,
+            p1.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            center.num,
+            p2.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            center.num,
+            p3.num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+    ]
+
+
+def _draw_congruent_triangles_direct_properties(
+    ax: Axes,
+    application: RuleApplication,
+    theme: DrawTheme,
+) -> list[Artist]:
+    contri: ContriClock | None = None
+    for premise in application.premises:
+        if premise.predicate_type == PredicateType.CONTRI_CLOCK:
+            contri = premise
+            break
+
+    if contri is None:
+        raise ValueError(
+            f"Unexpected premises for rule {application.rule}: {application.premises}"
+        )
+    a, b, c = contri.triangle1
+    p, q, r = contri.triangle2
+    return [
+        draw_triangle(
+            ax,
+            a.num,
+            b.num,
+            c.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_triangle(
+            ax,
+            p.num,
+            q.num,
+            r.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            a.num,
+            b.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            b.num,
+            c.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            c.num,
+            a.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            p.num,
+            q.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            q.num,
+            r.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            r.num,
+            p.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+    ]
+
+
+def _draw_congruent_triangles_reverse_properties(
+    ax: Axes,
+    application: RuleApplication,
+    theme: DrawTheme,
+) -> list[Artist]:
+    contri: ContriReflect | None = None
+    for premise in application.premises:
+        if premise.predicate_type == PredicateType.CONTRI_REFLECT:
+            contri = premise
+            break
+
+    if contri is None:
+        raise ValueError(
+            f"Unexpected premises for rule {application.rule}: {application.premises}"
+        )
+    a, b, c = contri.triangle1
+    p, q, r = contri.triangle2
+    return [
+        draw_triangle(
+            ax,
+            a.num,
+            b.num,
+            c.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_triangle(
+            ax,
+            p.num,
+            q.num,
+            r.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            a.num,
+            b.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            b.num,
+            c.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            c.num,
+            a.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            p.num,
+            q.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            q.num,
+            r.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+        draw_arrow(
+            ax,
+            r.num,
+            p.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thin_line_width,
+        ),
+    ]
+
+
+def _draw_same_chord_same_arc_four_points_1(
+    ax: Axes,
+    application: RuleApplication,
+    symbols: SymbolsRegistry,
+    theme: DrawTheme,
+) -> list[Artist]:
+    if len(application.premises) != 3:
+        raise ValueError(
+            f"Unexpected number of premises for rule {application.rule}: {application.premises}"
+        )
+    if application.premises[0].predicate_type != PredicateType.CONGRUENT:
+        raise ValueError(
+            f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
+        )
+    cong = application.premises[0]
+
+    if application.predicate.predicate_type != PredicateType.EQUAL_ANGLES:
+        raise ValueError(
+            f"Unexpected conclusion for rule {application.rule}: {application.predicate}"
+        )
+    eqangle = application.predicate
+
+    points: List[Point] = []
+    for point in cong.segment1:
+        if point not in points:
+            points.append(point)
+
+    for point in cong.segment2:
+        if point not in points:
+            points.append(point)
+
+    if len(points) != 4:
+        raise ValueError(
+            f"Unexpected number of points for congruence in rule {application.rule}: {points}"
+        )
+
+    center = _circumcenter_of_triangle((points[0], points[1], points[2]))
+    radius = center.distance(points[0].num)
+
+    return list(draw_predicate(ax, eqangle, symbols, theme=theme)) + [
+        draw_segment(
+            ax,
+            points[0].num,
+            points[1].num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            points[2].num,
+            points[3].num,
+            line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_circle(
+            ax,
+            (center.x, center.y),
+            radius,
+            line_color=theme.circle_color,
             line_width=theme.thick_line_width,
         ),
     ]
@@ -1727,7 +2158,6 @@ def _midpoint_of_segment(segment: tuple[Point, Point]) -> PointNum:
     return PointNum(x=midpoint_x, y=midpoint_y)
 
 
-# FINISH THIS
 def _circumcenter_of_triangle(
     triangle: tuple[Point, Point, Point],
 ) -> PointNum:

@@ -119,7 +119,7 @@ a = free a; b = free b; c = free c; p = on_circum p a b c; q = on_circum q b c p
 r60
 a b c = triangle a b c; p q = segment p q; r = eqratio r b a b c q p q, eqratio6 r p q c a c b ? sameclock a b c p q r; simtri a b c p q r
 r61
-a b c = triangle a b c; p q = segment p q; r = eqratio r b a b c q p q, on_aline0 r b a b c q p q ? sameclock a b c p r q; simtrir a b c p q r
+a b c = triangle a b c; p q = segment p q; r = eqratio r b a b c q p q, eqratio6 r p q c a c b ? sameclock a b c p r q; simtrir a b c p q r
 r62
 a b c = triangle a b c; p q = segment p q; r = eqratio r b a b c q p q, on_aline0 r b a b c q p q ? sameclock a b c p q r; simtri a b c p q r
 r63
