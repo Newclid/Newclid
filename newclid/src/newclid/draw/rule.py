@@ -39,6 +39,7 @@ from newclid.all_rules import (
     R78_CONGRUENT_TRIANGLES_REVERSE_PROPERTIES,
     R80_SAME_CHORD_SAME_ARC_FOUR_POINTS_1,
     R82_PARA_OF_COLL,
+    R91_ANGLES_OF_ISO_TRAPEZOID,
 )
 from newclid.draw.geometries import draw_arrow, draw_circle, draw_segment, draw_triangle
 from newclid.draw.predicates import (
@@ -165,6 +166,8 @@ def draw_rule_application(
             return _draw_same_chord_same_arc_four_points_1(ax, application, symbols, theme)
         case R82_PARA_OF_COLL.id:
             return _draw_para_of_coll(ax, application, theme)
+        case R91_ANGLES_OF_ISO_TRAPEZOID.id:
+            return _draw_iso_trapezoid_base_angles(ax, application, symbols, theme)
         case _:
             print(f"Rule {rule_applied.id} not implemented for drawing.")
             return []
@@ -629,6 +632,75 @@ def _draw_para_of_coll(
             coll.points[1].num,
             coll.points[2].num,
             line_color=theme.line_color,
+            line_width=theme.thick_line_width,
+        ),
+    ]
+
+
+def _draw_iso_trapezoid_base_angles(
+    ax: Axes,
+    application: RuleApplication,
+    symbols: SymbolsRegistry,
+    theme: DrawTheme,
+) -> list[Artist]:
+    
+    if application.predicate.predicate_type != PredicateType.EQUAL_ANGLES:
+        raise ValueError(
+            f"Unexpected conclusion for rule {application.rule}: {application.predicate}"
+        )
+    eqangle = application.predicate
+
+    if len(application.premises) != 3:
+        raise ValueError(
+            f"Unexpected number of premises for rule {application.rule}: {application.premises}"
+        )
+    
+    if application.premises[0].predicate_type != PredicateType.CONGRUENT:
+        raise ValueError(
+            f"Unexpected premise 0 for rule {application.rule}: {application.premises[0]}"
+        )
+    cong = application.premises[0]
+
+    if application.premises[2].predicate_type != PredicateType.PARALLEL:
+        raise ValueError(
+            f"Unexpected premise 2 for rule {application.rule}: {application.premises[2]}"
+        )
+    para = application.premises[2]
+
+    p1, p2 = cong.segment1
+    p3, p4 = cong.segment2
+
+    q1, q2 = para.line1
+    q3, q4 = para.line2
+
+
+    return list(draw_predicate(ax, eqangle, symbols, theme)) + [
+        draw_segment(
+            ax,
+            p1.num,
+            p2.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            p3.num,
+            p4.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            q1.num,
+            q2.num,
+            line_color=theme.triangle_color,
+            line_width=theme.thick_line_width,
+        ),
+        draw_segment(
+            ax,
+            q3.num,
+            q4.num,
+            line_color=theme.triangle_color,
             line_width=theme.thick_line_width,
         ),
     ]
