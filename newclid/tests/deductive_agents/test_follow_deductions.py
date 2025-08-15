@@ -13,13 +13,12 @@ from newclid.api import GeometricSolverBuilder
 from newclid.justifications.justification import Assumption, justify_dependency
 from newclid.numerical.geometries import PointNum
 from newclid.predicate_types import PredicateArgument
+from newclid.predicates import Predicate, predicate_from_construction
 from newclid.problem import PredicateConstruction, ProblemSetup
 from newclid.proof_state import ProofState
 from newclid.rng import setup_rng
 from newclid.rule import Rule
 from newclid.symbols.points_registry import Point
-
-from newclid.predicates import Predicate, predicate_from_construction
 
 
 def p(name: str) -> PredicateArgument:

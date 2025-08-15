@@ -3,14 +3,13 @@ from newclid.justifications._index import JustificationError
 from newclid.justifications.justification import DirectConsequence, Justification
 from newclid.numerical.geometries import PointNum
 from newclid.predicate_types import PredicateArgument
+from newclid.predicates import Predicate
 from newclid.predicates.collinearity import Coll
 from newclid.problem import ProblemSetup
 from newclid.proof_justifications import _proof_of_predicate  # type: ignore
 from newclid.proof_state import ProofState
 from newclid.symbols.points_registry import Point
 from pytest_mock import MockerFixture
-
-from newclid.predicates import Predicate
 
 
 def p(name: str) -> PredicateArgument:

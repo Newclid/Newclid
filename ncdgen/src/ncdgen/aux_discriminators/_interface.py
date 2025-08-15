@@ -3,9 +3,9 @@ from typing import NamedTuple
 
 from newclid.jgex.clause import is_numerical_argument
 from newclid.justifications.justification import Justification
+from newclid.predicates import Predicate
 
 from ncdgen.build_diagram import Diagram
-from newclid.predicates import Predicate
 
 
 class PointsForConclusion(NamedTuple):

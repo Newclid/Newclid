@@ -17,6 +17,7 @@ from newclid.jgex.to_newclid import JGEXClauseConsequences
 from newclid.justifications.justification import Assumption
 from newclid.numerical.geometries import PointNum
 from newclid.predicate_types import PredicateArgument
+from newclid.predicates import predicate_from_construction
 from newclid.problem import (
     PredicateConstruction,
     ProblemSetup,
@@ -28,8 +29,6 @@ from newclid.run_loop import RunInfos
 from newclid.symbols.points_registry import Point
 from py_yuclid.omni_matcher import OmniMatcher
 from py_yuclid.yuclid_adapter import YuclidAdapter
-
-from newclid.predicates import predicate_from_construction
 
 
 class TestDoubleChecking:

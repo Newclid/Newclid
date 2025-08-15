@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING
 
 from newclid.agent.follow_deductions import CachedRuleDeduction
 from newclid.justifications.justification import Justification
+from newclid.predicates import Predicate, predicate_from_construction
 from newclid.rule import Rule, RuleApplication
 from newclid.rule_matching.interface import RuleMatcher
 from newclid.symbols.symbols_registry import SymbolsRegistry
 
-from newclid.predicates import Predicate, predicate_from_construction
 from py_yuclid.yuclid_adapter import YuclidAdapter
 
 if TYPE_CHECKING:
