@@ -15,6 +15,7 @@ from newclid.draw.rule import circumcenter_of_triangle
 from newclid.draw.theme import DrawTheme
 from newclid.jgex.clause import JGEXConstruction
 from newclid.jgex.formulation import JGEXFormulation
+from newclid.symbols.points_registry import Triangle
 from newclid.symbols.symbols_registry import SymbolsRegistry
 
 
