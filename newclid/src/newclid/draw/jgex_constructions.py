@@ -153,6 +153,26 @@ def draw_jgex_constructions(
                     color=theme.perpendicular_color,
                 ),
             ]
+        case "r_triangle":
+            x, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
+            xa = symbols_registry.lines.line_thru_pair(x, a)
+            xb = symbols_registry.lines.line_thru_pair(x, b)
+            return [
+                draw_triangle(
+                    ax=ax,
+                    p0=x.num,
+                    p1=a.num,
+                    p2=b.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=xa,
+                    line1=xb,
+                    color=theme.perpendicular_color,
+                ),
+            ]
         case "midpoint" | "between" | "between_bound":
             x, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
             ab = symbols_registry.lines.line_thru_pair(a, b)
