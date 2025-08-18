@@ -3,7 +3,12 @@ from typing import Iterable
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 
-from newclid.draw.geometries import draw_arrow, draw_circle, draw_triangle
+from newclid.draw.geometries import (
+    draw_arrow,
+    draw_circle,
+    draw_complete_arrow,
+    draw_triangle,
+)
 from newclid.draw.predicates import draw_line, draw_line_symbol, draw_perp_rectangle
 from newclid.draw.theme import DrawTheme
 from newclid.jgex.clause import JGEXConstruction
@@ -175,6 +180,17 @@ def draw_jgex_constructions(
             ]
         case "midpoint" | "between" | "between_bound":
             x, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
+            ab = symbols_registry.lines.line_thru_pair(a, b)
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=ab,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+            ]
+        case "trisegment":
+            x, y, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
             ab = symbols_registry.lines.line_thru_pair(a, b)
             return [
                 draw_line_symbol(
@@ -403,6 +419,42 @@ def draw_jgex_constructions(
                     r.num,
                     p.num,
                     line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+            ]
+        case "shift":
+            x, b, c, d = symbols_registry.points.names2points(construction.args)
+            return [
+                draw_complete_arrow(
+                    ax,
+                    d.num,
+                    c.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_complete_arrow(
+                    ax,
+                    b.num,
+                    x.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+            ]
+        case "mirror":
+            x, a, b = symbols_registry.points.names2points(construction.args)
+            return [
+                draw_complete_arrow(
+                    ax,
+                    b.num,
+                    a.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_complete_arrow(
+                    ax,
+                    b.num,
+                    x.num,
+                    line_color=theme.line_color,
                     line_width=theme.thin_line_width,
                 ),
             ]
