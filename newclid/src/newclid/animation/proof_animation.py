@@ -235,9 +235,12 @@ class ProofAnimation:
         highlight_color = (
             self.theme.aux_point_color if is_aux else self.theme.construction_color
         )
+        new_point_color = self.theme.new_point_color
         updated_artists.update(
             clause_artists.manifest(
-                aux_point_names=self.aux_point_names, highlight_color=highlight_color
+                aux_point_names=self.aux_point_names,
+                highlight_color=highlight_color,
+                new_point_color=new_point_color,
             )
         )
         return updated_artists

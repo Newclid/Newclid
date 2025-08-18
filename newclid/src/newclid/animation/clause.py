@@ -24,6 +24,7 @@ class ClauseArtists:
         self,
         aux_point_names: set[PredicateArgument],
         highlight_color: ColorType | None = None,
+        new_point_color: ColorType | None = None,
     ) -> set[Artist]:
         updated_artists: set[Artist] = set()
         for used_point in self.used_points:
@@ -32,7 +33,7 @@ class ClauseArtists:
             if construction.highlight(color=highlight_color):
                 updated_artists.add(construction.artist)
         for point in self.new_points:
-            color = highlight_color if point.name not in aux_point_names else None
+            color = new_point_color if point.name not in aux_point_names else None
             updated_artists.update(point.highlight(color=color))
         return updated_artists
 
