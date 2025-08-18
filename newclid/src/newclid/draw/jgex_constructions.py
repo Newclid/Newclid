@@ -11,9 +11,11 @@ from newclid.draw.geometries import (
     draw_triangle,
 )
 from newclid.draw.predicates import draw_line, draw_line_symbol, draw_perp_rectangle
+from newclid.draw.rule import circumcenter_of_triangle
 from newclid.draw.theme import DrawTheme
 from newclid.jgex.clause import JGEXConstruction
 from newclid.jgex.formulation import JGEXFormulation
+from newclid.symbols.points_registry import Triangle
 from newclid.symbols.symbols_registry import SymbolsRegistry
 
 
@@ -53,6 +55,27 @@ def draw_jgex_constructions(
                     b.num,
                     c.num,
                     line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+            ]
+        case "on_circum":
+            x, a, b, c = symbols_registry.points.names2points(construction.args)  # type: ignore
+            triangle = Triangle([a, b, c])
+            center = circumcenter_of_triangle(triangle)
+            return [
+                draw_triangle(
+                    ax,
+                    a.num,
+                    b.num,
+                    c.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_circle(
+                    ax=ax,
+                    center=(center.x, center.y),
+                    radius=center.distance(a.num),
+                    line_color=theme.circle_color,
                     line_width=theme.thick_line_width,
                 ),
             ]
