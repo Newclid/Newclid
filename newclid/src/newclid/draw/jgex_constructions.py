@@ -229,6 +229,24 @@ def draw_jgex_constructions(
                     ls=":",
                 ),
             ]
+        case "intersection_ll":
+            _x, a, b, c, d = symbols_registry.points.names2points(construction.args)  # type: ignore
+            ab = symbols_registry.lines.line_thru_pair(a, b)
+            cd = symbols_registry.lines.line_thru_pair(c, d)
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=ab,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_line_symbol(
+                    ax=ax,
+                    line=cd,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+            ]
         case "on_dia":
             x, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
             xa = symbols_registry.lines.line_thru_pair(x, a)
