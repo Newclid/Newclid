@@ -31,8 +31,8 @@ def draw_jgex_constructions(
     theme: DrawTheme,
 ) -> Iterable[Artist]:
     match construction.name:
-        case "circle":
-            x, a, _b, _c = symbols_registry.points.names2points(construction.args)  # type: ignore
+        case "circle" | "circumcenter":
+            x, a, b, c = symbols_registry.points.names2points(construction.args)  # type: ignore
             return [
                 draw_circle(
                     ax=ax,
@@ -40,7 +40,15 @@ def draw_jgex_constructions(
                     radius=x.num.distance(a.num),
                     line_color=theme.line_color,
                     line_width=theme.thick_line_width,
-                )
+                ),
+                draw_triangle(
+                    ax,
+                    a.num,
+                    b.num,
+                    c.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
             ]
         case "on_circle":
             _x, o, a = symbols_registry.points.names2points(construction.args)  # type: ignore
@@ -54,7 +62,7 @@ def draw_jgex_constructions(
                     line_width=theme.thick_line_width,
                 )
             ]
-        case "triangle":
+        case "triangle" | "acute_triangle" | "triangle12":
             a, b, c = symbols_registry.points.names2points(construction.args)  # type: ignore
             return [
                 draw_triangle(
@@ -102,7 +110,7 @@ def draw_jgex_constructions(
                     color=theme.perpendicular_color,
                 ),
             ]
-        case "on_pline":
+        case "on_pline" | "on_pline0":
             x, y, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
             return [
                 draw_line(
@@ -145,7 +153,7 @@ def draw_jgex_constructions(
                     color=theme.perpendicular_color,
                 ),
             ]
-        case "midpoint":
+        case "midpoint" | "between" | "between_bound":
             x, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
             ab = symbols_registry.lines.line_thru_pair(a, b)
             return [
@@ -254,5 +262,8 @@ def draw_jgex_constructions(
                     line_width=theme.thick_line_width,
                 ),
             ]
+        # Create an explicit case for constructions that do not need anything to be drawn but the points
+        case "free":
+            return []
         case _:
             return []
