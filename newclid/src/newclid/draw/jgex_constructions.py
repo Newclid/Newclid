@@ -273,6 +273,42 @@ def draw_jgex_constructions(
                     ls=":",
                 ),
             ]
+        case "intersection_pp":
+            x, a, b, c, d, e, f = symbols_registry.points.names2points(
+                construction.args
+            )  # type: ignore
+            bc = symbols_registry.lines.line_thru_pair(b, c)
+            ef = symbols_registry.lines.line_thru_pair(e, f)
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=bc,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_line_symbol(
+                    ax=ax,
+                    line=ef,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_line(
+                    ax=ax,
+                    p0=a.num,
+                    p1=x.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                    ls=":",
+                ),
+                draw_line(
+                    ax=ax,
+                    p0=d.num,
+                    p1=x.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                    ls=":",
+                ),
+            ]
         case "on_dia":
             x, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
             xa = symbols_registry.lines.line_thru_pair(x, a)
