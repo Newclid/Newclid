@@ -112,6 +112,45 @@ def draw_jgex_constructions(
                     line_width=theme.thick_line_width,
                 ),
             ]
+        case "pentagon":
+            a, b, c, d, e = symbols_registry.points.names2points(construction.args)  # type: ignore
+            return [
+                draw_segment(
+                    ax=ax,
+                    p0=a.num,
+                    p1=b.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=b.num,
+                    p1=c.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=c.num,
+                    p1=d.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=d.num,
+                    p1=e.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=e.num,
+                    p1=a.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+            ]
         case "on_line":
             _x, a, b = symbols_registry.points.names2points(construction.args)  # type: ignore
             return [
