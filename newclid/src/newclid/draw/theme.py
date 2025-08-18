@@ -36,6 +36,7 @@ class DrawTheme(BaseModel):
     triangle_color: str = "#B35555"
     goal_color: str = "#A38905"
     aux_point_color: str = HARMONIC_BLUE
+    new_point_color: str = "#a5e838"
     construction_color: str = "#487f56"
     point_color: str = "#3ee838"
     text_color: str = "#ffd1a9"

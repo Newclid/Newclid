@@ -111,3 +111,22 @@ def draw_arrow(
     )
     ax.add_artist(arrow)
     return arrow
+
+
+def draw_complete_arrow(
+    ax: Axes,
+    p0: PointNum,
+    p1: PointNum,
+    line_color: str,
+    line_width: float,
+) -> Artist:
+    arrow = patches.FancyArrowPatch(
+        (p0.x, p0.y),
+        (p1.x, p1.y),
+        zorder=5,
+        color=line_color,
+        lw=line_width,
+        arrowstyle="simple,head_length=10,head_width=10",
+    )
+    ax.add_artist(arrow)
+    return arrow

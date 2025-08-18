@@ -204,7 +204,7 @@ def _draw_arc_determines_internal_angles(
     p1 = angle_edges[0]
     p2 = angle_edges[1]
 
-    center = _circumcenter_of_triangle((p1, p2, vertex1))
+    center = circumcenter_of_triangle((p1, p2, vertex1))
     radius = center.distance(p1.num)
 
     return [
@@ -278,7 +278,7 @@ def _draw_congruent_angles_are_in_a_cyclic(
     p1 = angle_edges[0]
     p2 = angle_edges[1]
 
-    center = _circumcenter_of_triangle((p1, p2, vertex1))
+    center = circumcenter_of_triangle((p1, p2, vertex1))
     radius = center.distance(p1.num)
 
     return [
@@ -2002,7 +2002,7 @@ def _draw_same_chord_same_arc_four_points_1(
             f"Unexpected number of points for congruence in rule {application.rule}: {points}"
         )
 
-    center = _circumcenter_of_triangle((points[0], points[1], points[2]))
+    center = circumcenter_of_triangle((points[0], points[1], points[2]))
     radius = center.distance(points[0].num)
 
     return list(draw_predicate(ax, eqangle, symbols, theme=theme)) + [
@@ -2062,7 +2062,7 @@ def _draw_intersection_bisectors(
 
     triangle = [point for point in cyclic.points if point != intersection]
 
-    center = _circumcenter_of_triangle((triangle[0], triangle[1], triangle[2]))
+    center = circumcenter_of_triangle((triangle[0], triangle[1], triangle[2]))
     radius = center.distance(triangle[0].num)
     for point in eqangle.angle1[0]:
         if point not in cong.segment1 and point not in cong.segment2:
@@ -2158,7 +2158,7 @@ def _midpoint_of_segment(segment: tuple[Point, Point]) -> PointNum:
     return PointNum(x=midpoint_x, y=midpoint_y)
 
 
-def _circumcenter_of_triangle(
+def circumcenter_of_triangle(
     triangle: tuple[Point, Point, Point],
 ) -> PointNum:
     if len(triangle) != 3:
