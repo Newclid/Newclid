@@ -3,7 +3,7 @@ from typing import Iterable
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 
-from newclid.draw.geometries import draw_circle, draw_triangle
+from newclid.draw.geometries import draw_arrow, draw_circle, draw_triangle
 from newclid.draw.predicates import draw_line, draw_line_symbol, draw_perp_rectangle
 from newclid.draw.theme import DrawTheme
 from newclid.jgex.clause import JGEXConstruction
@@ -260,6 +260,130 @@ def draw_jgex_constructions(
                     line=cd,
                     line_color=theme.line_color,
                     line_width=theme.thick_line_width,
+                ),
+            ]
+        case "simtri" | "simtrir":
+            r, a, b, c, p, q = symbols_registry.points.names2points(construction.args)  # type: ignore
+            return [
+                draw_triangle(
+                    ax=ax,
+                    p0=a.num,
+                    p1=b.num,
+                    p2=c.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_triangle(
+                    ax=ax,
+                    p0=p.num,
+                    p1=q.num,
+                    p2=r.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    a.num,
+                    b.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    b.num,
+                    c.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    c.num,
+                    a.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    p.num,
+                    q.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    q.num,
+                    r.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    r.num,
+                    p.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+            ]
+        case "contri" | "contrir":
+            q, r, a, b, c, p = symbols_registry.points.names2points(construction.args)  # type: ignore
+            return [
+                draw_triangle(
+                    ax=ax,
+                    p0=a.num,
+                    p1=b.num,
+                    p2=c.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_triangle(
+                    ax=ax,
+                    p0=p.num,
+                    p1=q.num,
+                    p2=r.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    a.num,
+                    b.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    b.num,
+                    c.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    c.num,
+                    a.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    p.num,
+                    q.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    q.num,
+                    r.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_arrow(
+                    ax,
+                    r.num,
+                    p.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
                 ),
             ]
         # Create an explicit case for constructions that do not need anything to be drawn but the points
