@@ -15,7 +15,6 @@ from newclid.draw.rule import circumcenter_of_triangle
 from newclid.draw.theme import DrawTheme
 from newclid.jgex.clause import JGEXConstruction
 from newclid.jgex.formulation import JGEXFormulation
-from newclid.symbols.points_registry import Triangle
 from newclid.symbols.symbols_registry import SymbolsRegistry
 
 
@@ -60,7 +59,7 @@ def draw_jgex_constructions(
             ]
         case "on_circum":
             x, a, b, c = symbols_registry.points.names2points(construction.args)  # type: ignore
-            triangle = Triangle([a, b, c])
+            triangle = (a, b, c)
             center = circumcenter_of_triangle(triangle)
             return [
                 draw_triangle(
