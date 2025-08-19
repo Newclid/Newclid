@@ -11,7 +11,7 @@ from newclid.draw.geometries import (
     draw_triangle,
 )
 from newclid.draw.predicates import draw_line, draw_line_symbol, draw_perp_rectangle
-from newclid.draw.rule import circumcenter_of_triangle
+from newclid.draw.rule import circumcenter_of_triangle, midpoint_of_segment
 from newclid.draw.theme import DrawTheme
 from newclid.jgex.clause import JGEXConstruction
 from newclid.jgex.formulation import JGEXFormulation
@@ -630,6 +630,38 @@ def draw_jgex_constructions(
                     x.num,
                     line_color=theme.line_color,
                     line_width=theme.thin_line_width,
+                ),
+            ]
+        case "reflect":
+            x, a, b, c = symbols_registry.points.names2points(construction.args)  # type: ignore
+            bc = symbols_registry.lines.line_thru_pair(b, c)
+            midpoint = midpoint_of_segment((x, a))
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=bc,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_complete_arrow(
+                    ax,
+                    midpoint,
+                    x.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_complete_arrow(
+                    ax,
+                    midpoint,
+                    a.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=bc,
+                    line1=symbols_registry.lines.line_thru_pair(x, a),
+                    color=theme.perpendicular_color,
                 ),
             ]
         # Create an explicit case for constructions that do not need anything to be drawn but the points
