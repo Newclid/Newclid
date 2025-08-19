@@ -2070,7 +2070,7 @@ def _draw_intersection_bisectors(
             break
 
     segment = [point for point in triangle if point != vertex]
-    midpoint = _midpoint_of_segment((segment[0], segment[1]))
+    midpoint = midpoint_of_segment((segment[0], segment[1]))
 
     return [
         draw_circle(
@@ -2148,7 +2148,7 @@ def _get_eqangle_vertex(predicate: Predicate) -> Point:
     return vertex1
 
 
-def _midpoint_of_segment(segment: tuple[Point, Point]) -> PointNum:
+def midpoint_of_segment(segment: tuple[Point, Point]) -> PointNum:
     if len(segment) != 2:
         raise ValueError("Segment must have exactly 2 points.")
 
