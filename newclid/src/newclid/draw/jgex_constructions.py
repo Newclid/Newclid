@@ -11,7 +11,7 @@ from newclid.draw.geometries import (
     draw_triangle,
 )
 from newclid.draw.predicates import draw_line, draw_line_symbol, draw_perp_rectangle
-from newclid.draw.rule import circumcenter_of_triangle
+from newclid.draw.rule import circumcenter_of_triangle, midpoint_of_segment
 from newclid.draw.theme import DrawTheme
 from newclid.jgex.clause import JGEXConstruction
 from newclid.jgex.formulation import JGEXFormulation
@@ -54,6 +54,32 @@ def draw_jgex_constructions(
                     b.num,
                     c.num,
                     line_color=theme.triangle_color,
+                    line_width=theme.thick_line_width,
+                ),
+            ]
+        case "iso_triangle" | "iso_triangle0" | "iso_triangle_vertex":
+            vertex, p1, p2 = symbols_registry.points.names2points(construction.args)  # type: ignore
+            return [
+                draw_triangle(
+                    ax=ax,
+                    p0=vertex.num,
+                    p1=p1.num,
+                    p2=p2.num,
+                    line_color=theme.triangle_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=p1.num,
+                    p1=vertex.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=p2.num,
+                    p1=vertex.num,
+                    line_color=theme.line_color,
                     line_width=theme.thick_line_width,
                 ),
             ]
@@ -306,6 +332,252 @@ def draw_jgex_constructions(
                     line_color=theme.line_color,
                     line_width=theme.thin_line_width,
                     ls=":",
+                ),
+            ]
+        case "intersection_lt":
+            x, a, b, c, d, e = symbols_registry.points.names2points(construction.args)  # type: ignore
+            ab = symbols_registry.lines.line_thru_pair(a, b)
+            de = symbols_registry.lines.line_thru_pair(d, e)
+            cx = symbols_registry.lines.line_thru_pair(c, x)
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=ab,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_line_symbol(
+                    ax=ax,
+                    line=de,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=de,
+                    line1=cx,
+                    color=theme.perpendicular_color,
+                ),
+                draw_line_symbol(
+                    ax=ax,
+                    line=cx,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                    ls=":",
+                ),
+            ]
+        case "intersection_tt":
+            x, a, b, c, d, e, f = symbols_registry.points.names2points(
+                construction.args
+            )  # type: ignore
+            bc = symbols_registry.lines.line_thru_pair(b, c)
+            ef = symbols_registry.lines.line_thru_pair(e, f)
+            xa = symbols_registry.lines.line_thru_pair(a, x)
+            dx = symbols_registry.lines.line_thru_pair(d, x)
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=bc,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_line_symbol(
+                    ax=ax,
+                    line=ef,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=bc,
+                    line1=xa,
+                    color=theme.perpendicular_color,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=ef,
+                    line1=dx,
+                    color=theme.perpendicular_color,
+                ),
+                draw_line_symbol(
+                    ax=ax,
+                    line=xa,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                    ls=":",
+                ),
+                draw_line_symbol(
+                    ax=ax,
+                    line=dx,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                    ls=":",
+                ),
+            ]
+        case "intersection_lc":
+            x, a, o, b = symbols_registry.points.names2points(construction.args)
+            radius = o.num.distance(b.num)
+            ab = symbols_registry.lines.line_thru_pair(a, b)
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=ab,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_circle(
+                    ax=ax,
+                    center=(o.num.x, o.num.y),
+                    radius=radius,
+                    line_color=theme.circle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=o.num,
+                    p1=b.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+            ]
+        case "intersection_cc":
+            x, o, w, a = symbols_registry.points.names2points(construction.args)
+            radius1 = o.num.distance(a.num)
+            radius2 = w.num.distance(a.num)
+            return [
+                draw_circle(
+                    ax=ax,
+                    center=(o.num.x, o.num.y),
+                    radius=radius1,
+                    line_color=theme.circle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=o.num,
+                    p1=a.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_circle(
+                    ax=ax,
+                    center=(w.num.x, w.num.y),
+                    radius=radius2,
+                    line_color=theme.circle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=w.num,
+                    p1=a.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+            ]
+        case "cc_tangent" | "cc_itangent":
+            x, y, z, i, o, a, w, b = symbols_registry.points.names2points(
+                construction.args
+            )  # type: ignore
+            xy = symbols_registry.lines.line_thru_pair(x, y)
+            iz = symbols_registry.lines.line_thru_pair(i, z)
+            ox = symbols_registry.lines.line_thru_pair(o, x)
+            wy = symbols_registry.lines.line_thru_pair(w, y)
+            oz = symbols_registry.lines.line_thru_pair(o, z)
+            iw = symbols_registry.lines.line_thru_pair(i, w)
+            radius1 = o.num.distance(a.num)
+            radius2 = w.num.distance(b.num)
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=xy,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_line_symbol(
+                    ax=ax,
+                    line=iz,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_circle(
+                    ax=ax,
+                    center=(o.num.x, o.num.y),
+                    radius=radius1,
+                    line_color=theme.circle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_circle(
+                    ax=ax,
+                    center=(w.num.x, w.num.y),
+                    radius=radius2,
+                    line_color=theme.circle_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=o.num,
+                    p1=a.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=w.num,
+                    p1=b.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=o.num,
+                    p1=x.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=w.num,
+                    p1=y.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=o.num,
+                    p1=z.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_segment(
+                    ax=ax,
+                    p0=w.num,
+                    p1=i.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=xy,
+                    line1=ox,
+                    color=theme.perpendicular_color,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=iz,
+                    line1=oz,
+                    color=theme.perpendicular_color,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=xy,
+                    line1=wy,
+                    color=theme.perpendicular_color,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=iz,
+                    line1=iw,
+                    color=theme.perpendicular_color,
                 ),
             ]
         case "on_dia":
@@ -630,6 +902,38 @@ def draw_jgex_constructions(
                     x.num,
                     line_color=theme.line_color,
                     line_width=theme.thin_line_width,
+                ),
+            ]
+        case "reflect":
+            x, a, b, c = symbols_registry.points.names2points(construction.args)  # type: ignore
+            bc = symbols_registry.lines.line_thru_pair(b, c)
+            midpoint = midpoint_of_segment((x, a))
+            return [
+                draw_line_symbol(
+                    ax=ax,
+                    line=bc,
+                    line_color=theme.line_color,
+                    line_width=theme.thick_line_width,
+                ),
+                draw_complete_arrow(
+                    ax,
+                    midpoint,
+                    x.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_complete_arrow(
+                    ax,
+                    midpoint,
+                    a.num,
+                    line_color=theme.line_color,
+                    line_width=theme.thin_line_width,
+                ),
+                draw_perp_rectangle(
+                    ax=ax,
+                    line0=bc,
+                    line1=symbols_registry.lines.line_thru_pair(x, a),
+                    color=theme.perpendicular_color,
                 ),
             ]
         # Create an explicit case for constructions that do not need anything to be drawn but the points
