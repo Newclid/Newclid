@@ -74,3 +74,6 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = ["sympy.*"]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+omit = ['src/newclid/animation']
