@@ -30,6 +30,7 @@ dependencies = [
     "pybind11>=2.13.6",
     "pydantic>=2.11.5",
     "pyvis>=0.3.2",
+    "pyyaml>=6.0.2",
     "scipy>=1.10.0",
     "symengine>=0.14.1",
     "sympy>=1.13",
