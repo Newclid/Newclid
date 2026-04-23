@@ -55,7 +55,7 @@ option(WITH_SAFE_NUMERICS
   ${WITH_SAFE_NUMERICS_DEFAULT}
 )
 
-option(USE_STATIC_LINK "Link statically to external libraries" ON)
+option(USE_STATIC_LINK "Link statically to external libraries" OFF)
 option(BUILD_DOC "Build doxygen documentation" ON)
 
 if (USE_STATIC_LINK)
@@ -66,8 +66,6 @@ if (USE_STATIC_LINK)
     else()
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
     endif()
-  elseif(NOT APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
   endif()
 endif()
 

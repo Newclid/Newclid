@@ -35,7 +35,7 @@ build-backend = "scikit_build_core.build"
 [tool.scikit-build]
 cmake.source-dir = "."
 cmake.args = [
-  "-DUSE_STATIC_LINK=ON",
+  "-DUSE_STATIC_LINK=OFF",
   "-DBUILD_DOC=OFF"
 ]
 build-dir = "build/{wheel_tag}"
