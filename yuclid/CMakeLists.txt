@@ -70,7 +70,7 @@ if (USE_STATIC_LINK)
 endif()
 
 find_package(Boost 1.83 REQUIRED
-  COMPONENTS log log_setup json program_options system unit_test_framework headers)
+  COMPONENTS log log_setup json program_options unit_test_framework headers)
 
 yuclid_check_cxx_feature(
   HAVE_VARIABLES_MAP_CONTAINS

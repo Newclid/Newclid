@@ -68,7 +68,6 @@ target_link_libraries(yuclid
   Boost::log_setup
   Boost::json
   Boost::program_options
-  Boost::system
   Boost::headers
 )
 
