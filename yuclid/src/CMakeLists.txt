@@ -84,6 +84,11 @@ else()
   set(YUCLID_RUNTIME_DEST "${CMAKE_INSTALL_BINDIR}")
 endif()
 
+# Install yuclid.exe and any Boost DLLs it depends on into the same directory.
+# On Windows, DLLs must live next to the exe or the exe crashes at startup
+# with a missing DLL error (exit code 0xC0000135).
+# $<TARGET_RUNTIME_DLLS:...> resolves automatically from Boost target metadata.
+# OPTIONAL silently skips this when Boost is static (no DLLs to copy).
 if(WIN32)
   install(TARGETS yuclid_exe
     RUNTIME DESTINATION "${YUCLID_RUNTIME_DEST}"

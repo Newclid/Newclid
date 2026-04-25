@@ -69,6 +69,9 @@ if (USE_STATIC_LINK)
   endif()
 endif()
 
+# On Windows, CMake has no standard location to search for Boost.
+# Users must download Boost from boost.org and point us at the cmake subfolder
+# inside the lib directory via this environment variable.
 if(WIN32 AND NOT DEFINED Boost_DIR AND DEFINED ENV{YUCLID_BOOST_DIR})
   if(EXISTS "$ENV{YUCLID_BOOST_DIR}/BoostConfig.cmake")
     set(Boost_DIR "$ENV{YUCLID_BOOST_DIR}" CACHE PATH "Path to BoostConfig.cmake")
