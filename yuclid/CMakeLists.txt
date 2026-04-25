@@ -69,6 +69,18 @@ if (USE_STATIC_LINK)
   endif()
 endif()
 
+if(WIN32 AND NOT DEFINED Boost_DIR AND DEFINED ENV{YUCLID_BOOST_DIR})
+  if(EXISTS "$ENV{YUCLID_BOOST_DIR}/BoostConfig.cmake")
+    set(Boost_DIR "$ENV{YUCLID_BOOST_DIR}" CACHE PATH "Path to BoostConfig.cmake")
+    message(STATUS "Using Boost_DIR from YUCLID_BOOST_DIR: ${Boost_DIR}")
+  else()
+    message(FATAL_ERROR
+      "YUCLID_BOOST_DIR is set, but BoostConfig.cmake was not found there: "
+      "$ENV{YUCLID_BOOST_DIR}"
+    )
+  endif()
+endif()
+
 find_package(Boost 1.83 REQUIRED
   COMPONENTS log log_setup json program_options unit_test_framework headers)
 

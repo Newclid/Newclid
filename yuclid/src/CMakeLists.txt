@@ -1,4 +1,5 @@
 add_subdirectory(numbers)
+include(GNUInstallDirs)
 
 add_library(yuclid
   STATIC
@@ -78,7 +79,21 @@ target_link_libraries(yuclid_exe PRIVATE
 )
 
 if (DEFINED SKBUILD_SCRIPTS_DIR)
-  install(TARGETS yuclid_exe DESTINATION "${SKBUILD_SCRIPTS_DIR}")
+  set(YUCLID_RUNTIME_DEST "${SKBUILD_SCRIPTS_DIR}")
 else()
-  install(TARGETS yuclid_exe DESTINATION "${CMAKE_INSTALL_BINDIR}")
+  set(YUCLID_RUNTIME_DEST "${CMAKE_INSTALL_BINDIR}")
+endif()
+
+if(WIN32)
+  install(TARGETS yuclid_exe
+    RUNTIME DESTINATION "${YUCLID_RUNTIME_DEST}"
+  )
+  install(FILES $<TARGET_RUNTIME_DLLS:yuclid_exe>
+    DESTINATION "${YUCLID_RUNTIME_DEST}"
+    OPTIONAL
+  )
+else()
+  install(TARGETS yuclid_exe
+    RUNTIME DESTINATION "${YUCLID_RUNTIME_DEST}"
+  )
 endif()
