@@ -198,6 +198,9 @@ class GeometricSolverBuilder:
         )
 
         self.api_default.callback(proof_state)
+        if hasattr(self.api_default, "he_adapter"):
+            custom_rules = [r for r in self.rules if r not in DEFAULT_RULES]
+            self.api_default.he_adapter.custom_rules = custom_rules
         return GeometricSolver(proof_state, self.rules, self.deductive_agent)
 
     def with_deductive_agent(self, deductive_agent: DeductiveAgent) -> Self:
@@ -218,6 +221,20 @@ class GeometricSolverBuilder:
 
     def with_rules_from_file(self, rules_path: Path) -> Self:
         self.with_rules(rules_from_file(rules_path))
+        return self
+
+    def with_additional_rules(self, additional_rules: list[Rule]) -> Self:
+        rule_dict = {r.id: r for r in self.rules}
+
+        for new_rule in additional_rules:
+            if new_rule.id in rule_dict:
+                LOGGER.warning(
+                    f"Rule ID '{new_rule.id}' already exists. Skipping duplicate rules."
+                )
+                continue
+            rule_dict[new_rule.id] = new_rule
+
+        self.rules = list(rule_dict.values())
         return self
 
 
