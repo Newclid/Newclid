@@ -3,14 +3,17 @@
 #include <string>
 #include <vector>
 
-#include "statement_patterns.hpp"
-
 namespace Yuclid {
 
-    struct RuleSchema {
+    struct RulePredicatePattern {
         std::string name;
-        std::vector<PointVar> variables;
-        std::vector<StatementPattern> hypotheses;
-        std::vector<StatementPattern> conclusions;
+        std::vector<std::string> arguments;
+    };
+
+    struct RuleSchema {
+        std::string id;
+        std::vector<std::string> variables;
+        std::vector<RulePredicatePattern> hypotheses;
+        std::vector<RulePredicatePattern> conclusions;
     };
 }
