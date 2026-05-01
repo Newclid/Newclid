@@ -65,7 +65,25 @@ namespace Yuclid {
             }
 
             if(action == "rule") {
-                // TODO: Implement rule handling
+                add_current_rule(currentRule, rules);
+
+                RuleSchema rule;
+
+                if(!(stream >> rule.id)) {
+                    throw std::runtime_error("Rule is missing an id");
+                }
+                
+                std::string variable;
+                while(stream >> variable) {
+                    rule.variables.push_back(variable);
+                }
+
+                if(rule.variables.empty()) {
+                    throw std::runtime_error("Rule has no variables: " + rule.id);
+                }
+
+                currentRule = std::move(rule);
+                continue;
             }
 
             if(action == "require") {
