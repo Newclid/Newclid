@@ -14,6 +14,7 @@ foreach(name
     int_sqrt
     #slope_angle
     #squared_dist
+    rule_parser
   )
   add_executable(test_${name} ${name}.cpp)
 
