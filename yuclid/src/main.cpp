@@ -15,7 +15,7 @@
 */
 #include "config_options.hpp" // Include our configuration class header
 #include "matcher.hpp"
-#include "parser/simple.hpp"
+#include "parser/problem_parser.hpp"
 #include "problem.hpp"
 #include "statement/statement.hpp"
 #include "theorem.hpp"
@@ -97,7 +97,7 @@ namespace {
   }
 
   int run_file(const Config &config, istream &input) {
-    Problem prob = parse_input_simple(input);
+    Problem prob = parse_problem(input);
 
     switch (config.global().mode()) {
     case Config::Mode::DDAR:
