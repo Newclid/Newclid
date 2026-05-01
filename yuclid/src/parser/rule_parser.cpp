@@ -5,6 +5,9 @@
 
 namespace Yuclid {
 
+    /**
+     * @brief Parses the provided stream to a rule predicate
+     */
     RulePredicatePattern parse_rule_predicate(std::istream &stream) {
         RulePredicatePattern pattern;
 
@@ -25,6 +28,9 @@ namespace Yuclid {
         return pattern;
     }
 
+    /**
+     * @brief Checks if the currentRule is a valid one and adds it to all found rules
+     */
     void add_current_rule(
         std::optional<RuleSchema> &currentRule,
         std::vector<RuleSchema> &rules
@@ -45,6 +51,9 @@ namespace Yuclid {
         currentRule.reset();
     }
 
+    /**
+     * @brief Parses the input stream to a list of Rule schemas
+     */
     std::vector<RuleSchema> parse_rule_schemas(std::istream &input) {
         std::vector<RuleSchema> rules;
         std::optional<RuleSchema> currentRule;
