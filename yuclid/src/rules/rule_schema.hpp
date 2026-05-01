@@ -7,7 +7,7 @@ namespace Yuclid {
 
     struct RulePredicatePattern {
         std::string name;
-        std::vector<std::string> arguments;
+        std::vector<std::string> args;
     };
 
     struct RuleSchema {
