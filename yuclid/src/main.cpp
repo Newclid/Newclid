@@ -132,6 +132,19 @@ int main(int argc, char* argv[]) {
                              << (config.global().err_on_failure() ? "enabled" : "disabled");
     BOOST_LOG_TRIVIAL(info) << "Operating in mode " << config.global().mode();
 
+    std::vector<Theorem> custom_theorems;
+
+    const auto &custom_theorems_file = config.global().custom_theorems_file_path();
+    if(custom_theorems_file.empty()){
+      BOOST_LOG_TRIVIAL(info) << "No file with custom theorems provided.";
+    } else {
+      BOOST_LOG_TRIVIAL(info) << "Reading custom theorems from " << custom_theorems_file;
+      ifstream theorems_input(custom_theorems_file);
+      // TODO: Implement the actual parsing function
+      // Decide wether to store the custom theorems inside the Problem object or pass them to the solvers directly
+      // custom_theorems = parse_input_theorems(theorems_input)
+    }
+
     if (config.global().input_file_paths().empty()) {
       BOOST_LOG_TRIVIAL(info) << "Parsing stdin";
       return run_file(config, cin);

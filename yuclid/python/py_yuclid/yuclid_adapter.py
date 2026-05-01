@@ -231,7 +231,7 @@ class YuclidAdapter(DeductionProvider):
             if self.custom_rules:
                 command.extend(
                     [
-                        "--input-additional-rules-file",
+                        "--input-additional-theorems-file",
                         str(input_custom_rules_file_path),
                     ]
                 )
