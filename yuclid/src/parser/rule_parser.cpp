@@ -96,7 +96,12 @@ namespace Yuclid {
             }
 
             if(action == "conclude") {
-                // TODO: Implement conclude handling
+                if(!currentRule.has_value()) {
+                    throw std::runtime_error("Found 'conclude' before defining a rule");
+                }
+
+                currentRule->conclusions.push_back(parse_rule_predicate(stream));
+                continue;
             }
 
             throw std::runtime_error("Unknown rule parser action: " + action);
