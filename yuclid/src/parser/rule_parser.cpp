@@ -87,7 +87,12 @@ namespace Yuclid {
             }
 
             if(action == "require") {
-                // TODO: Implement require handling
+                if(!currentRule.has_value()) {
+                    throw std::runtime_error("Found 'require' before defining a rule");
+                }
+
+                currentRule->hypotheses.push_back(parse_rule_predicate(stream));
+                continue;
             }
 
             if(action == "conclude") {
