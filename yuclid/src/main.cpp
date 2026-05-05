@@ -132,6 +132,20 @@ int main(int argc, char* argv[]) {
                              << (config.global().err_on_failure() ? "enabled" : "disabled");
     BOOST_LOG_TRIVIAL(info) << "Operating in mode " << config.global().mode();
 
+    // TODO: Change the type of this variable to RuleScheme once thats implemented
+    std::vector<Theorem> custom_rules;
+
+    const auto &custom_rules_file = config.global().custom_rules_file_path();
+    if(custom_rules_file.empty()){
+      BOOST_LOG_TRIVIAL(info) << "No file with custom rules provided.";
+    } else {
+      BOOST_LOG_TRIVIAL(info) << "Reading custom rules from " << custom_rules_file;
+      ifstream rules_input(custom_rules_file);
+      // TODO: Implement the actual parsing function
+      // Decide wether to store the custom rules inside the Problem object or pass them to the solvers directly
+      // custom_rules = parse_input_rules(rules_input)
+    }
+
     if (config.global().input_file_paths().empty()) {
       BOOST_LOG_TRIVIAL(info) << "Parsing stdin";
       return run_file(config, cin);
