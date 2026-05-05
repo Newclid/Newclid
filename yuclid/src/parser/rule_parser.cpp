@@ -1,7 +1,11 @@
 #include "rule_parser.hpp"
-#include <iostream>
+
+#include <istream>
 #include <sstream>
-#include <iosfwd>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace Yuclid {
 
@@ -36,7 +40,7 @@ namespace Yuclid {
         std::vector<RuleSchema> &rules
     ) {
         if(!currentRule.has_value()) {
-            return;
+            throw std::runtime_error("Found 'end' before defining a rule");
         }
 
         if(currentRule->hypotheses.empty()) {
@@ -53,6 +57,13 @@ namespace Yuclid {
 
     /**
      * @brief Parses the input stream to a list of Rule schemas
+     * 
+     * Format
+     *      rule <rule_id> <variables...>
+     *      require <predicate_name> <arguments...>
+     *      conclude <predicate_name> <arguments...>
+     *      end
+     *
      */
     std::vector<RuleSchema> parse_rule_schemas(std::istream &input) {
         std::vector<RuleSchema> rules;
@@ -60,7 +71,7 @@ namespace Yuclid {
 
         std::string line;
 
-        while (getline(input, line)) {
+        while (std::getline(input, line)) {
             if (line.empty()) {
                 continue;
             }
@@ -74,7 +85,13 @@ namespace Yuclid {
             }
 
             if(action == "rule") {
-                add_current_rule(currentRule, rules);
+
+                if(currentRule.has_value()) {
+                    throw std::runtime_error(
+                        "Found new rule before closing previous rule with 'end': "
+                        + currentRule->id
+                    );
+                }
 
                 RuleSchema rule;
 
@@ -113,11 +130,18 @@ namespace Yuclid {
                 continue;
             }
 
+            if(action == "end") {
+                add_current_rule(currentRule, rules);
+                continue;
+            }
+
             throw std::runtime_error("Unknown rule parser action: " + action);
         }
-
-        add_current_rule(currentRule, rules);
+        
+        if(currentRule.has_value()) {
+            throw std::runtime_error("Rule is missing 'end': " + currentRule->id);
+        }
 
         return rules;
     }
-};
+} // namespace Yuclid
