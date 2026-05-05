@@ -19,69 +19,73 @@ using namespace Yuclid;
  * require <predicate_name> <arg1> <arg2> ...
  * conclude <predicate_name> <arg1> <arg2> ...
  * conclude <predicate_name> <arg1> <arg2> ...
- * rule ... and we can repeate
+ * end
  *
  * Require and conclude sections are independ number of each other
 */
 
 BOOST_AUTO_TEST_SUITE(rule_parser_suite)
 
-    BOOST_AUTO_TEST_CASE(parse_single_rule) {
-        std::istringstream input(R"(
-            rule user_iso O A B
-            require cong O A O B
-            require ncoll O A B
-            conclude eqangle O A B A B O
-        )");
+BOOST_AUTO_TEST_CASE(parse_single_rule) {
+    std::istringstream input(R"(
+        rule user_iso O A B
+        require cong O A O B
+        require ncoll O A B
+        conclude eqangle O A B A B O
+        end
+    )");
 
-        std::vector<RuleSchema> rules = parse_rule_schemas(input);
+    std::vector<RuleSchema> rules = parse_rule_schemas(input);
 
-        BOOST_REQUIRE_EQUAL(rules.size(), 1);
+    BOOST_REQUIRE_EQUAL(rules.size(), 1);
 
-        const RuleSchema &rule = rules.at(0);
+    const RuleSchema &rule = rules.at(0);
 
-        BOOST_CHECK_EQUAL(rule.id, "user_iso");
+    BOOST_CHECK_EQUAL(rule.id, "user_iso");
 
-        BOOST_REQUIRE_EQUAL(rule.variables.size(), 3);
-        BOOST_CHECK_EQUAL(rule.variables.at(0), "O");
-        BOOST_CHECK_EQUAL(rule.variables.at(1), "A");
-        BOOST_CHECK_EQUAL(rule.variables.at(2), "B");
+    BOOST_REQUIRE_EQUAL(rule.variables.size(), 3);
+    BOOST_CHECK_EQUAL(rule.variables.at(0), "O");
+    BOOST_CHECK_EQUAL(rule.variables.at(1), "A");
+    BOOST_CHECK_EQUAL(rule.variables.at(2), "B");
 
-        BOOST_REQUIRE_EQUAL(rule.hypotheses.size(), 2);
+    BOOST_REQUIRE_EQUAL(rule.hypotheses.size(), 2);
 
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(0).name, "cong");
-        BOOST_REQUIRE_EQUAL(rule.hypotheses.at(0).args.size(), 4);
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(0).args.at(0), "O");
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(0).args.at(1), "A");
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(0).args.at(2), "O");
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(0).args.at(3), "B");
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(0).name, "cong");
+    BOOST_REQUIRE_EQUAL(rule.hypotheses.at(0).args.size(), 4);
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(0).args.at(0), "O");
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(0).args.at(1), "A");
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(0).args.at(2), "O");
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(0).args.at(3), "B");
 
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(1).name, "ncoll");
-        BOOST_REQUIRE_EQUAL(rule.hypotheses.at(1).args.size(), 3);
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(1).args.at(0), "O");
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(1).args.at(1), "A");
-        BOOST_CHECK_EQUAL(rule.hypotheses.at(1).args.at(2), "B");
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(1).name, "ncoll");
+    BOOST_REQUIRE_EQUAL(rule.hypotheses.at(1).args.size(), 3);
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(1).args.at(0), "O");
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(1).args.at(1), "A");
+    BOOST_CHECK_EQUAL(rule.hypotheses.at(1).args.at(2), "B");
 
-        BOOST_REQUIRE_EQUAL(rule.conclusions.size(), 1);
+    BOOST_REQUIRE_EQUAL(rule.conclusions.size(), 1);
 
-        BOOST_CHECK_EQUAL(rule.conclusions.at(0).name, "eqangle");
-        BOOST_REQUIRE_EQUAL(rule.conclusions.at(0).args.size(), 6);
-        BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(0), "O");
-        BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(1), "A");
-        BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(2), "B");
-        BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(3), "A");
-        BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(4), "B");
-        BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(5), "O");
-    }
+    BOOST_CHECK_EQUAL(rule.conclusions.at(0).name, "eqangle");
+    BOOST_REQUIRE_EQUAL(rule.conclusions.at(0).args.size(), 6);
+    BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(0), "O");
+    BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(1), "A");
+    BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(2), "B");
+    BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(3), "A");
+    BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(4), "B");
+    BOOST_CHECK_EQUAL(rule.conclusions.at(0).args.at(5), "O");
+}
 
-BOOST_AUTO_TEST_CASE(parse_multiple_rules_without_end_keyword) {
+BOOST_AUTO_TEST_CASE(parse_multiple_rules_with_end_keyword) {
     std::istringstream input(R"(
         rule r1 A B
         require diff A B
         conclude diff B A
+        end
+
         rule r2 X Y Z
         require coll X Y Z
         conclude coll Z Y X
+        end
     )");
 
     std::vector<RuleSchema> rules = parse_rule_schemas(input);
@@ -123,19 +127,34 @@ BOOST_AUTO_TEST_CASE(conclude_before_rule_is_error) {
         conclude cong A B C D
     )");
 
-   BOOST_CHECK_THROW(
+    BOOST_CHECK_THROW(
         {
             const auto rules = parse_rule_schemas(input);
             (void)rules;
         },
         std::runtime_error
-    ); 
+    );
+}
+
+BOOST_AUTO_TEST_CASE(end_before_rule_is_error) {
+    std::istringstream input(R"(
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules = parse_rule_schemas(input);
+            (void)rules;
+        },
+        std::runtime_error
+    );
 }
 
 BOOST_AUTO_TEST_CASE(rule_without_hypotheses_is_error) {
     std::istringstream input(R"(
         rule bad A B
         conclude diff A B
+        end
     )");
 
     BOOST_CHECK_THROW(
@@ -151,6 +170,44 @@ BOOST_AUTO_TEST_CASE(rule_without_conclusions_is_error) {
     std::istringstream input(R"(
         rule bad A B
         require diff A B
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules = parse_rule_schemas(input);
+            (void)rules;
+        },
+        std::runtime_error
+    );
+}
+
+BOOST_AUTO_TEST_CASE(rule_without_end_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff A B
+        conclude diff B A
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules = parse_rule_schemas(input);
+            (void)rules;
+        },
+        std::runtime_error
+    );
+}
+
+BOOST_AUTO_TEST_CASE(new_rule_before_end_is_error) {
+    std::istringstream input(R"(
+        rule r1 A B
+        require diff A B
+        conclude diff B A
+
+        rule r2 X Y
+        require diff X Y
+        conclude diff Y X
+        end
     )");
 
     BOOST_CHECK_THROW(
