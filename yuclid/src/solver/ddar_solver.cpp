@@ -56,7 +56,7 @@ using namespace std;
 
 namespace Yuclid {
 
-  DDARSolver::DDARSolver(const Problem *problem, const Config::Solver *config, const std::vector<RuleSchema> *custom_rules) :
+  DDARSolver::DDARSolver(const Problem *problem, const Config::Solver *config, std::span<const RuleSchema> custom_rules) :
     m_problem(problem), m_config(config), m_custom_rules(custom_rules) {
     BOOST_LOG_TRIVIAL(info) << "Adding `by assumption` theorems";
     // Add problem's hypotheses.

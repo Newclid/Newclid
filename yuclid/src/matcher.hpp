@@ -38,7 +38,7 @@ namespace Yuclid {
 
   class TheoremMatcher {
   public:
-    explicit TheoremMatcher(const Problem *prob, const Config::Solver *config, const std::vector<RuleSchema> *custom_rules);
+    explicit TheoremMatcher(const Problem *prob, const Config::Solver *config, std::span<const RuleSchema> custom_rules);
     [[nodiscard]] const std::vector<Theorem> &theorems() const {
       return m_theorems;
     }
@@ -165,7 +165,7 @@ namespace Yuclid {
 
     const Problem *m_problem;
     const Config::Solver *m_config;
-    const std::vector<RuleSchema> *m_custom_rules;
+    const std::span<const RuleSchema> m_custom_rules;
 
     std::vector<Theorem> m_theorems;
   };

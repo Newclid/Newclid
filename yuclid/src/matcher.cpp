@@ -118,11 +118,10 @@ namespace Yuclid {
     }
   }
 
-  TheoremMatcher::TheoremMatcher(const Problem *prob, const Config::Solver *config, const std::vector<RuleSchema>* custom_rules = nullptr) :
+  TheoremMatcher::TheoremMatcher(const Problem *prob, const Config::Solver *config, std::span<const RuleSchema> custom_rules) :
     m_problem(prob), m_config(config), m_custom_rules(custom_rules) {
 
-    size_t rule_count = (m_custom_rules != nullptr) ? m_custom_rules->size() : 0;
-    BOOST_LOG_TRIVIAL(info) << "TheoremMatcher received " << rule_count << " custom rules.";
+    BOOST_LOG_TRIVIAL(info) << "TheoremMatcher received " << custom_rules.size() << " custom rules.";
 
     match_similar_triangles();
     match_between();

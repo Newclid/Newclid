@@ -94,7 +94,7 @@ namespace Yuclid {
      */
     size_t push_established_statement(const StatementProof *pf);
 
-    DDARSolver(const Problem *problem, const Config::Solver *config, const std::vector<RuleSchema> *custom_rules);
+    DDARSolver(const Problem *problem, const Config::Solver *config, std::span<const RuleSchema> custom_rules);
 
     /**
      * @brief Insert an equation in a table of equations to solve.
@@ -170,7 +170,7 @@ namespace Yuclid {
   private:
     const Problem *m_problem;
     const Config::Solver *m_config;
-    const std::vector<RuleSchema> *m_custom_rules;
+    const std::span<const RuleSchema> m_custom_rules;
 
     /** Current proof level. */
     size_t m_level{0};

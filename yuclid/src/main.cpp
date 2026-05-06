@@ -60,9 +60,9 @@ namespace {
     logging::add_common_attributes();
   }
 
-  bool run_ddar(const Problem &prob, const Config &config, const std::vector<RuleSchema> &custom_rules) {
+  bool run_ddar(const Problem &prob, const Config &config, std::span<const RuleSchema> custom_rules) {
     BOOST_LOG_TRIVIAL(info) << "Start initialization";
-    DDARSolver solver(&prob, &config.solver(), &custom_rules);
+    DDARSolver solver(&prob, &config.solver(), custom_rules);
     BOOST_LOG_TRIVIAL(info) << "Matched " << solver.num_theorems() << " theorems";
 
     for (const auto &goal : prob.goals()) {
@@ -84,8 +84,8 @@ namespace {
     return res;
   }
 
-  void match_theorems(const Problem &prob, const Config &config, const std::vector<RuleSchema> &custom_rules) {
-    TheoremMatcher matcher(&prob, &config.solver(), &custom_rules);
+  void match_theorems(const Problem &prob, const Config &config, std::span<const RuleSchema> custom_rules) {
+    TheoremMatcher matcher(&prob, &config.solver(), custom_rules);
     BOOST_LOG_TRIVIAL(info) << std::format("Matched {} theorems", matcher.theorems().size());
     if (config.global().use_json()) {
       boost::json::value const jv = boost::json::value_from(matcher.theorems());
@@ -97,7 +97,7 @@ namespace {
     }
   }
 
-  int run_file(const Config &config, istream &input, const std::vector<RuleSchema> &custom_rules) {
+  int run_file(const Config &config, istream &input, std::span<const RuleSchema> custom_rules) {
     Problem prob = parse_problem(input);
 
     switch (config.global().mode()) {
