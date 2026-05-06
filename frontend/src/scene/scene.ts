@@ -6,7 +6,7 @@ export class Scene {
   private nextLabelCode = 65; // 'A'
 
   addPoint(x: number, y: number): ObjectId {
-    const id = 'p${this.nextId++}';
+    const id = `p${this.nextId++}`;
     const label = String.fromCharCode(this.nextLabelCode++);
     this.points.set(id, { id, kind: 'point', x, y, label });
     return id;
