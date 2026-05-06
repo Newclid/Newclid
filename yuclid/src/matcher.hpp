@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include "config_options.hpp"
+#include "rules/rule_schema.hpp"
 
 namespace Yuclid {
   class Angle;
@@ -37,7 +38,7 @@ namespace Yuclid {
 
   class TheoremMatcher {
   public:
-    explicit TheoremMatcher(const Problem *prob, const Config::Solver *config);
+    explicit TheoremMatcher(const Problem *prob, const Config::Solver *config, std::span<const RuleSchema> custom_rules);
     [[nodiscard]] const std::vector<Theorem> &theorems() const {
       return m_theorems;
     }
@@ -164,6 +165,7 @@ namespace Yuclid {
 
     const Problem *m_problem;
     const Config::Solver *m_config;
+    const std::span<const RuleSchema> m_custom_rules;
 
     std::vector<Theorem> m_theorems;
   };

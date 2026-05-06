@@ -38,6 +38,7 @@
 #include "type/squared_dist.hpp"
 #include "typedef.hpp"
 #include "config_options.hpp"
+#include "rules/rule_schema.hpp"
 
 #include <algorithm>
 #include <boost/log/trivial.hpp>
@@ -117,8 +118,11 @@ namespace Yuclid {
     }
   }
 
-  TheoremMatcher::TheoremMatcher(const Problem *prob, const Config::Solver *config) :
-    m_problem(prob), m_config(config) {
+  TheoremMatcher::TheoremMatcher(const Problem *prob, const Config::Solver *config, std::span<const RuleSchema> custom_rules) :
+    m_problem(prob), m_config(config), m_custom_rules(custom_rules) {
+
+    BOOST_LOG_TRIVIAL(info) << "TheoremMatcher received " << custom_rules.size() << " custom rules.";
+
     match_similar_triangles();
     match_between();
     auto important_angles = match_equal_angles();

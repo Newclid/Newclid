@@ -31,6 +31,7 @@
 #include "type/squared_dist.hpp"
 #include "type/variable_types.hpp"
 #include "typedef.hpp"
+#include "rules/rule_schema.hpp"
 
 #include <boost/json/array.hpp>
 #include <boost/json/serialize.hpp>
@@ -55,8 +56,8 @@ using namespace std;
 
 namespace Yuclid {
 
-  DDARSolver::DDARSolver(const Problem *problem, const Config::Solver *config) :
-    m_problem(problem), m_config(config) {
+  DDARSolver::DDARSolver(const Problem *problem, const Config::Solver *config, std::span<const RuleSchema> custom_rules) :
+    m_problem(problem), m_config(config), m_custom_rules(custom_rules) {
     BOOST_LOG_TRIVIAL(info) << "Adding `by assumption` theorems";
     // Add problem's hypotheses.
     for (const auto &hyp : problem->hypotheses()) {
@@ -65,7 +66,7 @@ namespace Yuclid {
 
     BOOST_LOG_TRIVIAL(info) << "Matching theorems";
     // Enqueue all numerically matching theorems.
-    TheoremMatcher matcher(m_problem, m_config);
+    TheoremMatcher matcher(m_problem, m_config, m_custom_rules);
     for (const auto &thm : matcher.theorems()) {
       insert_theorem(thm.clone());
     }
