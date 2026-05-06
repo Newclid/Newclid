@@ -3,19 +3,20 @@ import { world } from '../geometry/coords';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-// Styling constants — tweak these to taste.
 const STYLE = {
   background: '#fafafa',
   gridMinor: '#ececec',  // small grid lines
   gridMajor: '#d0d0d0',  // every 5th line, slightly darker
-  axis: '#333',          // x and y axes
+  axis: '#333',
   axisLabel: '#555',     // numbers next to ticks
   tickLength: 4,         // pixels of tick mark on each side of axis
   fontSize: 11,
 };
 
 export class Renderer {
-  private svg: SVGSVGElement;
+  // Exposed (readonly) so the input layer can attach pointer/wheel
+  // listeners. Renderer still owns the element's lifecycle and contents.
+  readonly svg: SVGSVGElement;
 
   constructor(private container: HTMLElement, private viewport: Viewport) {
     this.svg = document.createElementNS(SVG_NS, 'svg');
@@ -25,7 +26,6 @@ export class Renderer {
     this.resize();
   }
 
-  // Sync the SVG element's pixel size to the viewport.
   resize(): void {
     this.svg.setAttribute('width', String(this.viewport.width));
     this.svg.setAttribute('height', String(this.viewport.height));
@@ -47,8 +47,8 @@ export class Renderer {
   private drawGrid(): void {
     const vp = this.viewport;
 
-    // Pick a grid spacing in *world units* that ends up roughly 50px on screen.
-    // This means the grid auto-adjusts when we add zoom later.
+    // Grid spacing in *world units* chosen to land near 50px on screen.
+    // niceStep snaps that to a 1/2/5 multiple so labels stay readable.
     const targetPx = 50;
     const spacing = niceStep(targetPx / vp.scale);
 
@@ -57,7 +57,6 @@ export class Renderer {
     const tl = vp.screenToWorld({ x: 0, y: 0, _kind: 'screen' } as any);
     const br = vp.screenToWorld({ x: vp.width, y: vp.height, _kind: 'screen' } as any);
 
-    // Walk from the leftmost visible grid line to the rightmost.
     const minX = Math.floor(tl.x / spacing) * spacing;
     const maxX = Math.ceil(br.x / spacing) * spacing;
     // Note: br has smaller y than tl in world coords (screen y flipped).
