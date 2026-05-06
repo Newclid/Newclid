@@ -13,3 +13,6 @@ npm-debug.log*
 
 # Editor
 .DS_Store
+
+# Extras
+extras/
