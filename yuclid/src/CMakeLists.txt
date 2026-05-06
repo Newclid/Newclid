@@ -15,7 +15,8 @@ add_library(yuclid
   numbers/posreal.cpp
   numbers/root_rat.cpp
   numbers/util.cpp
-  parser/simple.cpp
+  parser/problem_parser.cpp
+  parser/rule_parser.cpp
   problem.cpp
   solver/ddar_solver.cpp
   solver/statement_proof.cpp
