@@ -1,24 +1,26 @@
+// Routes pointer events on the canvas to the active tool: a click
+// resolves `scene.tool` against the registry and calls that tool's
+// `onClick`.
+//
+// Coexists with panZoom: while space is held the user is panning, so we
+// suppress the click. Space state is tracked here rather than read from
+// panZoom — the duplicated key listener keeps the two modules
+// decoupled.
+
 import { Viewport } from '../geometry/viewport';
 import { screen } from '../geometry/coords';
 import { Scene } from '../scene/scene';
+import { toolRegistry } from '../tools/registry';
 
-// Bare left-click on the canvas places a new point.
-//
-// Coexists with panZoom: while space is held the user is panning, so we
-// suppress the click. We track space state independently rather than
-// reaching into panZoom — keeps modules decoupled at the cost of a
-// duplicated key listener.
-
-export interface ClickToAddPointHandle {
+export interface ToolDispatcherHandle {
   destroy(): void;
 }
 
-export function attachClickToAddPoint(
+export function attachToolDispatcher(
   target: SVGSVGElement,
   viewport: Viewport,
   scene: Scene,
-  onChange: () => void,
-): ClickToAddPointHandle {
+): ToolDispatcherHandle {
   let spaceHeld = false;
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -40,9 +42,16 @@ export function attachClickToAddPoint(
   const onClick = (e: MouseEvent) => {
     if (e.button !== 0 || spaceHeld) return;
     const local = toLocal(e);
-    const w = viewport.screenToWorld(screen(local.x, local.y));
-    scene.addPoint(w.x, w.y);
-    onChange();
+    const sp = screen(local.x, local.y);
+    const wp = viewport.screenToWorld(sp);
+    const tool = toolRegistry[scene.tool];
+    tool.onClick({
+      scene,
+      world: wp,
+      screen: sp,
+      scale: viewport.scale,
+      shiftKey: e.shiftKey,
+    });
   };
 
   window.addEventListener('keydown', onKeyDown);
