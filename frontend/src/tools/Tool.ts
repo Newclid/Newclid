@@ -21,8 +21,16 @@ export interface ToolContext {
 }
 
 // A preview shape rendered by the canvas while a tool is mid-action.
-// Discriminated on `kind` so the renderer can branch on it.
-export type ToolPreview = { kind: 'highlightPoint'; pos: WorldPoint };
+// Discriminated on `kind` so the renderer can branch on it. Adding a
+// future preview shape (rubberLine, rubberCircleAbs, ...) is one new
+// variant + one new switch arm in the renderer's preview pass.
+//
+// Positions here are plain {x, y} rather than branded WorldPoint:
+// previews carry derived geometry that's already been resolved from
+// the scene, and tool call sites build them as object literals.
+export type ToolPreview =
+  | { kind: 'highlightPoint'; pos: { x: number; y: number } }
+  | { kind: 'rubberCircle'; center: { x: number; y: number }; radiusVec: { x: number; y: number } };
 
 export interface Tool {
   readonly name: ToolName;

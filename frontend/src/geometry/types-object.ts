@@ -13,7 +13,15 @@ export interface PointObject {
   label: string;
 }
 
-export type GeoObject = PointObject;
+// Mode-tagged: 'center-through' is the variant in scope here. The
+// 'three-points' arm is declared up front so renderer / cascade /
+// serialize branches written today are already shaped for it; the
+// 3-point tool itself ships in a follow-up prompt.
+export type CircleObject =
+  | { id: ObjectId; kind: 'circle'; mode: 'center-through'; center: ObjectId; through: ObjectId }
+  | { id: ObjectId; kind: 'circle'; mode: 'three-points'; p1: ObjectId; p2: ObjectId; p3: ObjectId };
+
+export type GeoObject = PointObject | CircleObject;
 export type GeoKind = GeoObject['kind'];
 
-export type ToolName = 'select' | 'point';
+export type ToolName = 'select' | 'point' | 'circle';
