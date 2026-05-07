@@ -1,6 +1,7 @@
 import { Viewport } from '../geometry/viewport';
-import { world } from '../geometry/coords';
+import { world, type WorldPoint } from '../geometry/coords';
 import { Scene } from '../scene/scene';
+import { distance } from '../geometry/primitives';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -12,6 +13,15 @@ const STYLE = {
   axisLabel: '#555',     // numbers next to ticks
   tickLength: 4,         // pixels of tick mark on each side of axis
   fontSize: 11,
+  // Stored circles — solid stroke, ink graphite to match points.
+  circleStroke: '#1A1816',
+  circleStrokeWidth: 1.75,
+  // Snap-target ring (drawn around an existing point under the cursor).
+  snapStroke: '#2A4A7F',
+  // Rubber-band preview circle — dashed, soft grey.
+  previewStroke: '#8C887F',
+  previewStrokeWidth: 1.5,
+  previewDash: '5 4',
 };
 
 export class Renderer {
@@ -36,12 +46,17 @@ export class Renderer {
     // Clear everything from the previous frame.
     while (this.svg.firstChild) this.svg.removeChild(this.svg.firstChild);
 
-    // Order matters in SVG: later elements draw on top of earlier ones.
-    // So we draw grid first, then axes, then labels.
+    // SVG paints later elements on top of earlier ones. Order:
+    // grid → axes → labels → circles → points → previews.
+    // Points stay above circles so the user can grab them through any
+    // circle that intersects them; previews float on top so the snap
+    // ring is visible even when it's centred on a point.
     this.drawGrid();
     this.drawAxes();
     this.drawAxisLabels();
+    this.drawCircles();
     this.drawPoints();
+    this.drawPreviews();
   }
 
   // -------- grid --------
@@ -159,6 +174,63 @@ export class Renderer {
     el.setAttribute('fill', STYLE.axisLabel);
     el.textContent = content;
     this.svg.appendChild(el);
+  }
+
+  private drawCircles(): void {
+    for (const o of this.scene.objects.values()) {
+      if (o.kind !== 'circle') continue;
+      if (o.mode === 'center-through') {
+        const c = this.scene.objects.get(o.center);
+        const t = this.scene.objects.get(o.through);
+        // Skip silently: a frame between cascade-delete and re-render
+        // can briefly reference a stale ID.
+        if (c?.kind !== 'point' || t?.kind !== 'point') continue;
+        const radiusWorld = distance(
+          c as unknown as WorldPoint,
+          t as unknown as WorldPoint,
+        );
+        const sc = this.viewport.worldToScreen(world(c.x, c.y));
+        const r = radiusWorld * this.viewport.scale;
+        const el = document.createElementNS(SVG_NS, 'circle');
+        el.setAttribute('cx', String(sc.x));
+        el.setAttribute('cy', String(sc.y));
+        el.setAttribute('r', String(r));
+        el.setAttribute('fill', 'none');
+        el.setAttribute('stroke', STYLE.circleStroke);
+        el.setAttribute('stroke-width', String(STYLE.circleStrokeWidth));
+        this.svg.appendChild(el);
+      }
+      // o.mode === 'three-points': render branch lands when 3-point
+      // tool ships. Type-completeness only — no current producer.
+    }
+  }
+
+  private drawPreviews(): void {
+    for (const p of this.scene.previews) {
+      if (p.kind === 'highlightPoint') {
+        const s = this.viewport.worldToScreen(world(p.pos.x, p.pos.y));
+        const el = document.createElementNS(SVG_NS, 'circle');
+        el.setAttribute('cx', String(s.x));
+        el.setAttribute('cy', String(s.y));
+        el.setAttribute('r', '9');
+        el.setAttribute('fill', 'none');
+        el.setAttribute('stroke', STYLE.snapStroke);
+        el.setAttribute('stroke-width', '1.5');
+        this.svg.appendChild(el);
+      } else if (p.kind === 'rubberCircle') {
+        const sc = this.viewport.worldToScreen(world(p.center.x, p.center.y));
+        const r = Math.hypot(p.radiusVec.x - p.center.x, p.radiusVec.y - p.center.y) * this.viewport.scale;
+        const el = document.createElementNS(SVG_NS, 'circle');
+        el.setAttribute('cx', String(sc.x));
+        el.setAttribute('cy', String(sc.y));
+        el.setAttribute('r', String(r));
+        el.setAttribute('fill', 'none');
+        el.setAttribute('stroke', STYLE.previewStroke);
+        el.setAttribute('stroke-width', String(STYLE.previewStrokeWidth));
+        el.setAttribute('stroke-dasharray', STYLE.previewDash);
+        this.svg.appendChild(el);
+      }
+    }
   }
 
   private drawPoints(): void {

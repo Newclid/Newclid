@@ -7,6 +7,9 @@
 // downstream renderers are expected to rAF-coalesce their redraws.
 
 import type { GeoObject, ObjectId, PointObject, ToolName } from '../geometry/types-object';
+import type { ToolPreview } from '../tools/Tool';
+import { distance } from '../geometry/primitives';
+import type { WorldPoint } from '../geometry/coords';
 
 // Distributive Omit so each variant of the union keeps its own keys.
 // addObject takes everything except `id`, which the scene assigns.
@@ -14,12 +17,25 @@ type DistOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
 
 export type ToolState = { firstPoint?: ObjectId } | null;
 
+// Schema for a frontend → backend snapshot. Keys are optional past
+// `points` so adding new kinds (lines, segments, triangles, etc.) is
+// purely additive and old consumers don't break.
+export interface SerializedScene {
+  points: { id: ObjectId; label: string; x: number; y: number }[];
+  circles?: { id: ObjectId; kind: 'center-radius'; center: ObjectId; radius: number }[];
+}
+
 export class Scene {
   readonly objects = new Map<ObjectId, GeoObject>();
   // The canvas starts in the point tool so a fresh page lets the user
   // click to place a point without first selecting a tool.
   tool: ToolName = 'point';
   toolState: ToolState = null;
+  // Transient preview shapes from the active tool's onMove. Replaced
+  // wholesale every pointermove. Not part of emit() — preview writes
+  // would otherwise re-run every subscriber 60+ times per second; the
+  // tool dispatcher pairs setPreviews with a direct requestRedraw call.
+  previews: ToolPreview[] = [];
 
   private nextId = 1;
   private nextLabelCode = 65; // 'A'
@@ -46,6 +62,10 @@ export class Scene {
   setToolState(s: ToolState): void {
     this.toolState = s;
     this.emit();
+  }
+
+  setPreviews(p: ToolPreview[]): void {
+    this.previews = p;
   }
 
   addPoint(x: number, y: number): ObjectId {
@@ -75,16 +95,61 @@ export class Scene {
   removeObject(id: ObjectId): void {
     if (!this.objects.has(id)) return;
     this.objects.delete(id);
+    // Cascade: any shape that referenced this id loses its definition.
+    // Mirroring the reference's structure so adding line/segment/
+    // triangle later is one more `else if` arm.
+    for (const [k, v] of this.objects) {
+      if (v.kind === 'circle') {
+        if (v.mode === 'center-through') {
+          if (v.center === id || v.through === id) this.objects.delete(k);
+        } else {
+          if (v.p1 === id || v.p2 === id || v.p3 === id) this.objects.delete(k);
+        }
+      }
+    }
     this.emit();
   }
 
   clear(): void {
-    if (this.objects.size === 0 && this.toolState === null) return;
+    if (this.objects.size === 0 && this.toolState === null && this.previews.length === 0) return;
     this.objects.clear();
     this.toolState = null;
+    this.previews = [];
     this.nextId = 1;
     this.nextLabelCode = 65;
     this.emit();
+  }
+
+  // Backend-ready snapshot. The schema starts narrow and grows: only
+  // emit a key when at least one of that kind exists. Consumers must
+  // tolerate missing keys (they will appear as kinds ship). For circles
+  // in 'center-through' mode, radius is computed at serialize time via
+  // `distance` — never stored on the object — so dragging a referenced
+  // point produces a fresh radius on the next snapshot.
+  serialize(): SerializedScene {
+    const points: SerializedScene['points'] = [];
+    const circles: NonNullable<SerializedScene['circles']> = [];
+    for (const o of this.objects.values()) {
+      if (o.kind === 'point') {
+        points.push({ id: o.id, label: o.label, x: o.x, y: o.y });
+      } else if (o.kind === 'circle') {
+        if (o.mode === 'center-through') {
+          const c = this.objects.get(o.center);
+          const t = this.objects.get(o.through);
+          if (c?.kind !== 'point' || t?.kind !== 'point') continue;
+          const radius = distance(
+            c as unknown as WorldPoint,
+            t as unknown as WorldPoint,
+          );
+          circles.push({ id: o.id, kind: 'center-radius', center: o.center, radius });
+        }
+        // 'three-points' arm intentionally omitted — ships with the
+        // 3-point circle prompt.
+      }
+    }
+    const out: SerializedScene = { points };
+    if (circles.length > 0) out.circles = circles;
+    return out;
   }
 
   // ---------- pub/sub ----------

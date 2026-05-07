@@ -7,6 +7,7 @@ import type { ToolName } from '../geometry/types-object';
 const SHORTCUTS: Record<string, ToolName> = {
   v: 'select',
   p: 'point',
+  c: 'circle',
 };
 
 export interface ShortcutsHandle {
