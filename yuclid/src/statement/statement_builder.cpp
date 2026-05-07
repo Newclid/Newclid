@@ -3,6 +3,7 @@
 #include "rules/rule_mapping.hpp"
 #include "rules/rule_schema.hpp"
 #include "statement/statement.hpp"
+#include "type/dist.hpp"
 
 namespace Yuclid {
 namespace {
@@ -38,6 +39,18 @@ namespace {
         }
 
         return iterator->second;
+    }
+    
+    Dist mapped_dist(
+        const RulePredicatePattern &pattern,
+        const RuleMapping &mapping,
+        std::size_t first,
+        std::size_t second
+    ) {
+        return Dist(
+            mapped_point(pattern, mapping, first),
+            mapped_point(pattern, mapping, second)
+        );
     }
 
 }
