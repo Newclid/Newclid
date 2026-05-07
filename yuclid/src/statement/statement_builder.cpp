@@ -68,6 +68,18 @@ namespace {
         );
     }
 
+    SlopeAngle mapped_slope_angle(
+        const RulePredicatePattern &pattern,
+        const RuleMapping &mapping,
+        std::size_t first,
+        std::size_t second
+    ) {
+        return SlopeAngle(
+            mapped_point(pattern, mapping, first),
+            mapped_point(pattern, mapping, second)
+        );
+    }
+
 }
     std::unique_ptr<Statement> build_statement_from_pattern(
         const RulePredicatePattern &pattern,
