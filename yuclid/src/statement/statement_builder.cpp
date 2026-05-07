@@ -28,7 +28,7 @@ namespace {
 
         RuleMapping::const_iterator iterator = mapping.find(variable);
         if(iterator == mapping.end()) {
-            std::runtime_error(
+            throw std::runtime_error(
                 std::format(
                     "Predicate {} uses variable {}, but it is missing from rule mapping.",
                     pattern.name,
