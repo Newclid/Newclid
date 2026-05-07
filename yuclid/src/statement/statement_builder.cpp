@@ -1,5 +1,16 @@
+#include <cstddef>
+#include <format>
+#include <stdexcept>
+#include <string>
+
 #include "rules/rule_mapping.hpp"
 #include "rules/rule_schema.hpp"
+#include "statement/coll.hpp"
+#include "statement/cong.hpp"
+#include "statement/equal_angles.hpp"
+#include "statement/equal_line_angles.hpp"
+#include "statement/para.hpp"
+#include "statement/perp.hpp"
 #include "statement/statement.hpp"
 #include "type/angle.hpp"
 #include "type/dist.hpp"
@@ -82,6 +93,72 @@ namespace {
     std::unique_ptr<Statement> build_statement_from_pattern(
         const RulePredicatePattern &pattern,
         const RuleMapping &mapping
-    );
+    ) {
+        if(pattern.name == "cong") {
+            check_arity(pattern, 4);
 
+            return std::make_unique<DistEqDist>(
+                mapped_dist(pattern, mapping, 0, 1),
+                mapped_dist(pattern, mapping, 2, 3)
+            );
+        }
+
+        if(pattern.name == "coll") {
+            check_arity(pattern, 3);
+
+            return std::make_unique<Collinear>(
+                mapped_point(pattern, mapping, 0),
+                mapped_point(pattern, mapping, 1),
+                mapped_point(pattern, mapping, 2)
+            );
+        }
+
+        if(pattern.name == "eqangle" || pattern.name == "equal_angles") {
+            if(pattern.args.size() == 6) {
+                return std::make_unique<EqualAngles>(
+                    mapped_angle(pattern, mapping, 0, 1, 2),
+                    mapped_angle(pattern, mapping, 3, 4, 5)
+                );
+            }
+
+            else if(pattern.args.size() == 8) {
+                return std::make_unique<EqualLineAngles>(
+                    mapped_slope_angle(pattern, mapping, 0, 1),
+                    mapped_slope_angle(pattern, mapping, 2, 3),
+                    mapped_slope_angle(pattern, mapping, 4, 5),
+                    mapped_slope_angle(pattern, mapping, 6, 7)
+                );
+            }
+
+            throw std::runtime_error(
+                std::format(
+                    "Predicate '{}' expected either 6 or 8 arguments, but got only {}",
+                    pattern.name,
+                    pattern.args.size()
+                )
+            );
+        }
+
+        if(pattern.name == "para") {
+            check_arity(pattern, 4);
+
+            return std::make_unique<Parallel>(
+                mapped_slope_angle(pattern, mapping, 0, 1),
+                mapped_slope_angle(pattern, mapping, 2, 3)
+            );
+        }
+
+        if(pattern.name == "perp") {
+            check_arity(pattern, 4);
+
+            return std::make_unique<Perpendicular>(
+                mapped_slope_angle(pattern, mapping, 0, 1),
+                mapped_slope_angle(pattern, mapping, 2, 3)
+            );
+        }
+
+        throw std::runtime_error(
+            std::format("Unknown rule predicate '{}'", pattern.name)
+        );
+    }
 }
