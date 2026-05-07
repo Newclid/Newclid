@@ -1,5 +1,3 @@
-#pragma once
-
 #include "rules/rule_mapping.hpp"
 #include "rules/rule_schema.hpp"
 #include "statement/statement.hpp"
