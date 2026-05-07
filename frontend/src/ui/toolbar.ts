@@ -75,6 +75,19 @@ function pointIcon(): SVGSVGElement {
   ]);
 }
 
+function circleIcon(): SVGSVGElement {
+  return iconWrap([
+    svgEl('circle', {
+      cx: '11',
+      cy: '11',
+      r: '8',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '1.6',
+    }),
+  ]);
+}
+
 function trashIcon(): SVGSVGElement {
   return iconWrap([
     svgEl('path', {
@@ -101,6 +114,7 @@ interface ToolEntry {
 const tools: ToolEntry[] = [
   { name: 'select', label: 'Select', shortcut: 'V', icon: cursorIcon },
   { name: 'point', label: 'Point', shortcut: 'P', icon: pointIcon },
+  { name: 'circle', label: 'Circle', shortcut: 'C', icon: circleIcon },
 ];
 
 export interface ToolbarHandle {
