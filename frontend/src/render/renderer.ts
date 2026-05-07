@@ -162,7 +162,7 @@ export class Renderer {
   }
 
   private drawPoints(): void {
-    for (const p of this.scene.points.values()) {
+    for (const p of this.scene.points()) {
       const s = this.viewport.worldToScreen(world(p.x, p.y));
 
       const dot = document.createElementNS(SVG_NS, 'circle');
