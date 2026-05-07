@@ -1,5 +1,6 @@
 import { Viewport } from '../geometry/viewport';
 import { world } from '../geometry/coords';
+import { Scene } from '../scene/scene';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -18,7 +19,7 @@ export class Renderer {
   // listeners. Renderer still owns the element's lifecycle and contents.
   readonly svg: SVGSVGElement;
 
-  constructor(private container: HTMLElement, private viewport: Viewport) {
+  constructor(private container: HTMLElement, private viewport: Viewport, private scene: Scene) {
     this.svg = document.createElementNS(SVG_NS, 'svg');
     this.svg.style.background = STYLE.background;
     this.svg.style.display = 'block';
@@ -40,6 +41,7 @@ export class Renderer {
     this.drawGrid();
     this.drawAxes();
     this.drawAxisLabels();
+    this.drawPoints();
   }
 
   // -------- grid --------
@@ -157,6 +159,29 @@ export class Renderer {
     el.setAttribute('fill', STYLE.axisLabel);
     el.textContent = content;
     this.svg.appendChild(el);
+  }
+
+  private drawPoints(): void {
+    for (const p of this.scene.points.values()) {
+      const s = this.viewport.worldToScreen(world(p.x, p.y));
+
+      const dot = document.createElementNS(SVG_NS, 'circle');
+      dot.setAttribute('cx', String(s.x));
+      dot.setAttribute('cy', String(s.y));
+      dot.setAttribute('r', '4.25');
+      dot.setAttribute('fill', '#1a1a1a');
+      this.svg.appendChild(dot);
+
+      const label = document.createElementNS(SVG_NS, 'text');
+      label.setAttribute('x', String(s.x + 9));
+      label.setAttribute('y', String(s.y - 9));
+      label.setAttribute('font-family', 'system-ui, sans-serif');
+      label.setAttribute('font-size', '14');
+      label.setAttribute('font-style', 'italic');
+      label.setAttribute('fill', '#1a1a1a');
+      label.textContent = p.label;
+      this.svg.appendChild(label);
+    }
   }
 }
 

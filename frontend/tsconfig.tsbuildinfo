@@ -1,1 +1,1 @@
-{"root":["./src/main.ts","./src/vite-env.d.ts","./src/geometry/coords.ts","./src/geometry/viewport.ts","./src/input/panzoom.ts","./src/render/renderer.ts","./vite.config.ts"],"version":"5.9.3"}
+{"root":["./src/main.ts","./src/vite-env.d.ts","./src/geometry/coords.ts","./src/geometry/types-object.ts","./src/geometry/viewport.ts","./src/input/clicktoaddpoint.ts","./src/input/panzoom.ts","./src/render/renderer.ts","./src/scene/scene.ts","./vite.config.ts"],"version":"5.9.3"}
