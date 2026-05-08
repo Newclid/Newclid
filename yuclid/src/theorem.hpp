@@ -272,6 +272,25 @@ namespace Yuclid {
      */
     [[nodiscard]] Point max_point() const;
 
+
+    /**
+     * @brief Constructs a theorem object from already built hypothesis and conclusion statements
+     *
+     * The `name` and `newclid_rule` parameters are stored as std::string_view inside
+     * Theorem. Therefore, the strings they refer to must outlive the created Theorem.
+     *
+     * The existing hardcoded theorem constructors pass string literals for those parameters
+     * and they have static lifetime, which is safe.
+     *
+     * For custom rules, pass non-temporary strings such as RuleSchema::id directly.
+     * Do not pass temporary strings, such as ("custom rule: " + schema.id), because
+     * the resulting string_view would dangle after this call.
+     *
+     * When this factory is used for custom rules, the RuleSchema objects that own the
+     * referenced strings must outlive the generated Theorem objects.
+     *
+     * @return The newly constructed theorem object
+     */
     static Theorem from_statements(
         std::string_view name,
         std::string_view newclid_rule,
