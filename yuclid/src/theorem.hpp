@@ -272,6 +272,13 @@ namespace Yuclid {
      */
     [[nodiscard]] Point max_point() const;
 
+    static Theorem from_statements(
+        std::string_view name,
+        std::string_view newclid_rule,
+        std::vector<std::unique_ptr<Statement>> hypothesis,
+        std::vector<std::unique_ptr<Statement>> conclusions
+    );
+
   private:
     Theorem(std::string_view name, std::string_view newclid_id);
 
