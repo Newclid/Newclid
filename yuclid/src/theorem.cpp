@@ -412,6 +412,20 @@ namespace Yuclid {
     m_name(name), m_newclid_rule(newclid_id)
   {}
 
+  Theorem Theorem::from_statements(
+    std::string_view name,
+    std::string_view newclid_rule,
+    std::vector<std::unique_ptr<Statement>> hypotheses,
+    std::vector<std::unique_ptr<Statement>> conclusions
+  ) {
+    Theorem newTheorem(name, newclid_rule);
+
+    newTheorem.m_hypotheses = std::move(hypotheses);
+    newTheorem.m_conclusions = std::move(conclusions);
+
+    return newTheorem;
+  }
+
   Theorem Theorem::triangle_bisector_of_equal_angles(const Point &point,
                                                      const Angle &angle) {
     Theorem thm("Property of a bisector in a triangle.", "r12");
