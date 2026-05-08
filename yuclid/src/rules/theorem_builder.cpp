@@ -25,6 +25,7 @@ namespace Yuclid {
             conclusions.push_back(build_statement_from_pattern(pattern, mapping));
         }
 
+        //RuleSchema doesn't have a dedicated display name, so we use the schema id for that
         return Theorem::from_statements(
             schema.id,
             schema.id,
