@@ -14,7 +14,7 @@
    limitations under the License.
 */
 #include "config_options.hpp" // Include our configuration class header
-#include "matcher.hpp"
+#include "matchers/matcher.hpp"
 #include "parser/problem_parser.hpp"
 #include "parser/rule_parser.hpp"
 #include "problem.hpp"

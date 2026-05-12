@@ -24,7 +24,7 @@
 #include "statement/squared_dist_eq.hpp"
 #include "numbers/util.hpp"
 #include "config_options.hpp"
-#include "matcher.hpp"
+#include "matchers/matcher.hpp"
 #include "type/dist.hpp"
 #include "type/sin_or_dist.hpp"
 #include "type/slope_angle.hpp"

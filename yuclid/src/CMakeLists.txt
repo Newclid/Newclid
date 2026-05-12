@@ -10,7 +10,7 @@ add_library(yuclid
   ar/linear_system.cpp
   ar/reduced_equation.cpp
   config_options.cpp
-  matcher.cpp
+  matchers/matcher.cpp
   numbers/add_circle.cpp
   numbers/posreal.cpp
   numbers/root_rat.cpp
