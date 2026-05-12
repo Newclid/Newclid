@@ -18,6 +18,7 @@ add_library(yuclid
   numbers/util.cpp
   parser/problem_parser.cpp
   parser/rule_parser.cpp
+  rules/theorem_builder.cpp
   problem.cpp
   solver/ddar_solver.cpp
   solver/statement_proof.cpp
@@ -53,6 +54,7 @@ add_library(yuclid
   statement/squared_dist_eq.cpp
   statement/statement.cpp
   statement/thales.cpp
+  statement/statement_builder.cpp
   theorem.cpp
   type/angle.cpp
   type/dist.cpp
