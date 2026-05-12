@@ -119,4 +119,5 @@ members = [
     "newclid",
     "ncdgen",
     "yuclid",
+    "backend",
 ]
