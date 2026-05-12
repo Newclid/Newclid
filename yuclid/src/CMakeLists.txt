@@ -11,6 +11,7 @@ add_library(yuclid
   ar/reduced_equation.cpp
   config_options.cpp
   matchers/matcher.cpp
+  matchers/generic_rule_matcher.cpp
   numbers/add_circle.cpp
   numbers/posreal.cpp
   numbers/root_rat.cpp

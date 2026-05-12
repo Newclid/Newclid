@@ -33,7 +33,7 @@ namespace Yuclid {
                 }
 
                 used_points[i] = true;
-                current_mapping[current_var] = all_problem_points[i];
+                current_mapping.insert_or_assign(current_var, all_problem_points[i]);
 
                 generate_distinct_mappings(rule_variables, current_var_index + 1, all_problem_points, used_points, current_mapping, valid_results);
                 
@@ -50,20 +50,30 @@ namespace Yuclid {
     std::vector<Theorem> GenericRuleMatcher::match() const{
         std::vector<Theorem> generated_theorems;
         for(const RuleSchema &rule_schema: m_rules){
-            std::vector<RuleMapping> &rule_mappings = find_mappings_for_rule(rule_schema);
+            std::vector<RuleMapping> rule_mappings = find_mappings_for_rule(rule_schema);
 
             for(const RuleMapping &mapping: rule_mappings){
-                generated_theorems.push_back(build_theorem_from_rule_schema(rule_schema, mapping));
+                Theorem candidate = build_theorem_from_rule_schema(rule_schema, mapping);
+                
+                // Skip degenerate cases
+                if (!candidate.check_hypotheses_nondeg_numerically()) {
+                    continue; 
+                }
+
+                if(candidate.check_numerically()){
+                    generated_theorems.push_back(candidate.normalize());
+                }
             }
         }
         return generated_theorems;
     }
 
 
-    std::vector<RuleMapping> GenericRuleMatcher::find_mappings_for_rule(const RuleSchema *schema) const {
+    std::vector<RuleMapping> GenericRuleMatcher::find_mappings_for_rule(const RuleSchema &schema) const {
         std::vector<RuleMapping> results;
         RuleMapping current_mapping;
-        const std::vector<Point> &all_problem_points = m_problem->all_points();
+        auto all_points_view = m_problem->all_points();
+        const std::vector<Point> all_problem_points(all_points_view.begin(), all_points_view.end());
         std::vector<bool> used_points(all_problem_points.size(), false);
     
         generate_distinct_mappings(schema.variables, 0, all_problem_points, used_points, current_mapping, results);
