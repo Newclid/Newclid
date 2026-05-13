@@ -1,0 +1,85 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+          
+    - when: never
+
+stages:
+  - test
+
+yuclid-compile-and-test-linux:
+  stage: test
+  timeout: 30m
+  image: ghcr.io/astral-sh/uv:0.11.11-python3.12-trixie-slim
+
+  interruptible: true
+
+  rules:
+    - changes:
+        - yuclid/**/*
+        - .gitlab-ci.yml
+    - when: never
+
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+
+    CC: gcc-14
+    CXX: g++-14
+
+    CMAKE_GENERATOR: Ninja
+    CMAKE_ARGS: >-
+      -DUSE_STATIC_LINK=OFF
+      -DBUILD_DOC=OFF
+      -DCMAKE_BUILD_TYPE=Release
+
+  before_script:
+    - apt-get update -qq
+    - >
+      apt-get install -y --no-install-recommends
+      build-essential
+      cmake
+      ninja-build
+      libboost-all-dev
+      gcc-14
+      g++-14
+      ca-certificates
+    - rm -rf /var/lib/apt/lists/*
+    - mkdir -p reports
+    - export CMAKE_BUILD_PARALLEL_LEVEL="2"
+
+  script:
+    - echo "Sync Python environment and build Yuclid through uv/scikit-build"
+    - uv sync --frozen -v
+
+    - |
+      echo "Find Yuclid CMake build directory created by scikit-build"
+
+      YUCLID_BUILD_DIR="$(dirname "$(find yuclid/build -name CMakeCache.txt | head -n 1)")"
+
+      if [ -z "$YUCLID_BUILD_DIR" ]; then
+        echo "Could not find Yuclid CMake build directory"
+        find yuclid -maxdepth 4 -type d
+        exit 1
+      fi
+
+      echo "Yuclid build dir: $YUCLID_BUILD_DIR"
+
+      echo "Make sure C++ test targets are built"
+      cmake --build "$YUCLID_BUILD_DIR" --parallel "$(nproc)"
+
+      echo "Run Yuclid CTest tests"
+      ctest \
+        --test-dir "$YUCLID_BUILD_DIR" \
+        --output-on-failure \
+        --parallel "$(nproc)" \
+        --output-junit "$CI_PROJECT_DIR/reports/ctest-yuclid.xml"
+
+    - echo "Run Yuclid Python tests"
+    - uv run pytest yuclid/tests -q --junitxml=reports/pytest-yuclid.xml
+
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit:
+        - reports/*.xml
