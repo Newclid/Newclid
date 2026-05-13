@@ -1,13 +1,7 @@
-// Routes pointer events on the canvas to the active tool. Click
-// resolves `scene.tool` against the registry and calls that tool's
-// `onClick`; pointermove calls `onMove` and stashes the returned
-// previews on `scene.previews` for the renderer to read on the next
-// rAF tick.
-//
-// Coexists with panZoom: while space is held the user is panning, so
-// we suppress click and skip onMove. Space state is tracked here
-// rather than read from panZoom — the duplicated key listener keeps
-// the two modules decoupled.
+/**
+Routes canvas pointer events to the active tool via toolRegistry.
+Suppresses click/onMove while space is held so panZoom owns the gesture.
+**/
 
 import { Viewport } from '../geometry/viewport';
 import { screen } from '../geometry/coords';
@@ -66,9 +60,10 @@ export function attachToolDispatcher(
     const tool = toolRegistry[scene.tool];
     const previews = tool.onMove(buildCtx(e));
     scene.setPreviews(previews);
-    // Direct rAF nudge: setPreviews intentionally does not emit, so a
-    // pointermove burst doesn't run every subscriber. The renderer is
-    // the only consumer that needs to react to preview changes.
+    /**
+    setPreviews doesn't emit. Nudge the renderer directly so a
+    pointermove burst doesn't re-run every subscriber.
+    **/
     requestRedraw();
   };
 

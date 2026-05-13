@@ -25,8 +25,6 @@ const STYLE = {
 };
 
 export class Renderer {
-  // Exposed (readonly) so the input layer can attach pointer/wheel
-  // listeners. Renderer still owns the element's lifecycle and contents.
   readonly svg: SVGSVGElement;
 
   constructor(private container: HTMLElement, private viewport: Viewport, private scene: Scene) {
@@ -46,11 +44,6 @@ export class Renderer {
     // Clear everything from the previous frame.
     while (this.svg.firstChild) this.svg.removeChild(this.svg.firstChild);
 
-    // SVG paints later elements on top of earlier ones. Order:
-    // grid → axes → labels → circles → points → previews.
-    // Points stay above circles so the user can grab them through any
-    // circle that intersects them; previews float on top so the snap
-    // ring is visible even when it's centred on a point.
     this.drawGrid();
     this.drawAxes();
     this.drawAxisLabels();
@@ -64,13 +57,10 @@ export class Renderer {
   private drawGrid(): void {
     const vp = this.viewport;
 
-    // Grid spacing in *world units* chosen to land near 50px on screen.
-    // niceStep snaps that to a 1/2/5 multiple so labels stay readable.
     const targetPx = 50;
     const spacing = niceStep(targetPx / vp.scale);
 
-    // Figure out which world-coord range is currently visible on screen.
-    // Top-left of screen = pixel (0, 0). Bottom-right = (width, height).
+    // Visible world range. Top-left of screen = (0,0), bottom-right = (w,h).
     const tl = vp.screenToWorld({ x: 0, y: 0, _kind: 'screen' } as any);
     const br = vp.screenToWorld({ x: vp.width, y: vp.height, _kind: 'screen' } as any);
 
@@ -182,8 +172,10 @@ export class Renderer {
       if (o.mode === 'center-through') {
         const c = this.scene.objects.get(o.center);
         const t = this.scene.objects.get(o.through);
-        // Skip silently: a frame between cascade-delete and re-render
-        // can briefly reference a stale ID.
+        /**
+        Skip silently: a frame between cascade-delete and re-render
+        can briefly reference a stale ID.
+        **/
         if (c?.kind !== 'point' || t?.kind !== 'point') continue;
         const radiusWorld = distance(
           c as unknown as WorldPoint,
@@ -200,8 +192,6 @@ export class Renderer {
         el.setAttribute('stroke-width', String(STYLE.circleStrokeWidth));
         this.svg.appendChild(el);
       }
-      // o.mode === 'three-points': render branch lands when 3-point
-      // tool ships. Type-completeness only — no current producer.
     }
   }
 
@@ -259,8 +249,10 @@ export class Renderer {
 
 // -------- pure helpers, no SVG, no class --------
 
-// Pick a "nice" round number >= raw: 1, 2, 5, 10, 20, 50, 100, 0.1, 0.2, ...
-// This is the trick that makes grid spacing look natural at any zoom level.
+/**
+Pick a "nice" round number >= raw: 1, 2, 5, 10, 20, 50, 100, 0.1, ...
+Makes grid spacing look natural at any zoom level.
+**/
 function niceStep(raw: number): number {
   if (raw <= 0) return 1;
   const exp = Math.floor(Math.log10(raw));

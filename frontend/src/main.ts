@@ -17,9 +17,10 @@ const scene = new Scene();
 const toolbar = createToolbar(scene);
 root.appendChild(toolbar.root);
 
-// The canvas host fills the second grid column. The viewport tracks
-// the host's pixel size, not the window's, so the SVG fills the cell
-// rather than overlapping the toolbar.
+/**
+Canvas host fills the second grid column; viewport tracks its size so
+the SVG fills the cell rather than overlapping the toolbar.
+**/
 const canvasHost = document.createElement('div');
 canvasHost.className = 'canvas-host';
 root.appendChild(canvasHost);
@@ -30,8 +31,6 @@ viewport.height = canvasHost.clientHeight;
 
 const renderer = new Renderer(canvasHost, viewport, scene);
 
-// rAF-coalesce redraws so a burst of scene changes within a single
-// frame collapses to one render call.
 let frameQueued = false;
 const requestRedraw = () => {
   if (frameQueued) return;
