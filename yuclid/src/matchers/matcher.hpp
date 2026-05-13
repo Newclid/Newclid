@@ -163,6 +163,8 @@ namespace Yuclid {
 
     void match_orthocenters();
 
+    void match_generic_rules();
+
     const Problem *m_problem;
     const Config::Solver *m_config;
     const std::span<const RuleSchema> m_custom_rules;

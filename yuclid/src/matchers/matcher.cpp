@@ -39,6 +39,7 @@
 #include "typedef.hpp"
 #include "config_options.hpp"
 #include "rules/rule_schema.hpp"
+#include "matchers/generic_rule_matcher.hpp"
 
 #include <algorithm>
 #include <boost/log/trivial.hpp>
@@ -133,6 +134,9 @@ namespace Yuclid {
       match_perpendiculars();
     } else {
       match_orthocenters();
+    }
+    if (!custom_rules.empty()){
+      match_generic_rules();
     }
   }
 
@@ -648,6 +652,14 @@ namespace Yuclid {
           }
         }
       }
+    }
+  }
+
+  void TheoremMatcher::match_generic_rules() {
+    GenericRuleMatcher generic_rule_matcher(m_problem, m_custom_rules);
+    std::vector<Theorem> generic_theorems = generic_rule_matcher.match();
+    for(const Theorem &theorem: generic_theorems){
+      insert_theorem(theorem);
     }
   }
 
