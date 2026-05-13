@@ -13,12 +13,19 @@ using namespace std;
 
 namespace Yuclid {
     namespace {
-        void generate_distinct_mappings(const std::vector<std::string>& rule_variables, 
-                                        size_t current_var_index, 
-                                        const std::vector<Point> &all_problem_points,
-                                        std::vector<bool> &used_points,
-                                        RuleMapping &current_mapping,
-                                        std::vector<RuleMapping> &valid_results) {
+        // TODO: A guard is needed to prevent too many nested recursions. 
+        // A decision should be made about the stage of the process at which this guard should be implemented.
+        //
+        // If the guard is not implemented inside this function,
+        // be aware that its callers should mind the size of the rule_variables parameter
+        void generate_distinct_mappings(
+            const std::vector<std::string>& rule_variables, 
+            size_t current_var_index, 
+            const std::vector<Point> &all_problem_points,
+            std::vector<bool> &used_points,
+            RuleMapping &current_mapping,
+            std::vector<RuleMapping> &valid_results
+        ) {
             
             if(current_var_index == rule_variables.size()) {
                 valid_results.push_back(current_mapping);
@@ -38,7 +45,6 @@ namespace Yuclid {
                 generate_distinct_mappings(rule_variables, current_var_index + 1, all_problem_points, used_points, current_mapping, valid_results);
                 
                 used_points[i] = false;
-                current_mapping.erase(current_var);
             }
         }
     }
@@ -61,6 +67,8 @@ namespace Yuclid {
                 }
 
                 if(candidate.check_numerically()){
+                    // Normalize the theorems in case this method is called from someplace that doesn't do it already
+                    // The TheoremMatcher class normalizes them anyways so this is a duplication
                     generated_theorems.push_back(candidate.normalize());
                 }
             }
