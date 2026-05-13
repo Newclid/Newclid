@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -26,3 +26,12 @@ class JobStatusResponse(BaseModel):
         "queued", "running", "succeeded", "failed", "timed_out", "cancelled"
     ]
     message: str | None = None
+
+
+class JobResultResponse(BaseModel):
+    job_id: str
+    status: Literal[
+        "queued", "running", "succeeded", "failed", "timed_out", "cancelled"
+    ]
+    result: dict[str, Any] | None = None
+    error: str | None = None
