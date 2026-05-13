@@ -1,4 +1,4 @@
-//import type { ConstructionObject } from '../geometry/types-object'; TODO: Person B adds this
+import type { ConstructionObject } from '../geometry/types-object'; 
 import type { ObjectId, ToolName } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
 
@@ -33,7 +33,7 @@ export interface CatalogEntry {
   slots: SlotSpec[];
   edges: EdgeSpec[];
   circles: CircleSpec[];
-  sketch: (bindings: Bindings, scene: Scene) => any; // TODO: ConstructionObject
+  sketch: (bindings: Bindings, scene: Scene) => ConstructionObject; 
 }
 
 // All catalog entries keyed by name

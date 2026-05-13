@@ -23,6 +23,13 @@ export type ToolState = { firstPoint?: ObjectId } | null;
 export interface SerializedScene {
   points: { id: ObjectId; label: string; x: number; y: number }[];
   circles?: { id: ObjectId; kind: 'center-radius'; center: ObjectId; radius: number }[];
+  constructions?: {
+    id: ObjectId;
+    name: string;
+    bindings: Record<string, ObjectId>;
+   edges: [string, string][]; // actual point ID pairs, style dropped
+   circles: { center: string; radius: number }[]; // resolved center ID + computed radius
+  }[];
 }
 
 export class Scene {
@@ -107,6 +114,14 @@ export class Scene {
         }
       }
     }
+
+    // Cascade: if a ConstructionObject references a deleted point, delete the construction
+    for (const [k, v] of this.objects) {
+      if (v.kind === 'construction') {
+        const allBoundIds = Object.values(v.bindings);
+        if (allBoundIds.includes(id)) this.objects.delete(k);
+      }
+    }
     this.emit();
   }
 
@@ -147,8 +162,22 @@ export class Scene {
         // 3-point circle prompt.
       }
     }
+
+    const constructions: SerializedScene['constructions'] = [];
+    for (const o of this.objects.values()) {
+      if (o.kind === 'construction') {
+        constructions.push({
+          id: o.id,
+          name: o.name,
+          bindings: o.bindings,
+          edges: o.edges,
+          circles: o.circles,
+        });
+      }
+    }
     const out: SerializedScene = { points };
     if (circles.length > 0) out.circles = circles;
+    if (constructions.length > 0) out.constructions = constructions;
     return out;
   }
 

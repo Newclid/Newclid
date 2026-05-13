@@ -55,6 +55,7 @@ export class Renderer {
     this.drawAxes();
     this.drawAxisLabels();
     this.drawCircles();
+    this.drawConstructions();
     this.drawPoints();
     this.drawPreviews();
   }
@@ -152,6 +153,36 @@ export class Renderer {
   }
 
   // -------- tiny helpers for making SVG elements --------
+
+  private drawConstructions(): void {
+  for (const o of this.scene.objects.values()) {
+    if (o.kind !== 'construction') continue;
+    // Draw edges
+    for (const [p1Id, p2Id] of o.edges) {
+      const p1 = this.scene.objects.get(p1Id);
+      const p2 = this.scene.objects.get(p2Id);
+      if (p1?.kind !== 'point' || p2?.kind !== 'point') continue;
+      const s1 = this.viewport.worldToScreen(world(p1.x, p1.y));
+      const s2 = this.viewport.worldToScreen(world(p2.x, p2.y));
+      this.line(s1.x, s1.y, s2.x, s2.y, '#888', 1.5);  // construction color
+    }
+    // Draw circles
+    for (const circ of o.circles) {
+      const c = this.scene.objects.get(circ.center);
+      if (c?.kind !== 'point') continue;
+      const sc = this.viewport.worldToScreen(world(c.x, c.y));
+      const r = circ.radius * this.viewport.scale;
+      const el = document.createElementNS(SVG_NS, 'circle');
+      el.setAttribute('cx', String(sc.x));
+      el.setAttribute('cy', String(sc.y));
+      el.setAttribute('r', String(r));
+      el.setAttribute('fill', 'none');
+      el.setAttribute('stroke', '#888');
+      el.setAttribute('stroke-width', '1.5');
+      this.svg.appendChild(el);
+    }
+  }
+}
 
   private line(x1: number, y1: number, x2: number, y2: number, stroke: string, width: number): void {
     const el = document.createElementNS(SVG_NS, 'line');
