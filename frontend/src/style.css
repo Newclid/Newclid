@@ -1,0 +1,204 @@
+/* ---------- Design tokens ---------- */
+
+:root {
+  /* Type system: Inter for UI, IBM Plex Mono for numbers, Fraunces for math labels. */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: 'Fraunces', 'Times New Roman', serif;
+
+  /* Surfaces — paper-white feel, slightly warm. */
+  --bg-app: #FAF8F4;
+  --bg-canvas: #FDFBF7;
+  --bg-toolbar: #F2EFE8;
+  --bg-elevated: #FFFFFF;
+
+  /* Ink — graphite-on-paper, never pure black. */
+  --ink-strong: #1A1816;
+  --ink-mid: #595650;
+  --ink-soft: #8C887F;
+  --ink-faint: #BFBBB1;
+
+  /* Borders */
+  --rule-soft: rgba(26, 24, 22, 0.07);
+  --rule-mid: rgba(26, 24, 22, 0.14);
+
+  /* The single accent — a deep ink-blue. Used sparingly. */
+  --accent: #2A4A7F;
+  --accent-soft: rgba(42, 74, 127, 0.12);
+
+  /* Canvas-specific */
+  --grid-minor: rgba(26, 24, 22, 0.045);
+  --grid-major: rgba(26, 24, 22, 0.10);
+  --axis-stroke: rgba(26, 24, 22, 0.40);
+  --axis-label: #8C887F;
+  --shape-stroke: #1A1816;
+  --circle-stroke: #1A1816;
+  --point-fill: #1A1816;
+  --label-fill: #1A1816;
+  --preview-stroke: #8C887F;
+}
+
+/* ---------- Reset ---------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-app);
+  color: var(--ink-strong);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* ---------- App shell ---------- */
+
+#app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* The canvas host fills its grid cell and contains the SVG. */
+.canvas-host {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.canvas-host > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- Toolbar ---------- */
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-toolbar);
+  border-right: 1px solid var(--rule-mid);
+  padding: 24px 16px 16px;
+  gap: 4px;
+  min-height: 0;
+}
+
+.toolbar-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 6px 22px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.toolbar-brand-mark {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--ink-strong);
+  line-height: 1;
+}
+
+.toolbar-brand-name {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+}
+
+.toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+.tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--ink-mid);
+  transition: background 120ms ease, color 120ms ease;
+  position: relative;
+}
+
+.tool-btn:hover {
+  background: rgba(26, 24, 22, 0.04);
+  color: var(--ink-strong);
+}
+
+.tool-btn.is-active {
+  background: var(--bg-elevated);
+  color: var(--ink-strong);
+  box-shadow: 0 0 0 1px var(--rule-mid), 0 1px 2px rgba(26, 24, 22, 0.04);
+}
+
+.tool-btn.is-active::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+
+.tool-btn svg {
+  flex: 0 0 auto;
+}
+
+.tool-btn-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.tool-btn-key {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  letter-spacing: 0.05em;
+}
+
+.tool-btn:hover .tool-btn-key {
+  color: var(--ink-soft);
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.tool-btn-danger {
+  color: var(--ink-soft);
+}
+
+.tool-btn-danger:hover {
+  color: #8B2828;
+}
