@@ -16,3 +16,7 @@ npm-debug.log*
 
 # Extras
 extras/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+tsconfig.tsbuildinfo
