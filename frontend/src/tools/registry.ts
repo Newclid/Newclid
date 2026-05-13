@@ -1,25 +1,26 @@
 import type { Tool, ToolContext, ToolPreview } from './Tool';
 import type { ObjectId, ToolName } from '../geometry/types-object';
 import { pickNearestPoint } from '../geometry/hitTest';
+import { getOrCreatePoint, snapHighlight } from './sharedHelpers';
 
-const SNAP_PX = 12;
+// const SNAP_PX = 12;
 
-function getOrCreatePoint(ctx: ToolContext): ObjectId {
-  const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
-    tolerancePx: SNAP_PX,
-    scale: ctx.scale,
-  });
-  if (hit) return hit.id;
-  return ctx.scene.addPoint(ctx.world.x, ctx.world.y);
-}
+// function getOrCreatePoint(ctx: ToolContext): ObjectId {
+//   const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
+//     tolerancePx: SNAP_PX,
+//     scale: ctx.scale,
+//   });
+//   if (hit) return hit.id;
+//   return ctx.scene.addPoint(ctx.world.x, ctx.world.y);
+// }
 
-function snapHighlight(ctx: ToolContext): ToolPreview[] {
-  const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
-    tolerancePx: SNAP_PX,
-    scale: ctx.scale,
-  });
-  return hit ? [{ kind: 'highlightPoint', pos: { x: hit.x, y: hit.y } }] : [];
-}
+// function snapHighlight(ctx: ToolContext): ToolPreview[] {
+//   const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
+//     tolerancePx: SNAP_PX,
+//     scale: ctx.scale,
+//   });
+//   return hit ? [{ kind: 'highlightPoint', pos: { x: hit.x, y: hit.y } }] : [];
+// }
 
 // Cursor mode: clicks on the canvas are inert (do nothing).
 const selectTool: Tool = {
