@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "matcher.hpp"
+#include "matchers/matcher.hpp"
 
 #include <boost/container_hash/hash.hpp>
 #include <functional>

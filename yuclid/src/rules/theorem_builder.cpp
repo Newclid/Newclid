@@ -8,8 +8,8 @@
 namespace Yuclid {
 
     Theorem build_theorem_from_rule_schema(
-        RuleSchema &schema,
-        RuleMapping &mapping
+        const RuleSchema &schema,
+        const RuleMapping &mapping
     ) {
         std::vector<std::unique_ptr<Statement>> hypothesis;
         std::vector<std::unique_ptr<Statement>> conclusions;
