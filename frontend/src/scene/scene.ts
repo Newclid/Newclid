@@ -1,25 +1,22 @@
-// In-memory store for the scene plus the active tool.
-//
-// Holds geometric objects keyed by ID, the currently selected tool, and
-// transient tool-specific state (e.g. the first clicked point of a
-// half-built line). Notifies subscribers synchronously whenever any of
-// those change, so any reader sees the latest state immediately;
-// downstream renderers are expected to rAF-coalesce their redraws.
+/**
+In-memory store for scene objects, active tool, and transient tool state.
+Notifies subscribers synchronously.
+**/
 
 import type { GeoObject, ObjectId, PointObject, ToolName } from '../geometry/types-object';
 import type { ToolPreview } from '../tools/Tool';
 import { distance } from '../geometry/primitives';
 import type { WorldPoint } from '../geometry/coords';
 
-// Distributive Omit so each variant of the union keeps its own keys.
-// addObject takes everything except `id`, which the scene assigns.
+/**
+Distributive Omit so each variant of the union keeps its own keys.
+addObject takes everything except `id`, which the scene assigns.
+**/
 type DistOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 export type ToolState = { firstPoint?: ObjectId } | null;
 
-// Schema for a frontend → backend snapshot. Keys are optional past
-// `points` so adding new kinds (lines, segments, triangles, etc.) is
-// purely additive and old consumers don't break.
+// Frontend -> backend snapshot.
 export interface SerializedScene {
   points: { id: ObjectId; label: string; x: number; y: number }[];
   circles?: { id: ObjectId; kind: 'center-radius'; center: ObjectId; radius: number }[];
@@ -34,14 +31,13 @@ export interface SerializedScene {
 
 export class Scene {
   readonly objects = new Map<ObjectId, GeoObject>();
-  // The canvas starts in the point tool so a fresh page lets the user
-  // click to place a point without first selecting a tool.
+  // Start in the point tool so a fresh page is immediately useful.
   tool: ToolName = 'point';
   toolState: ToolState = null;
-  // Transient preview shapes from the active tool's onMove. Replaced
-  // wholesale every pointermove. Not part of emit() — preview writes
-  // would otherwise re-run every subscriber 60+ times per second; the
-  // tool dispatcher pairs setPreviews with a direct requestRedraw call.
+  /**
+  Transient previews from the active tool's onMove. Not part of emit()
+  so a pointermove burst doesn't re-run every subscriber.
+  **/
   previews: ToolPreview[] = [];
 
   private nextId = 1;
@@ -83,8 +79,10 @@ export class Scene {
     return id;
   }
 
-  // Generic add for any non-point GeoObject variant. Caller passes the
-  // shape minus `id`; the scene assigns the id and stores it.
+  /**
+  Generic add for any non-point GeoObject variant. Caller passes the
+  shape minus `id`; the scene assigns the id and stores it.
+  **/
   addObject(obj: DistOmit<GeoObject, 'id'>): ObjectId {
     const id = `o${this.nextId++}`;
     this.objects.set(id, { ...obj, id } as GeoObject);
@@ -102,9 +100,10 @@ export class Scene {
   removeObject(id: ObjectId): void {
     if (!this.objects.has(id)) return;
     this.objects.delete(id);
-    // Cascade: any shape that referenced this id loses its definition.
-    // Mirroring the reference's structure so adding line/segment/
-    // triangle later is one more `else if` arm.
+    /**
+    Cascade: any shape referencing this id loses its definition.
+    Adding line/segment/triangle later is one more `else if` arm.
+    **/
     for (const [k, v] of this.objects) {
       if (v.kind === 'circle') {
         if (v.mode === 'center-through') {
@@ -135,12 +134,10 @@ export class Scene {
     this.emit();
   }
 
-  // Backend-ready snapshot. The schema starts narrow and grows: only
-  // emit a key when at least one of that kind exists. Consumers must
-  // tolerate missing keys (they will appear as kinds ship). For circles
-  // in 'center-through' mode, radius is computed at serialize time via
-  // `distance` — never stored on the object — so dragging a referenced
-  // point produces a fresh radius on the next snapshot.
+  /**
+  Backend-ready snapshot. Only emit a key when at least one of that kind
+  exists; circle radius is derived from points so drags pick up fresh.
+  **/
   serialize(): SerializedScene {
     const points: SerializedScene['points'] = [];
     const circles: NonNullable<SerializedScene['circles']> = [];
@@ -158,8 +155,10 @@ export class Scene {
           );
           circles.push({ id: o.id, kind: 'center-radius', center: o.center, radius });
         }
-        // 'three-points' arm intentionally omitted — ships with the
-        // 3-point circle prompt.
+        /**
+        'three-points' arm intentionally omitted — ships with the
+        3-point circle prompt.
+        **/
       }
     }
 

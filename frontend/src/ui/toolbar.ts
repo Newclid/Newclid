@@ -1,7 +1,3 @@
-// Left-side toolbar. The `tools` array is the single source of truth
-// for the button list; the toolbar subscribes to the scene and updates
-// the active-state styling when `scene.tool` changes.
-
 import { Scene } from '../scene/scene';
 import type { ToolName } from '../geometry/types-object';
 
@@ -32,9 +28,10 @@ function svgEl(tag: string, attrs: Record<string, string>, text?: string): SVGEl
   return node;
 }
 
-// Each icon is a function returning a fresh <svg> element. SVG nodes
-// can't be reused in two places in the DOM, so a cached node would
-// break the moment a second button referenced it.
+/**
+Icons are functions returning a fresh <svg>: SVG nodes can't be reused
+in two DOM places, so a cached node would break on the second button.
+**/
 function iconWrap(children: SVGElement[]): SVGSVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg') as SVGSVGElement;
   svg.setAttribute('viewBox', '0 0 22 22');

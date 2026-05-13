@@ -1,12 +1,3 @@
-// Concrete tools, keyed by name. The dispatcher resolves
-// `toolRegistry[scene.tool]` and calls into it directly.
-//
-// getOrCreatePoint and snapHighlight are the shared primitives every
-// builder tool reuses — snap to an existing point within ~12 screen
-// pixels (zoom-invariant), or create a fresh point at the click.
-// Future tools (line, segment, triangle, 3-point circle) all reuse
-// these helpers without duplicating the snap math.
-
 import type { Tool, ToolContext, ToolPreview } from './Tool';
 import type { ObjectId, ToolName } from '../geometry/types-object';
 import { pickNearestPoint } from '../geometry/hitTest';
@@ -31,7 +22,7 @@ import { getOrCreatePoint, snapHighlight } from './sharedHelpers';
 //   return hit ? [{ kind: 'highlightPoint', pos: { x: hit.x, y: hit.y } }] : [];
 // }
 
-// Cursor mode: clicks on the canvas are inert.
+// Cursor mode: clicks on the canvas are inert (do nothing).
 const selectTool: Tool = {
   name: 'select',
   onClick() {},
@@ -53,10 +44,10 @@ const pointTool: Tool = {
   onDeactivate() {},
 };
 
-// Two-click center-through circle. First click sets the centre, second
-// click sets a point on the rim. The circle stores both point IDs;
-// radius is derived live from their distance, so dragging either point
-// updates the rendered circle automatically.
+/**
+Two-click center-through circle. Stores both point IDs, radius is
+derived live, so dragging either point updates the rendered circle.
+**/
 const circleTool: Tool = {
   name: 'circle',
   onClick(ctx) {
