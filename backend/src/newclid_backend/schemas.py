@@ -18,3 +18,11 @@ class CreateJobRequest(BaseModel):
 class CreateJobResponse(BaseModel):
     job_id: str
     status: Literal["queued"]
+
+
+class JobStatusResponse(BaseModel):
+    job_id: str
+    status: Literal[
+        "queued", "running", "succeeded", "failed", "timed_out", "cancelled"
+    ]
+    message: str | None = None
