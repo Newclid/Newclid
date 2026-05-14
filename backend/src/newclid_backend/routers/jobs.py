@@ -1,22 +1,40 @@
 from uuid import uuid4
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from fastapi import status as http_status
 
-from ..schemas import (
+from newclid_backend.queue import enqueue_job
+from newclid_backend.schemas import (
     CreateJobRequest,
     CreateJobResponse,
     JobResultResponse,
     JobStatusResponse,
 )
+from newclid_backend.tasks import run_newclid_job
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
 
 @router.post("", response_model=CreateJobResponse)
 def create_job(request: CreateJobRequest) -> CreateJobResponse:
-    print(request.problem_input)
+    job_id = str(uuid4())
+    jgex_problem = request.problem_input.strip()
 
-    return CreateJobResponse(job_id=str(uuid4()), status="queued")
+    try:
+        enqueue_job(
+            run_newclid_job,
+            jgex_problem,
+            request.timeout_seconds,
+            job_id=job_id,
+            timeout_seconds=request.timeout_seconds,
+        )
+    except Exception as error:
+        raise HTTPException(
+            status_code=http_status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Could not enqueue a new Newclid job: {error}",
+        )
+
+    return CreateJobResponse(job_id=job_id, status="queued")
 
 
 @router.get("/{job_id}", response_model=JobStatusResponse)
