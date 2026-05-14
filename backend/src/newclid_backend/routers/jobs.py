@@ -127,4 +127,38 @@ def check_job_status(job_id: str) -> JobStatusResponse:
 
 @router.get("/{job_id}/result", response_model=JobResultResponse)
 def check_job_result(job_id: str) -> JobResultResponse:
-    return JobResultResponse(job_id=job_id, status="queued", result=None, error=None)
+    job = _get_job_or_404(job_id)
+    public_job_status = _to_public_status(job)
+
+    if public_job_status in {"queued", "running"}:
+        return JobResultResponse(
+            job_id=job_id, status=public_job_status, result=None, error=None
+        )
+
+    if public_job_status == "cancelled":
+        return JobResultResponse(
+            job_id=job_id,
+            status=public_job_status,
+            result=None,
+            error="Job was cancelled.",
+        )
+
+    result = job.return_value(refresh=True)
+
+    if isinstance(result, dict):
+        error = None
+
+        if public_job_status in {"failed", "timed_out"}:
+            message = result.get("message")
+            error = message if isinstance(message, str) else "Newclid job failed"
+
+        return JobResultResponse(
+            job_id=job_id, status=public_job_status, result=result, error=error
+        )
+
+    return JobResultResponse(
+        job_id=job_id,
+        status="failed",
+        result=None,
+        error="Newclid job failed for unknown reason",
+    )
