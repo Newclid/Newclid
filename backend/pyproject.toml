@@ -9,6 +9,8 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.136.1",
+    "redis>=7.4.0",
+    "rq>=2.8.0",
     "uvicorn>=0.35.0",
 ]
 
