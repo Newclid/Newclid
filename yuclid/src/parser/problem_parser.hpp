@@ -19,5 +19,5 @@
 namespace Yuclid {
   class Problem;
 
-  [[nodiscard]] Problem parse_input_simple(std::istream &input);
+  [[nodiscard]] Problem parse_problem(std::istream &input);
 }

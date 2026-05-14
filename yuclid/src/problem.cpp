@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-#include "matcher.hpp"
+#include "matchers/matcher.hpp"
 #include "problem.hpp"
 #include "statement/statement.hpp"
 #include "type/point.hpp"     // To create point objects for the map

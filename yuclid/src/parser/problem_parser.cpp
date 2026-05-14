@@ -14,7 +14,7 @@
    limitations under the License.
 */
 #include "config_options.hpp"
-#include "parser/simple.hpp"
+#include "parser/problem_parser.hpp"
 
 #include <cmath>
 #include "statement/circumcenter.hpp"
@@ -55,7 +55,7 @@
 using namespace std;
 
 namespace Yuclid {
-  Problem parse_input_simple(istream &input) {
+  Problem parse_problem(istream &input) {
     Problem prob;
     auto get_point = [&prob](istringstream &str) -> Point {
       string name;

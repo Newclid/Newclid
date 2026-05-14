@@ -10,12 +10,15 @@ add_library(yuclid
   ar/linear_system.cpp
   ar/reduced_equation.cpp
   config_options.cpp
-  matcher.cpp
+  matchers/matcher.cpp
+  matchers/generic_rule_matcher.cpp
   numbers/add_circle.cpp
   numbers/posreal.cpp
   numbers/root_rat.cpp
   numbers/util.cpp
-  parser/simple.cpp
+  parser/problem_parser.cpp
+  parser/rule_parser.cpp
+  rules/theorem_builder.cpp
   problem.cpp
   solver/ddar_solver.cpp
   solver/statement_proof.cpp
@@ -51,6 +54,7 @@ add_library(yuclid
   statement/squared_dist_eq.cpp
   statement/statement.cpp
   statement/thales.cpp
+  statement/statement_builder.cpp
   theorem.cpp
   type/angle.cpp
   type/dist.cpp
