@@ -1,26 +1,8 @@
-import type { Tool, ToolContext, ToolPreview } from './Tool';
-import type { ObjectId, ToolName } from '../geometry/types-object';
-import { pickNearestPoint } from '../geometry/hitTest';
+import type { Tool } from './tool';
+import type { ToolName } from '../geometry/types-object';
 import { getOrCreatePoint, snapHighlight } from './sharedHelpers';
-
-// const SNAP_PX = 12;
-
-// function getOrCreatePoint(ctx: ToolContext): ObjectId {
-//   const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
-//     tolerancePx: SNAP_PX,
-//     scale: ctx.scale,
-//   });
-//   if (hit) return hit.id;
-//   return ctx.scene.addPoint(ctx.world.x, ctx.world.y);
-// }
-
-// function snapHighlight(ctx: ToolContext): ToolPreview[] {
-//   const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
-//     tolerancePx: SNAP_PX,
-//     scale: ctx.scale,
-//   });
-//   return hit ? [{ kind: 'highlightPoint', pos: { x: hit.x, y: hit.y } }] : [];
-// }
+import { ConstructionTool } from './construction-tool';
+import { CONSTRUCTION_CATALOG } from '../construction/catalog';
 
 // Cursor mode: clicks on the canvas are inert (do nothing).
 const selectTool: Tool = {
@@ -85,8 +67,28 @@ const circleTool: Tool = {
   },
 };
 
-export const toolRegistry: Record<ToolName, Tool> = {
+const builtIns: Record<ToolName, Tool> = {
   select: selectTool,
   point: pointTool,
   circle: circleTool,
 };
+
+// Cache so the same ConstructionTool instance is reused across tool switches;
+// onDeactivate already resets transient state.
+const constructionToolCache = new Map<string, Tool>();
+
+/**
+Look up a tool by name. Falls back from built-ins to the catalog of
+construction entries. Returns undefined for unknown names.
+**/
+export function getTool(name: string): Tool | undefined {
+  if (name in builtIns) return builtIns[name as ToolName];
+  let t = constructionToolCache.get(name);
+  if (!t) {
+    const entry = CONSTRUCTION_CATALOG[name];
+    if (!entry) return undefined;
+    t = new ConstructionTool(entry);
+    constructionToolCache.set(name, t);
+  }
+  return t;
+}

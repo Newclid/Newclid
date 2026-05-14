@@ -1,61 +1,99 @@
-import { Tool, ToolContext, ToolPreview } from './Tool';
+import { Tool, ToolContext, ToolPreview } from './tool';
 import type { CatalogEntry } from '../construction/catalog-types';
 import { getOrCreatePoint, snapHighlight } from './sharedHelpers';
-import type { ObjectId } from '../geometry/types-object';
-import type { ToolName } from '../geometry/types-object';
+import type { ObjectId, ToolName } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
 
 export class ConstructionTool implements Tool {
   name: ToolName;
-  private catalogEntry: CatalogEntry; // the blueprint (e.g. triangle)
+  private catalogEntry: CatalogEntry; // the blueprint (e.g. trapezoid)
   private bindings: Record<string, ObjectId> = {}; // slots filled so far
   private currentSlotIndex = 0; // which step the user is on
-  // "where are we in the construction right now?"
 
   constructor(catalogEntry: CatalogEntry) {
     this.catalogEntry = catalogEntry;
     this.name = catalogEntry.name;
   }
 
-  // Every click advances the construction by one slot
+  // Every click advances the construction by one slot.
   onClick(ctx: ToolContext): void {
     const slot = this.catalogEntry.slots[this.currentSlotIndex];
     if (!slot) return;
 
+    let pointId: ObjectId;
     if (slot.kind === 'pick' || slot.kind === 'place-free') {
-      const pointId = getOrCreatePoint(ctx);
-      this.bindings[slot.name] = pointId;
-      this.currentSlotIndex++;
+      pointId = getOrCreatePoint(ctx);
+    } else if (slot.kind === 'derive') {
+      // Project the cursor onto the constrained locus, then materialise a
+      // fresh point at the projected position.
+      const projected = slot.project(this.bindings, ctx.scene, ctx.world);
+      pointId = ctx.scene.addPoint(projected.x, projected.y);
+    } else {
+      console.warn(`ConstructionTool: slot kind '${(slot as { kind: string }).kind}' not implemented`);
+      return;
+    }
 
-      if (this.currentSlotIndex >= this.catalogEntry.slots.length) {
-        // Done: call sketch fn and add to scene
-        const obj = this.catalogEntry.sketch(this.bindings, ctx.scene);
-        ctx.scene.addObject(obj);
-        // Reset for next use
-        this.reset();
-      }
+    // Validate the tentative binding before committing it.
+    const tentative = { ...this.bindings, [slot.name]: pointId };
+    const err = this.catalogEntry.validate?.(tentative, ctx.scene);
+    if (err) {
+      console.warn(`[${this.catalogEntry.name}] ${err}`);
+      // Roll back the auto-created point so a rejected derive doesn't leak.
+      if (slot.kind === 'derive') ctx.scene.removeObject(pointId);
+      return;
+    }
+
+    this.bindings = tentative;
+    this.currentSlotIndex++;
+
+    if (this.currentSlotIndex >= this.catalogEntry.slots.length) {
+      // Done: call sketch and add to scene
+      const obj = this.catalogEntry.sketch(this.bindings, ctx.scene);
+      ctx.scene.addObject(obj);
+      this.reset();
     }
   }
 
-    // Fires constantly as the mouse moves. 
-    // A visual indicator of where the next point would land.
-    // This is where a live preview of the in-progress shape would eventually go.
+  // Live preview: already-bound edges, plus per-slot aux geometry.
   onMove(ctx: ToolContext): ToolPreview[] {
+    const previews: ToolPreview[] = [];
     const slot = this.catalogEntry.slots[this.currentSlotIndex];
-    if (!slot) return [];
+    if (!slot) return previews;
 
-    // Show snap highlight at cursor
-    return snapHighlight(ctx);
+    // Layer 1: any edges whose endpoints are already bound — partial shape.
+    for (const e of this.catalogEntry.edges) {
+      const aId = this.bindings[e.pointIds[0]];
+      const bId = this.bindings[e.pointIds[1]];
+      if (!aId || !bId) continue;
+      const a = ctx.scene.objects.get(aId);
+      const b = ctx.scene.objects.get(bId);
+      if (a?.kind !== 'point' || b?.kind !== 'point') continue;
+      previews.push({
+        kind: 'partialEdge',
+        from: { x: a.x, y: a.y },
+        to: { x: b.x, y: b.y },
+      });
+    }
+
+    // Layer 2: per-slot aux geometry + cursor preview.
+    if (slot.kind === 'derive') {
+      for (const aux of slot.preview(this.bindings, ctx.scene)) {
+        previews.push({ kind: 'auxLine', from: aux.from, to: aux.to });
+      }
+      const projected = slot.project(this.bindings, ctx.scene, ctx.world);
+      previews.push({ kind: 'highlightPoint', pos: { x: projected.x, y: projected.y } });
+    } else if (slot.kind === 'pick' || slot.kind === 'place-free') {
+      previews.push(...snapHighlight(ctx));
+    }
+    // scalar: nothing to preview — falls through.
+
+    return previews;
   }
 
-    // Called when the user switches to a different tool. 
-    // It resets everything so no half-finished state leaks into the next session.
-  onDeactivate(ctx: { scene: Scene }): void {
+  onDeactivate(_ctx: { scene: Scene }): void {
     this.reset();
   }
 
-    // Wipes bindings and rewinds the slot index back to 0,
-    // ready for the next construction of the same type.
   private reset(): void {
     this.bindings = {};
     this.currentSlotIndex = 0;

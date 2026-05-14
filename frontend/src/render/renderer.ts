@@ -238,7 +238,7 @@ export class Renderer {
         el.setAttribute('stroke', STYLE.snapStroke);
         el.setAttribute('stroke-width', '1.5');
         this.svg.appendChild(el);
-      } else if (p.kind === 'rubberCircle') {
+            } else if (p.kind === 'rubberCircle') {
         const sc = this.viewport.worldToScreen(world(p.center.x, p.center.y));
         const r = Math.hypot(p.radiusVec.x - p.center.x, p.radiusVec.y - p.center.y) * this.viewport.scale;
         const el = document.createElementNS(SVG_NS, 'circle');
@@ -250,6 +250,24 @@ export class Renderer {
         el.setAttribute('stroke-width', String(STYLE.previewStrokeWidth));
         el.setAttribute('stroke-dasharray', STYLE.previewDash);
         this.svg.appendChild(el);
+      } else if (p.kind === 'auxLine') {
+        // Dashed parallel/perpendicular guide drawn while a derive slot is active.
+        const a = this.viewport.worldToScreen(world(p.from.x, p.from.y));
+        const b = this.viewport.worldToScreen(world(p.to.x, p.to.y));
+        const el = document.createElementNS(SVG_NS, 'line');
+        el.setAttribute('x1', String(a.x));
+        el.setAttribute('y1', String(a.y));
+        el.setAttribute('x2', String(b.x));
+        el.setAttribute('y2', String(b.y));
+        el.setAttribute('stroke', STYLE.previewStroke);
+        el.setAttribute('stroke-width', String(STYLE.previewStrokeWidth));
+        el.setAttribute('stroke-dasharray', STYLE.previewDash);
+        this.svg.appendChild(el);
+      } else if (p.kind === 'partialEdge') {
+        // Already-bound edge of an in-progress construction.
+        const a = this.viewport.worldToScreen(world(p.from.x, p.from.y));
+        const b = this.viewport.worldToScreen(world(p.to.x, p.to.y));
+        this.line(a.x, a.y, b.x, b.y, '#888', 1.5);
       }
     }
   }

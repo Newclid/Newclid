@@ -26,7 +26,12 @@ Preview shape rendered while a tool is mid-action. Positions are plain
 **/
 export type ToolPreview =
   | { kind: 'highlightPoint'; pos: { x: number; y: number } }
-  | { kind: 'rubberCircle'; center: { x: number; y: number }; radiusVec: { x: number; y: number } };
+  | { kind: 'rubberCircle'; center: { x: number; y: number }; radiusVec: { x: number; y: number } }
+  // Making sure for shapes like trapezoid will end up as trapezoids by controlling the last point for example
+  // This shows where the last point can land to make it valid
+  | { kind: 'auxLine'; from: { x: number; y: number }; to: { x: number; y: number } }
+  // This is to let the viewer see the edges they already have created by the points they placed
+  | { kind: 'partialEdge'; from: { x: number; y: number }; to: { x: number; y: number } };
 
 export interface Tool {
   readonly name: ToolName;

@@ -1,12 +1,12 @@
 /**
-Routes canvas pointer events to the active tool via toolRegistry.
+Routes canvas pointer events to the active tool via getTool.
 Suppresses click/onMove while space is held so panZoom owns the gesture.
 **/
 
 import { Viewport } from '../geometry/viewport';
 import { screen } from '../geometry/coords';
 import { Scene } from '../scene/scene';
-import { toolRegistry } from '../tools/registry';
+import { getTool } from '../tools/registry';
 
 export interface ToolDispatcherHandle {
   destroy(): void;
@@ -51,13 +51,15 @@ export function attachToolDispatcher(
 
   const onClick = (e: MouseEvent) => {
     if (e.button !== 0 || spaceHeld) return;
-    const tool = toolRegistry[scene.tool];
+    const tool = getTool(scene.tool);
+    if (!tool) return;
     tool.onClick(buildCtx(e));
   };
 
   const onPointerMove = (e: PointerEvent) => {
     if (spaceHeld) return;
-    const tool = toolRegistry[scene.tool];
+    const tool = getTool(scene.tool);
+    if (!tool) return;
     const previews = tool.onMove(buildCtx(e));
     scene.setPreviews(previews);
     /**

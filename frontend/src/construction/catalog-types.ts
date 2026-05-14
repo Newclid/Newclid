@@ -1,40 +1,51 @@
-import type { ConstructionObject } from '../geometry/types-object'; 
-import type { ObjectId, ToolName } from '../geometry/types-object';
+import type { ConstructionObject, ObjectId } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
+import type { WorldPoint } from '../geometry/coords';
 
-// Rule slot kinds
-type SlotKind = 'pick' | 'place-free' | 'derive' | 'scalar';
+// Bindings: maps slot name → picked ObjectId or computed scalar value.
+export type Bindings = Record<string, ObjectId | number>;
+
+// Aux geometry shown while a `derive` slot is active.
+export type DerivePreview =
+  | { kind: 'auxLine'; from: WorldPoint; to: WorldPoint };
 
 // One input step in a construction
-interface SlotSpec {
-  name: string;              // e.g. 'center', 'rimPoint'
-  kind: SlotKind;
-  label: string;             // UI text
+export type SlotSpec =
+  | { name: string; kind: 'pick' | 'place-free'; label: string }
+  | {
+      name: string;
+      kind: 'derive';
+      label: string;
+      preview: (b: Bindings, scene: Scene) => DerivePreview[];
+      project: (b: Bindings, scene: Scene, cursor: WorldPoint) => WorldPoint;
+    }
+  | { name: string; kind: 'scalar'; label: string; defaultValue?: number };
+
+// An edge to draw between two points (slot names, resolved to ids in sketch).
+export interface EdgeSpec {
+  pointIds: [string, string];
+  style?: 'solid' | 'dashed';
 }
 
-// An edge to draw between two points
-interface EdgeSpec {
-  pointIds: [string, string]; // [slot1, slot2]
-  style?: 'solid' | 'dashed'; 
-}
-
-// A circle to draw
-interface CircleSpec {
+// A circle to draw (slot names for center and radius).
+export interface CircleSpec {
   centerSlot: string;
   radiusSlot: string;
 }
 
-// Bindings: maps slot name → picked ObjectId or computed value
-type Bindings = Record<string, ObjectId | number>;
+// Construction names are open strings; built-in tools use BuiltInToolName.
+export type ConstructionName = string;
 
-// One construction definition
 export interface CatalogEntry {
-  name: ToolName;                  // e.g. 'triangle'
+  name: ConstructionName;         // e.g. 'trapezoid'
+  label: string;                  // toolbar text
+  shortcut: string;               // single key, e.g. 'T'
+  icon: () => SVGSVGElement;      // returns a fresh <svg> each call
   slots: SlotSpec[];
   edges: EdgeSpec[];
   circles: CircleSpec[];
-  sketch: (bindings: Bindings, scene: Scene) => ConstructionObject; 
+  // Final emit: caller passes the shape minus `id`, scene.addObject assigns it.
+  sketch: (b: Bindings, scene: Scene) => Omit<ConstructionObject, 'id'>;
+  // Optional guard. Returns null = OK, string = error message to console.warn.
+  validate?: (b: Bindings, scene: Scene) => string | null;
 }
-
-// All catalog entries keyed by name
-export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {};
