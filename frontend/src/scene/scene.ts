@@ -4,7 +4,7 @@ Notifies subscribers synchronously.
 **/
 
 import type { GeoObject, ObjectId, PointObject, ToolName } from '../geometry/types-object';
-import type { ToolPreview } from '../tools/tool';
+import type { ToolPreview } from '../tools/tool'
 import { distance } from '../geometry/primitives';
 import type { WorldPoint } from '../geometry/coords';
 
@@ -94,6 +94,13 @@ export class Scene {
     const o = this.objects.get(id);
     if (!o || o.kind !== 'point') return;
     this.objects.set(id, { ...o, x, y });
+    this.emit();
+  }
+
+  setPointColor(id: ObjectId, color: string): void {
+    const o = this.objects.get(id);
+    if (!o || o.kind !== 'point') return;
+    this.objects.set(id, { ...o, color });
     this.emit();
   }
 
