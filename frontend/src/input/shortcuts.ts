@@ -2,12 +2,24 @@
 
 import { Scene } from '../scene/scene';
 import type { ToolName } from '../geometry/types-object';
+import { CONSTRUCTION_CATALOG } from '../construction/catalog';
 
 const SHORTCUTS: Record<string, ToolName> = {
   v: 'select',
   p: 'point',
   c: 'circle',
 };
+
+// Merge catalog shortcuts at module init. First-defined wins; collisions
+// are warned, not enforced, since shortcuts are static config.
+for (const entry of Object.values(CONSTRUCTION_CATALOG)) {
+  const key = entry.shortcut.toLowerCase();
+  if (SHORTCUTS[key]) {
+    console.warn(`Shortcut collision: '${key}' is already bound; '${entry.name}' will not be reachable by keyboard.`);
+    continue;
+  }
+  SHORTCUTS[key] = entry.name;
+}
 
 export interface ShortcutsHandle {
   destroy(): void;

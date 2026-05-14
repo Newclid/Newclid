@@ -4,7 +4,7 @@ Notifies subscribers synchronously.
 **/
 
 import type { GeoObject, ObjectId, PointObject, ToolName } from '../geometry/types-object';
-import type { ToolPreview } from '../tools/Tool';
+import type { ToolPreview } from '../tools/tool';
 import { distance } from '../geometry/primitives';
 import type { WorldPoint } from '../geometry/coords';
 

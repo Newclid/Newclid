@@ -1,4 +1,4 @@
-import { ToolContext, ToolPreview } from './Tool';
+import { ToolContext, ToolPreview } from './tool';
 import { pickNearestPoint } from '../geometry/hitTest';
 import type { ObjectId } from '../geometry/types-object';
 

@@ -34,4 +34,4 @@ export type CircleObject =
 export type GeoObject = PointObject | CircleObject | ConstructionObject;
 export type GeoKind = GeoObject['kind'];
 
-export type ToolName = 'select' | 'point' | 'circle';
+export type ToolName = string;
