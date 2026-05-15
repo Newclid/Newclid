@@ -7,8 +7,7 @@ class CreateJobRequest(BaseModel):
     input_type: Literal["jgex"] = Field(
         default="jgex", description="Input format of the submitted problem"
     )
-    problem_input: str = Field(description="Problem definition in JGEX format")
-    goals: str = Field(description="Goal that Newclid should try to prove.")
+    problem_input: str = Field(description="Problem definition and goal in JGEX format")
     timeout_seconds: int = Field(
         default=120,
         description="Timeout time after which the newclid process will be stopped",
