@@ -11,3 +11,7 @@ RESULT_TTL_SECONDS = int(os.getenv("RESULT_TTL_SECONDS", "3600"))
 
 # how long failed job info stays in Redis
 FAILURE_TTL_SECONDS = int(os.getenv("FAILURE_TTL_SECONDS", "3600"))
+
+# the cli command that is used to execute newclid application
+NEWCLID_COMMAND = os.getenv("NEWCLID_COMMAND", "newclid")
+MAX_OUTPUT_CHARS = int(os.getenv("MAX_OUTPUT_CHARS", "200000"))
