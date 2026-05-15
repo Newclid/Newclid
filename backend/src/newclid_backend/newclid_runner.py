@@ -1,7 +1,10 @@
-import subprocess
+import traceback
+
+from newclid.api import GeometricSolverBuilder
+from newclid.jgex.problem_builder import JGEXProblemBuilder
 
 from newclid_backend.runner_models import NewclidRunResult
-from newclid_backend.settings import MAX_OUTPUT_CHARS, NEWCLID_COMMAND
+from newclid_backend.settings import MAX_OUTPUT_CHARS
 
 
 def _truncate_output(output: str | None) -> str:
@@ -16,45 +19,33 @@ def _truncate_output(output: str | None) -> str:
 
 # This function will not be called directly from our FastAPI backend logic
 # This will be directly invoked by a worker
-def run_newclid_from_jgex(jgex_problem: str, timeout_seconds: int) -> NewclidRunResult:
-    command = [NEWCLID_COMMAND, "jgex", "--problem", jgex_problem]
-
+def run_newclid_from_jgex(jgex_problem: str) -> NewclidRunResult:
     try:
-        completed_process = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,  # return stdout/stderr as strings
-            timeout=timeout_seconds,
-            check=False,  # do not throw an exception just because Newclid exits with error code
-        )
-    except subprocess.TimeoutExpired as error:
-        stdout = error.stdout if isinstance(error.stdout, str) else ""
-        stderr = error.stderr if isinstance(error.stderr, str) else ""
+        problem_setup = JGEXProblemBuilder().with_problem_from_txt(jgex_problem).build()
+
+        solver = GeometricSolverBuilder().build(problem_setup)
+
+        success = solver.run()
+        proof_text = solver.proof()
+
+        if success:
+            return NewclidRunResult(
+                status="succeeded",
+                message="Newclid completed successfully.",
+                proof_text=_truncate_output(proof_text),
+            )
 
         return NewclidRunResult(
-            status="timed_out",
-            return_code=None,
-            stdout=_truncate_output(stdout),
-            stderr=_truncate_output(stderr),
-            message=f"Newclid exceeded the timeout of {timeout_seconds} seconds.",
+            status="failed",
+            message="Newclid finished, but did not prove all goals",
+            proof_text=_truncate_output(proof_text),
         )
 
-    stdout = _truncate_output(completed_process.stdout)
-    stderr = _truncate_output(completed_process.stderr)
-
-    if completed_process.returncode == 0:
+    except Exception as error:
         return NewclidRunResult(
-            status="succeeded",
-            return_code=0,
-            stdout=_truncate_output(stdout),
-            stderr=_truncate_output(stderr),
-            message="Newclid completed successfully",
+            status="failed",
+            message=f"Newclid failed: {error}",
+            stderr=_truncate_output(traceback.format_exc()),
+            proof_text=None,
+            run_info=None,
         )
-
-    return NewclidRunResult(
-        status="failed",
-        return_code=completed_process.returncode,
-        stdout=_truncate_output(stdout),
-        stderr=_truncate_output(stderr),
-        message="Newclid failed",
-    )

@@ -100,7 +100,6 @@ def create_job(request: CreateJobRequest) -> CreateJobResponse:
         enqueue_job(
             run_newclid_job,
             jgex_problem,
-            request.timeout_seconds,
             job_id=job_id,
             timeout_seconds=request.timeout_seconds,
         )
