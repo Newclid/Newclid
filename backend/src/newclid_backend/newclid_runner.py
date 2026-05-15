@@ -25,7 +25,7 @@ def run_newclid_from_jgex(jgex_problem: str, timeout_seconds: int) -> NewclidRun
             capture_output=True,
             text=True,  # return stdout/stderr as strings
             timeout=timeout_seconds,
-            check=True,  # do not throw an exception just because Newclid exits with error code
+            check=False,  # do not throw an exception just because Newclid exits with error code
         )
     except subprocess.TimeoutExpired as error:
         stdout = error.stdout if isinstance(error.stdout, str) else ""
