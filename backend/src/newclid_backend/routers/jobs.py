@@ -51,7 +51,7 @@ def _to_public_status(job: Job) -> PublicJobStatus:
         return "queued"
     if rq_job_status == "started":
         return "running"
-    if rq_job_status in {"stopped", "canceled", "cancelled"}:
+    if rq_job_status in {"stopped", "canceled"}:
         return "cancelled"
     if rq_job_status == "failed":
         return "failed"
