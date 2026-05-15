@@ -12,6 +12,8 @@ export interface PointObject {
   y: number;
   // Display label, e.g. 'A'. Auto-assigned A, B, C, … on creation.
   label: string;
+  // Optional per-point render color. Defaults to the renderer's ink color.
+  color?: string;
 }
 
 export interface ConstructionObject {

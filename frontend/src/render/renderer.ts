@@ -280,7 +280,7 @@ export class Renderer {
       dot.setAttribute('cx', String(s.x));
       dot.setAttribute('cy', String(s.y));
       dot.setAttribute('r', '4.25');
-      dot.setAttribute('fill', '#1a1a1a');
+      dot.setAttribute('fill', p.color ?? '#1a1a1a');
       this.svg.appendChild(dot);
 
       const label = document.createElementNS(SVG_NS, 'text');
