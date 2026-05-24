@@ -31,9 +31,7 @@ export class JobPoller {
       });
       if (TERMINAL_STATUSES.has(statusResp.status)) {
         this.stop();
-        if (statusResp.status === 'succeeded' || statusResp.status === 'failed') {
-          await this.fetchResult(jobId);
-        }
+        await this.fetchResult(jobId);
       }
     } catch (err) {
       if (err instanceof ApiError && !err.retryable) {
