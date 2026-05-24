@@ -1,25 +1,9 @@
 import { Scene } from '../scene/scene';
 import type { ToolName } from '../geometry/types-object';
 import { svgEl, iconWrap } from './icon-helpers';
+import { el } from './dom';
+import { createJgexInput } from './jgexInput';
 import { CONSTRUCTION_CATALOG } from '../construction/catalog';
-
-// Tiny declarative element factory.
-function el<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  attrs: Partial<Record<string, string>> = {},
-  children: (Node | string)[] = [],
-): HTMLElementTagNameMap[K] {
-  const node = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (v === undefined) continue;
-    if (k === 'class') node.className = v;
-    else node.setAttribute(k, v);
-  }
-  for (const c of children) {
-    node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  }
-  return node;
-}
 
 function cursorIcon(): SVGSVGElement {
   return iconWrap([
@@ -74,6 +58,20 @@ function trashIcon(): SVGSVGElement {
       fill: 'none',
       stroke: 'currentColor',
       'stroke-width': '1.4',
+      'stroke-linejoin': 'round',
+      'stroke-linecap': 'round',
+    }),
+  ]);
+}
+
+// Angle-brackets glyph, so the button reads as "type code".
+function jgexIcon(): SVGSVGElement {
+  return iconWrap([
+    svgEl('path', {
+      d: 'M8 6 L3.5 11 L8 16 M14 6 L18.5 11 L14 16',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '1.5',
       'stroke-linejoin': 'round',
       'stroke-linecap': 'round',
     }),
@@ -138,6 +136,17 @@ export function createToolbar(scene: Scene): ToolbarHandle {
   // ---------- spacer ----------
   const spacer = el('div', { class: 'toolbar-spacer' });
 
+  // ---------- jgex line input ----------
+  const jgex = createJgexInput();
+  const jgexBtn = el('button', {
+    type: 'button',
+    class: 'tool-btn',
+    title: 'Enter a JGEX line',
+  }) as HTMLButtonElement;
+  jgexBtn.appendChild(jgexIcon());
+  jgexBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['JGEX']));
+  jgexBtn.addEventListener('click', () => jgex.open());
+
   // ---------- clear ----------
   const clearBtn = el('button', {
     type: 'button',
@@ -152,6 +161,7 @@ export function createToolbar(scene: Scene): ToolbarHandle {
   aside.appendChild(brand);
   aside.appendChild(group);
   aside.appendChild(spacer);
+  aside.appendChild(jgexBtn);
   aside.appendChild(clearBtn);
 
   // ---------- subscription ----------
@@ -169,6 +179,7 @@ export function createToolbar(scene: Scene): ToolbarHandle {
     root: aside,
     destroy() {
       unsubscribe();
+      jgex.destroy();
     },
   };
 }

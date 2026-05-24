@@ -202,3 +202,89 @@ button {
 .tool-btn-danger:hover {
   color: #8B2828;
 }
+
+/* ---------- JGEX input modal ---------- */
+
+.jgex-backdrop {
+  position: fixed;
+  inset: 0;
+  display: none;                       /* shown via .is-open */
+  align-items: center;
+  justify-content: center;             /* centers the dialog */
+  background: rgba(26, 24, 22, 0.35);  /* dims the page; canvas still shows through */
+  z-index: 100;
+}
+
+.jgex-backdrop.is-open {
+  display: flex;
+}
+
+.jgex-dialog {
+  width: min(560px, 90vw);             /* centered box, not full-screen */
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-mid);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(26, 24, 22, 0.22);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jgex-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ink-strong);
+}
+
+.jgex-input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 6px;
+  background: var(--bg-canvas);
+  color: var(--ink-strong);
+}
+
+.jgex-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.jgex-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.jgex-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.jgex-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.jgex-btn-quiet {
+  color: var(--ink-mid);
+}
+
+.jgex-btn-quiet:hover {
+  background: rgba(26, 24, 22, 0.04);
+  color: var(--ink-strong);
+}
+
+.jgex-btn-accent {
+  background: var(--accent);
+  color: #FFFFFF;
+}
+
+.jgex-btn-accent:hover {
+  background: #20396A;
+}
