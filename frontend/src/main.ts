@@ -5,6 +5,9 @@ import { attachPanZoom } from './input/panZoom';
 import { attachToolDispatcher } from './input/toolDispatcher';
 import { attachShortcuts } from './input/shortcuts';
 import { createToolbar } from './ui/toolbar';
+import { AppStore } from './store/appStore';
+import { BackendClient } from './api/backendClient';
+import { JobPoller } from './api/jobPoller';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -13,6 +16,9 @@ if (!root) {
 }
 
 const scene = new Scene();
+export const appStore = new AppStore();
+export const backendClient = new BackendClient('/api');
+export const jobPoller = new JobPoller(backendClient, appStore);
 
 const toolbar = createToolbar(scene);
 root.appendChild(toolbar.root);
