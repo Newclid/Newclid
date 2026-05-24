@@ -105,7 +105,10 @@ export interface ToolbarHandle {
   destroy(): void;
 }
 
-export function createToolbar(scene: Scene): ToolbarHandle {
+export function createToolbar(
+  scene: Scene,
+  onJgexSubmit?: (jgex: string) => Promise<void>,
+): ToolbarHandle {
   const aside = el('aside', { class: 'toolbar' });
 
   // ---------- brand block ----------
@@ -137,7 +140,7 @@ export function createToolbar(scene: Scene): ToolbarHandle {
   const spacer = el('div', { class: 'toolbar-spacer' });
 
   // ---------- jgex line input ----------
-  const jgex = createJgexInput();
+  const jgex = createJgexInput(onJgexSubmit);
   const jgexBtn = el('button', {
     type: 'button',
     class: 'tool-btn',
