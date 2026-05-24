@@ -250,11 +250,23 @@ def test_check_job_status_returns_404_for_missing_job(client, monkeypatch) -> No
     assert response.status_code == 404
 
 
-def test_check_job_result_returns_none_for_queued_job(client, monkeypatch) -> None:
+@pytest.mark.parametrize(
+    ("rq_status", "expected_status"),
+    [
+        ("queued", "queued"),
+        ("started", "running"),
+    ],
+)
+def test_check_job_result_returns_no_result_for_incomplete_job(
+    client,
+    monkeypatch,
+    rq_status: str,
+    expected_status: str,
+) -> None:
     monkeypatch.setattr(
         jobs,
         "fetch_job",
-        lambda job_id: FakeJob("queued"),
+        lambda job_id: FakeJob(rq_status),
     )
 
     response = client.get("/api/jobs/test-job-id/result")
@@ -264,26 +276,7 @@ def test_check_job_result_returns_none_for_queued_job(client, monkeypatch) -> No
     body = response.json()
 
     assert body["job_id"] == "test-job-id"
-    assert body["status"] == "queued"
-    assert body["result"] is None
-    assert body["error"] is None
-
-
-def test_check_job_result_returns_none_for_running_job(client, monkeypatch) -> None:
-    monkeypatch.setattr(
-        jobs,
-        "fetch_job",
-        lambda job_id: FakeJob("started"),
-    )
-
-    response = client.get("/api/jobs/test-job-id/result")
-
-    assert response.status_code == 200
-
-    body = response.json()
-
-    assert body["job_id"] == "test-job-id"
-    assert body["status"] == "running"
+    assert body["status"] == expected_status
     assert body["result"] is None
     assert body["error"] is None
 
