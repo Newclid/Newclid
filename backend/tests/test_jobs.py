@@ -152,6 +152,24 @@ def test_create_job_returns_503_when_enqueue_fails(
 
 
 @pytest.mark.parametrize(
+    "payload",
+    [
+        {
+            "input_type": "invalid",
+            "problem_input": "some problem",
+        },
+        {
+            "input_type": "jgex",
+        },
+    ],
+)
+def test_create_job_rejects_invalid_request_payload(client, payload) -> None:
+    response = client.post("/api/jobs", json=payload)
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
     ("rq_status", "expected_status"),
     [
         ("queued", "queued"),
