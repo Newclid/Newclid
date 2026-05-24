@@ -37,14 +37,13 @@ export class BackendClient {
     }
   }
 
-  submitJob(problem: string, timeoutSeconds = 120): Promise<SubmitJobResponse> {
+  submitJob(problem: string): Promise<SubmitJobResponse> {
     return request<SubmitJobResponse>(`${this.baseUrl}/jobs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         input_type: 'jgex',
         problem_input: problem,
-        timeout_seconds: timeoutSeconds,
       }),
     });
   }

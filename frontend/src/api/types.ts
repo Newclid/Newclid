@@ -24,12 +24,25 @@ export interface JobStatusResponse {
   message: string | null;
 }
 
+export interface NewclidProofSections {
+  points: string[];
+  assumptions: string[];
+  numerical_checks: string[];
+  trivial_predicates: string[];
+  proven_goals: string[];
+  unproven_goals: string[];
+  proof_steps: string[];
+  appendix_ar: string[];
+}
+
 export interface JobResultPayload {
-  status: string;
-  return_code: number | null;
+  status: 'succeeded' | 'failed' | 'timed_out';
+  message: string;
+  proof_text: string | null;
+  proof_sections: NewclidProofSections | null;
+  run_info: Record<string, unknown> | null;
   stdout: string;
   stderr: string;
-  message: string;
 }
 
 export interface JobResultResponse {
