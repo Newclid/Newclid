@@ -15,6 +15,7 @@ dev = [
  "pytest-xdist>=3.7.0",
  "types-pyyaml>=6.0.12.20250516",
  "pytest-mock>=3.14.1",
+ "httpx>=0.28.1",
 ]
 
 
