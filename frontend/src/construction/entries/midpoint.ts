@@ -37,6 +37,9 @@ export const midpoint: CatalogEntry = {
       circles: [],
     };
   },
+  jgex: [
+    { def: 'midpoint', signature: ['m', 'a', 'b'], produces: ['m'] },
+  ],
   validate: (b) =>
     b.a !== undefined && b.b !== undefined && b.a === b.b
       ? 'Two distinct points required'
