@@ -6,6 +6,7 @@ workflow:
 
 stages:
   - test
+  - integration
 
 yuclid-compile-and-test-linux:
   stage: test
@@ -83,3 +84,90 @@ yuclid-compile-and-test-linux:
     reports:
       junit:
         - reports/*.xml
+
+backend-tests-linux:
+  stage: test
+  timeout: 10m
+  image: ghcr.io/astral-sh/uv:0.11.11-python3.12-trixie-slim
+
+  interruptible: true
+
+  rules:
+    - exists:
+        - backend/tests/unit/**/*
+      changes:
+        - backend/**/*
+        - pytest.ini
+        - uv.lock
+        - .gitlab-ci.yml
+    - when: never
+
+  before_script:
+    - mkdir -p reports
+
+  script:
+    - echo "Create backend test environment"
+    - uv venv
+    - uv pip install -e "backend[test]"
+
+    - echo "Run backend unit tests"
+    - .venv/bin/python -m pytest backend/tests/unit -q --junitxml=reports/pytest-backend.xml
+
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit:
+        - reports/pytest-backend.xml
+
+backend-integration-tests-linux:
+  stage: integration
+  timeout: 30m
+  image: ghcr.io/astral-sh/uv:0.11.11-python3.12-trixie-slim
+
+  interruptible: true
+
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - when: never
+
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+
+    CC: gcc-14
+    CXX: g++-14
+
+    CMAKE_GENERATOR: Ninja
+    CMAKE_BUILD_PARALLEL_LEVEL: "2"
+    CMAKE_ARGS: >-
+      -DUSE_STATIC_LINK=OFF
+      -DBUILD_DOC=OFF
+      -DCMAKE_BUILD_TYPE=Release
+
+  before_script:
+    - apt-get update -qq
+    - >
+      apt-get install -y --no-install-recommends
+      build-essential
+      cmake
+      ninja-build
+      libboost-all-dev
+      gcc-14
+      g++-14
+      ca-certificates
+    - rm -rf /var/lib/apt/lists/*
+    - mkdir -p reports
+
+  script:
+    - echo "Sync full environment and build Newclid/Yuclid"
+    - uv sync --frozen -v
+
+    - echo "Run backend integration tests"
+    - uv run pytest backend/tests/integration -q --junitxml=reports/pytest-backend-integration.xml
+
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit:
+        - reports/pytest-backend-integration.xml
