@@ -14,6 +14,12 @@ dependencies = [
     "uvicorn>=0.35.0",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=9.0.0",
+    "httpx>=0.28.0",
+]
+
 [project.scripts]
 newclid-backend = "newclid_backend:main"
 
