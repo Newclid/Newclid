@@ -29,6 +29,51 @@ function buildSection(title: string, items: string[]): HTMLElement {
   return section;
 }
 
+interface ParsedProofStep {
+  num: string;
+  premises: string[];
+  rule: string;
+  conclusion: string;
+}
+
+function parseProofStep(raw: string): ParsedProofStep | null {
+  const match = raw.match(/^(\d+)\.\s*\|\s*(.+?)\s*=\((.+?)\)>\s*(.+)$/);
+  if (!match) return null;
+  return {
+    num: match[1],
+    premises: match[2].split(',').map((p) => p.trim()),
+    rule: match[3].trim(),
+    conclusion: match[4].trim(),
+  };
+}
+
+function buildProofStepItem(raw: string): HTMLElement {
+  const parsed = parseProofStep(raw);
+  if (!parsed) {
+    return el('li', { class: 'proof-step-item' }, [raw]);
+  }
+
+  const card = el('li', { class: 'proof-step-card' });
+  card.appendChild(el('span', { class: 'proof-step-num' }, [parsed.num]));
+  for (const premise of parsed.premises) {
+    card.appendChild(el('span', { class: 'proof-step-premise' }, [premise]));
+  }
+  card.appendChild(el('span', { class: 'proof-step-rule' }, [parsed.rule]));
+  card.appendChild(el('span', { class: 'proof-step-conclusion' }, [parsed.conclusion]));
+  return card;
+}
+
+function buildProofStepsSection(title: string, steps: string[]): HTMLElement {
+  const section = el('div', { class: 'proof-section' });
+  section.appendChild(el('div', { class: 'proof-section-title' }, [title]));
+  const list = el('ol', { class: 'proof-steps-list' });
+  for (const step of steps) {
+    list.appendChild(buildProofStepItem(step));
+  }
+  section.appendChild(list);
+  return section;
+}
+
 export function createProofPanel(appStore: AppStore): ProofPanelHandle {
   const root = el('div', { class: 'proof-panel' });
 
@@ -68,7 +113,7 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
           root.appendChild(buildSection('Unproven Goals', unproven_goals));
         }
         if (proof_steps.length > 0) {
-          root.appendChild(buildSection('Proof Steps', proof_steps));
+          root.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
         }
       } else if (job.result.message) {
         root.appendChild(el('p', { class: 'proof-error-msg' }, [job.result.message]));
