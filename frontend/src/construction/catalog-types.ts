@@ -49,3 +49,26 @@ export interface CatalogEntry {
   // Optional guard. Returns null = OK, string = error message to console.warn.
   validate?: (b: Bindings, scene: Scene) => string | null;
 }
+
+
+/**
+ * One JGEX clause
+ */
+export interface JgexEmit {
+  def: string;
+  signature: string[]; // the positional argument list (slot names, in the exact order)
+  produces: string[]; // names which of those slots is defined as a new point
+  scalars?: string[]; // names which slots are bound to numbers
+}
+
+/**
+ * One JGEX block on a catalog entry. 
+ */
+export type JgexBlock =
+  | JgexEmit
+  | { combine: 'intersect'; clauses: JgexEmit[] }; // intersect joins multiple clauses with ',' to describe a point as an intersection
+
+export interface CatalogEntry {
+  // ...existing fields unchanged...
+  jgex?: JgexBlock[];
+}
