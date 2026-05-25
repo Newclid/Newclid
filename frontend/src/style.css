@@ -300,3 +300,52 @@ button {
   min-height: 0;
   margin: 0;
 }
+
+/* ---------- Job status banner ---------- */
+
+.job-status-banner {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 200;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 16px rgba(26, 24, 22, 0.16);
+  max-width: 420px;
+}
+
+.job-status-banner.is-visible {
+  display: flex;
+}
+
+.job-status-banner[data-variant="success"] {
+  background: #EAF3EA;
+  color: #1A4A1A;
+  border: 1px solid rgba(26, 74, 26, 0.18);
+}
+
+.job-status-banner[data-variant="error"] {
+  background: #F5EAEA;
+  color: #6B1A1A;
+  border: 1px solid rgba(107, 26, 26, 0.18);
+}
+
+.job-banner-text {
+  flex: 1;
+}
+
+.job-banner-close {
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.55;
+  padding: 0 2px;
+}
+
+.job-banner-close:hover {
+  opacity: 1;
+}
