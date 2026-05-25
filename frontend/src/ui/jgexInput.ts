@@ -67,6 +67,7 @@ export function createJgexInput(
       close();
     } catch (err) {
       console.log('[JGEX submit error]', err);
+      errorMsg.textContent = 'Server Error';
     } finally {
       submitBtn.disabled = false;
     }
