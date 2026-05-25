@@ -66,7 +66,7 @@ export function createJgexInput(
       await onSubmit(value);
       close();
     } catch (err) {
-      errorMsg.textContent = err instanceof Error ? err.message : String(err);
+      console.log('[JGEX submit error]', err);
     } finally {
       submitBtn.disabled = false;
     }
