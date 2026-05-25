@@ -4,6 +4,8 @@ import { svgEl, iconWrap } from './icon-helpers';
 import { el } from './dom';
 import { createJgexInput } from './jgexInput';
 import { CONSTRUCTION_CATALOG } from '../construction/catalog';
+import { AppStore } from '../store/appStore';
+import { createProofPanel } from './proofPanel';
 
 function cursorIcon(): SVGSVGElement {
   return iconWrap([
@@ -108,6 +110,7 @@ export interface ToolbarHandle {
 export function createToolbar(
   scene: Scene,
   onJgexSubmit?: (jgex: string) => Promise<void>,
+  appStore?: AppStore,
 ): ToolbarHandle {
   const aside = el('aside', { class: 'toolbar' });
 
@@ -160,12 +163,32 @@ export function createToolbar(
   clearBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Clear']));
   clearBtn.addEventListener('click', () => scene.clear());
 
+  // ---------- proof panel ----------
+  const proofPanel = appStore ? createProofPanel(appStore) : null;
+
+  const toolElements = [group, spacer, jgexBtn, clearBtn];
+
+  const syncProofView = () => {
+    if (!appStore) return;
+    const showProof = appStore.activeJobId !== null;
+    for (const node of toolElements) {
+      node.style.display = showProof ? 'none' : '';
+    }
+    if (proofPanel) {
+      proofPanel.root.style.display = showProof ? '' : 'none';
+    }
+  };
+
   // ---------- assemble ----------
   aside.appendChild(brand);
   aside.appendChild(group);
   aside.appendChild(spacer);
   aside.appendChild(jgexBtn);
   aside.appendChild(clearBtn);
+  if (proofPanel) {
+    proofPanel.root.style.display = 'none';
+    aside.appendChild(proofPanel.root);
+  }
 
   // ---------- subscription ----------
   const updateActive = () => {
@@ -176,12 +199,17 @@ export function createToolbar(
     }
   };
   updateActive();
-  const unsubscribe = scene.subscribe(updateActive);
+  const unsubscribeScene = scene.subscribe(updateActive);
+  const unsubscribeStore = appStore ? appStore.subscribe(syncProofView) : undefined;
+
+  syncProofView();
 
   return {
     root: aside,
     destroy() {
-      unsubscribe();
+      unsubscribeScene();
+      unsubscribeStore?.();
+      proofPanel?.destroy();
       jgex.destroy();
     },
   };

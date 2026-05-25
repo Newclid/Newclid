@@ -28,7 +28,7 @@ const onJgexSubmit = async (jgex: string) => {
   appStore.addJob(resp.job_id);
   jobPoller.start(resp.job_id);
 };
-const toolbar = createToolbar(scene, onJgexSubmit);
+const toolbar = createToolbar(scene, onJgexSubmit, appStore);
 root.appendChild(toolbar.root);
 attachToolbarResizer({ app: root, toolbar: toolbar.root });
 
@@ -49,16 +49,12 @@ appStore.subscribe(() => {
   if (job.result) {
     lastNotifiedKey = key;
     if (job.result.status === 'succeeded') {
-      console.log('[Newclid] Job succeeded', job.result);
-      console.log('[Newclid] Proof steps:', job.result.proof_sections?.proof_steps);
-      banner.showSuccess('Proof complete — see console for details');
+      banner.showSuccess('Proof complete');
     } else {
-      console.log('[Newclid] Job failed', job.result);
       banner.showError(job.result.message);
     }
   } else if (job.error) {
     lastNotifiedKey = key;
-    console.log('[Newclid] Job error', job.error);
     banner.showError(job.error);
   }
 });
