@@ -115,8 +115,31 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
         if (proof_steps.length > 0) {
           root.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
         }
-      } else if (job.result.message) {
-        root.appendChild(el('p', { class: 'proof-error-msg' }, [job.result.message]));
+      } else {
+        if (job.result.message) {
+          root.appendChild(el('p', { class: 'proof-error-msg' }, [job.result.message]));
+        }
+        if (job.result.proof_sections) {
+          const { assumptions, proven_goals, unproven_goals, proof_steps } =
+            job.result.proof_sections;
+          if (unproven_goals.length > 0) {
+            root.appendChild(buildSection('Unproven Goals', unproven_goals));
+          }
+          if (assumptions.length > 0) {
+            root.appendChild(buildSection('Assumptions', assumptions));
+          }
+          if (proven_goals.length > 0) {
+            root.appendChild(buildSection('Proved So Far', proven_goals));
+          }
+          if (proof_steps.length > 0) {
+            root.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
+          }
+        }
+        if (job.result.stderr) {
+          const pre = el('pre', { class: 'proof-stderr' });
+          pre.textContent = job.result.stderr;
+          root.appendChild(pre);
+        }
       }
     } else if (job.error) {
       root.appendChild(el('p', { class: 'proof-error-msg' }, [job.error]));

@@ -481,6 +481,21 @@ body.is-resizing {
   word-break: break-word;
 }
 
+.proof-stderr {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: #8B2828;
+  background: rgba(139, 40, 40, 0.04);
+  border: 1px solid rgba(139, 40, 40, 0.12);
+  border-radius: 4px;
+  padding: 8px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
 /* ---------- Job status banner ---------- */
 
 .job-status-banner {
