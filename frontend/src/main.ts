@@ -9,6 +9,7 @@ import { AppStore } from './store/appStore';
 import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
+import { attachToolbarResizer } from './ui/toolbarResizer';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -28,6 +29,8 @@ const onJgexSubmit = async (jgex: string) => {
   jobPoller.start(resp.job_id);
 };
 const toolbar = createToolbar(scene, onJgexSubmit);
+root.appendChild(toolbar.root);
+attachToolbarResizer({ app: root, toolbar: toolbar.root });
 
 const banner = createJobStatusBanner();
 document.body.appendChild(banner.root);
@@ -59,11 +62,10 @@ appStore.subscribe(() => {
     banner.showError(job.error);
   }
 });
-root.appendChild(toolbar.root);
 
 /**
-Canvas host fills the second grid column; viewport tracks its size so
-the SVG fills the cell rather than overlapping the toolbar.
+Canvas host fills the whole app and the toolbar overlays it; the viewport
+tracks the host size so the SVG matches the window.
 **/
 const canvasHost = document.createElement('div');
 canvasHost.className = 'canvas-host';
@@ -92,9 +94,15 @@ attachShortcuts(scene);
 
 scene.subscribe(requestRedraw);
 
-window.addEventListener('resize', () => {
+// Keep the viewport in step with the canvas, which fills the window. A
+// ResizeObserver catches window resizes; the toolbar overlays the canvas so
+// dragging it doesn't change the canvas size.
+const syncCanvasSize = () => {
   viewport.width = canvasHost.clientWidth;
   viewport.height = canvasHost.clientHeight;
   renderer.resize();
   requestRedraw();
-});
+};
+
+const canvasResizeObserver = new ResizeObserver(() => syncCanvasSize());
+canvasResizeObserver.observe(canvasHost);

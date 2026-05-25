@@ -70,18 +70,22 @@ button {
 /* ---------- App shell ---------- */
 
 #app {
-  display: grid;
-  grid-template-columns: 240px 1fr;
+  position: relative;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
 }
 
-/* The canvas host fills its grid cell and contains the SVG. */
+/* Suppress text selection and keep the resize cursor while dragging the handle. */
+body.is-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* The canvas host fills the whole app; the toolbar floats on top of it. */
 .canvas-host {
-  position: relative;
-  min-width: 0;
-  min-height: 0;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
 }
 
@@ -100,7 +104,31 @@ button {
   border-right: 1px solid var(--rule-mid);
   padding: 24px 16px 16px;
   gap: 4px;
-  min-height: 0;
+  /* Overlay the canvas so resizing covers the plane instead of shrinking it. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--toolbar-width, 240px);
+  height: 100%;
+  z-index: 10;
+}
+
+/* Drag strip sitting over the toolbar's right border. */
+.toolbar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 5;
+  touch-action: none;
+  transition: background 120ms ease;
+}
+
+.toolbar-resizer:hover,
+.toolbar-resizer.is-active {
+  background: var(--accent-soft);
 }
 
 .toolbar-brand {
@@ -178,6 +206,9 @@ button {
   font-size: 13px;
   font-weight: 400;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tool-btn-key {
