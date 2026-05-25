@@ -8,6 +8,7 @@ import { createToolbar } from './ui/toolbar';
 import { AppStore } from './store/appStore';
 import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
+import { createJobStatusBanner } from './ui/jobStatusBanner';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -27,6 +28,37 @@ const onJgexSubmit = async (jgex: string) => {
   jobPoller.start(resp.job_id);
 };
 const toolbar = createToolbar(scene, onJgexSubmit);
+
+const banner = createJobStatusBanner();
+document.body.appendChild(banner.root);
+
+// Track the last notified job result so we fire at most once per result.
+let lastNotifiedKey = '';
+appStore.subscribe(() => {
+  const { activeJobId } = appStore;
+  if (!activeJobId) return;
+  const job = appStore.jobs.get(activeJobId);
+  if (!job) return;
+
+  const key = `${activeJobId}:${job.result?.status ?? ''}:${job.error ?? ''}`;
+  if (key === lastNotifiedKey) return;
+
+  if (job.result) {
+    lastNotifiedKey = key;
+    if (job.result.status === 'succeeded') {
+      console.log('[Newclid] Job succeeded', job.result);
+      console.log('[Newclid] Proof steps:', job.result.proof_sections?.proof_steps);
+      banner.showSuccess('Proof complete — see console for details');
+    } else {
+      console.log('[Newclid] Job failed', job.result);
+      banner.showError(job.result.message);
+    }
+  } else if (job.error) {
+    lastNotifiedKey = key;
+    console.log('[Newclid] Job error', job.error);
+    banner.showError(job.error);
+  }
+});
 root.appendChild(toolbar.root);
 
 /**
