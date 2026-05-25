@@ -39,28 +39,3 @@ def fetch_job(job_id: str) -> Job | None:
         return Job.fetch(job_id, connection=redis_connection)
     except NoSuchJobError:
         return None
-
-
-def map_rq_status(status: str) -> str:
-    match status:
-        case "queued" | "deferred" | "scheduled":
-            return "queued"
-        case "started":
-            return "running"
-        case "finished":
-            return "succeeded"
-        case "failed":
-            return "failed"
-        case "stopped" | "canceled":
-            return "canceled"
-        case _:
-            return "failed"
-
-
-def get_job_status(job_id: str) -> str | None:
-    job = fetch_job(job_id)
-
-    if job is None:
-        return None
-
-    return map_rq_status(job.get_status())
