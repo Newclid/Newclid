@@ -7,6 +7,7 @@ import { Viewport } from '../geometry/viewport';
 import { screen } from '../geometry/coords';
 import { Scene } from '../scene/scene';
 import { getTool } from '../tools/registry';
+import type { AppStore } from '../store/appStore';
 
 export interface ToolDispatcherHandle {
   destroy(): void;
@@ -17,6 +18,7 @@ export function attachToolDispatcher(
   viewport: Viewport,
   scene: Scene,
   requestRedraw: () => void,
+  appStore?: AppStore,
 ): ToolDispatcherHandle {
   let spaceHeld = false;
 
@@ -50,14 +52,14 @@ export function attachToolDispatcher(
   };
 
   const onClick = (e: MouseEvent) => {
-    if (e.button !== 0 || spaceHeld) return;
+    if (e.button !== 0 || spaceHeld || appStore?.proofMode) return;
     const tool = getTool(scene.tool);
     if (!tool) return;
     tool.onClick(buildCtx(e));
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    if (spaceHeld) return;
+    if (spaceHeld || appStore?.proofMode) return;
     const tool = getTool(scene.tool);
     if (!tool) return;
     const previews = tool.onMove(buildCtx(e));
