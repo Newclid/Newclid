@@ -77,8 +77,15 @@ function buildProofStepsSection(title: string, steps: string[]): HTMLElement {
 export function createProofPanel(appStore: AppStore): ProofPanelHandle {
   const root = el('div', { class: 'proof-panel' });
 
+  const backBtn = el('button', { class: 'proof-back-btn', type: 'button' }, ['← Back to edit']);
+  backBtn.addEventListener('click', () => appStore.exitProofMode());
+  root.appendChild(backBtn);
+
+  const content = el('div', { class: 'proof-panel-content' });
+  root.appendChild(content);
+
   const update = () => {
-    root.innerHTML = '';
+    content.innerHTML = '';
 
     const { activeJobId } = appStore;
     if (!activeJobId) return;
@@ -97,52 +104,52 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
         statusLabel(job.status),
       ]),
     );
-    root.appendChild(statusRow);
+    content.appendChild(statusRow);
 
     if (job.result) {
       if (job.result.status === 'succeeded' && job.result.proof_sections) {
         const { assumptions, proven_goals, unproven_goals, proof_steps } =
           job.result.proof_sections;
         if (assumptions.length > 0) {
-          root.appendChild(buildSection('Assumptions', assumptions));
+          content.appendChild(buildSection('Assumptions', assumptions));
         }
         if (proven_goals.length > 0) {
-          root.appendChild(buildSection('Proven Goals', proven_goals));
+          content.appendChild(buildSection('Proven Goals', proven_goals));
         }
         if (unproven_goals.length > 0) {
-          root.appendChild(buildSection('Unproven Goals', unproven_goals));
+          content.appendChild(buildSection('Unproven Goals', unproven_goals));
         }
         if (proof_steps.length > 0) {
-          root.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
+          content.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
         }
       } else {
         if (job.result.message) {
-          root.appendChild(el('p', { class: 'proof-error-msg' }, [job.result.message]));
+          content.appendChild(el('p', { class: 'proof-error-msg' }, [job.result.message]));
         }
         if (job.result.proof_sections) {
           const { assumptions, proven_goals, unproven_goals, proof_steps } =
             job.result.proof_sections;
           if (unproven_goals.length > 0) {
-            root.appendChild(buildSection('Unproven Goals', unproven_goals));
+            content.appendChild(buildSection('Unproven Goals', unproven_goals));
           }
           if (assumptions.length > 0) {
-            root.appendChild(buildSection('Assumptions', assumptions));
+            content.appendChild(buildSection('Assumptions', assumptions));
           }
           if (proven_goals.length > 0) {
-            root.appendChild(buildSection('Proved So Far', proven_goals));
+            content.appendChild(buildSection('Proved So Far', proven_goals));
           }
           if (proof_steps.length > 0) {
-            root.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
+            content.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
           }
         }
         if (job.result.stderr) {
           const pre = el('pre', { class: 'proof-stderr' });
           pre.textContent = job.result.stderr;
-          root.appendChild(pre);
+          content.appendChild(pre);
         }
       }
     } else if (job.error) {
-      root.appendChild(el('p', { class: 'proof-error-msg' }, [job.error]));
+      content.appendChild(el('p', { class: 'proof-error-msg' }, [job.error]));
     }
   };
 

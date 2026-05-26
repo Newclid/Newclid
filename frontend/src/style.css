@@ -336,12 +336,24 @@ body.is-resizing {
 
 .proof-panel {
   flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}
+
+.proof-back-btn {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.proof-panel-content {
+  flex: 1;
   overflow-y: auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-top: 8px;
 }
 
 .proof-status-row {

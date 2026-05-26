@@ -85,8 +85,8 @@ const requestRedraw = () => {
 renderer.draw();
 
 attachPanZoom(renderer.svg, viewport, requestRedraw);
-attachToolDispatcher(renderer.svg, viewport, scene, requestRedraw);
-attachShortcuts(scene);
+attachToolDispatcher(renderer.svg, viewport, scene, requestRedraw, appStore);
+attachShortcuts(scene, appStore);
 
 scene.subscribe(requestRedraw);
 

@@ -3,6 +3,7 @@
 import { Scene } from '../scene/scene';
 import type { ToolName } from '../geometry/types-object';
 import { CONSTRUCTION_CATALOG } from '../construction/catalog';
+import type { AppStore } from '../store/appStore';
 
 const SHORTCUTS: Record<string, ToolName> = {
   v: 'select',
@@ -25,7 +26,7 @@ export interface ShortcutsHandle {
   destroy(): void;
 }
 
-export function attachShortcuts(scene: Scene): ShortcutsHandle {
+export function attachShortcuts(scene: Scene, appStore?: AppStore): ShortcutsHandle {
   const onKey = (e: KeyboardEvent) => {
     /**
     Skip form-control input and modified keys, matches the panZoom guard
@@ -34,6 +35,7 @@ export function attachShortcuts(scene: Scene): ShortcutsHandle {
     const t = e.target as HTMLElement | null;
     if (t?.tagName === 'INPUT' || t?.tagName === 'TEXTAREA') return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (appStore?.proofMode) return;
     const tool = SHORTCUTS[e.key.toLowerCase()];
     if (!tool) return;
     scene.setTool(tool);
