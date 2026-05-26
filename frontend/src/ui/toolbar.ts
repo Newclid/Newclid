@@ -166,6 +166,15 @@ export function createToolbar(
   // ---------- proof panel ----------
   const proofPanel = appStore ? createProofPanel(appStore) : null;
 
+  // Shown in the tools panel when a result exists but proof view is closed.
+  const viewProofBtn = el('button', {
+    type: 'button',
+    class: 'tool-btn',
+    title: 'View proof results',
+  }) as HTMLButtonElement;
+  viewProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['View proof']));
+  viewProofBtn.addEventListener('click', () => appStore?.enterProofMode());
+
   const toolElements = [group, spacer, jgexBtn, clearBtn];
 
   const syncProofView = () => {
@@ -177,10 +186,13 @@ export function createToolbar(
     if (proofPanel) {
       proofPanel.root.style.display = showProof ? '' : 'none';
     }
+    // Show "View proof" only when there's a result to return to.
+    viewProofBtn.style.display = !showProof && appStore.activeJobId !== null ? '' : 'none';
   };
 
   // ---------- assemble ----------
   aside.appendChild(brand);
+  aside.appendChild(viewProofBtn);
   aside.appendChild(group);
   aside.appendChild(spacer);
   aside.appendChild(jgexBtn);
