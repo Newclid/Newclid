@@ -16,6 +16,8 @@ export class AppStore {
   readonly jobs = new Map<string, JobRecord>();
   /** Job currently being tracked (submitted or polling). */
   activeJobId: string | null = null;
+  /** True while the proof panel is shown; disables canvas editing. */
+  proofMode = false;
 
   private readonly listeners = new Set<() => void>();
 
@@ -36,6 +38,17 @@ export class AppStore {
       submittedAt: Date.now(),
     });
     this.activeJobId = jobId;
+    this.proofMode = true;
+    this.emit();
+  }
+
+  enterProofMode(): void {
+    this.proofMode = true;
+    this.emit();
+  }
+
+  exitProofMode(): void {
+    this.proofMode = false;
     this.emit();
   }
 

@@ -77,8 +77,15 @@ function buildProofStepsSection(title: string, steps: string[]): HTMLElement {
 export function createProofPanel(appStore: AppStore): ProofPanelHandle {
   const root = el('div', { class: 'proof-panel' });
 
+  const backBtn = el('button', { class: 'proof-back-btn', type: 'button' }, ['← Back to edit']);
+  backBtn.addEventListener('click', () => appStore.exitProofMode());
+  root.appendChild(backBtn);
+
+  const content = el('div', { class: 'proof-panel-content' });
+  root.appendChild(content);
+
   const update = () => {
-    root.innerHTML = '';
+    content.innerHTML = '';
 
     const { activeJobId } = appStore;
     if (!activeJobId) return;

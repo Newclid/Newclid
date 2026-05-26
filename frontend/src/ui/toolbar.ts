@@ -170,7 +170,7 @@ export function createToolbar(
 
   const syncProofView = () => {
     if (!appStore) return;
-    const showProof = appStore.activeJobId !== null;
+    const showProof = appStore.proofMode;
     for (const node of toolElements) {
       node.style.display = showProof ? 'none' : '';
     }
