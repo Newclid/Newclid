@@ -3,6 +3,12 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
+class SketchPoint(BaseModel):
+    name: str
+    x: float
+    y: float
+
+
 class NewclidProofSections(BaseModel):
     points: list[str] = Field(default_factory=list)
     assumptions: list[str] = Field(default_factory=list)
@@ -26,6 +32,8 @@ class NewclidRunResult(BaseModel):
 
     # Solver statistics
     run_info: dict[str, Any] | None = None
+
+    sketch_points: list[SketchPoint] = Field(default_factory=list)
 
     stdout: str = ""
     stderr: str = ""
