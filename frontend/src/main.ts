@@ -10,6 +10,7 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
+import { parseJgexSegments } from './emit/jgexParser';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -89,6 +90,21 @@ attachToolDispatcher(renderer.svg, viewport, scene, requestRedraw, appStore);
 attachShortcuts(scene, appStore);
 
 scene.subscribe(requestRedraw);
+
+appStore.subscribe(() => {
+  const { proofMode, activeJobId } = appStore;
+  if (proofMode && activeJobId) {
+    const job = appStore.jobs.get(activeJobId);
+    const sketchPoints = job?.result?.sketch_points ?? [];
+    const problem = appStore.problem ?? '';
+    renderer.proofSketch = sketchPoints.length > 0
+      ? { points: sketchPoints, segments: parseJgexSegments(problem) }
+      : null;
+  } else {
+    renderer.proofSketch = null;
+  }
+  requestRedraw();
+});
 
 // Keep the viewport in step with the canvas, which fills the window. A
 // ResizeObserver catches window resizes; the toolbar overlays the canvas so
