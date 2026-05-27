@@ -3,6 +3,8 @@ import { world, type WorldPoint } from '../geometry/coords';
 import { Scene } from '../scene/scene';
 import { distance } from '../geometry/primitives';
 
+import type { SketchPoint } from '../api/types';
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const STYLE = {
@@ -24,8 +26,14 @@ const STYLE = {
   previewDash: '5 4',
 };
 
+export interface ProofSketch {
+  points: SketchPoint[];
+  segments: [string, string][];
+}
+
 export class Renderer {
   readonly svg: SVGSVGElement;
+  proofSketch: ProofSketch | null = null;
 
   constructor(private container: HTMLElement, private viewport: Viewport, private scene: Scene) {
     this.svg = document.createElementNS(SVG_NS, 'svg');
@@ -51,6 +59,9 @@ export class Renderer {
     this.drawConstructions();
     this.drawPoints();
     this.drawPreviews();
+    if (this.proofSketch && this.scene.objects.size === 0) {
+      this.drawProofSketch(this.proofSketch);
+    }
   }
 
   // -------- grid --------
@@ -173,6 +184,39 @@ export class Renderer {
     }
   }
 }
+
+  private drawProofSketch(sketch: ProofSketch): void {
+    const ptMap = new Map(sketch.points.map(p => [p.name, p]));
+
+    for (const [a, b] of sketch.segments) {
+      const pa = ptMap.get(a), pb = ptMap.get(b);
+      if (!pa || !pb) continue;
+      const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+      const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+      this.line(sa.x, sa.y, sb.x, sb.y, '#888', 1.5);
+    }
+
+    for (const p of sketch.points) {
+      const s = this.viewport.worldToScreen(world(p.x, p.y));
+
+      const dot = document.createElementNS(SVG_NS, 'circle');
+      dot.setAttribute('cx', String(s.x));
+      dot.setAttribute('cy', String(s.y));
+      dot.setAttribute('r', '4.25');
+      dot.setAttribute('fill', '#1a1a1a');
+      this.svg.appendChild(dot);
+
+      const label = document.createElementNS(SVG_NS, 'text');
+      label.setAttribute('x', String(s.x + 9));
+      label.setAttribute('y', String(s.y - 9));
+      label.setAttribute('font-family', 'system-ui, sans-serif');
+      label.setAttribute('font-size', '14');
+      label.setAttribute('font-style', 'italic');
+      label.setAttribute('fill', '#1a1a1a');
+      label.textContent = p.name;
+      this.svg.appendChild(label);
+    }
+  }
 
   private line(x1: number, y1: number, x2: number, y2: number, stroke: string, width: number): void {
     const el = document.createElementNS(SVG_NS, 'line');
