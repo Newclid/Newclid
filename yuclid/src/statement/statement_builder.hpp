@@ -7,7 +7,7 @@
 #include "statement/statement.hpp"
 
 namespace Yuclid {
-    [[nodiscard]] std::unique_ptr<Statement> build_statement_from_pattern(
+    [[nodiscard]] std::vector<std::unique_ptr<Statement>> build_statements_from_pattern(
         const RulePredicatePattern &pattern,
         const RuleMapping &mapping
     );
