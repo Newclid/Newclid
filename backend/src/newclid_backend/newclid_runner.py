@@ -54,7 +54,7 @@ def _build_proof_sections(proof_data: Any) -> NewclidProofSections:
 # This will be directly invoked by a worker
 def _build_sketch_points(proof_data: Any) -> list[SketchPoint]:
     return [
-        SketchPoint(name=str(p), x=float(p.num.x), y=float(p.num.y))
+        SketchPoint(name=p.name, x=float(p.num.x), y=float(p.num.y))
         for p in proof_data.points
     ]
 

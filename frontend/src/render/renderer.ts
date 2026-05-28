@@ -248,7 +248,7 @@ export class Renderer {
       label.setAttribute('font-size', '14');
       label.setAttribute('font-style', 'italic');
       label.setAttribute('fill', '#1a1a1a');
-      label.textContent = p.name;
+      label.textContent = displayPointName(p.name);
       this.svg.appendChild(label);
     }
   }
@@ -387,6 +387,20 @@ export class Renderer {
 }
 
 // -------- pure helpers, no SVG, no class --------
+
+function displayPointName(name: string): string {
+  if (!name) return name;
+  let out = name[0].toUpperCase();
+  for (let i = 1; i < name.length; i++) {
+    const c = name[i];
+    if (c >= '0' && c <= '9') {
+      out += String.fromCharCode(0x2080 + c.charCodeAt(0) - 0x30);
+    } else {
+      out += c;
+    }
+  }
+  return out;
+}
 
 function circumcenter(
   p1: { x: number; y: number },
