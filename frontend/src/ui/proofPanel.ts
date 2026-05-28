@@ -6,7 +6,7 @@ export interface ProofPanelHandle {
   destroy(): void;
 }
 
-function statusLabel(status: string): string {
+export function statusLabel(status: string): string {
   switch (status) {
     case 'queued': return 'Queued…';
     case 'running': return 'Running…';

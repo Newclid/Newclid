@@ -26,7 +26,7 @@ export const jobPoller = new JobPoller(backendClient, appStore);
 const onJgexSubmit = async (jgex: string) => {
   appStore.setProblem(jgex);
   const resp = await backendClient.submitJob(jgex);
-  appStore.addJob(resp.job_id);
+  appStore.addJob(resp.job_id, jgex);
   jobPoller.start(resp.job_id);
 };
 const toolbar = createToolbar(scene, onJgexSubmit, appStore);

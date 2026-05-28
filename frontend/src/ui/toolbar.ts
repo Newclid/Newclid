@@ -6,6 +6,9 @@ import { createJgexInput } from './jgexInput';
 import { CONSTRUCTION_CATALOG } from '../construction/catalog';
 import { AppStore } from '../store/appStore';
 import { createProofPanel } from './proofPanel';
+import { createProofsList } from './proofsList';
+import { createProofChoice } from './proofChoice';
+import { createProofByPointsPanel } from './proofByPointsPanel';
 
 function cursorIcon(): SVGSVGElement {
   return iconWrap([
@@ -142,16 +145,21 @@ export function createToolbar(
   // ---------- spacer ----------
   const spacer = el('div', { class: 'toolbar-spacer' });
 
-  // ---------- jgex line input ----------
+  // ---------- create proof ----------
+  // The JGEX input still exists; it is now reached through the choice modal.
   const jgex = createJgexInput(onJgexSubmit);
-  const jgexBtn = el('button', {
+  const proofChoice = createProofChoice({
+    onJgex: () => jgex.open(),
+    onPoints: () => appStore?.enterProofByPoints(),
+  });
+  const createProofBtn = el('button', {
     type: 'button',
     class: 'tool-btn',
-    title: 'Enter a JGEX line',
+    title: 'Create a proof',
   }) as HTMLButtonElement;
-  jgexBtn.appendChild(jgexIcon());
-  jgexBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['JGEX']));
-  jgexBtn.addEventListener('click', () => jgex.open());
+  createProofBtn.appendChild(jgexIcon());
+  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Create proof']));
+  createProofBtn.addEventListener('click', () => proofChoice.open());
 
   // ---------- clear ----------
   const clearBtn = el('button', {
@@ -166,6 +174,9 @@ export function createToolbar(
   // ---------- proof panel ----------
   const proofPanel = appStore ? createProofPanel(appStore) : null;
 
+  // ---------- proof-by-points plane (placeholder) ----------
+  const proofByPointsPanel = appStore ? createProofByPointsPanel(appStore) : null;
+
   // Shown in the tools panel when a result exists but proof view is closed.
   const viewProofBtn = el('button', {
     type: 'button',
@@ -175,31 +186,86 @@ export function createToolbar(
   viewProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['View proof']));
   viewProofBtn.addEventListener('click', () => appStore?.enterProofMode());
 
-  const toolElements = [group, spacer, jgexBtn, clearBtn];
+  // ---------- panel tab switch (Toolbar | Proofs) ----------
+  const panelTabSwitch = el('div', {
+    class: 'panel-tab-switch',
+    role: 'tablist',
+  });
+  const toolbarTabBtn = el('button', {
+    type: 'button',
+    class: 'panel-tab-btn',
+    role: 'tab',
+    'aria-selected': 'true',
+  }, ['Toolbar']) as HTMLButtonElement;
+  const proofsTabBtn = el('button', {
+    type: 'button',
+    class: 'panel-tab-btn',
+    role: 'tab',
+    'aria-selected': 'false',
+  }, ['Proofs']) as HTMLButtonElement;
+  panelTabSwitch.appendChild(toolbarTabBtn);
+  panelTabSwitch.appendChild(proofsTabBtn);
+  toolbarTabBtn.addEventListener('click', () => appStore?.setPanelTab('toolbar'));
+  proofsTabBtn.addEventListener('click', () => appStore?.setPanelTab('proofs'));
 
-  const syncProofView = () => {
+  // Proofs-tab history list.
+  const proofsContent = el('section', { class: 'panel-proofs' });
+  const proofsList = appStore ? createProofsList(appStore) : null;
+  if (proofsList) {
+    proofsContent.appendChild(proofsList.root);
+  }
+
+  const toolElements = [group, proofsContent, spacer, panelTabSwitch, createProofBtn, clearBtn];
+
+  const syncPanelState = () => {
     if (!appStore) return;
     const showProof = appStore.proofMode;
+    const showPoints = appStore.proofByPointsMode;
+    const inToolbarTab = appStore.panelTab === 'toolbar';
+
+    // Tool elements hide whenever either full-panel mode is active.
     for (const node of toolElements) {
-      node.style.display = showProof ? 'none' : '';
+      node.style.display = showProof || showPoints ? 'none' : '';
     }
     if (proofPanel) {
       proofPanel.root.style.display = showProof ? '' : 'none';
     }
-    // Show "View proof" only when there's a result to return to.
-    viewProofBtn.style.display = !showProof && appStore.activeJobId !== null ? '' : 'none';
+    if (proofByPointsPanel) {
+      proofByPointsPanel.root.style.display = showPoints ? '' : 'none';
+    }
+    // Show "View proof" only when editing and there's a result to return to.
+    viewProofBtn.style.display =
+      !showProof && !showPoints && appStore.activeJobId !== null ? '' : 'none';
+
+    if (!showProof && !showPoints) {
+      group.style.display = inToolbarTab ? '' : 'none';
+      proofsContent.style.display = inToolbarTab ? 'none' : '';
+      // In the Proofs tab the list fills the space, so the spacer is not needed.
+      spacer.style.display = inToolbarTab ? '' : 'none';
+    }
+
+    toolbarTabBtn.classList.toggle('is-active', inToolbarTab);
+    proofsTabBtn.classList.toggle('is-active', !inToolbarTab);
+    toolbarTabBtn.setAttribute('aria-selected', inToolbarTab ? 'true' : 'false');
+    proofsTabBtn.setAttribute('aria-selected', inToolbarTab ? 'false' : 'true');
   };
 
   // ---------- assemble ----------
   aside.appendChild(brand);
   aside.appendChild(viewProofBtn);
   aside.appendChild(group);
+  aside.appendChild(proofsContent);
   aside.appendChild(spacer);
-  aside.appendChild(jgexBtn);
+  aside.appendChild(panelTabSwitch);
+  aside.appendChild(createProofBtn);
   aside.appendChild(clearBtn);
   if (proofPanel) {
     proofPanel.root.style.display = 'none';
     aside.appendChild(proofPanel.root);
+  }
+  if (proofByPointsPanel) {
+    proofByPointsPanel.root.style.display = 'none';
+    aside.appendChild(proofByPointsPanel.root);
   }
 
   // ---------- subscription ----------
@@ -212,9 +278,9 @@ export function createToolbar(
   };
   updateActive();
   const unsubscribeScene = scene.subscribe(updateActive);
-  const unsubscribeStore = appStore ? appStore.subscribe(syncProofView) : undefined;
+  const unsubscribeStore = appStore ? appStore.subscribe(syncPanelState) : undefined;
 
-  syncProofView();
+  syncPanelState();
 
   return {
     root: aside,
@@ -222,6 +288,9 @@ export function createToolbar(
       unsubscribeScene();
       unsubscribeStore?.();
       proofPanel?.destroy();
+      proofByPointsPanel?.destroy();
+      proofsList?.destroy();
+      proofChoice.destroy();
       jgex.destroy();
     },
   };
