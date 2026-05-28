@@ -176,6 +176,13 @@ redrawBtn.addEventListener('click', async () => {
             renderer.proofSketch = { ...renderer.proofSketch, points: pts };
             viewport.fitPoints(pts);
             requestRedraw();
+            const { activeJobId } = appStore;
+            const activeJob = activeJobId ? appStore.jobs.get(activeJobId) : null;
+            if (activeJob?.result) {
+              appStore.updateJob(activeJobId!, {
+                result: { ...activeJob.result, sketch_points: raw },
+              });
+            }
           }
           resolve();
         } catch {
