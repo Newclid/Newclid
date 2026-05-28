@@ -2,8 +2,9 @@ import { Viewport } from '../geometry/viewport';
 import { screen } from '../geometry/coords';
 
 /**
-Bindings: Space + left-drag, wheel = zoom centered on cursor.
-Bare left-click stays unbound so construction tools can claim it.
+Bindings: right-click drag or middle-click drag = pan,
+ctrlKey+wheel (or pinch) = zoom centered on cursor,
+plain wheel (trackpad two-finger scroll) = pan.
 **/
 
 // Roughly a 5% scale step per wheel detent on common trackpads/mice.
@@ -32,7 +33,6 @@ export function attachPanZoom(
 
   // -------- pan state --------
 
-  let spaceHeld = false;
   let panning: { lastX: number; lastY: number; pointerId: number } | null = null;
 
   // clientX/Y → SVG-local coords.
@@ -41,30 +41,10 @@ export function attachPanZoom(
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
 
-  // -------- spacebar latch --------
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.code !== 'Space' || e.repeat) return;
-   
-    const t = e.target as HTMLElement | null;
-    if (t?.tagName === 'INPUT' || t?.tagName === 'TEXTAREA') return;
-    spaceHeld = true;
-    target.style.cursor = 'grab';
-    // Without preventDefault, space scrolls the page when body has focus.
-    e.preventDefault();
-  };
-
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.code !== 'Space') return;
-    spaceHeld = false;
-    // Don't reset cursor mid-drag; pointerup will handle it.
-    if (!panning) target.style.cursor = '';
-  };
-
-  // -------- pointer: pan while space is held --------
+  // -------- pointer: pan on right-click (button 2) or middle-click (button 1) --------
 
   const onPointerDown = (e: PointerEvent) => {
-    if (e.button !== 0 || !spaceHeld) return;
+    if (e.button !== 1 && e.button !== 2) return;
     const local = toLocal(e);
     panning = { lastX: local.x, lastY: local.y, pointerId: e.pointerId };
     /**
@@ -91,43 +71,54 @@ export function attachPanZoom(
     if (!panning || e.pointerId !== panning.pointerId) return;
     target.releasePointerCapture(panning.pointerId);
     panning = null;
-    target.style.cursor = spaceHeld ? 'grab' : '';
+    target.style.cursor = '';
   };
 
-  // -------- wheel: zoom centered on cursor --------
+  // -------- wheel: zoom (ctrlKey/pinch) or pan (two-finger scroll) --------
 
   /**
   passive: false so preventDefault works, without it the page scrolls
-  under us while the user is trying to zoom.
+  under us while the user is trying to zoom or pan.
   **/
   const onWheel = (e: WheelEvent) => {
     e.preventDefault();
-    const local = toLocal(e);
-    // exp() so equal-and-opposite deltas exactly cancel.
-    const factor = Math.exp(-e.deltaY * WHEEL_ZOOM_SENSITIVITY);
-    viewport.zoomAt(screen(local.x, local.y), factor);
+    if (e.ctrlKey) {
+      // Pinch-to-zoom on trackpad, or Ctrl+scroll on mouse.
+      // exp() so equal-and-opposite deltas exactly cancel.
+      const local = toLocal(e);
+      const factor = Math.exp(-e.deltaY * WHEEL_ZOOM_SENSITIVITY);
+      viewport.zoomAt(screen(local.x, local.y), factor);
+    } else {
+      // Trackpad two-finger scroll → pan.
+      // Negate so scrolling right moves the canvas left (natural scroll).
+      viewport.pan(-e.deltaX, -e.deltaY);
+    }
     requestRedraw();
+  };
+
+  // -------- suppress browser context menu on the canvas --------
+
+  const onContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
   };
 
   // -------- attach --------
 
-  window.addEventListener('keydown', onKeyDown);
-  window.addEventListener('keyup', onKeyUp);
   target.addEventListener('pointerdown', onPointerDown);
   target.addEventListener('pointermove', onPointerMove);
   target.addEventListener('pointerup', endPan);
   target.addEventListener('pointercancel', endPan);
   target.addEventListener('wheel', onWheel, { passive: false });
+  target.addEventListener('contextmenu', onContextMenu);
 
   return {
     destroy() {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
       target.removeEventListener('pointerdown', onPointerDown);
       target.removeEventListener('pointermove', onPointerMove);
       target.removeEventListener('pointerup', endPan);
       target.removeEventListener('pointercancel', endPan);
       target.removeEventListener('wheel', onWheel);
+      target.removeEventListener('contextmenu', onContextMenu);
     },
   };
 }

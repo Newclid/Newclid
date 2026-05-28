@@ -1,6 +1,7 @@
 /**
 Routes canvas pointer events to the active tool via getTool.
-Suppresses click/onMove while space is held so panZoom owns the gesture.
+Pan gestures (right/middle drag, wheel) are handled exclusively by
+panZoom.ts and do not reach this dispatcher.
 **/
 
 import { Viewport } from '../geometry/viewport';
@@ -20,19 +21,6 @@ export function attachToolDispatcher(
   requestRedraw: () => void,
   appStore?: AppStore,
 ): ToolDispatcherHandle {
-  let spaceHeld = false;
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.code !== 'Space' || e.repeat) return;
-    const t = e.target as HTMLElement | null;
-    if (t?.tagName === 'INPUT' || t?.tagName === 'TEXTAREA') return;
-    spaceHeld = true;
-  };
-
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.code === 'Space') spaceHeld = false;
-  };
-
   const toLocal = (e: { clientX: number; clientY: number }) => {
     const r = target.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -52,14 +40,14 @@ export function attachToolDispatcher(
   };
 
   const onClick = (e: MouseEvent) => {
-    if (e.button !== 0 || spaceHeld || appStore?.proofMode) return;
+    if (e.button !== 0 || appStore?.proofMode) return;
     const tool = getTool(scene.tool);
     if (!tool) return;
     tool.onClick(buildCtx(e));
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    if (spaceHeld || appStore?.proofMode) return;
+    if (appStore?.proofMode) return;
     const tool = getTool(scene.tool);
     if (!tool) return;
     const previews = tool.onMove(buildCtx(e));
@@ -77,16 +65,12 @@ export function attachToolDispatcher(
     requestRedraw();
   };
 
-  window.addEventListener('keydown', onKeyDown);
-  window.addEventListener('keyup', onKeyUp);
   target.addEventListener('click', onClick);
   target.addEventListener('pointermove', onPointerMove);
   target.addEventListener('pointerleave', onPointerLeave);
 
   return {
     destroy() {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
       target.removeEventListener('click', onClick);
       target.removeEventListener('pointermove', onPointerMove);
       target.removeEventListener('pointerleave', onPointerLeave);
