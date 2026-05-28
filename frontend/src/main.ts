@@ -115,7 +115,7 @@ appStore.subscribe(() => {
     const job = appStore.jobs.get(activeJobId);
     const raw = job?.result?.sketch_points ?? [];
     const sketchPoints = normalizeSketchPoints(raw);
-    const problem = appStore.problem ?? '';
+    const problem = job?.problem ?? '';
     renderer.proofSketch = sketchPoints.length > 0
       ? { points: sketchPoints, geometry: parseJgexGeometry(problem) }
       : null;
