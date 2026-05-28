@@ -11,6 +11,7 @@ import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
 import { parseJgexGeometry } from './emit/jgexParser';
+import { TERMINAL_STATUSES } from './api/types';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -139,3 +140,53 @@ const syncCanvasSize = () => {
 
 const canvasResizeObserver = new ResizeObserver(() => syncCanvasSize());
 canvasResizeObserver.observe(canvasHost);
+
+// --- Redraw button ---
+const redrawBtn = document.createElement('button');
+redrawBtn.className = 'redraw-btn';
+redrawBtn.textContent = 'Redraw';
+redrawBtn.hidden = true;
+canvasHost.appendChild(redrawBtn);
+
+appStore.subscribe(() => {
+  const { proofMode, activeJobId } = appStore;
+  if (!proofMode || !activeJobId) { redrawBtn.hidden = true; return; }
+  const job = appStore.jobs.get(activeJobId);
+  redrawBtn.hidden = !((job?.result?.sketch_points?.length ?? 0) > 0);
+});
+
+let redrawing = false;
+redrawBtn.addEventListener('click', async () => {
+  if (redrawing || !appStore.problem) return;
+  redrawing = true;
+  redrawBtn.disabled = true;
+  redrawBtn.textContent = 'Redrawing…';
+  try {
+    const { job_id } = await backendClient.submitJob(appStore.problem);
+    await new Promise<void>((resolve) => {
+      const iv = setInterval(async () => {
+        try {
+          const statusResp = await backendClient.getJobStatus(job_id);
+          if (!TERMINAL_STATUSES.has(statusResp.status)) return;
+          clearInterval(iv);
+          const resultResp = await backendClient.getJobResult(job_id);
+          const raw = resultResp.result?.sketch_points ?? [];
+          const pts = normalizeSketchPoints(raw);
+          if (pts.length > 0 && renderer.proofSketch) {
+            renderer.proofSketch = { ...renderer.proofSketch, points: pts };
+            viewport.fitPoints(pts);
+            requestRedraw();
+          }
+          resolve();
+        } catch {
+          clearInterval(iv);
+          resolve();
+        }
+      }, 2000);
+    });
+  } catch { /* network error: fail silently */ } finally {
+    redrawing = false;
+    redrawBtn.disabled = false;
+    redrawBtn.textContent = 'Redraw';
+  }
+});
