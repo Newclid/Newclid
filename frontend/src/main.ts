@@ -157,12 +157,16 @@ appStore.subscribe(() => {
 
 let redrawing = false;
 redrawBtn.addEventListener('click', async () => {
-  if (redrawing || !appStore.problem) return;
+  if (redrawing) return;
+  const targetJobId = appStore.activeJobId;
+  const targetJob = targetJobId ? appStore.jobs.get(targetJobId) : null;
+  if (!targetJobId || !targetJob?.problem) return;
+
   redrawing = true;
   redrawBtn.disabled = true;
   redrawBtn.textContent = 'Redrawing…';
   try {
-    const { job_id } = await backendClient.submitJob(appStore.problem);
+    const { job_id } = await backendClient.submitJob(targetJob.problem);
     await new Promise<void>((resolve) => {
       const iv = setInterval(async () => {
         try {
@@ -171,18 +175,11 @@ redrawBtn.addEventListener('click', async () => {
           clearInterval(iv);
           const resultResp = await backendClient.getJobResult(job_id);
           const raw = resultResp.result?.sketch_points ?? [];
-          const pts = normalizeSketchPoints(raw);
-          if (pts.length > 0 && renderer.proofSketch) {
-            renderer.proofSketch = { ...renderer.proofSketch, points: pts };
-            viewport.fitPoints(pts);
-            requestRedraw();
-            const { activeJobId } = appStore;
-            const activeJob = activeJobId ? appStore.jobs.get(activeJobId) : null;
-            if (activeJob?.result) {
-              appStore.updateJob(activeJobId!, {
-                result: { ...activeJob.result, sketch_points: raw },
-              });
-            }
+          const currentJob = appStore.jobs.get(targetJobId);
+          if (raw.length > 0 && currentJob?.result) {
+            appStore.updateJob(targetJobId, {
+              result: { ...currentJob.result, sketch_points: raw },
+            });
           }
           resolve();
         } catch {
