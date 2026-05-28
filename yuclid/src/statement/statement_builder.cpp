@@ -135,25 +135,36 @@ namespace {
     }
 
     template <typename ExpectedConstType>
-    ExpectedConstType mapped_constant(
+    ExpectedConstType parsed_constant(
         const RulePredicatePattern &pattern,
         std::size_t index
     ) {
         static_assert(
             std::is_same_v<ExpectedConstType, NNRat> || std::is_same_v<ExpectedConstType, Rat>,
-            "mapped_constant can only be used with NNRat or Rat!"
+            "parsed_constant can only be used with NNRat or Rat!"
         );
 
         const std::string &value_str = pattern.args.at(index);
-        std::istringstream stream(value_str);
-        ExpectedConstType val;
-        if (!(stream >> val)) {
+
+        try {
+            // Check if it's a fraction "a/b"
+            std::size_t slash_pos = value_str.find('/');
+            
+            if (slash_pos != std::string::npos) {
+                // std::stoll will also convert hexadecimals (0xffff and 0f0) to decimals
+                long long num = std::stoll(value_str.substr(0, slash_pos));
+                long long den = std::stoll(value_str.substr(slash_pos + 1));
+                return ExpectedConstType(num, den);
+            } else {
+                long long num = std::stoll(value_str);
+                return ExpectedConstType(num);
+            }
+        } catch (const std::exception&) {
             throw std::runtime_error(
                 std::format("Predicate '{}' expected a valid fraction or integer at index {}, but got '{}'",
                             pattern.name, index, value_str)
             );
         }
-        return val;
     }
 
     void build_coll_pattern(
@@ -366,7 +377,7 @@ namespace {
             statements.push_back(std::make_unique<RatioDistEquals>(
                 mapped_dist(pattern, mapping, 0, 1),
                 mapped_dist(pattern, mapping, 2, 3),
-                mapped_constant<NNRat>(pattern, 4)
+                parsed_constant<NNRat>(pattern, 4)
             ));
             return statements;
         }
@@ -377,7 +388,7 @@ namespace {
             statements.push_back(std::make_unique<RatioSquaredDist>(
                 mapped_squared_dist(pattern, mapping, 0, 1),
                 mapped_squared_dist(pattern, mapping, 2, 3),
-                mapped_constant<NNRat>(pattern, 4)
+                parsed_constant<NNRat>(pattern, 4)
             ));
             return statements;
         }
@@ -387,7 +398,7 @@ namespace {
 
             statements.push_back(std::make_unique<DistEq>(
                 mapped_dist(pattern, mapping, 0, 1),
-                mapped_constant<NNRat>(pattern, 2)
+                parsed_constant<NNRat>(pattern, 2)
             ));
             return statements;
         }
@@ -397,7 +408,7 @@ namespace {
 
             statements.push_back(std::make_unique<SquaredDistEq>(
                 mapped_squared_dist(pattern, mapping, 0, 1),
-                mapped_constant<NNRat>(pattern, 2)
+                parsed_constant<NNRat>(pattern, 2)
             ));
             return statements;
         }
@@ -408,7 +419,7 @@ namespace {
             statements.push_back(LineAngleEq(
                 mapped_slope_angle(pattern, mapping, 0, 1),
                 mapped_slope_angle(pattern, mapping, 2, 3),
-                mapped_constant<Rat>(pattern, 4)
+                parsed_constant<Rat>(pattern, 4)
             ).normalize());
             return statements;
         }
