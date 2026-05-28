@@ -185,7 +185,9 @@ class YuclidAdapter(DeductionProvider):
                         HESpecificRule.BY_CONSTRUCTION.value,
                     }:
                         continue
-                    deduction = he_deduction.to_cached_application()
+                    deduction = he_deduction.to_cached_application(
+                        id_to_yuclid_extended
+                    )
                     rule = id_to_yuclid_extended[he_deduction.newclid_rule]
                     self._precomputed_rule_deductions[rule].append(deduction)
                 case DeductionType.AR:
@@ -303,10 +305,16 @@ class HERuleApplication(BaseModel):
     assumptions: list[HEConstruction]
     assertions: list[HEConstruction]
 
-    def to_cached_application(self) -> CachedRuleDeduction:
+    def to_cached_application(
+        self, extended_rule_dict: dict[str, Rule] | None = None
+    ) -> CachedRuleDeduction:
         premises = tuple(assumption.to_newclid() for assumption in self.assumptions)
         conclusions = tuple(assertion.to_newclid() for assertion in self.assertions)
-        rule = ID_TO_YUCLID_RULE[self.newclid_rule]
+
+        lookup_dict = (
+            extended_rule_dict if extended_rule_dict is not None else ID_TO_YUCLID_RULE
+        )
+        rule = lookup_dict[self.newclid_rule]
 
         return CachedRuleDeduction(
             deduction_type=DeductionType.RULE,

@@ -19,7 +19,7 @@ from typing_extensions import Self
 
 from newclid.agent.agents_interface import DeductiveAgent
 from newclid.agent.ddarn import DDARN
-from newclid.all_rules import DEFAULT_RULES
+from newclid.all_rules import ALL_RULES, DEFAULT_RULES
 from newclid.animation import ProofAnimation
 from newclid.api_defaults import APIDefault
 from newclid.deductors.deductor_interface import Deductor
@@ -199,7 +199,8 @@ class GeometricSolverBuilder:
 
         self.api_default.callback(proof_state)
         if hasattr(self.api_default, "he_adapter"):
-            custom_rules = [r for r in self.rules if r not in DEFAULT_RULES]
+            # A rule is only considered custom if it doesnt exist in the complete standard library
+            custom_rules = [r for r in self.rules if r not in ALL_RULES]
             self.api_default.he_adapter.custom_rules = custom_rules
         return GeometricSolver(proof_state, self.rules, self.deductive_agent)
 

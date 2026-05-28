@@ -15,6 +15,9 @@ foreach(name
     #slope_angle
     #squared_dist
     rule_parser
+    generic_rule_matcher
+    statement_builder
+    custom_rule_integration_test
   )
   add_executable(test_${name} ${name}.cpp)
 
