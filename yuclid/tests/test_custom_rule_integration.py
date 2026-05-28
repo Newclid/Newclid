@@ -66,3 +66,9 @@ class TestYuclidCustomRuleIntegration:
 
         assert len(matches) > 0, "No matches were found for the custom rule."
         assert matches[0].rule.id == "custom_imo_cheat"
+
+        deductions_used = self.he_adapter.ordered_deductions_for_problem(problem_setup)
+        rule_ids_used = [deduction.rule.id for deduction in deductions_used]
+        assert "custom_imo_cheat" in rule_ids_used, (
+            "Rule hasn't been used in the proof."
+        )
