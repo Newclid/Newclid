@@ -41,6 +41,22 @@ export class Viewport {
   }
 
   
+  fitPoints(pts: { x: number; y: number }[], paddingRatio = 0.15): void {
+    if (pts.length === 0) return;
+    const xs = pts.map(p => p.x);
+    const ys = pts.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    this.center = world((minX + maxX) / 2, (minY + maxY) / 2);
+    const rangeX = maxX - minX, rangeY = maxY - minY;
+    if (rangeX < 1e-9 && rangeY < 1e-9) { this.scale = 200; return; }
+    const pad = 1 + 2 * paddingRatio;
+    this.scale = Math.min(
+      rangeX > 0 ? this.width / (rangeX * pad) : Infinity,
+      rangeY > 0 ? this.height / (rangeY * pad) : Infinity,
+    );
+  }
+
   // Zoom by `factor` keeping the world point under `anchor` pinned.
   zoomAt(anchor: ScreenPoint, factor: number): void {
     const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, this.scale * factor));

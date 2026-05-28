@@ -35,12 +35,19 @@ export interface NewclidProofSections {
   appendix_ar: string[];
 }
 
+export interface SketchPoint {
+  name: string;
+  x: number;
+  y: number;
+}
+
 export interface JobResultPayload {
   status: 'succeeded' | 'failed' | 'timed_out';
   message: string;
   proof_text: string | null;
   proof_sections: NewclidProofSections | null;
   run_info: Record<string, unknown> | null;
+  sketch_points: SketchPoint[];
   stdout: string;
   stderr: string;
 }

@@ -10,6 +10,7 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
+import { parseJgexGeometry } from './emit/jgexParser';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -89,6 +90,42 @@ attachToolDispatcher(renderer.svg, viewport, scene, requestRedraw, appStore);
 attachShortcuts(scene, appStore);
 
 scene.subscribe(requestRedraw);
+
+function normalizeSketchPoints(
+  pts: { name: string; x: number; y: number }[],
+): { name: string; x: number; y: number }[] {
+  if (pts.length === 0) return pts;
+  const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  const span = Math.max(maxX - minX, maxY - minY);
+  const scale = span > 1e-9 ? 4 / span : 1;
+  return pts.map(p => ({
+    name: p.name,
+    x: (p.x - cx) * scale + 3,
+    y: (p.y - cy) * scale + 3,
+  }));
+}
+
+appStore.subscribe(() => {
+  const { proofMode, activeJobId } = appStore;
+  if (proofMode && activeJobId) {
+    const job = appStore.jobs.get(activeJobId);
+    const raw = job?.result?.sketch_points ?? [];
+    const sketchPoints = normalizeSketchPoints(raw);
+    const problem = appStore.problem ?? '';
+    renderer.proofSketch = sketchPoints.length > 0
+      ? { points: sketchPoints, geometry: parseJgexGeometry(problem) }
+      : null;
+    if (renderer.proofSketch) {
+      viewport.fitPoints(renderer.proofSketch.points);
+    }
+  } else {
+    renderer.proofSketch = null;
+  }
+  requestRedraw();
+});
 
 // Keep the viewport in step with the canvas, which fills the window. A
 // ResizeObserver catches window resizes; the toolbar overlays the canvas so

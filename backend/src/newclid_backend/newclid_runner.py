@@ -7,7 +7,7 @@ from newclid.problem import predicate_to_construction
 from newclid.proof_data import proof_data_from_state
 from newclid.proof_writing import write_proof, write_proof_sections
 
-from newclid_backend.runner_models import NewclidProofSections, NewclidRunResult
+from newclid_backend.runner_models import NewclidProofSections, NewclidRunResult, SketchPoint
 from newclid_backend.settings import MAX_OUTPUT_CHARS
 
 
@@ -52,9 +52,16 @@ def _build_proof_sections(proof_data: Any) -> NewclidProofSections:
 
 # This function will not be called directly from our FastAPI backend logic
 # This will be directly invoked by a worker
+def _build_sketch_points(proof_data: Any) -> list[SketchPoint]:
+    return [
+        SketchPoint(name=p.name, x=float(p.num.x), y=float(p.num.y))
+        for p in proof_data.points
+    ]
+
+
 def run_newclid_from_jgex(jgex_problem: str) -> NewclidRunResult:
     try:
-        problem_setup = JGEXProblemBuilder().with_problem_from_txt(jgex_problem).build()
+        problem_setup = JGEXProblemBuilder(rng=42).with_problem_from_txt(jgex_problem).build()
         solver = GeometricSolverBuilder().build(problem_setup)
 
         success = solver.run()
@@ -63,6 +70,7 @@ def run_newclid_from_jgex(jgex_problem: str) -> NewclidRunResult:
         proof_text = _build_proof_text(proof_data)
         proof_sections = _build_proof_sections(proof_data)
         run_info = _to_run_info_dict(solver.run_infos)
+        sketch_points = _build_sketch_points(proof_data)
 
         if success:
             return NewclidRunResult(
@@ -71,6 +79,7 @@ def run_newclid_from_jgex(jgex_problem: str) -> NewclidRunResult:
                 proof_text=proof_text,
                 proof_sections=proof_sections,
                 run_info=run_info,
+                sketch_points=sketch_points,
             )
 
         return NewclidRunResult(
@@ -79,6 +88,7 @@ def run_newclid_from_jgex(jgex_problem: str) -> NewclidRunResult:
             proof_text=proof_text,
             proof_sections=proof_sections,
             run_info=run_info,
+            sketch_points=sketch_points,
         )
 
     except Exception as error:

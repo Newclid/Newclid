@@ -3,6 +3,9 @@ import { world, type WorldPoint } from '../geometry/coords';
 import { Scene } from '../scene/scene';
 import { distance } from '../geometry/primitives';
 
+import type { SketchPoint } from '../api/types';
+import type { SketchGeom } from '../emit/jgexParser';
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const STYLE = {
@@ -24,8 +27,14 @@ const STYLE = {
   previewDash: '5 4',
 };
 
+export interface ProofSketch {
+  points: SketchPoint[];
+  geometry: SketchGeom[];
+}
+
 export class Renderer {
   readonly svg: SVGSVGElement;
+  proofSketch: ProofSketch | null = null;
 
   constructor(private container: HTMLElement, private viewport: Viewport, private scene: Scene) {
     this.svg = document.createElementNS(SVG_NS, 'svg');
@@ -51,6 +60,9 @@ export class Renderer {
     this.drawConstructions();
     this.drawPoints();
     this.drawPreviews();
+    if (this.proofSketch && this.scene.objects.size === 0) {
+      this.drawProofSketch(this.proofSketch);
+    }
   }
 
   // -------- grid --------
@@ -173,6 +185,84 @@ export class Renderer {
     }
   }
 }
+
+  private drawProofSketch(sketch: ProofSketch): void {
+    const ptMap = new Map(sketch.points.map(p => [p.name, p]));
+
+    // Draw geometry first so points render on top.
+    for (const g of sketch.geometry) {
+      if (g.kind === 'segment') {
+        const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
+        if (!pa || !pb) continue;
+        const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+        const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+        this.line(sa.x, sa.y, sb.x, sb.y, '#888', 1.5);
+
+      } else if (g.kind === 'line') {
+        const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
+        if (!pa || !pb) continue;
+        const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+        const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+        const dx = sb.x - sa.x, dy = sb.y - sa.y;
+        const len = Math.hypot(dx, dy);
+        if (len < 1e-6) continue;
+        const ext = 10000;
+        const nx = (dx / len) * ext, ny = (dy / len) * ext;
+        this.line(sa.x - nx, sa.y - ny, sa.x + nx, sa.y + ny, '#888', 1.5);
+
+      } else if (g.kind === 'circle') {
+        const pc = ptMap.get(g.center), pt = ptMap.get(g.through);
+        if (!pc || !pt) continue;
+        const radiusWorld = Math.hypot(pt.x - pc.x, pt.y - pc.y);
+        const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
+        const r = radiusWorld * this.viewport.scale;
+        this.svgCircle(sc.x, sc.y, r);
+
+      } else if (g.kind === 'circumcircle') {
+        const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2), pc = ptMap.get(g.p3);
+        if (!pa || !pb || !pc) continue;
+        const cc = circumcenter(pa, pb, pc);
+        if (!cc) continue;
+        const radiusWorld = Math.hypot(pa.x - cc.x, pa.y - cc.y);
+        const sc = this.viewport.worldToScreen(world(cc.x, cc.y));
+        const r = radiusWorld * this.viewport.scale;
+        this.svgCircle(sc.x, sc.y, r);
+      }
+    }
+
+    // Draw points on top.
+    for (const p of sketch.points) {
+      const s = this.viewport.worldToScreen(world(p.x, p.y));
+
+      const dot = document.createElementNS(SVG_NS, 'circle');
+      dot.setAttribute('cx', String(s.x));
+      dot.setAttribute('cy', String(s.y));
+      dot.setAttribute('r', '4.25');
+      dot.setAttribute('fill', '#1a1a1a');
+      this.svg.appendChild(dot);
+
+      const label = document.createElementNS(SVG_NS, 'text');
+      label.setAttribute('x', String(s.x + 9));
+      label.setAttribute('y', String(s.y - 9));
+      label.setAttribute('font-family', 'system-ui, sans-serif');
+      label.setAttribute('font-size', '14');
+      label.setAttribute('font-style', 'italic');
+      label.setAttribute('fill', '#1a1a1a');
+      label.textContent = displayPointName(p.name);
+      this.svg.appendChild(label);
+    }
+  }
+
+  private svgCircle(cx: number, cy: number, r: number): void {
+    const el = document.createElementNS(SVG_NS, 'circle');
+    el.setAttribute('cx', String(cx));
+    el.setAttribute('cy', String(cy));
+    el.setAttribute('r', String(r));
+    el.setAttribute('fill', 'none');
+    el.setAttribute('stroke', '#888');
+    el.setAttribute('stroke-width', '1.5');
+    this.svg.appendChild(el);
+  }
 
   private line(x1: number, y1: number, x2: number, y2: number, stroke: string, width: number): void {
     const el = document.createElementNS(SVG_NS, 'line');
@@ -297,6 +387,36 @@ export class Renderer {
 }
 
 // -------- pure helpers, no SVG, no class --------
+
+function displayPointName(name: string): string {
+  if (!name) return name;
+  let out = name[0].toUpperCase();
+  for (let i = 1; i < name.length; i++) {
+    const c = name[i];
+    if (c >= '0' && c <= '9') {
+      out += String.fromCharCode(0x2080 + c.charCodeAt(0) - 0x30);
+    } else {
+      out += c;
+    }
+  }
+  return out;
+}
+
+function circumcenter(
+  p1: { x: number; y: number },
+  p2: { x: number; y: number },
+  p3: { x: number; y: number },
+): { x: number; y: number } | null {
+  const D = 2 * (p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y));
+  if (Math.abs(D) < 1e-10) return null;
+  const s1 = p1.x * p1.x + p1.y * p1.y;
+  const s2 = p2.x * p2.x + p2.y * p2.y;
+  const s3 = p3.x * p3.x + p3.y * p3.y;
+  return {
+    x: (s1 * (p2.y - p3.y) + s2 * (p3.y - p1.y) + s3 * (p1.y - p2.y)) / D,
+    y: (s1 * (p3.x - p2.x) + s2 * (p1.x - p3.x) + s3 * (p2.x - p1.x)) / D,
+  };
+}
 
 /**
 Pick a "nice" round number >= raw: 1, 2, 5, 10, 20, 50, 100, 0.1, ...
