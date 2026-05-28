@@ -219,4 +219,38 @@ BOOST_AUTO_TEST_CASE(new_rule_before_end_is_error) {
     );
 }
 
+BOOST_AUTO_TEST_CASE(rule_with_duplicate_adjacent_variable_is_error) {
+    std::istringstream input(R"(
+        rule bad A A B
+        require diff A B
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules = parse_rule_schemas(input);
+            (void)rules;
+        },
+        std::runtime_error
+    );
+}
+
+BOOST_AUTO_TEST_CASE(rule_with_duplicate_non_adjacent_variable_is_error) {
+    std::istringstream input(R"(
+        rule bad A B C A
+        require coll A B C
+        conclude coll C B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules = parse_rule_schemas(input);
+            (void)rules;
+        },
+        std::runtime_error
+    );
+}
+
 BOOST_AUTO_TEST_SUITE_END()
