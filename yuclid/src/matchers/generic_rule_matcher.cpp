@@ -13,11 +13,6 @@ using namespace std;
 
 namespace Yuclid {
     namespace {
-        // TODO: A guard is needed to prevent too many nested recursions. 
-        // A decision should be made about the stage of the process at which this guard should be implemented.
-        //
-        // If the guard is not implemented inside this function,
-        // be aware that its callers should mind the size of the rule_variables parameter
         void generate_distinct_mappings(
             const std::vector<std::string>& rule_variables, 
             size_t current_var_index, 
@@ -79,6 +74,13 @@ namespace Yuclid {
 
     std::vector<RuleMapping> GenericRuleMatcher::find_mappings_for_rule(const RuleSchema &schema) const {
         std::vector<RuleMapping> results;
+
+        if(schema.variables.size() > MAX_VARIABLES_FOR_NAIVE_MATCHING){
+            BOOST_LOG_TRIVIAL(warning)  << "Rule " << schema.id << " has too many variables ("
+                                        << schema.variables.size() << ") for naive matching. Skipping...";
+            return results;
+        }
+
         RuleMapping current_mapping;
         auto all_points_view = m_problem->all_points();
         const std::vector<Point> all_problem_points(all_points_view.begin(), all_points_view.end());
