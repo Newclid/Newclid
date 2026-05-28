@@ -19,5 +19,7 @@ namespace Yuclid {
             std::span<const RuleSchema> m_rules;
 
             [[nodiscard]] std::vector<RuleMapping> find_mappings_for_rule(const RuleSchema &schema) const;
+            //Safety limit for naive matching
+            static constexpr size_t MAX_VARIABLES_FOR_NAIVE_MATCHING = 6;
     };
 }
