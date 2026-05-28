@@ -253,4 +253,26 @@ BOOST_AUTO_TEST_CASE(rule_with_duplicate_non_adjacent_variable_is_error) {
     );
 }
 
+BOOST_AUTO_TEST_CASE(rule_with_unique_variables_is_valid) {
+    std::istringstream input(R"(
+        rule good A B C
+        require coll A B C
+        conclude coll C B A
+        end
+    )");
+
+    const auto rules = parse_rule_schemas(input);
+
+    BOOST_REQUIRE_EQUAL(rules.size(), 1);
+
+    const RuleSchema &rule = rules.at(0);
+
+    BOOST_CHECK_EQUAL(rule.id, "good");
+
+    BOOST_REQUIRE_EQUAL(rule.variables.size(), 3);
+    BOOST_CHECK_EQUAL(rule.variables.at(0), "A");
+    BOOST_CHECK_EQUAL(rule.variables.at(1), "B");
+    BOOST_CHECK_EQUAL(rule.variables.at(2), "C");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
