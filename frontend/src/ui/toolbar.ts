@@ -155,10 +155,10 @@ export function createToolbar(
   const createProofBtn = el('button', {
     type: 'button',
     class: 'tool-btn',
-    title: 'Create a proof',
+    title: 'Solve a new problem',
   }) as HTMLButtonElement;
   createProofBtn.appendChild(jgexIcon());
-  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Create proof']));
+  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Solve new problem']));
   createProofBtn.addEventListener('click', () => proofChoice.open());
 
   // ---------- clear ----------

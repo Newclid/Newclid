@@ -317,7 +317,11 @@ body.is-resizing {
   text-overflow: ellipsis;
 }
 
-/* ---------- Create-proof choice modal ---------- */
+/* ---------- Solve-new-problem choice modal ---------- */
+
+.proof-choice-dialog {
+  width: min(420px, 90vw);
+}
 
 .proof-choice-options {
   display: flex;
@@ -327,9 +331,81 @@ body.is-resizing {
 
 .proof-choice-btn {
   width: 100%;
-  text-align: center;
-  padding: 14px;
+  text-align: left;
+  padding: 16px 18px;
+  border-radius: 8px;
+  border: 1.5px solid var(--rule-mid);
+  background: var(--bg-canvas);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+
+.proof-choice-btn:hover {
+  background: var(--bg-elevated);
+  box-shadow: 0 2px 8px rgba(26, 24, 22, 0.08);
+}
+
+.proof-choice-btn-primary {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.proof-choice-btn-primary:hover {
+  background: rgba(42, 74, 127, 0.18);
+  border-color: var(--accent);
+}
+
+.proof-choice-btn-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.proof-choice-btn-title {
   font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.proof-choice-btn-subtitle {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.proof-choice-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  background: var(--rule-mid);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.proof-choice-badge-recommended {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.proof-choice-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.proof-choice-cancel {
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 6px 20px;
+}
+
+.proof-choice-cancel:hover {
+  color: var(--ink-strong);
+  background: var(--rule-soft);
 }
 
 /* ---------- JGEX input modal ---------- */
