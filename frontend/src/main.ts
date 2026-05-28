@@ -10,7 +10,7 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
-import { parseJgexSegments } from './emit/jgexParser';
+import { parseJgexGeometry } from './emit/jgexParser';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -98,8 +98,11 @@ appStore.subscribe(() => {
     const sketchPoints = job?.result?.sketch_points ?? [];
     const problem = appStore.problem ?? '';
     renderer.proofSketch = sketchPoints.length > 0
-      ? { points: sketchPoints, segments: parseJgexSegments(problem) }
+      ? { points: sketchPoints, geometry: parseJgexGeometry(problem) }
       : null;
+    if (renderer.proofSketch) {
+      viewport.fitPoints(renderer.proofSketch.points);
+    }
   } else {
     renderer.proofSketch = null;
   }
