@@ -33,6 +33,7 @@ const STYLE = {
 export interface ProofSketch {
   points: SketchPoint[];
   geometry: SketchGeom[];
+  extraGeometry?: SketchGeom[];
   markers?: ConstructionMarker[];
 }
 
@@ -207,20 +208,23 @@ export class Renderer {
   private drawProofSketch(sketch: ProofSketch): void {
     const ptMap = new Map(sketch.points.map(p => [p.name, p]));
     this.drawSketchGeometry(sketch.geometry, ptMap);
+    if (sketch.extraGeometry?.length) {
+      this.drawSketchGeometry(sketch.extraGeometry, ptMap, '4 3');
+    }
     if (sketch.markers?.length) {
       this.drawConstructionMarkers(sketch.markers, ptMap);
     }
     this.drawSketchPoints(sketch.points);
   }
 
-  private drawSketchGeometry(geometry: SketchGeom[], ptMap: Map<string, SketchPoint>): void {
+  private drawSketchGeometry(geometry: SketchGeom[], ptMap: Map<string, SketchPoint>, dash?: string): void {
     for (const g of geometry) {
       if (g.kind === 'segment') {
         const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
         if (!pa || !pb) continue;
         const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
         const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
-        this.line(sa.x, sa.y, sb.x, sb.y, '#888', 1.5);
+        this.line(sa.x, sa.y, sb.x, sb.y, '#888', 1.5, dash);
 
       } else if (g.kind === 'line') {
         const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
@@ -232,7 +236,7 @@ export class Renderer {
         if (len < 1e-6) continue;
         const ext = 10000;
         const nx = (dx / len) * ext, ny = (dy / len) * ext;
-        this.line(sa.x - nx, sa.y - ny, sa.x + nx, sa.y + ny, '#888', 1.5);
+        this.line(sa.x - nx, sa.y - ny, sa.x + nx, sa.y + ny, '#888', 1.5, dash);
 
       } else if (g.kind === 'circle') {
         const pc = ptMap.get(g.center), pt = ptMap.get(g.through);
@@ -240,7 +244,7 @@ export class Renderer {
         const radiusWorld = Math.hypot(pt.x - pc.x, pt.y - pc.y);
         const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
         const r = radiusWorld * this.viewport.scale;
-        this.svgCircle(sc.x, sc.y, r);
+        this.svgCircle(sc.x, sc.y, r, dash);
 
       } else if (g.kind === 'circumcircle') {
         const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2), pc = ptMap.get(g.p3);
@@ -250,7 +254,7 @@ export class Renderer {
         const radiusWorld = Math.hypot(pa.x - cc.x, pa.y - cc.y);
         const sc = this.viewport.worldToScreen(world(cc.x, cc.y));
         const r = radiusWorld * this.viewport.scale;
-        this.svgCircle(sc.x, sc.y, r);
+        this.svgCircle(sc.x, sc.y, r, dash);
       }
     }
   }
@@ -375,7 +379,7 @@ export class Renderer {
     this.line(l2x, l2y, tx, ty, color, 1.5);
   }
 
-  private svgCircle(cx: number, cy: number, r: number): void {
+  private svgCircle(cx: number, cy: number, r: number, dash?: string): void {
     const el = document.createElementNS(SVG_NS, 'circle');
     el.setAttribute('cx', String(cx));
     el.setAttribute('cy', String(cy));
@@ -383,10 +387,11 @@ export class Renderer {
     el.setAttribute('fill', 'none');
     el.setAttribute('stroke', '#888');
     el.setAttribute('stroke-width', '1.5');
+    if (dash) el.setAttribute('stroke-dasharray', dash);
     this.svg.appendChild(el);
   }
 
-  private line(x1: number, y1: number, x2: number, y2: number, stroke: string, width: number): void {
+  private line(x1: number, y1: number, x2: number, y2: number, stroke: string, width: number, dash?: string): void {
     const el = document.createElementNS(SVG_NS, 'line');
     el.setAttribute('x1', String(x1));
     el.setAttribute('y1', String(y1));
@@ -394,6 +399,7 @@ export class Renderer {
     el.setAttribute('y2', String(y2));
     el.setAttribute('stroke', stroke);
     el.setAttribute('stroke-width', String(width));
+    if (dash) el.setAttribute('stroke-dasharray', dash);
     this.svg.appendChild(el);
   }
 
