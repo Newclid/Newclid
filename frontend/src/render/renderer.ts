@@ -60,7 +60,7 @@ export class Renderer {
     this.drawConstructions();
     this.drawPoints();
     this.drawPreviews();
-    if (this.proofSketch && this.scene.objects.size === 0) {
+    if (this.proofSketch) {
       this.drawProofSketch(this.proofSketch);
     }
   }
