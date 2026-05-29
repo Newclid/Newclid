@@ -9,6 +9,11 @@ services:
       - "80:80"
     depends_on:
       - api
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api:
     image: newclid-backend:demo
@@ -25,12 +30,14 @@ services:
       --port 8000
     depends_on:
       - redis
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   worker:
     image: newclid-backend:demo
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
     restart: unless-stopped
     environment:
       REDIS_URL: redis://redis:6379/0
@@ -39,13 +46,27 @@ services:
       sh -c 'rq worker --url "$$REDIS_URL" newclid'
     depends_on:
       - redis
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
     volumes:
       - redis-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   redis-data:
