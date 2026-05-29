@@ -95,6 +95,29 @@ body.is-resizing {
   height: 100%;
 }
 
+.redraw-btn {
+  position: absolute;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--accent);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+.redraw-btn:hover {
+  background: #20396A;
+}
+
+.redraw-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* ---------- Toolbar ---------- */
 
 .toolbar {

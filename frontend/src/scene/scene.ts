@@ -16,6 +16,12 @@ type DistOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
 
 export type ToolState = { firstPoint?: ObjectId } | null;
 
+export interface SceneSnapshot {
+  objects: Map<ObjectId, GeoObject>;
+  nextId: number;
+  nextLabelCode: number;
+}
+
 // Frontend -> backend snapshot.
 export interface SerializedScene {
   points: { id: ObjectId; label: string; x: number; y: number }[];
@@ -138,6 +144,24 @@ export class Scene {
     this.previews = [];
     this.nextId = 1;
     this.nextLabelCode = 65;
+    this.emit();
+  }
+
+  snapshot(): SceneSnapshot {
+    return {
+      objects: new Map(this.objects),
+      nextId: this.nextId,
+      nextLabelCode: this.nextLabelCode,
+    };
+  }
+
+  restore(snap: SceneSnapshot): void {
+    this.objects.clear();
+    for (const [k, v] of snap.objects) this.objects.set(k, v);
+    this.nextId = snap.nextId;
+    this.nextLabelCode = snap.nextLabelCode;
+    this.toolState = null;
+    this.previews = [];
     this.emit();
   }
 

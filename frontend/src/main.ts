@@ -11,6 +11,8 @@ import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
 import { parseJgexGeometry } from './emit/jgexParser';
+import { TERMINAL_STATUSES } from './api/types';
+import type { SceneSnapshot } from './scene/scene';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -108,13 +110,28 @@ function normalizeSketchPoints(
   }));
 }
 
+let savedSceneSnapshot: SceneSnapshot | null = null;
+let wasInProofMode = false;
+
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
+
+  if (proofMode && !wasInProofMode) {
+    savedSceneSnapshot = scene.snapshot();
+    scene.clear();
+  } else if (!proofMode && wasInProofMode) {
+    if (savedSceneSnapshot) {
+      scene.restore(savedSceneSnapshot);
+      savedSceneSnapshot = null;
+    }
+  }
+  wasInProofMode = proofMode;
+
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
     const raw = job?.result?.sketch_points ?? [];
     const sketchPoints = normalizeSketchPoints(raw);
-    const problem = appStore.problem ?? '';
+    const problem = job?.problem ?? '';
     renderer.proofSketch = sketchPoints.length > 0
       ? { points: sketchPoints, geometry: parseJgexGeometry(problem) }
       : null;
@@ -139,3 +156,57 @@ const syncCanvasSize = () => {
 
 const canvasResizeObserver = new ResizeObserver(() => syncCanvasSize());
 canvasResizeObserver.observe(canvasHost);
+
+// --- Redraw button ---
+const redrawBtn = document.createElement('button');
+redrawBtn.className = 'redraw-btn';
+redrawBtn.textContent = 'Redraw';
+redrawBtn.hidden = true;
+canvasHost.appendChild(redrawBtn);
+
+appStore.subscribe(() => {
+  const { proofMode, activeJobId } = appStore;
+  if (!proofMode || !activeJobId) { redrawBtn.hidden = true; return; }
+  const job = appStore.jobs.get(activeJobId);
+  redrawBtn.hidden = !((job?.result?.sketch_points?.length ?? 0) > 0);
+});
+
+let redrawing = false;
+redrawBtn.addEventListener('click', async () => {
+  if (redrawing) return;
+  const targetJobId = appStore.activeJobId;
+  const targetJob = targetJobId ? appStore.jobs.get(targetJobId) : null;
+  if (!targetJobId || !targetJob?.problem) return;
+
+  redrawing = true;
+  redrawBtn.disabled = true;
+  redrawBtn.textContent = 'Redrawing…';
+  try {
+    const { job_id } = await backendClient.submitJob(targetJob.problem);
+    await new Promise<void>((resolve) => {
+      const iv = setInterval(async () => {
+        try {
+          const statusResp = await backendClient.getJobStatus(job_id);
+          if (!TERMINAL_STATUSES.has(statusResp.status)) return;
+          clearInterval(iv);
+          const resultResp = await backendClient.getJobResult(job_id);
+          const raw = resultResp.result?.sketch_points ?? [];
+          const currentJob = appStore.jobs.get(targetJobId);
+          if (raw.length > 0 && currentJob?.result) {
+            appStore.updateJob(targetJobId, {
+              result: { ...currentJob.result, sketch_points: raw },
+            });
+          }
+          resolve();
+        } catch {
+          clearInterval(iv);
+          resolve();
+        }
+      }, 2000);
+    });
+  } catch { /* network error: fail silently */ } finally {
+    redrawing = false;
+    redrawBtn.disabled = false;
+    redrawBtn.textContent = 'Redraw';
+  }
+});

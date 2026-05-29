@@ -61,7 +61,7 @@ def _build_sketch_points(proof_data: Any) -> list[SketchPoint]:
 
 def run_newclid_from_jgex(jgex_problem: str) -> NewclidRunResult:
     try:
-        problem_setup = JGEXProblemBuilder(rng=42).with_problem_from_txt(jgex_problem).build()
+        problem_setup = JGEXProblemBuilder().with_problem_from_txt(jgex_problem).build()
         solver = GeometricSolverBuilder().build(problem_setup)
 
         success = solver.run()
