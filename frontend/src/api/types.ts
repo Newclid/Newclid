@@ -33,6 +33,7 @@ export interface NewclidProofSections {
   unproven_goals: string[];
   proof_steps: string[];
   appendix_ar: string[];
+  construction_signatures: string[];
 }
 
 export interface SketchPoint {

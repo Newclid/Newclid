@@ -1,3 +1,15 @@
+export interface ConstructionMarker {
+  kind: string;
+  args: string[];
+}
+
+export function parseConstructionSignature(sig: string): ConstructionMarker | null {
+  const parts = sig.trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return null;
+  const [kind, ...args] = parts;
+  return { kind, args };
+}
+
 export type SketchGeom =
   | { kind: 'segment';      p1: string; p2: string }
   | { kind: 'line';         p1: string; p2: string }
