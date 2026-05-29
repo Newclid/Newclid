@@ -134,21 +134,23 @@ appStore.subscribe(() => {
     const sketchPoints = normalizeSketchPoints(raw);
     const problem = job?.problem ?? '';
     const sections = job?.result?.proof_sections;
-    const markerSigs = sections?.construction_signatures ?? [];
-    const markers = markerSigs
-      .map(parseConstructionSignature)
-      .filter((m): m is ConstructionMarker => m !== null);
-    const allSigs = [
+    const markers = [
       ...(sections?.construction_signatures ?? []),
       ...(sections?.step_signatures ?? []),
+      ...(sections?.goal_signatures ?? []),
+    ]
+      .map(parseConstructionSignature)
+      .filter((m): m is ConstructionMarker => m !== null);
+    const geometry = [
+      ...parseJgexGeometry(problem),
+      ...geomFromSignatures(sections?.construction_signatures ?? []),
     ];
-    const predicateGeom = geomFromSignatures(allSigs);
+    const extraGeometry = geomFromSignatures([
+      ...(sections?.step_signatures ?? []),
+      ...(sections?.goal_signatures ?? []),
+    ]);
     renderer.proofSketch = sketchPoints.length > 0
-      ? {
-          points: sketchPoints,
-          geometry: [...parseJgexGeometry(problem), ...predicateGeom],
-          markers,
-        }
+      ? { points: sketchPoints, geometry, extraGeometry, markers }
       : null;
     if (renderer.proofSketch) {
       viewport.fitPoints(renderer.proofSketch.points);
