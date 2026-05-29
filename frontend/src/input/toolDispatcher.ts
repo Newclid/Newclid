@@ -8,6 +8,7 @@ import { Viewport } from '../geometry/viewport';
 import { screen } from '../geometry/coords';
 import { Scene } from '../scene/scene';
 import { getTool } from '../tools/registry';
+import { pickNearestPoint } from '../geometry/hitTest';
 import type { AppStore } from '../store/appStore';
 
 export interface ToolDispatcherHandle {
@@ -41,6 +42,11 @@ export function attachToolDispatcher(
 
   const onClick = (e: MouseEvent) => {
     if (e.button !== 0 || appStore?.proofMode) return;
+    if (appStore?.proofByPointsMode) {
+      const ctx = buildCtx(e);
+      appStore.goalPickCallback?.(ctx.world.x, ctx.world.y, ctx.scale);
+      return;
+    }
     const tool = getTool(scene.tool);
     if (!tool) return;
     tool.onClick(buildCtx(e));
@@ -48,6 +54,13 @@ export function attachToolDispatcher(
 
   const onPointerMove = (e: PointerEvent) => {
     if (appStore?.proofMode) return;
+    if (appStore?.proofByPointsMode) {
+      const ctx = buildCtx(e);
+      const nearest = pickNearestPoint(scene.objects, ctx.world, { tolerancePx: 12, scale: ctx.scale });
+      scene.setPreviews(nearest ? [{ kind: 'highlightPoint', pos: { x: nearest.x, y: nearest.y } }] : []);
+      requestRedraw();
+      return;
+    }
     const tool = getTool(scene.tool);
     if (!tool) return;
     const previews = tool.onMove(buildCtx(e));

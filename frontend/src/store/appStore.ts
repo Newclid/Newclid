@@ -29,6 +29,8 @@ export class AppStore {
   proofByPointsMode = false;
   // Which section of the side panel is currently shown.
   panelTab: PanelTab = 'toolbar';
+  // Callback registered by proofByPointsPanel so canvas clicks route to the goal picker.
+  goalPickCallback: ((worldX: number, worldY: number, scale: number) => void) | null = null;
 
   private readonly listeners = new Set<() => void>();
 
@@ -75,7 +77,12 @@ export class AppStore {
 
   exitProofByPoints(): void {
     this.proofByPointsMode = false;
+    this.goalPickCallback = null;
     this.emit();
+  }
+
+  setGoalPickCallback(cb: ((worldX: number, worldY: number, scale: number) => void) | null): void {
+    this.goalPickCallback = cb;
   }
 
   setPanelTab(tab: PanelTab): void {

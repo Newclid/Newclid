@@ -103,7 +103,7 @@ export class Scene {
     this.emit();
   }
 
-  setPointColor(id: ObjectId, color: string): void {
+  setPointColor(id: ObjectId, color: string | undefined): void {
     const o = this.objects.get(id);
     if (!o || o.kind !== 'point') return;
     this.objects.set(id, { ...o, color });
