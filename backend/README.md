@@ -123,7 +123,16 @@ From the `backend/` directory:
 uv sync
 ```
 
-## Running the backend
+## Running the backend locally
+
+The backend requires two running processes:
+
+1. The FastAPI application, which receives API requests.
+2. An RQ worker, which processes queued solver jobs.
+
+The FastAPI server only creates and exposes jobs. It does not execute solver jobs itself. If the worker is not running, submitted jobs will remain queued and will not produce results.
+
+### Start the FastAPI server
 
 From the `backend/` directory:
 
@@ -154,3 +163,58 @@ FastAPI API docs are available at:
 ```text
 http://127.0.0.1:8000/docs
 ```
+
+### Start the RQ worker
+
+Open a second terminal and run the worker from the `backend/` directory.
+
+On Linux/macOS:
+
+```bash
+uv run rq worker newclid
+```
+
+On Windows:
+
+```bash
+uv run rq worker --worker-class rq.worker.SimpleWorker newclid
+```
+
+The queue name must match the configured value of `NEWCLID_QUEUE_NAME`. By default, this is:
+
+```text
+newclid
+```
+
+So with the default configuration, both the backend and worker use the same `newclid` queue.
+
+## Local startup checklist
+
+For a complete local setup, run these in separate terminals:
+
+1. Start Redis or Valkey:
+
+```bash
+docker run --rm -p 6379:6379 redis:7
+```
+
+2. Start the FastAPI backend from `backend/`:
+
+```bash
+uv run uvicorn newclid_backend.main:app --reload
+```
+
+3. Start the RQ worker from `backend/`.
+
+Linux/macOS:
+
+```bash
+uv run rq worker newclid
+```
+
+Windows:
+
+```bash
+uv run rq worker --worker-class rq.worker.SimpleWorker newclid
+```
+
