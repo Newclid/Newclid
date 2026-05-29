@@ -208,14 +208,75 @@ export function createProofByPointsPanel(
     }
     content.appendChild(slotSection);
 
-    // JGEX preview + submit go here in commit 6.
+    // ---- JGEX preview ----
+    // buildGoalJgex returns a complete clause when all slots are filled, null otherwise.
+    const goalJgex = buildGoalJgex();
+    const setupJgex = emitScene(scene);
+
+    // Partial preview: unfilled slots shown as [A], [B], … so the user sees the shape.
+    const partialNames = slotAssignments.map((id, i) =>
+      id ? (nameTable.get(id) ?? '?') : `[${selectedPredicate!.slotLabels[i]}]`,
+    );
+    const previewText = (setupJgex ? setupJgex + ' ' : '') +
+      `? ${goalJgex ?? selectedPredicate.id + ' ' + partialNames.join(' ')}`;
+
+    const previewSection = el('div', { class: 'goal-preview-section' });
+    previewSection.appendChild(el('div', { class: 'proof-section-title' }, ['JGEX Preview:']));
+    const previewCode = el('pre', { class: 'goal-preview-code' });
+    previewCode.textContent = previewText;
+    previewSection.appendChild(previewCode);
+    content.appendChild(previewSection);
+
+    // ---- Submit button ----
+    const errorEl = el('p', { class: 'jgex-error' });
+    const submitBtn = el('button', {
+      type: 'button',
+      class: 'jgex-btn jgex-btn-accent goal-submit-btn',
+    }, ['Submit →']) as HTMLButtonElement;
+    submitBtn.disabled = goalJgex === null;
+
+    submitBtn.addEventListener('click', async () => {
+      const jgex = buildGoalJgex();
+      if (!jgex || !onSubmit) return;
+      const setup = emitScene(scene);
+      const full = (setup ? setup + ' ' : '') + `? ${jgex}`;
+      submitBtn.disabled = true;
+      errorEl.textContent = '';
+      // Clean up highlights before handing control back to proof mode.
+      clearHighlights();
+      appStore.setGoalPickCallback(null);
+      try {
+        await onSubmit(full);
+      } catch {
+        errorEl.textContent = 'Server error — check connection.';
+        submitBtn.disabled = false;
+      }
+    });
+
+    content.appendChild(errorEl);
+    content.appendChild(submitBtn);
   }
 
-  // Re-enter the mode fresh whenever the user opens this panel again.
+  // Converts slotAssignments → JGEX clause, or null if any slot is still empty.
+  function buildGoalJgex(): string | null {
+    if (!selectedPredicate || !scene) return null;
+    const nameTable = buildNameTable(scene);
+    const names: string[] = [];
+    for (const id of slotAssignments) {
+      if (id === null) return null;
+      const name = nameTable.get(id);
+      if (!name) return null;
+      names.push(name);
+    }
+    return selectedPredicate.buildJgex(names);
+  }
+
+  // Re-enter fresh on mode open; safety-clean highlights on any exit path.
   let wasPBPMode = false;
   const unsubscribe = appStore.subscribe(() => {
     const now = appStore.proofByPointsMode;
     if (now && !wasPBPMode) resetState();
+    if (!now && wasPBPMode) clearHighlights();  // no-op if already cleared
     wasPBPMode = now;
   });
 
