@@ -34,6 +34,7 @@ export interface NewclidProofSections {
   proof_steps: string[];
   appendix_ar: string[];
   construction_signatures: string[];
+  step_signatures: string[];
 }
 
 export interface SketchPoint {
