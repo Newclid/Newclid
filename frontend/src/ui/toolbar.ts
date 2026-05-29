@@ -174,8 +174,10 @@ export function createToolbar(
   // ---------- proof panel ----------
   const proofPanel = appStore ? createProofPanel(appStore) : null;
 
-  // ---------- proof-by-points plane (placeholder) ----------
-  const proofByPointsPanel = appStore ? createProofByPointsPanel(appStore) : null;
+  // ---------- proof-by-points plane ----------
+  const proofByPointsPanel = appStore
+    ? createProofByPointsPanel(appStore, scene, onJgexSubmit)
+    : null;
 
   // ---------- panel tab switch (Toolbar | Proofs) ----------
   const panelTabSwitch = el('div', {
