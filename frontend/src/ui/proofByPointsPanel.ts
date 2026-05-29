@@ -3,6 +3,8 @@ import { Scene } from '../scene/scene';
 import { el } from './dom';
 import { pickNearestPoint } from '../geometry/hitTest';
 import { world } from '../geometry/coords';
+import { buildNameTable } from '../emit/names';
+import { emitScene } from '../emit/jgex';
 import type { ObjectId } from '../geometry/types-object';
 
 // Describes one provable geometric relationship.
@@ -145,7 +147,68 @@ export function createProofByPointsPanel(
     chooserSection.appendChild(grid);
     content.appendChild(chooserSection);
 
-    // Slot list goes here in commit 5.
+    if (!selectedPredicate) return;
+
+    // Guard: if there are no points yet the user can't select anything.
+    if ([...scene.points()].length === 0) {
+      content.appendChild(
+        el('p', { class: 'goal-hint goal-hint-warn' }, ['Go back and add points to the canvas first.']),
+      );
+      return;
+    }
+
+    // ---- Slot list ----
+    // Shows one row per slot; rows are filled / next / waiting.
+    const nameTable = buildNameTable(scene);
+    const slotSection = el('div', { class: 'goal-slot-section' });
+    slotSection.appendChild(
+      el('div', { class: 'proof-section-title' }, [`Points — ${selectedPredicate.shorthand}`]),
+    );
+
+    const slotList = el('div', { class: 'goal-slot-list' });
+    for (let i = 0; i < selectedPredicate.slotLabels.length; i++) {
+      const assignedId = slotAssignments[i];
+      const isNext   = i === nextSlotIndex;
+      const isFilled = assignedId !== null;
+
+      const row = el('div', {
+        class: ['goal-slot-row', isNext ? 'is-next' : '', isFilled ? 'is-filled' : ''].filter(Boolean).join(' '),
+      });
+      row.appendChild(el('span', { class: 'goal-slot-label' }, [selectedPredicate.slotLabels[i]]));
+
+      if (isFilled) {
+        const obj = scene.objects.get(assignedId);
+        const displayLabel = obj?.kind === 'point' ? obj.label : assignedId;
+        row.appendChild(el('span', { class: 'goal-slot-value' }, [`${displayLabel} (${nameTable.get(assignedId) ?? '?'})`]));
+
+        // × clears this slot, restores the point color, rewinds nextSlotIndex.
+        const clearBtn = el('button', { type: 'button', class: 'goal-slot-clear', title: 'Remove' }, ['×']) as HTMLButtonElement;
+        clearBtn.addEventListener('click', () => {
+          if (originalColors.has(assignedId)) {
+            scene!.setPointColor(assignedId, originalColors.get(assignedId));
+            originalColors.delete(assignedId);
+          }
+          slotAssignments[i] = null;
+          if (i < nextSlotIndex) nextSlotIndex = i;
+          render();
+        });
+        row.appendChild(clearBtn);
+      } else {
+        row.appendChild(el('span', { class: `goal-slot-placeholder${isNext ? ' is-next' : ''}` },
+          [isNext ? '← click on canvas' : '—']));
+      }
+      slotList.appendChild(row);
+    }
+    slotSection.appendChild(slotList);
+
+    if (nextSlotIndex < selectedPredicate.slotLabels.length) {
+      slotSection.appendChild(
+        el('p', { class: 'goal-hint' }, [`Click point "${selectedPredicate.slotLabels[nextSlotIndex]}" on the canvas`]),
+      );
+    }
+    content.appendChild(slotSection);
+
+    // JGEX preview + submit go here in commit 6.
   }
 
   // Re-enter the mode fresh whenever the user opens this panel again.
