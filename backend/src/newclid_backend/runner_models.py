@@ -19,6 +19,7 @@ class NewclidProofSections(BaseModel):
     proof_steps: list[str] = Field(default_factory=list)
     appendix_ar: list[str] = Field(default_factory=list)
     construction_signatures: list[str] = Field(default_factory=list)
+    step_signatures: list[str] = Field(default_factory=list)
 
 
 class NewclidRunResult(BaseModel):

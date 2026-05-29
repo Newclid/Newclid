@@ -25,6 +25,7 @@ class ProofSections(BaseModel):
     proof_steps: list[str]
     appendix_ar: list[str]
     construction_signatures: list[str] = []
+    step_signatures: list[str] = []
 
 
 def write_proof(proof_data: ProofData) -> str:
@@ -126,6 +127,13 @@ def write_proof_sections(proof_data: ProofData) -> ProofSections:
         except Exception:
             pass
 
+    step_signatures: list[str] = []
+    for step in proof_data.proof_steps:
+        try:
+            step_signatures.append(repr(step.proven_predicate.predicate))
+        except Exception:
+            pass
+
     return ProofSections(
         points=point_lines,
         assumptions=assumption_lines,
@@ -136,6 +144,7 @@ def write_proof_sections(proof_data: ProofData) -> ProofSections:
         proof_steps=proof_lines,
         appendix_ar=appendix_ar_lines,
         construction_signatures=construction_signatures,
+        step_signatures=step_signatures,
     )
 
 
