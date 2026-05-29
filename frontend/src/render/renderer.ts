@@ -4,7 +4,7 @@ import { Scene } from '../scene/scene';
 import { distance } from '../geometry/primitives';
 
 import type { SketchPoint } from '../api/types';
-import type { SketchGeom } from '../emit/jgexParser';
+import type { ConstructionMarker, SketchGeom } from '../emit/jgexParser';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -25,11 +25,15 @@ const STYLE = {
   previewStroke: '#8C887F',
   previewStrokeWidth: 1.5,
   previewDash: '5 4',
+  // Construction markers on the proof sketch (midpoint ticks, right-angle squares, etc.).
+  markerColor: '#2266cc',
+  markerSize: 8,
 };
 
 export interface ProofSketch {
   points: SketchPoint[];
   geometry: SketchGeom[];
+  markers?: ConstructionMarker[];
 }
 
 export class Renderer {
@@ -202,9 +206,15 @@ export class Renderer {
 
   private drawProofSketch(sketch: ProofSketch): void {
     const ptMap = new Map(sketch.points.map(p => [p.name, p]));
+    this.drawSketchGeometry(sketch.geometry, ptMap);
+    if (sketch.markers?.length) {
+      this.drawConstructionMarkers(sketch.markers, ptMap);
+    }
+    this.drawSketchPoints(sketch.points);
+  }
 
-    // Draw geometry first so points render on top.
-    for (const g of sketch.geometry) {
+  private drawSketchGeometry(geometry: SketchGeom[], ptMap: Map<string, SketchPoint>): void {
+    for (const g of geometry) {
       if (g.kind === 'segment') {
         const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
         if (!pa || !pb) continue;
@@ -243,9 +253,10 @@ export class Renderer {
         this.svgCircle(sc.x, sc.y, r);
       }
     }
+  }
 
-    // Draw points on top.
-    for (const p of sketch.points) {
+  private drawSketchPoints(points: SketchPoint[]): void {
+    for (const p of points) {
       const s = this.viewport.worldToScreen(world(p.x, p.y));
 
       const dot = document.createElementNS(SVG_NS, 'circle');
@@ -265,6 +276,103 @@ export class Renderer {
       label.textContent = displayPointName(p.name);
       this.svg.appendChild(label);
     }
+  }
+
+  private drawConstructionMarkers(
+    markers: ConstructionMarker[],
+    ptMap: Map<string, SketchPoint>,
+  ): void {
+    for (const marker of markers) {
+      switch (marker.kind) {
+        case 'midp': {
+          const [m, a, b] = marker.args;
+          const pm = ptMap.get(m), pa = ptMap.get(a), pb = ptMap.get(b);
+          if (!pm || !pa || !pb) break;
+          this.drawTickMark(pm, pa, STYLE.markerColor, 6);
+          this.drawTickMark(pm, pb, STYLE.markerColor, 6);
+          break;
+        }
+        case 'perp': {
+          const [a, b, c, d] = marker.args;
+          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+          if (!pa || !pb || !pc || !pd) break;
+          const ix = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+          if (!ix) break;
+          const si = this.viewport.worldToScreen(world(ix.x, ix.y));
+          const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+          const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+          const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
+          const sd = this.viewport.worldToScreen(world(pd.x, pd.y));
+          const lenAB = Math.hypot(sb.x - sa.x, sb.y - sa.y);
+          const lenCD = Math.hypot(sd.x - sc.x, sd.y - sc.y);
+          if (lenAB < 1e-6 || lenCD < 1e-6) break;
+          const uABx = (sb.x - sa.x) / lenAB, uABy = (sb.y - sa.y) / lenAB;
+          const uCDx = (sd.x - sc.x) / lenCD, uCDy = (sd.y - sc.y) / lenCD;
+          const s = STYLE.markerSize;
+          const c1x = si.x + s * uABx, c1y = si.y + s * uABy;
+          const c2x = c1x + s * uCDx, c2y = c1y + s * uCDy;
+          const c3x = si.x + s * uCDx, c3y = si.y + s * uCDy;
+          this.line(c1x, c1y, c2x, c2y, STYLE.markerColor, 1.5);
+          this.line(c3x, c3y, c2x, c2y, STYLE.markerColor, 1.5);
+          break;
+        }
+        case 'cong': {
+          const [a, b, c, d] = marker.args;
+          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+          if (!pa || !pb || !pc || !pd) break;
+          this.drawTickMark(pa, pb, STYLE.markerColor, 6);
+          this.drawTickMark(pc, pd, STYLE.markerColor, 6);
+          break;
+        }
+        case 'para': {
+          const [a, b, c, d] = marker.args;
+          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+          if (!pa || !pb || !pc || !pd) break;
+          this.drawChevron(pa, pb, STYLE.markerColor);
+          this.drawChevron(pc, pd, STYLE.markerColor);
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+
+  private drawTickMark(
+    pa: { x: number; y: number },
+    pb: { x: number; y: number },
+    color: string,
+    halfLen: number,
+  ): void {
+    const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+    const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+    const mx = (sa.x + sb.x) / 2, my = (sa.y + sb.y) / 2;
+    const dx = sb.x - sa.x, dy = sb.y - sa.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 1e-6) return;
+    const px = -dy / len, py = dx / len;
+    this.line(mx - halfLen * px, my - halfLen * py, mx + halfLen * px, my + halfLen * py, color, 1.5);
+  }
+
+  private drawChevron(
+    pa: { x: number; y: number },
+    pb: { x: number; y: number },
+    color: string,
+  ): void {
+    const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+    const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+    const mx = (sa.x + sb.x) / 2, my = (sa.y + sb.y) / 2;
+    const dx = sb.x - sa.x, dy = sb.y - sa.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 1e-6) return;
+    const ux = dx / len, uy = dy / len;
+    const vx = -uy, vy = ux;
+    const arm = 6;
+    const tx = mx + arm * ux, ty = my + arm * uy;
+    const l1x = mx - arm * ux + arm * vx, l1y = my - arm * uy + arm * vy;
+    const l2x = mx - arm * ux - arm * vx, l2y = my - arm * uy - arm * vy;
+    this.line(l1x, l1y, tx, ty, color, 1.5);
+    this.line(l2x, l2y, tx, ty, color, 1.5);
   }
 
   private svgCircle(cx: number, cy: number, r: number): void {
@@ -458,4 +566,16 @@ function formatNumber(n: number): string {
   if (Math.abs(n) < 1e-9) return '0';
   // Show up to 3 decimal places, strip trailing zeros.
   return parseFloat(n.toFixed(3)).toString();
+}
+
+function lineIntersect(
+  ax: number, ay: number, bx: number, by: number,
+  cx: number, cy: number, dx: number, dy: number,
+): { x: number; y: number } | null {
+  const dxAB = bx - ax, dyAB = by - ay;
+  const dxCD = dx - cx, dyCD = dy - cy;
+  const denom = dxAB * dyCD - dyAB * dxCD;
+  if (Math.abs(denom) < 1e-9) return null;
+  const t = ((cx - ax) * dyCD - (cy - ay) * dxCD) / denom;
+  return { x: ax + t * dxAB, y: ay + t * dyAB };
 }
