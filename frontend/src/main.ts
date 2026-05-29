@@ -12,6 +12,7 @@ import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
 import { parseJgexGeometry } from './emit/jgexParser';
 import { TERMINAL_STATUSES } from './api/types';
+import type { SceneSnapshot } from './scene/scene';
 import './style.css';
 
 const root = document.getElementById('app');
@@ -109,8 +110,23 @@ function normalizeSketchPoints(
   }));
 }
 
+let savedSceneSnapshot: SceneSnapshot | null = null;
+let wasInProofMode = false;
+
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
+
+  if (proofMode && !wasInProofMode) {
+    savedSceneSnapshot = scene.snapshot();
+    scene.clear();
+  } else if (!proofMode && wasInProofMode) {
+    if (savedSceneSnapshot) {
+      scene.restore(savedSceneSnapshot);
+      savedSceneSnapshot = null;
+    }
+  }
+  wasInProofMode = proofMode;
+
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
     const raw = job?.result?.sketch_points ?? [];
