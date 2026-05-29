@@ -64,7 +64,35 @@ export function createProofByPointsPanel(
       content.appendChild(el('p', { class: 'proof-error-msg' }, ['Scene not available.']));
       return;
     }
-    // Predicate grid goes here in commit 3.
+
+    // ---- Predicate chooser grid ----
+    // Always visible so the user can switch their choice at any time.
+    const chooserSection = el('div', { class: 'goal-chooser-section' });
+    chooserSection.appendChild(
+      el('div', { class: 'proof-section-title' }, ['Choose what to prove:']),
+    );
+
+    const grid = el('div', { class: 'goal-pred-grid' });
+    for (const pred of GOAL_PREDICATES) {
+      const isActive = selectedPredicate?.id === pred.id;
+      const btn = el('button', {
+        type: 'button',
+        class: `goal-pred-btn${isActive ? ' is-active' : ''}`,
+        title: pred.shorthand,
+      }) as HTMLButtonElement;
+      btn.appendChild(el('span', { class: 'goal-pred-icon' }, [pred.icon]));
+      btn.appendChild(el('span', { class: 'goal-pred-label' }, [pred.label]));
+      btn.addEventListener('click', () => {
+        selectedPredicate = pred;
+        // Route canvas clicks to our pick handler now that slots are defined.
+        appStore.setGoalPickCallback(onCanvasPick);
+        render();
+      });
+      grid.appendChild(btn);
+    }
+    chooserSection.appendChild(grid);
+    content.appendChild(chooserSection);
+
     // Slot list goes here in commit 5.
   }
 
