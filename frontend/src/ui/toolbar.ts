@@ -155,10 +155,10 @@ export function createToolbar(
   const createProofBtn = el('button', {
     type: 'button',
     class: 'tool-btn',
-    title: 'Create a proof',
+    title: 'Solve a new problem',
   }) as HTMLButtonElement;
   createProofBtn.appendChild(jgexIcon());
-  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Create proof']));
+  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Solve new problem']));
   createProofBtn.addEventListener('click', () => proofChoice.open());
 
   // ---------- clear ----------
@@ -176,15 +176,6 @@ export function createToolbar(
 
   // ---------- proof-by-points plane (placeholder) ----------
   const proofByPointsPanel = appStore ? createProofByPointsPanel(appStore) : null;
-
-  // Shown in the tools panel when a result exists but proof view is closed.
-  const viewProofBtn = el('button', {
-    type: 'button',
-    class: 'tool-btn',
-    title: 'View proof results',
-  }) as HTMLButtonElement;
-  viewProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['View proof']));
-  viewProofBtn.addEventListener('click', () => appStore?.enterProofMode());
 
   // ---------- panel tab switch (Toolbar | Proofs) ----------
   const panelTabSwitch = el('div', {
@@ -233,10 +224,6 @@ export function createToolbar(
     if (proofByPointsPanel) {
       proofByPointsPanel.root.style.display = showPoints ? '' : 'none';
     }
-    // Show "View proof" only when editing and there's a result to return to.
-    viewProofBtn.style.display =
-      !showProof && !showPoints && appStore.activeJobId !== null ? '' : 'none';
-
     if (!showProof && !showPoints) {
       group.style.display = inToolbarTab ? '' : 'none';
       proofsContent.style.display = inToolbarTab ? 'none' : '';
@@ -252,8 +239,7 @@ export function createToolbar(
 
   // ---------- assemble ----------
   aside.appendChild(brand);
-  aside.appendChild(viewProofBtn);
-  aside.appendChild(group);
+aside.appendChild(group);
   aside.appendChild(proofsContent);
   aside.appendChild(spacer);
   aside.appendChild(panelTabSwitch);
