@@ -10,7 +10,7 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
-import { parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
+import { geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
 import type { ConstructionMarker } from './emit/jgexParser';
 import { TERMINAL_STATUSES } from './api/types';
 import type { SceneSnapshot } from './scene/scene';
@@ -133,12 +133,22 @@ appStore.subscribe(() => {
     const raw = job?.result?.sketch_points ?? [];
     const sketchPoints = normalizeSketchPoints(raw);
     const problem = job?.problem ?? '';
-    const sigs = job?.result?.proof_sections?.construction_signatures ?? [];
-    const markers = sigs
+    const sections = job?.result?.proof_sections;
+    const markerSigs = sections?.construction_signatures ?? [];
+    const markers = markerSigs
       .map(parseConstructionSignature)
       .filter((m): m is ConstructionMarker => m !== null);
+    const allSigs = [
+      ...(sections?.construction_signatures ?? []),
+      ...(sections?.step_signatures ?? []),
+    ];
+    const predicateGeom = geomFromSignatures(allSigs);
     renderer.proofSketch = sketchPoints.length > 0
-      ? { points: sketchPoints, geometry: parseJgexGeometry(problem), markers }
+      ? {
+          points: sketchPoints,
+          geometry: [...parseJgexGeometry(problem), ...predicateGeom],
+          markers,
+        }
       : null;
     if (renderer.proofSketch) {
       viewport.fitPoints(renderer.proofSketch.points);
