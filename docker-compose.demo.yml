@@ -1,0 +1,51 @@
+services:
+  web:
+    image: newclid-web:demo
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+  api:
+    image: newclid-backend:demo
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DEFAULT_JOB_TIMEOUT_SECONDS: "120"
+    command: >
+      uvicorn newclid_backend.main:app
+      --host 0.0.0.0
+      --port 8000
+    depends_on:
+      - redis
+
+  worker:
+    image: newclid-backend:demo
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DEFAULT_JOB_TIMEOUT_SECONDS: "120"
+    command: >
+      sh -c 'rq worker --url "$$REDIS_URL" newclid'
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
