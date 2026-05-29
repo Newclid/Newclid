@@ -10,7 +10,8 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
-import { parseJgexGeometry } from './emit/jgexParser';
+import { parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
+import type { ConstructionMarker } from './emit/jgexParser';
 import { TERMINAL_STATUSES } from './api/types';
 import type { SceneSnapshot } from './scene/scene';
 import './style.css';
@@ -132,8 +133,12 @@ appStore.subscribe(() => {
     const raw = job?.result?.sketch_points ?? [];
     const sketchPoints = normalizeSketchPoints(raw);
     const problem = job?.problem ?? '';
+    const sigs = job?.result?.proof_sections?.construction_signatures ?? [];
+    const markers = sigs
+      .map(parseConstructionSignature)
+      .filter((m): m is ConstructionMarker => m !== null);
     renderer.proofSketch = sketchPoints.length > 0
-      ? { points: sketchPoints, geometry: parseJgexGeometry(problem) }
+      ? { points: sketchPoints, geometry: parseJgexGeometry(problem), markers }
       : null;
     if (renderer.proofSketch) {
       viewport.fitPoints(renderer.proofSketch.points);
