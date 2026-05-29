@@ -705,6 +705,140 @@ body.is-resizing {
   max-height: 200px;
 }
 
+/* ---------- Goal picker (visual problem definition) ---------- */
+
+.goal-chooser-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goal-pred-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.goal-pred-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border-radius: 6px;
+  border: 1.5px solid var(--rule-mid);
+  background: var(--bg-canvas);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.goal-pred-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--ink-soft);
+}
+
+.goal-pred-btn.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.goal-pred-icon {
+  font-size: 17px;
+  line-height: 1;
+  color: var(--ink-strong);
+}
+
+.goal-pred-label {
+  font-size: 10.5px;
+  color: var(--ink-mid);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.goal-pred-btn.is-active .goal-pred-label { color: var(--accent); }
+
+.goal-slot-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.goal-slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.goal-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: rgba(26, 24, 22, 0.03);
+  border: 1px solid transparent;
+}
+
+.goal-slot-row.is-next   { border-color: var(--accent); background: var(--accent-soft); }
+.goal-slot-row.is-filled { background: rgba(26, 107, 26, 0.06); border-color: rgba(26, 107, 26, 0.22); }
+
+.goal-slot-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-strong);
+  width: 16px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.goal-slot-value {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink-strong);
+}
+
+.goal-slot-placeholder       { flex: 1; font-size: 11.5px; color: var(--ink-faint); font-style: italic; }
+.goal-slot-placeholder.is-next { color: var(--accent); }
+
+.goal-slot-clear {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--ink-soft);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+.goal-slot-clear:hover { color: #8B2828; background: rgba(139, 40, 40, 0.06); }
+
+.goal-hint { margin: 0; font-size: 11.5px; color: var(--accent); font-style: italic; }
+.goal-hint-warn { color: var(--ink-soft); font-style: normal; }
+
+.goal-preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.goal-preview-code {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-strong);
+  background: rgba(26, 24, 22, 0.04);
+  border: 1px solid var(--rule-soft);
+  border-radius: 4px;
+  padding: 7px 8px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 90px;
+  overflow-y: auto;
+}
+
+.goal-submit-btn { align-self: flex-end; margin-top: 2px; }
+
 /* ---------- Job status banner ---------- */
 
 .job-status-banner {
