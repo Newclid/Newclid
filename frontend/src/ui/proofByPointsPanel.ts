@@ -1,6 +1,9 @@
 import { AppStore } from '../store/appStore';
 import { Scene } from '../scene/scene';
 import { el } from './dom';
+import { pickNearestPoint } from '../geometry/hitTest';
+import { world } from '../geometry/coords';
+import type { ObjectId } from '../geometry/types-object';
 
 // Describes one provable geometric relationship.
 // slotLabels names the points the user must select (e.g. ['A','B','C','D'] for perp).
@@ -48,15 +51,61 @@ export function createProofByPointsPanel(
 
   // ---- Mutable state ----
   let selectedPredicate: GoalPredicate | null = null;
+  // One entry per slot; null = not yet filled.
+  let slotAssignments: (ObjectId | null)[] = [];
+  // Index of the slot we are currently waiting the user to click for.
+  let nextSlotIndex = 0;
+  // Saved colors so we can restore them when the user exits or changes predicate.
+  const originalColors = new Map<ObjectId, string | undefined>();
+
+  // ---- Highlight helpers ----
+
+  function highlightPoint(id: ObjectId): void {
+    if (!scene) return;
+    const obj = scene.objects.get(id);
+    if (!obj || obj.kind !== 'point') return;
+    if (!originalColors.has(id)) originalColors.set(id, obj.color);
+    scene.setPointColor(id, '#2A4A7F');  // accent blue
+  }
+
+  function clearHighlights(): void {
+    if (!scene) return;
+    for (const [id, color] of originalColors) scene.setPointColor(id, color);
+    originalColors.clear();
+  }
 
   function resetState(): void {
+    clearHighlights();
     selectedPredicate = null;
+    slotAssignments = [];
+    nextSlotIndex = 0;
     appStore.setGoalPickCallback(null);
     render();
   }
 
-  // Placeholder — filled out in commit 4 when slot logic is added.
-  function onCanvasPick(_worldX: number, _worldY: number, _scale: number): void { /* next commit */ }
+  // ---- Canvas pick callback ----
+  // Called by toolDispatcher whenever the user clicks in proofByPointsMode.
+
+  function onCanvasPick(worldX: number, worldY: number, scale: number): void {
+    if (!selectedPredicate || !scene) return;
+    if (nextSlotIndex >= selectedPredicate.slotLabels.length) return;
+
+    const nearest = pickNearestPoint(scene.objects, world(worldX, worldY), { tolerancePx: 12, scale });
+    if (!nearest) return;
+
+    // If the point already occupies another slot, vacate that slot first.
+    const existing = slotAssignments.indexOf(nearest.id);
+    if (existing !== -1 && existing !== nextSlotIndex) slotAssignments[existing] = null;
+
+    highlightPoint(nearest.id);
+    slotAssignments[nextSlotIndex] = nearest.id;
+
+    // Advance nextSlotIndex past any already-filled slots.
+    do { nextSlotIndex++; }
+    while (nextSlotIndex < slotAssignments.length && slotAssignments[nextSlotIndex] !== null);
+
+    render();
+  }
 
   function render(): void {
     content.innerHTML = '';
@@ -83,8 +132,11 @@ export function createProofByPointsPanel(
       btn.appendChild(el('span', { class: 'goal-pred-icon' }, [pred.icon]));
       btn.appendChild(el('span', { class: 'goal-pred-label' }, [pred.label]));
       btn.addEventListener('click', () => {
+        // Switching predicate resets any prior slot selections and highlights.
+        clearHighlights();
         selectedPredicate = pred;
-        // Route canvas clicks to our pick handler now that slots are defined.
+        slotAssignments = pred.slotLabels.map(() => null);
+        nextSlotIndex = 0;
         appStore.setGoalPickCallback(onCanvasPick);
         render();
       });
