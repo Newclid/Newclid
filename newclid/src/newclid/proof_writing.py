@@ -26,6 +26,7 @@ class ProofSections(BaseModel):
     appendix_ar: list[str]
     construction_signatures: list[str] = []
     step_signatures: list[str] = []
+    goal_signatures: list[str] = []
 
 
 def write_proof(proof_data: ProofData) -> str:
@@ -134,6 +135,13 @@ def write_proof_sections(proof_data: ProofData) -> ProofSections:
         except Exception:
             pass
 
+    goal_signatures: list[str] = []
+    for goal in proof_data.proven_goals:
+        try:
+            goal_signatures.append(repr(goal.predicate))
+        except Exception:
+            pass
+
     return ProofSections(
         points=point_lines,
         assumptions=assumption_lines,
@@ -145,6 +153,7 @@ def write_proof_sections(proof_data: ProofData) -> ProofSections:
         appendix_ar=appendix_ar_lines,
         construction_signatures=construction_signatures,
         step_signatures=step_signatures,
+        goal_signatures=goal_signatures,
     )
 
 
