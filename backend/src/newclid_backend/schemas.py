@@ -1,15 +1,6 @@
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
-from pydantic import BaseModel, Field, field_validator
-
-
-def _predicate_variables(predicate: str) -> set[str]:
-    tokens = predicate.split()
-
-    if len(tokens) < 2:
-        raise ValueError("Predicate must contain a name and at least one argument")
-
-    return {token for token in tokens[1:] if token and token[0].isalpha()}
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class CustomRuleRequest(BaseModel):
@@ -58,10 +49,22 @@ class CreateJobRequest(BaseModel):
         default="jgex", description="Input format of the submitted problem"
     )
     problem_input: str = Field(description="Problem definition and goal in JGEX format")
+    custom_rules: list[CustomRuleRequest] = Field(
+        default_factory=list, description="Optional custom theorems"
+    )
     timeout_seconds: int = Field(
         default=120,
         description="Timeout time after which the newclid process will be stopped",
     )
+
+    @model_validator(mode="after")
+    def validate_custom_rule_names(self) -> Self:
+        rule_names = [rule.name for rule in self.custom_rules]
+
+        if len(rule_names) != len(set(rule_names)):
+            raise ValueError("Custom rule names must be unique")
+
+        return self
 
 
 class CreateJobResponse(BaseModel):
