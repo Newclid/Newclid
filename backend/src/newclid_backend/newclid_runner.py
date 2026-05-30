@@ -53,16 +53,38 @@ def _build_proof_sections(proof_data: Any) -> NewclidProofSections:
     return NewclidProofSections.model_validate(proof_sections.model_dump())
 
 
-def _build_custom_rules(custom_rules: list[dict[str, Any]]) -> list[Rule]:
-    return [
-        Rule(
-            id=rule["name"],
-            description=rule.get("description") or rule["name"],
-            premises_txt=list(rule["premises"]),
-            conclusions_txt=list(rule["conclusions"]),
+def _as_str_tuple(value: Any, field_name: str) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        raise ValueError(f"Custom rule field '{field_name}' must be a list of strings")
+
+    if not all(isinstance(item, str) for item in value):
+        raise ValueError(f"Custom rule field '{field_name}' must contain only strings")
+
+    return tuple(value)
+
+
+def _build_custom_rules(custom_theorems: list[dict[str, Any]]) -> list[Rule]:
+    rules: list[Rule] = []
+
+    for rule in custom_theorems:
+        name = rule.get("name")
+        if not isinstance(name, str):
+            raise ValueError("Custom theorem field 'name' must be a string")
+
+        description = rule.get("description") or name
+        if not isinstance(description, str):
+            raise ValueError("Custom theorem field 'description' must be a string")
+
+        rules.append(
+            Rule(
+                id=name,
+                description=description,
+                premises_txt=_as_str_tuple(rule.get("premises"), "premises"),
+                conclusions_txt=_as_str_tuple(rule.get("conclusions"), "conclusions"),
+            )
         )
-        for rule in custom_rules
-    ]
+
+    return rules
 
 
 # This function will not be called directly from our FastAPI backend logic
@@ -75,14 +97,14 @@ def _build_sketch_points(proof_data: Any) -> list[SketchPoint]:
 
 
 def run_newclid_from_jgex(
-    jgex_problem: str, custom_rules: list[dict[str, Any]] | None = None
+    jgex_problem: str, custom_theorems: list[dict[str, Any]] | None = None
 ) -> NewclidRunResult:
     try:
         problem_setup = JGEXProblemBuilder().with_problem_from_txt(jgex_problem).build()
         solver_builder = GeometricSolverBuilder()
 
-        if custom_rules:
-            solver_builder.with_additional_rules(_build_custom_rules(custom_rules))
+        if custom_theorems:
+            solver_builder.with_additional_rules(_build_custom_rules(custom_theorems))
 
         solver = solver_builder.build(problem_setup)
 
