@@ -37,6 +37,10 @@ def _successful_runner_result() -> dict[str, Any]:
             "success": True,
             "steps": 1,
         },
+        "sketch_points": [
+            {"name": "A", "x": 0.0, "y": 0.0},
+            {"name": "B", "x": 1.0, "y": 0.0},
+        ],
         "stdout": "",
         "stderr": "",
     }
@@ -49,6 +53,7 @@ def _failed_runner_result() -> dict[str, Any]:
         "proof_text": None,
         "proof_sections": None,
         "run_info": None,
+        "sketch_points": [],
         "stdout": "",
         "stderr": "Traceback...",
     }
@@ -92,7 +97,7 @@ def test_create_job_enqueues_newclid_job(
     assert isinstance(body["job_id"], str)
 
     assert captured["func"] is run_newclid_job
-    assert captured["args"] == (valid_jgex_problem,)
+    assert captured["args"] == (valid_jgex_problem, [])
     assert captured["job_id"] == body["job_id"]
     assert captured["timeout_seconds"] == 120
     assert captured["kwargs"] == {}
@@ -408,3 +413,56 @@ def test_check_job_result_returns_404_for_missing_job(client, monkeypatch) -> No
     response = client.get("/api/jobs/missing-job-id/result")
 
     assert response.status_code == 404
+
+
+def test_create_job_enqueues_custom_theorems(
+    client,
+    monkeypatch,
+    valid_jgex_problem: str,
+) -> None:
+    captured: dict[str, Any] = {}
+
+    def fake_enqueue_job(
+        func,
+        *args,
+        job_id=None,
+        timeout_seconds=120,
+        **kwargs,
+    ):
+        captured["func"] = func
+        captured["args"] = args
+        captured["job_id"] = job_id
+        captured["timeout_seconds"] = timeout_seconds
+        captured["kwargs"] = kwargs
+
+    monkeypatch.setattr(jobs, "enqueue_job", fake_enqueue_job)
+
+    custom_theorems = [
+        {
+            "name": "custom_parallel_theorem",
+            "description": "Perpendiculars to the same line are parallel",
+            "premises": [
+                "perp A B C D",
+                "perp E F C D",
+            ],
+            "conclusions": [
+                "para A B E F",
+            ],
+        }
+    ]
+
+    response = client.post(
+        "/api/jobs",
+        json={
+            "input_type": "jgex",
+            "problem_input": valid_jgex_problem,
+            "custom_theorems": custom_theorems,
+        },
+    )
+
+    assert response.status_code == 200
+
+    assert captured["func"] is run_newclid_job
+    assert captured["args"] == (valid_jgex_problem, custom_theorems)
+    assert captured["timeout_seconds"] == 120
+    assert captured["kwargs"] == {}

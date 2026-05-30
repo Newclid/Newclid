@@ -20,6 +20,9 @@ def test_run_newclid_from_valid_jgex_returns_successful_result(
     assert result.run_info is not None
     assert result.run_info["success"] is True
 
+    assert result.sketch_points
+    assert all(point.name for point in result.sketch_points)
+
     assert result.stdout == ""
     assert result.stderr == ""
 
@@ -34,6 +37,7 @@ def test_run_newclid_from_invalid_jgex_returns_failed_result() -> None:
     assert result.proof_text is None
     assert result.proof_sections is None
     assert result.run_info is None
+    assert result.sketch_points == []
 
     assert result.stdout == ""
     assert result.stderr
