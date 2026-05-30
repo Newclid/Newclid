@@ -6,8 +6,13 @@ from newclid.jgex.problem_builder import JGEXProblemBuilder
 from newclid.problem import predicate_to_construction
 from newclid.proof_data import proof_data_from_state
 from newclid.proof_writing import write_proof, write_proof_sections
+from newclid.rule import Rule
 
-from newclid_backend.runner_models import NewclidProofSections, NewclidRunResult, SketchPoint
+from newclid_backend.runner_models import (
+    NewclidProofSections,
+    NewclidRunResult,
+    SketchPoint,
+)
 from newclid_backend.settings import MAX_OUTPUT_CHARS
 
 
@@ -50,6 +55,18 @@ def _build_proof_sections(proof_data: Any) -> NewclidProofSections:
     )
 
 
+def _build_custom_rules(custom_rules: list[dict[str, Any]]) -> list[Rule]:
+    return [
+        Rule(
+            id=rule["name"],
+            description=rule.get("description") or rule["name"],
+            premises_txt=tuple(rule["premises"]),
+            conclusions_txt=tuple(rule["conclusions"]),
+        )
+        for rule in custom_rules
+    ]
+
+
 # This function will not be called directly from our FastAPI backend logic
 # This will be directly invoked by a worker
 def _build_sketch_points(proof_data: Any) -> list[SketchPoint]:
@@ -59,10 +76,17 @@ def _build_sketch_points(proof_data: Any) -> list[SketchPoint]:
     ]
 
 
-def run_newclid_from_jgex(jgex_problem: str) -> NewclidRunResult:
+def run_newclid_from_jgex(
+    jgex_problem: str, custom_rules: list[dict[str, Any]]
+) -> NewclidRunResult:
     try:
         problem_setup = JGEXProblemBuilder().with_problem_from_txt(jgex_problem).build()
-        solver = GeometricSolverBuilder().build(problem_setup)
+        solver_builder = GeometricSolverBuilder()
+
+        if custom_rules:
+            solver_builder.with_additional_rules(_build_custom_rules(custom_rules))
+
+        solver = solver_builder.build(problem_setup)
 
         success = solver.run()
 
