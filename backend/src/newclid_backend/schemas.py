@@ -3,25 +3,25 @@ from typing import Any, Literal, Self
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
-class CustomRuleRequest(BaseModel):
+class CustomTheoremRequest(BaseModel):
     name: str = Field(
         min_length=1,
         max_length=100,
         pattern=r"^[A-Za-z_][A-Za-z0-9_-]*$",
-        description="Unique custom rule name/id. Must not contain spaces.",
+        description="Unique custom theorem name/id. Must not contain spaces.",
     )
     description: str = Field(
         default="",
         max_length=500,
-        description="Human-readable description of the custom rule.",
+        description="Human-readable description of the custom theorem.",
     )
     premises: list[str] = Field(
         min_length=1,
-        description="Predicate assumptions required by the rule.",
+        description="Predicate assumptions required by the theorem.",
     )
     conclusions: list[str] = Field(
         min_length=1,
-        description="Predicate conclusions produced by the rule.",
+        description="Predicate conclusions produced by the theorem.",
     )
 
     @field_validator("premises", "conclusions")
@@ -38,7 +38,7 @@ class CustomRuleRequest(BaseModel):
 
             if "=>" in predicate:
                 raise ValueError(
-                    "Predicates must be individual predicate strings, not full rule expressions"
+                    "Predicates must be individual predicate strings, not full theorem expressions"
                 )
 
         return cleaned
@@ -49,7 +49,7 @@ class CreateJobRequest(BaseModel):
         default="jgex", description="Input format of the submitted problem"
     )
     problem_input: str = Field(description="Problem definition and goal in JGEX format")
-    custom_rules: list[CustomRuleRequest] = Field(
+    custom_theorems: list[CustomTheoremRequest] = Field(
         default_factory=list, description="Optional custom theorems"
     )
     timeout_seconds: int = Field(
@@ -58,11 +58,11 @@ class CreateJobRequest(BaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_custom_rule_names(self) -> Self:
-        rule_names = [rule.name for rule in self.custom_rules]
+    def validate_custom_theorem_names(self) -> Self:
+        theorem_names = [theorem.name for theorem in self.custom_theorems]
 
-        if len(rule_names) != len(set(rule_names)):
-            raise ValueError("Custom rule names must be unique")
+        if len(theorem_names) != len(set(theorem_names)):
+            raise ValueError("Custom theorem names must be unique")
 
         return self
 

@@ -95,11 +95,13 @@ def _get_message_for_job(job: Job, public_status: PublicJobStatus) -> str:
 def create_job(request: CreateJobRequest) -> CreateJobResponse:
     job_id = str(uuid4())
     jgex_problem = request.problem_input.strip()
+    custom_theorems = [theorem.model_dump() for theorem in request.custom_theorems]
 
     try:
         enqueue_job(
             run_newclid_job,
             jgex_problem,
+            custom_theorems,
             job_id=job_id,
             timeout_seconds=request.timeout_seconds,
         )
