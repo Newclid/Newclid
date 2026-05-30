@@ -50,9 +50,7 @@ def _build_proof_text(proof_data: Any) -> str:
 def _build_proof_sections(proof_data: Any) -> NewclidProofSections:
     proof_sections = write_proof_sections(proof_data)
 
-    return NewclidProofSections.model_validate(  # noqa: F821
-        proof_sections.model_dump()
-    )
+    return NewclidProofSections.model_validate(proof_sections.model_dump())
 
 
 def _build_custom_rules(custom_rules: list[dict[str, Any]]) -> list[Rule]:
@@ -60,8 +58,8 @@ def _build_custom_rules(custom_rules: list[dict[str, Any]]) -> list[Rule]:
         Rule(
             id=rule["name"],
             description=rule.get("description") or rule["name"],
-            premises_txt=tuple(rule["premises"]),
-            conclusions_txt=tuple(rule["conclusions"]),
+            premises_txt=list(rule["premises"]),
+            conclusions_txt=list(rule["conclusions"]),
         )
         for rule in custom_rules
     ]
@@ -77,7 +75,7 @@ def _build_sketch_points(proof_data: Any) -> list[SketchPoint]:
 
 
 def run_newclid_from_jgex(
-    jgex_problem: str, custom_rules: list[dict[str, Any]]
+    jgex_problem: str, custom_rules: list[dict[str, Any]] | None = None
 ) -> NewclidRunResult:
     try:
         problem_setup = JGEXProblemBuilder().with_problem_from_txt(jgex_problem).build()
@@ -89,26 +87,26 @@ def run_newclid_from_jgex(
         solver = solver_builder.build(problem_setup)
 
         success = solver.run()
+        run_info = _to_run_info_dict(solver.run_infos)
+
+        if not success:
+            return NewclidRunResult(
+                status="failed",
+                message="Newclid finished, but did not prove all goals.",
+                proof_text=None,
+                proof_sections=None,
+                run_info=run_info,
+                sketch_points=[],
+            )
 
         proof_data = _build_proof_data(solver)
         proof_text = _build_proof_text(proof_data)
         proof_sections = _build_proof_sections(proof_data)
-        run_info = _to_run_info_dict(solver.run_infos)
         sketch_points = _build_sketch_points(proof_data)
 
-        if success:
-            return NewclidRunResult(
-                status="succeeded",
-                message="Newclid completed successfully.",
-                proof_text=proof_text,
-                proof_sections=proof_sections,
-                run_info=run_info,
-                sketch_points=sketch_points,
-            )
-
         return NewclidRunResult(
-            status="failed",
-            message="Newclid finished, but did not prove all goals",
+            status="succeeded",
+            message="Newclid completed successfully.",
             proof_text=proof_text,
             proof_sections=proof_sections,
             run_info=run_info,
@@ -123,4 +121,5 @@ def run_newclid_from_jgex(
             proof_text=None,
             proof_sections=None,
             run_info=None,
+            sketch_points=[],
         )
