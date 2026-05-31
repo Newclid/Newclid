@@ -36,11 +36,6 @@ class CustomTheoremRequest(BaseModel):
             if "\n" in predicate or "\r" in predicate:
                 raise ValueError("Predicates must be single-line strings")
 
-            if "=>" in predicate:
-                raise ValueError(
-                    "Predicates must be individual predicate strings, not full theorem expressions"
-                )
-
         return cleaned
 
 
