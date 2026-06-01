@@ -7,21 +7,19 @@ import { buildNameTable } from '../emit/names';
 import { emitScene } from '../emit/jgex';
 import type { ObjectId } from '../geometry/types-object';
 
-// A named group of consecutive slots (e.g. "Line 1" = slots 0-1 for perp).
-// Groups are sequential: their counts must sum to slotLabels.length.
 interface SlotGroup {
   label: string;
   count: number;
 }
 
-// Describes one provable geometric relationship.
 interface GoalPredicate {
   id: string;
   label: string;
   shorthand: string;
   icon: string;
-  slotLabels: string[];
-  slotGroups?: SlotGroup[];  // if present, slots are shown under labeled sub-sections
+  slotLabels: string[];          // base labels (also the minimum set)
+  slotGroups?: SlotGroup[];      // if present, renders labeled sub-sections
+  variableSlots?: boolean;       // if true, user can add/remove slots beyond the base set
   buildJgex(jgexNames: string[]): string;
 }
 
@@ -45,14 +43,10 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     buildJgex: (ns) => `cong ${ns.join(' ')}`,
   },
   {
-    id: 'coll', label: 'Collinear', shorthand: 'A, B, C on line', icon: '—',
+    id: 'coll', label: 'Collinear', shorthand: 'A, B, C, … on line', icon: '—',
     slotLabels: ['A', 'B', 'C'],
+    variableSlots: true,  // user can add more points beyond the minimum 3
     buildJgex: (ns) => `coll ${ns.join(' ')}`,
-  },
-  {
-    id: 'cyclic', label: 'Concyclic', shorthand: 'A,B,C,D on circle', icon: '○',
-    slotLabels: ['A', 'B', 'C', 'D'],
-    buildJgex: (ns) => `cyclic ${ns.join(' ')}`,
   },
   {
     id: 'midp', label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '·',
@@ -90,10 +84,22 @@ export function createProofByPointsPanel(
   // ---- Mutable state ----
   let selectedPredicate: GoalPredicate | null = null;
   let slotAssignments: (ObjectId | null)[] = [];
-  // The slot currently waiting for a canvas click. The user can change this
-  // by clicking any row in the sidebar.
   let activeSlot = 0;
+  // Extra slots added by the user for variable-length predicates (e.g. coll).
+  let extraSlots = 0;
   const originalColors = new Map<ObjectId, string | undefined>();
+
+  // Returns the full label array for the current predicate + any extra slots added.
+  // For coll with 1 extra: ['A','B','C','D']; with 2 extra: ['A','B','C','D','E'].
+  function getEffectiveSlotLabels(): string[] {
+    if (!selectedPredicate) return [];
+    const base = selectedPredicate.slotLabels;
+    if (!selectedPredicate.variableSlots || extraSlots === 0) return base;
+    const extra = Array.from({ length: extraSlots }, (_, i) =>
+      String.fromCharCode(65 + base.length + i),  // D, E, F…
+    );
+    return [...base, ...extra];
+  }
 
   // ---- Highlight helpers ----
 
@@ -106,7 +112,6 @@ export function createProofByPointsPanel(
   }
 
   function unhighlightIfUnused(id: ObjectId): void {
-    // Restore color only if this point is not assigned to any other slot.
     const stillUsed = slotAssignments.some((sid) => sid === id);
     if (!stillUsed && originalColors.has(id)) {
       scene?.setPointColor(id, originalColors.get(id));
@@ -125,6 +130,7 @@ export function createProofByPointsPanel(
     selectedPredicate = null;
     slotAssignments = [];
     activeSlot = 0;
+    extraSlots = 0;
     appStore.setGoalPickCallback(null);
     render();
   }
@@ -133,27 +139,26 @@ export function createProofByPointsPanel(
 
   function onCanvasPick(worldX: number, worldY: number, scale: number): void {
     if (!selectedPredicate || !scene) return;
-    if (activeSlot >= selectedPredicate.slotLabels.length) return;
+    if (activeSlot >= slotAssignments.length) return;
 
     const nearest = pickNearestPoint(scene.objects, world(worldX, worldY), { tolerancePx: 12, scale });
     if (!nearest) return;
 
-    // 1. If this point is already in a different slot, vacate that slot.
+    // Vacate any other slot that already holds this point.
     const existing = slotAssignments.indexOf(nearest.id);
     if (existing !== -1 && existing !== activeSlot) slotAssignments[existing] = null;
 
-    // 2. If the active slot already had a point, un-highlight the old one.
+    // Restore the color of the point previously in this slot (if different).
     const prevId = slotAssignments[activeSlot];
     if (prevId !== null && prevId !== nearest.id) {
-      slotAssignments[activeSlot] = null;  // clear before unhighlight check
+      slotAssignments[activeSlot] = null;
       unhighlightIfUnused(prevId);
     }
 
-    // 3. Highlight the new point and assign it.
     highlightPoint(nearest.id);
     slotAssignments[activeSlot] = nearest.id;
 
-    // 4. Advance activeSlot to the next unfilled slot.
+    // Advance to the next unfilled slot.
     let next = activeSlot + 1;
     while (next < slotAssignments.length && slotAssignments[next] !== null) next++;
     activeSlot = next;
@@ -162,9 +167,8 @@ export function createProofByPointsPanel(
   }
 
   // ---- Slot row builder ----
-  // Each row is clickable to focus that slot. The × clears the slot and focuses it.
 
-  function buildSlotRow(i: number, nameTable: Map<ObjectId, string>): HTMLElement {
+  function buildSlotRow(i: number, labels: string[], nameTable: Map<ObjectId, string>): HTMLElement {
     const assignedId = slotAssignments[i];
     const isActive = i === activeSlot;
     const isFilled = assignedId !== null;
@@ -174,14 +178,13 @@ export function createProofByPointsPanel(
       title: isActive ? '' : 'Click to edit this point',
     });
 
-    // Clicking the row focuses it (unless already focused or clicking the × button).
     row.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).closest('.goal-slot-clear')) return;
       activeSlot = i;
       render();
     });
 
-    row.appendChild(el('span', { class: 'goal-slot-label' }, [selectedPredicate!.slotLabels[i]]));
+    row.appendChild(el('span', { class: 'goal-slot-label' }, [labels[i]]));
 
     if (isFilled) {
       const obj = scene?.objects.get(assignedId);
@@ -194,7 +197,7 @@ export function createProofByPointsPanel(
         e.stopPropagation();
         slotAssignments[i] = null;
         unhighlightIfUnused(assignedId);
-        activeSlot = i;  // focus this slot so the user can immediately re-pick
+        activeSlot = i;
         render();
       });
       row.appendChild(clearBtn);
@@ -204,7 +207,6 @@ export function createProofByPointsPanel(
           [isActive ? '← click on canvas' : '—']),
       );
     }
-
     return row;
   }
 
@@ -235,6 +237,7 @@ export function createProofByPointsPanel(
         selectedPredicate = pred;
         slotAssignments = pred.slotLabels.map(() => null);
         activeSlot = 0;
+        extraSlots = 0;
         appStore.setGoalPickCallback(onCanvasPick);
         render();
       });
@@ -250,7 +253,8 @@ export function createProofByPointsPanel(
       return;
     }
 
-    // ---- Slot list (grouped or flat) ----
+    // ---- Slot list ----
+    const labels = getEffectiveSlotLabels();
     const nameTable = buildNameTable(scene);
     const slotSection = el('div', { class: 'goal-slot-section' });
     slotSection.appendChild(el('div', { class: 'proof-section-title' }, [`Points — ${selectedPredicate.shorthand}`]));
@@ -258,29 +262,58 @@ export function createProofByPointsPanel(
     const slotList = el('div', { class: 'goal-slot-list' });
 
     if (selectedPredicate.slotGroups) {
-      // Render slots under labeled group headers.
       let offset = 0;
       for (const group of selectedPredicate.slotGroups) {
         slotList.appendChild(el('div', { class: 'goal-slot-group-label' }, [group.label]));
         const groupEl = el('div', { class: 'goal-slot-group' });
         for (let j = 0; j < group.count; j++) {
-          groupEl.appendChild(buildSlotRow(offset + j, nameTable));
+          groupEl.appendChild(buildSlotRow(offset + j, labels, nameTable));
         }
         slotList.appendChild(groupEl);
         offset += group.count;
       }
     } else {
-      // Flat list for predicates without groups (coll, cyclic).
-      for (let i = 0; i < selectedPredicate.slotLabels.length; i++) {
-        slotList.appendChild(buildSlotRow(i, nameTable));
+      for (let i = 0; i < labels.length; i++) {
+        slotList.appendChild(buildSlotRow(i, labels, nameTable));
       }
+    }
+
+    // +/− controls for variable-length predicates (e.g. collinear).
+    if (selectedPredicate.variableSlots) {
+      const varControls = el('div', { class: 'goal-var-controls' });
+
+      const addBtn = el('button', { type: 'button', class: 'goal-var-btn' }, ['+ Add point']) as HTMLButtonElement;
+      addBtn.addEventListener('click', () => {
+        extraSlots++;
+        slotAssignments.push(null);
+        activeSlot = slotAssignments.length - 1;  // focus the new slot
+        render();
+      });
+      varControls.appendChild(addBtn);
+
+      // Only show "Remove" when there are extra slots (can't go below the minimum).
+      if (extraSlots > 0) {
+        const removeBtn = el('button', { type: 'button', class: 'goal-var-btn goal-var-btn-remove' }, ['− Remove last']) as HTMLButtonElement;
+        removeBtn.addEventListener('click', () => {
+          const lastIdx = slotAssignments.length - 1;
+          const lastId = slotAssignments[lastIdx];
+          slotAssignments.pop();
+          extraSlots--;
+          if (lastId !== null) unhighlightIfUnused(lastId);
+          if (activeSlot >= slotAssignments.length) activeSlot = slotAssignments.length - 1;
+          render();
+        });
+        varControls.appendChild(removeBtn);
+      }
+
+      slotList.appendChild(varControls);
     }
 
     slotSection.appendChild(slotList);
 
-    if (activeSlot < selectedPredicate.slotLabels.length) {
+    if (activeSlot < labels.length) {
       slotSection.appendChild(
-        el('p', { class: 'goal-hint' }, [`Click point "${selectedPredicate.slotLabels[activeSlot]}" on the canvas`]),
+        el('p', { class: 'goal-hint' }, [`Click point "${labels[activeSlot]}" on the canvas`]),
       );
     }
     content.appendChild(slotSection);
@@ -289,7 +322,7 @@ export function createProofByPointsPanel(
     const goalJgex = buildGoalJgex();
     const setupJgex = emitScene(scene);
     const partialNames = slotAssignments.map((id, i) =>
-      id ? (nameTable.get(id) ?? '?') : `[${selectedPredicate!.slotLabels[i]}]`,
+      id ? (nameTable.get(id) ?? '?') : `[${labels[i]}]`,
     );
     const previewText = (setupJgex ? setupJgex + ' ' : '') +
       `? ${goalJgex ?? selectedPredicate.id + ' ' + partialNames.join(' ')}`;
