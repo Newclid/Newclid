@@ -145,11 +145,13 @@ appStore.subscribe(() => {
       .filter((m): m is ConstructionMarker => m !== null);
     const geometry = [
       ...parseJgexGeometry(problem),
-      ...geomFromSignatures(sections?.construction_signatures ?? []),
+      ...geomFromSignatures([...new Set(sections?.construction_signatures ?? [])]),
     ];
     const extraGeometry = geomFromSignatures([
-      ...(sections?.step_signatures ?? []),
-      ...(sections?.goal_signatures ?? []),
+      ...new Set([
+        ...(sections?.step_signatures ?? []),
+        ...(sections?.goal_signatures ?? []),
+      ]),
     ]);
     renderer.proofSketch = sketchPoints.length > 0
       ? { points: sketchPoints, geometry, extraGeometry, markers }
