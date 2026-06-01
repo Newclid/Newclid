@@ -39,13 +39,21 @@ export interface ProofSketch {
 
 export class Renderer {
   readonly svg: SVGSVGElement;
+  private readonly _bgGroup: SVGGElement;
   private _proofSketch: ProofSketch | null = null;
   private _proofGeomGroup: SVGGElement | null = null;
 
   get proofSketch(): ProofSketch | null { return this._proofSketch; }
   set proofSketch(sketch: ProofSketch | null) {
+    if (this._proofGeomGroup) this._proofGeomGroup.remove();
     this._proofSketch = sketch;
-    this._proofGeomGroup = sketch ? this.buildProofGeomGroup(sketch) : null;
+    if (sketch) {
+      this._proofGeomGroup = this.buildProofGeomGroup(sketch);
+      this._proofGeomGroup.style.willChange = 'transform';
+      this.svg.insertBefore(this._proofGeomGroup, this._bgGroup);
+    } else {
+      this._proofGeomGroup = null;
+    }
   }
 
   constructor(private container: HTMLElement, private viewport: Viewport, private scene: Scene) {
@@ -53,6 +61,8 @@ export class Renderer {
     this.svg.style.background = STYLE.background;
     this.svg.style.display = 'block';
     this.container.appendChild(this.svg);
+    this._bgGroup = document.createElementNS(SVG_NS, 'g');
+    this.svg.appendChild(this._bgGroup);
     this.resize();
   }
 
@@ -62,8 +72,7 @@ export class Renderer {
   }
 
   draw(): void {
-    // Clear everything from the previous frame.
-    while (this.svg.firstChild) this.svg.removeChild(this.svg.firstChild);
+    while (this._bgGroup.firstChild) this._bgGroup.removeChild(this._bgGroup.firstChild);
 
     this.drawGrid();
     this.drawAxes();
@@ -77,7 +86,6 @@ export class Renderer {
       const tx = this.viewport.width / 2 - this.viewport.center.x * s;
       const ty = this.viewport.height / 2 + this.viewport.center.y * s;
       this._proofGeomGroup.setAttribute('transform', `matrix(${s},0,0,${-s},${tx},${ty})`);
-      this.svg.appendChild(this._proofGeomGroup);
       const ptMap = new Map(this._proofSketch.points.map(p => [p.name, p]));
       if (this._proofSketch.markers?.length) {
         this.drawConstructionMarkers(this._proofSketch.markers, ptMap);
@@ -216,7 +224,7 @@ export class Renderer {
       el.setAttribute('fill', 'none');
       el.setAttribute('stroke', '#888');
       el.setAttribute('stroke-width', '1.5');
-      this.svg.appendChild(el);
+      this._bgGroup.appendChild(el);
     }
   }
 }
@@ -309,7 +317,7 @@ export class Renderer {
       dot.setAttribute('cy', String(s.y));
       dot.setAttribute('r', '4.25');
       dot.setAttribute('fill', '#1a1a1a');
-      this.svg.appendChild(dot);
+      this._bgGroup.appendChild(dot);
 
       const label = document.createElementNS(SVG_NS, 'text');
       label.setAttribute('x', String(s.x + 9));
@@ -319,7 +327,7 @@ export class Renderer {
       label.setAttribute('font-style', 'italic');
       label.setAttribute('fill', '#1a1a1a');
       label.textContent = displayPointName(p.name);
-      this.svg.appendChild(label);
+      this._bgGroup.appendChild(label);
     }
   }
 
@@ -429,7 +437,7 @@ export class Renderer {
     el.setAttribute('stroke', stroke);
     el.setAttribute('stroke-width', String(width));
     if (dash) el.setAttribute('stroke-dasharray', dash);
-    this.svg.appendChild(el);
+    this._bgGroup.appendChild(el);
   }
 
   private text(x: number, y: number, content: string, anchor: 'start' | 'middle' | 'end'): void {
@@ -441,7 +449,7 @@ export class Renderer {
     el.setAttribute('font-size', String(STYLE.fontSize));
     el.setAttribute('fill', STYLE.axisLabel);
     el.textContent = content;
-    this.svg.appendChild(el);
+    this._bgGroup.appendChild(el);
   }
 
   private drawCircles(): void {
@@ -468,7 +476,7 @@ export class Renderer {
         el.setAttribute('fill', 'none');
         el.setAttribute('stroke', STYLE.circleStroke);
         el.setAttribute('stroke-width', String(STYLE.circleStrokeWidth));
-        this.svg.appendChild(el);
+        this._bgGroup.appendChild(el);
       }
     }
   }
@@ -484,7 +492,7 @@ export class Renderer {
         el.setAttribute('fill', 'none');
         el.setAttribute('stroke', STYLE.snapStroke);
         el.setAttribute('stroke-width', '1.5');
-        this.svg.appendChild(el);
+        this._bgGroup.appendChild(el);
             } else if (p.kind === 'rubberCircle') {
         const sc = this.viewport.worldToScreen(world(p.center.x, p.center.y));
         const r = Math.hypot(p.radiusVec.x - p.center.x, p.radiusVec.y - p.center.y) * this.viewport.scale;
@@ -496,7 +504,7 @@ export class Renderer {
         el.setAttribute('stroke', STYLE.previewStroke);
         el.setAttribute('stroke-width', String(STYLE.previewStrokeWidth));
         el.setAttribute('stroke-dasharray', STYLE.previewDash);
-        this.svg.appendChild(el);
+        this._bgGroup.appendChild(el);
       } else if (p.kind === 'auxLine') {
         // Dashed parallel/perpendicular guide drawn while a derive slot is active.
         const a = this.viewport.worldToScreen(world(p.from.x, p.from.y));
@@ -509,7 +517,7 @@ export class Renderer {
         el.setAttribute('stroke', STYLE.previewStroke);
         el.setAttribute('stroke-width', String(STYLE.previewStrokeWidth));
         el.setAttribute('stroke-dasharray', STYLE.previewDash);
-        this.svg.appendChild(el);
+        this._bgGroup.appendChild(el);
       } else if (p.kind === 'partialEdge') {
         // Already-bound edge of an in-progress construction.
         const a = this.viewport.worldToScreen(world(p.from.x, p.from.y));
@@ -528,7 +536,7 @@ export class Renderer {
       dot.setAttribute('cy', String(s.y));
       dot.setAttribute('r', '4.25');
       dot.setAttribute('fill', p.color ?? '#1a1a1a');
-      this.svg.appendChild(dot);
+      this._bgGroup.appendChild(dot);
 
       const label = document.createElementNS(SVG_NS, 'text');
       label.setAttribute('x', String(s.x + 9));
@@ -538,7 +546,7 @@ export class Renderer {
       label.setAttribute('font-style', 'italic');
       label.setAttribute('fill', '#1a1a1a');
       label.textContent = p.label;
-      this.svg.appendChild(label);
+      this._bgGroup.appendChild(label);
     }
   }
 }
