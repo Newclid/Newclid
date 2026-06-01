@@ -22,8 +22,8 @@ export interface ConstructionObject {
   name: string;  // which construction (e.g. 'triangle')
   bindings: Record<string, ObjectId>;  // slot → point/derived id
   edges: Array<[ObjectId, ObjectId]>;  // pairs of points to draw as finite segments
-  // Half-lines anchored at the first point, extending through the second and beyond.
-  rays?: Array<[ObjectId, ObjectId]>;
+  // Full lines through the two points, extended infinitely in both directions.
+  lines?: Array<[ObjectId, ObjectId]>;
   circles: Array<{ center: ObjectId; radius: number }>;  // circles to draw
 }
 
