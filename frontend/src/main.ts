@@ -135,9 +135,11 @@ appStore.subscribe(() => {
     const problem = job?.problem ?? '';
     const sections = job?.result?.proof_sections;
     const markers = [
-      ...(sections?.construction_signatures ?? []),
-      ...(sections?.step_signatures ?? []),
-      ...(sections?.goal_signatures ?? []),
+      ...new Set([
+        ...(sections?.construction_signatures ?? []),
+        ...(sections?.step_signatures ?? []),
+        ...(sections?.goal_signatures ?? []),
+      ]),
     ]
       .map(parseConstructionSignature)
       .filter((m): m is ConstructionMarker => m !== null);
