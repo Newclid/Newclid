@@ -49,6 +49,11 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     buildJgex: (ns) => `coll ${ns.join(' ')}`,
   },
   {
+    id: 'cyclic', label: 'Concyclic', shorthand: 'A,B,C,D on circle', icon: '○',
+    slotLabels: ['A', 'B', 'C', 'D'],
+    buildJgex: (ns) => `cyclic ${ns.join(' ')}`,
+  },
+  {
     id: 'midp', label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '·',
     slotLabels: ['M', 'A', 'B'],
     slotGroups: [{ label: 'Midpoint', count: 1 }, { label: 'Segment', count: 2 }],
