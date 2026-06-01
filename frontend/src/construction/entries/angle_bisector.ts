@@ -61,7 +61,8 @@ export const angleBisector: CatalogEntry = {
       kind: 'construction',
       name: 'angle_bisector',
       bindings: { x: xId, a: aId, b: bId, c: cId },
-      edges: [[aId, bId], [bId, cId], [bId, xId]],
+      edges: [[aId, bId], [bId, cId]],
+      rays: [[bId, xId]],
       circles: [],
     };
   },

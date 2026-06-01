@@ -1,11 +1,14 @@
 export type SketchGeom =
   | { kind: 'segment';      p1: string; p2: string }
   | { kind: 'line';         p1: string; p2: string }
+  | { kind: 'ray';          p1: string; p2: string }
   | { kind: 'circle';       center: string; through: string }
   | { kind: 'circumcircle'; p1: string; p2: string; p3: string };
 
 function seg(p1: string, p2: string): SketchGeom { return { kind: 'segment', p1, p2 }; }
 function ln(p1: string, p2: string): SketchGeom  { return { kind: 'line',    p1, p2 }; }
+// Half-line: starts at p1 and extends through p2 and beyond, one direction only.
+function ray(p1: string, p2: string): SketchGeom { return { kind: 'ray',     p1, p2 }; }
 function circ(center: string, through: string): SketchGeom { return { kind: 'circle', center, through }; }
 function circumcirc(p1: string, p2: string, p3: string): SketchGeom { return { kind: 'circumcircle', p1, p2, p3 }; }
 
@@ -95,9 +98,9 @@ function geomForConstruction(name: string, args: string[]): SketchGeom[] {
       return [ln(x, y), ln(a, b)];
     }
     case 'angle_bisector': {
-      // x a b c → arms b,a and b,c + bisector b,x
+      // x a b c → arms b,a and b,c + bisector ray from vertex b through x
       const [x, a, b, c] = args;
-      return [ln(b, a), ln(b, c), ln(b, x)];
+      return [ln(b, a), ln(b, c), ray(b, x)];
     }
     case 'on_dia': {
       // x a b → line x,a + line x,b (right angle at x)
