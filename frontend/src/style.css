@@ -769,6 +769,26 @@ body.is-resizing {
   gap: 2px;
 }
 
+/* Group header shown above each logical cluster (Line 1, Angle 2, …). */
+.goal-slot-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  padding: 8px 0 3px;
+}
+
+/* Container for the rows within one group — adds a slight left indent. */
+.goal-slot-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 4px;
+  border-left: 2px solid var(--rule-soft);
+  margin-bottom: 2px;
+}
+
 .goal-slot-row {
   display: flex;
   align-items: center;
@@ -777,9 +797,16 @@ body.is-resizing {
   border-radius: 5px;
   background: rgba(26, 24, 22, 0.03);
   border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 100ms ease, border-color 100ms ease;
 }
 
-.goal-slot-row.is-next   { border-color: var(--accent); background: var(--accent-soft); }
+/* Filled rows get a pencil cursor — clicking re-focuses them for editing. */
+.goal-slot-row.is-filled { cursor: text; }
+
+.goal-slot-row:hover:not(.is-next) { border-color: var(--rule-mid); background: var(--bg-elevated); }
+
+.goal-slot-row.is-next   { border-color: var(--accent); background: var(--accent-soft); cursor: default; }
 .goal-slot-row.is-filled { background: rgba(26, 107, 26, 0.06); border-color: rgba(26, 107, 26, 0.22); }
 
 .goal-slot-label {
