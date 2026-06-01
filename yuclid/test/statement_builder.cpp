@@ -469,7 +469,7 @@ BOOST_AUTO_TEST_CASE(statement_builder_bad_const_num) {
     
     BOOST_CHECK_THROW(
         (void)build_statements_from_pattern(pattern, mapping), 
-        std::runtime_error
+        std::system_error
     );
 }
 
@@ -478,7 +478,7 @@ BOOST_AUTO_TEST_CASE(statement_builder_bad_const_end) {
     
     BOOST_CHECK_THROW(
         (void)build_statements_from_pattern(pattern, mapping), 
-        std::runtime_error
+        std::system_error
     );
 }
 
@@ -487,7 +487,7 @@ BOOST_AUTO_TEST_CASE(statement_builder_bad_const_start) {
     
     BOOST_CHECK_THROW(
         (void)build_statements_from_pattern(pattern, mapping), 
-        std::runtime_error
+        std::system_error
     );
 }
 
