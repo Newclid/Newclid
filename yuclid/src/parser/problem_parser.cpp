@@ -12,6 +12,13 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Renamed the simple problem parser to a dedicated problem
+   parser interface and updated the parser entry point to separate problem
+   parsing from custom rule parsing.
 */
 #include "config_options.hpp"
 #include "parser/problem_parser.hpp"

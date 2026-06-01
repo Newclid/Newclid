@@ -12,6 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Added configuration support for storing and exposing the
+   optional custom rule file path.
 */
 #include "config_options.hpp"
 

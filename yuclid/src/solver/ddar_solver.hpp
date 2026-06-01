@@ -12,6 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Extended the DDAR solver interface and state to carry
+   custom rule schemas into theorem matching.
 */
 #pragma once
 #include "ar/linear_system.hpp"
