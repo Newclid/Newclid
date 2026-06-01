@@ -7,6 +7,30 @@ and AutoMathis (python interface) for Concordance Inc. dba Harmonic.
 Licensed under the Apache License, Version 2.0.
 You must preserve this NOTICE in redistributions.
 
+MODIFICATIONS
+=============
+
+Copyright 2026 Simeon Vutov, Petar Iliev
+
+This distribution includes modifications to Yuclid made in 2026 as part of a
+TU Delft Computer Science and Engineering Software Project focused on extending
+Newclid.
+
+The modifications include, at a high level:
+
+- support for loading additional user-defined rule files;
+- parsing and validation of custom Yuclid rule schemas;
+- construction of Yuclid statements and theorem candidates from custom rule
+  predicates;
+- integration of generic custom-rule matching into the existing theorem matcher
+  and DDAR solver pipeline;
+- Python adapter support for forwarding Newclid custom rules to Yuclid and
+  mapping custom-rule deductions back to Newclid rules;
+- build and packaging updates needed for the custom-rule integration and
+  cross-platform execution;
+- tests for custom rule parsing, statement construction, theorem construction,
+  generic rule matching, and custom-rule integration.
+
 THIRD-PARTY SOFTWARE NOTICES
 ============================
 
