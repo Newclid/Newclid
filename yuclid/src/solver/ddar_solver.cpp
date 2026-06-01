@@ -12,6 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Extended DDAR solver initialization to accept custom rule
+   schemas and pass them into theorem matching.
 */
 #include "solver/ddar_solver.hpp"
 #include "ar/equation.hpp"
