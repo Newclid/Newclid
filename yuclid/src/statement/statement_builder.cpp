@@ -49,6 +49,18 @@ namespace {
         }
     }
 
+    void check_minimum_arity(const RulePredicatePattern &pattern, std::size_t expected) {
+        if(pattern.args.size() < expected) {
+            throw std::runtime_error(
+                std::format("Predicate '{}' expects {} arguments, but got {}",
+                    pattern.name,
+                    expected,
+                    pattern.args.size()
+                    )
+                );
+        }
+    }
+
     Point mapped_point(
         const RulePredicatePattern &pattern,
         const RuleMapping &mapping,
@@ -145,26 +157,23 @@ namespace {
         );
 
         const std::string &value_str = pattern.args.at(index);
+        std::istringstream value_sstream(value_str);
 
-        try {
-            // Check if it's a fraction "a/b"
-            std::size_t slash_pos = value_str.find('/');
-            
-            if (slash_pos != std::string::npos) {
-                // std::stoll will also convert hexadecimals (0xffff and 0f0) to decimals
-                long long num = std::stoll(value_str.substr(0, slash_pos));
-                long long den = std::stoll(value_str.substr(slash_pos + 1));
-                return ExpectedConstType(num, den);
-            } else {
-                long long num = std::stoll(value_str);
-                return ExpectedConstType(num);
+        ExpectedConstType constant_val;
+        value_sstream >> constant_val; 
+
+        if(value_sstream.fail()){
+            if (value_sstream.eof() && !value_str.empty() && std::isdigit(value_str.back())) {
+                // the number was parsed properly, the fail bit was raised because EOF was encountered while looking for '/'
             }
-        } catch (const std::exception&) {
-            throw std::runtime_error(
+            else {
+                throw std::runtime_error(
                 std::format("Predicate '{}' expected a valid fraction or integer at index {}, but got '{}'",
                             pattern.name, index, value_str)
-            );
+                );
+            }
         }
+        return constant_val;
     }
 
     void build_coll_pattern(
@@ -172,7 +181,7 @@ namespace {
         const RuleMapping &mapping,
         std::vector<std::unique_ptr<Statement>> &results
     ) {
-        if(pattern.args.size() < 3) check_arity(pattern, 3);
+        check_minimum_arity(pattern, 3);
         
         for(std::size_t i = 2; i < pattern.args.size(); ++i){
             results.push_back(
@@ -190,7 +199,7 @@ namespace {
         const RuleMapping &mapping,
         std::vector<std::unique_ptr<Statement>> &results
     ) {
-        if(pattern.args.size() < 4) check_arity(pattern, 4);
+        check_minimum_arity(pattern, 4);
 
         for(std::size_t i = 3; i < pattern.args.size(); ++i){
             results.push_back(
@@ -209,7 +218,7 @@ namespace {
         const RuleMapping &mapping,
         std::vector<std::unique_ptr<Statement>> &results
     ) {
-        if(pattern.args.size() < 4) check_arity(pattern, 4);
+        check_minimum_arity(pattern, 4);
         
         Point center = mapped_point(pattern, mapping, 0);
 
@@ -364,8 +373,8 @@ namespace {
             check_arity(pattern, 3);
  
             statements.push_back(std::make_unique<Midpoint>(
-                mapped_point(pattern, mapping, 0),
                 mapped_point(pattern, mapping, 1),
+                mapped_point(pattern, mapping, 0),
                 mapped_point(pattern, mapping, 2)
             ));
             return statements;
