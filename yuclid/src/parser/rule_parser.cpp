@@ -6,8 +6,39 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unordered_set>
 
 namespace Yuclid {
+    
+
+    /**
+     * @brief Parse rule variables by also checking for uniqueness
+     */
+    std::vector<std::string> parse_unique_variables(
+        std::istream &stream,
+        const std::string &rule_id
+    ) {
+        std::vector<std::string> variables;
+        std::unordered_set<std::string> seen_variables;
+
+        std::string variable;
+        while(stream >> variable) {
+            // insert function returns <iterator, bool> where bool is whether it was successful
+            if(!seen_variables.insert(variable).second) {
+                throw std::runtime_error(
+                    "Duplicate variable '" + variable + "' in rule: " + rule_id
+                );
+            }
+
+            variables.push_back(variable);
+        }
+
+        if(variables.empty()) {
+            throw std::runtime_error("Rule has no variables: " + rule_id);
+        }
+
+        return variables;
+    }
 
     /**
      * @brief Parses the provided stream to a rule predicate
@@ -99,14 +130,7 @@ namespace Yuclid {
                     throw std::runtime_error("Rule is missing an id");
                 }
                 
-                std::string variable;
-                while(stream >> variable) {
-                    rule.variables.push_back(variable);
-                }
-
-                if(rule.variables.empty()) {
-                    throw std::runtime_error("Rule has no variables: " + rule.id);
-                }
+                rule.variables = parse_unique_variables(stream, rule.id);
 
                 currentRule = std::move(rule);
                 continue;
