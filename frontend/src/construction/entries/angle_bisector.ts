@@ -8,21 +8,22 @@ export const angleBisector: CatalogEntry = {
   shortcut: 'B',
   icon: () =>
     iconWrap([
-      // two arms of the angle, vertex at bottom-left
+      // Two arms opening symmetrically above and below the horizontal,
+      // so the bisector visibly splits the angle in half.
       svgEl('line', {
-        x1: '4', y1: '18', x2: '18', y2: '4',
+        x1: '4', y1: '11', x2: '20', y2: '5',
         stroke: 'currentColor', 'stroke-width': '1.2',
       }),
       svgEl('line', {
-        x1: '4', y1: '18', x2: '20', y2: '18',
+        x1: '4', y1: '11', x2: '20', y2: '17',
         stroke: 'currentColor', 'stroke-width': '1.2',
       }),
-      // the bisector
+      // The bisector: horizontal, exactly between the two arms.
       svgEl('line', {
-        x1: '4', y1: '18', x2: '19', y2: '9',
+        x1: '4', y1: '11', x2: '20', y2: '11',
         stroke: 'red', 'stroke-width': '1.2',
       }),
-      svgEl('circle', { cx: '19', cy: '9', r: '1.8', fill: 'red' }),
+      svgEl('circle', { cx: '20', cy: '11', r: '1.8', fill: 'red' }),
     ]),
   slots: [
     { name: 'a', kind: 'pick', label: 'Pick first ray point' },
