@@ -31,13 +31,13 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     buildJgex: (ns) => `perp ${ns.join(' ')}`,
   },
   {
-    id: 'para', label: 'Parallel', shorthand: 'AB ∥ CD', icon: '∥',
+    id: 'para', label: 'Parallel', shorthand: 'AB || CD', icon: '||',
     slotLabels: ['A', 'B', 'C', 'D'],
     slotGroups: [{ label: 'Line 1', count: 2 }, { label: 'Line 2', count: 2 }],
     buildJgex: (ns) => `para ${ns.join(' ')}`,
   },
   {
-    id: 'cong', label: 'Equal Length', shorthand: '|AB| = |CD|', icon: '≅',
+    id: 'cong', label: 'Equal Length', shorthand: '|AB| = |CD|', icon: '=',
     slotLabels: ['A', 'B', 'C', 'D'],
     slotGroups: [{ label: 'Segment 1', count: 2 }, { label: 'Segment 2', count: 2 }],
     buildJgex: (ns) => `cong ${ns.join(' ')}`,
@@ -54,10 +54,10 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     buildJgex: (ns) => `cyclic ${ns.join(' ')}`,
   },
   {
-    id: 'midp', label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '·',
+    id: 'midp', label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '–·–',
     slotLabels: ['M', 'A', 'B'],
     slotGroups: [{ label: 'Midpoint', count: 1 }, { label: 'Segment', count: 2 }],
-    buildJgex: (ns) => `midp ${ns.join(' ')}`,
+    buildJgex: (ns) => `midpoint ${ns.join(' ')}`,
   },
   {
     id: 'eqangle', label: 'Equal Angles', shorthand: '∠(AB,CD) = ∠(EF,GH)', icon: '∠',
