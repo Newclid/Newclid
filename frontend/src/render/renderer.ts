@@ -39,7 +39,14 @@ export interface ProofSketch {
 
 export class Renderer {
   readonly svg: SVGSVGElement;
-  proofSketch: ProofSketch | null = null;
+  private _proofSketch: ProofSketch | null = null;
+  private _proofGeomGroup: SVGGElement | null = null;
+
+  get proofSketch(): ProofSketch | null { return this._proofSketch; }
+  set proofSketch(sketch: ProofSketch | null) {
+    this._proofSketch = sketch;
+    this._proofGeomGroup = sketch ? this.buildProofGeomGroup(sketch) : null;
+  }
 
   constructor(private container: HTMLElement, private viewport: Viewport, private scene: Scene) {
     this.svg = document.createElementNS(SVG_NS, 'svg');
@@ -65,8 +72,17 @@ export class Renderer {
     this.drawConstructions();
     this.drawPoints();
     this.drawPreviews();
-    if (this.proofSketch) {
-      this.drawProofSketch(this.proofSketch);
+    if (this._proofSketch && this._proofGeomGroup) {
+      const s = this.viewport.scale;
+      const tx = this.viewport.width / 2 - this.viewport.center.x * s;
+      const ty = this.viewport.height / 2 + this.viewport.center.y * s;
+      this._proofGeomGroup.setAttribute('transform', `matrix(${s},0,0,${-s},${tx},${ty})`);
+      this.svg.appendChild(this._proofGeomGroup);
+      const ptMap = new Map(this._proofSketch.points.map(p => [p.name, p]));
+      if (this._proofSketch.markers?.length) {
+        this.drawConstructionMarkers(this._proofSketch.markers, ptMap);
+      }
+      this.drawSketchPoints(this._proofSketch.points);
     }
   }
 
@@ -205,58 +221,83 @@ export class Renderer {
   }
 }
 
-  private drawProofSketch(sketch: ProofSketch): void {
+  private buildProofGeomGroup(sketch: ProofSketch): SVGGElement {
+    const g = document.createElementNS(SVG_NS, 'g');
     const ptMap = new Map(sketch.points.map(p => [p.name, p]));
-    this.drawSketchGeometry(sketch.geometry, ptMap);
+    this.drawSketchGeometryWorld(sketch.geometry, ptMap, g);
     if (sketch.extraGeometry?.length) {
-      this.drawSketchGeometry(sketch.extraGeometry, ptMap, '4 3');
+      this.drawSketchGeometryWorld(sketch.extraGeometry, ptMap, g, '4 3');
     }
-    if (sketch.markers?.length) {
-      this.drawConstructionMarkers(sketch.markers, ptMap);
-    }
-    this.drawSketchPoints(sketch.points);
+    return g;
   }
 
-  private drawSketchGeometry(geometry: SketchGeom[], ptMap: Map<string, SketchPoint>, dash?: string): void {
+  private drawSketchGeometryWorld(
+    geometry: SketchGeom[],
+    ptMap: Map<string, SketchPoint>,
+    container: SVGGElement,
+    dash?: string,
+  ): void {
     for (const g of geometry) {
       if (g.kind === 'segment') {
         const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
         if (!pa || !pb) continue;
-        const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
-        const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
-        this.line(sa.x, sa.y, sb.x, sb.y, '#888', 1.5, dash);
+        this.worldLine(pa.x, pa.y, pb.x, pb.y, '#888', 1.5, container, dash);
 
       } else if (g.kind === 'line') {
         const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
         if (!pa || !pb) continue;
-        const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
-        const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
-        const dx = sb.x - sa.x, dy = sb.y - sa.y;
+        const dx = pb.x - pa.x, dy = pb.y - pa.y;
         const len = Math.hypot(dx, dy);
-        if (len < 1e-6) continue;
-        const ext = 10000;
-        const nx = (dx / len) * ext, ny = (dy / len) * ext;
-        this.line(sa.x - nx, sa.y - ny, sa.x + nx, sa.y + ny, '#888', 1.5, dash);
+        if (len < 1e-10) continue;
+        const ext = 1e5;
+        const ux = (dx / len) * ext, uy = (dy / len) * ext;
+        this.worldLine(pa.x - ux, pa.y - uy, pa.x + ux, pa.y + uy, '#888', 1.5, container, dash);
 
       } else if (g.kind === 'circle') {
         const pc = ptMap.get(g.center), pt = ptMap.get(g.through);
         if (!pc || !pt) continue;
-        const radiusWorld = Math.hypot(pt.x - pc.x, pt.y - pc.y);
-        const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
-        const r = radiusWorld * this.viewport.scale;
-        this.svgCircle(sc.x, sc.y, r, dash);
+        const r = Math.hypot(pt.x - pc.x, pt.y - pc.y);
+        this.worldCircle(pc.x, pc.y, r, container, dash);
 
       } else if (g.kind === 'circumcircle') {
         const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2), pc = ptMap.get(g.p3);
         if (!pa || !pb || !pc) continue;
         const cc = circumcenter(pa, pb, pc);
         if (!cc) continue;
-        const radiusWorld = Math.hypot(pa.x - cc.x, pa.y - cc.y);
-        const sc = this.viewport.worldToScreen(world(cc.x, cc.y));
-        const r = radiusWorld * this.viewport.scale;
-        this.svgCircle(sc.x, sc.y, r, dash);
+        const r = Math.hypot(pa.x - cc.x, pa.y - cc.y);
+        this.worldCircle(cc.x, cc.y, r, container, dash);
       }
     }
+  }
+
+  private worldLine(
+    x1: number, y1: number, x2: number, y2: number,
+    stroke: string, width: number,
+    container: SVGGElement, dash?: string,
+  ): void {
+    const el = document.createElementNS(SVG_NS, 'line');
+    el.setAttribute('x1', String(x1));
+    el.setAttribute('y1', String(y1));
+    el.setAttribute('x2', String(x2));
+    el.setAttribute('y2', String(y2));
+    el.setAttribute('stroke', stroke);
+    el.setAttribute('stroke-width', String(width));
+    el.setAttribute('vector-effect', 'non-scaling-stroke');
+    if (dash) el.setAttribute('stroke-dasharray', dash);
+    container.appendChild(el);
+  }
+
+  private worldCircle(cx: number, cy: number, r: number, container: SVGGElement, dash?: string): void {
+    const el = document.createElementNS(SVG_NS, 'circle');
+    el.setAttribute('cx', String(cx));
+    el.setAttribute('cy', String(cy));
+    el.setAttribute('r', String(r));
+    el.setAttribute('fill', 'none');
+    el.setAttribute('stroke', '#888');
+    el.setAttribute('stroke-width', '1.5');
+    el.setAttribute('vector-effect', 'non-scaling-stroke');
+    if (dash) el.setAttribute('stroke-dasharray', dash);
+    container.appendChild(el);
   }
 
   private drawSketchPoints(points: SketchPoint[]): void {
@@ -377,18 +418,6 @@ export class Renderer {
     const l2x = mx - arm * ux - arm * vx, l2y = my - arm * uy - arm * vy;
     this.line(l1x, l1y, tx, ty, color, 1.5);
     this.line(l2x, l2y, tx, ty, color, 1.5);
-  }
-
-  private svgCircle(cx: number, cy: number, r: number, dash?: string): void {
-    const el = document.createElementNS(SVG_NS, 'circle');
-    el.setAttribute('cx', String(cx));
-    el.setAttribute('cy', String(cy));
-    el.setAttribute('r', String(r));
-    el.setAttribute('fill', 'none');
-    el.setAttribute('stroke', '#888');
-    el.setAttribute('stroke-width', '1.5');
-    if (dash) el.setAttribute('stroke-dasharray', dash);
-    this.svg.appendChild(el);
   }
 
   private line(x1: number, y1: number, x2: number, y2: number, stroke: string, width: number, dash?: string): void {
