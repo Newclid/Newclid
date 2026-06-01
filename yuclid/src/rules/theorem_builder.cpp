@@ -18,11 +18,23 @@ namespace Yuclid {
         conclusions.reserve(schema.conclusions.size());
 
         for(const auto &pattern : schema.hypotheses) {
-            hypothesis.push_back(build_statement_from_pattern(pattern, mapping));
+            auto results = build_statements_from_pattern(pattern, mapping);
+            
+            hypothesis.insert(
+                hypothesis.end(),
+                std::make_move_iterator(results.begin()),
+                std::make_move_iterator(results.end())
+            );
         }
 
         for(const auto &pattern : schema.conclusions) {
-            conclusions.push_back(build_statement_from_pattern(pattern, mapping));
+            auto results = build_statements_from_pattern(pattern, mapping);
+            
+            conclusions.insert(
+                conclusions.end(),
+                std::make_move_iterator(results.begin()),
+                std::make_move_iterator(results.end())
+            );
         }
 
         //RuleSchema doesn't have a dedicated display name, so we use the schema id for that
