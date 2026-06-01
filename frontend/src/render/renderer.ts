@@ -168,6 +168,20 @@ export class Renderer {
       const s2 = this.viewport.worldToScreen(world(p2.x, p2.y));
       this.line(s1.x, s1.y, s2.x, s2.y, '#888', 1.5);  // construction color
     }
+    // Draw lines: through both points, extended in both directions.
+    for (const [p1Id, p2Id] of o.lines ?? []) {
+      const p1 = this.scene.objects.get(p1Id);
+      const p2 = this.scene.objects.get(p2Id);
+      if (p1?.kind !== 'point' || p2?.kind !== 'point') continue;
+      const s1 = this.viewport.worldToScreen(world(p1.x, p1.y));
+      const s2 = this.viewport.worldToScreen(world(p2.x, p2.y));
+      const dx = s2.x - s1.x, dy = s2.y - s1.y;
+      const len = Math.hypot(dx, dy);
+      if (len < 1e-6) continue;
+      const ext = 10000;
+      const nx = (dx / len) * ext, ny = (dy / len) * ext;
+      this.line(s1.x - nx, s1.y - ny, s1.x + nx, s1.y + ny, '#888', 1.5);
+    }
     // Draw circles
     for (const circ of o.circles) {
       const c = this.scene.objects.get(circ.center);
