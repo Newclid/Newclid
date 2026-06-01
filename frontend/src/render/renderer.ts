@@ -49,7 +49,6 @@ export class Renderer {
     this.svg.style.background = STYLE.background;
     this.svg.style.display = 'block';
     this.container.appendChild(this.svg);
-    this.container.style.position = 'relative';
     this._proofCanvas = document.createElement('canvas');
     this._proofCanvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;display:none';
     this.container.appendChild(this._proofCanvas);
