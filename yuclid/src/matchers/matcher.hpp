@@ -12,6 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Moved the theorem matcher into the matchers namespace
+   directory and extended its interface to accept custom rule schemas.
 */
 #pragma once
 #include <boost/container_hash/hash.hpp>

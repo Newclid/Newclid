@@ -12,6 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Updated matcher includes after reorganizing the theorem
+   matcher into the matchers directory.
 */
 #include "matchers/matcher.hpp"
 #include "problem.hpp"
