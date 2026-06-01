@@ -54,7 +54,7 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     buildJgex: (ns) => `cyclic ${ns.join(' ')}`,
   },
   {
-    id: 'midp', label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '–·–',
+    id: 'midpoint', label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '–·–',
     slotLabels: ['M', 'A', 'B'],
     slotGroups: [{ label: 'Midpoint', count: 1 }, { label: 'Segment', count: 2 }],
     buildJgex: (ns) => `midpoint ${ns.join(' ')}`,
@@ -330,7 +330,7 @@ export function createProofByPointsPanel(
       id ? (nameTable.get(id) ?? '?') : `[${labels[i]}]`,
     );
     const previewText = (setupJgex ? setupJgex + ' ' : '') +
-      `? ${goalJgex ?? selectedPredicate.id + ' ' + partialNames.join(' ')}`;
+      `? ${goalJgex ?? selectedPredicate.buildJgex(partialNames)}`;
 
     const previewSection = el('div', { class: 'goal-preview-section' });
     previewSection.appendChild(el('div', { class: 'proof-section-title' }, ['JGEX Preview:']));
