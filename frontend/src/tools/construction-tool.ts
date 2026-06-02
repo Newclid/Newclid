@@ -78,7 +78,11 @@ export class ConstructionTool implements Tool {
     // Layer 2: per-slot aux geometry + cursor preview.
     if (slot.kind === 'derive') {
       for (const aux of slot.preview(this.bindings, ctx.scene)) {
-        previews.push({ kind: 'auxLine', from: aux.from, to: aux.to });
+        if (aux.kind === 'auxLine') {
+          previews.push({ kind: 'auxLine', from: aux.from, to: aux.to });
+        } else if (aux.kind === 'circle') {
+          previews.push({ kind: 'rubberCircle', center: aux.center, radiusVec: aux.through });
+        }
       }
       const projected = slot.project(this.bindings, ctx.scene, ctx.world);
       previews.push({ kind: 'highlightPoint', pos: { x: projected.x, y: projected.y } });
@@ -86,6 +90,15 @@ export class ConstructionTool implements Tool {
       previews.push(...snapHighlight(ctx));
     }
     // scalar: nothing to preview — falls through.
+
+    // Layer 3: entry-level live preview (e.g. the circle a final point forms).
+    for (const p of this.catalogEntry.preview?.(this.bindings, ctx.scene, ctx.world) ?? []) {
+      if (p.kind === 'auxLine') {
+        previews.push({ kind: 'auxLine', from: p.from, to: p.to });
+      } else if (p.kind === 'circle') {
+        previews.push({ kind: 'rubberCircle', center: p.center, radiusVec: p.through });
+      }
+    }
 
     return previews;
   }

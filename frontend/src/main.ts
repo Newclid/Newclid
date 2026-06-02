@@ -10,7 +10,8 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
-import { parseJgexGeometry } from './emit/jgexParser';
+import { geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
+import type { ConstructionMarker } from './emit/jgexParser';
 import { buildNameTable } from './emit/names';
 import { TERMINAL_STATUSES } from './api/types';
 import type { JobResultPayload, SketchPoint } from './api/types';
@@ -163,13 +164,34 @@ appStore.subscribe(() => {
     const points: SketchPoint[] = userPoints.length > 0
       ? userPoints
       : normalizeSketchPoints(result?.sketch_points ?? []);
+    const sections = result?.proof_sections;
+    const markers = [
+      ...new Set([
+        ...(sections?.construction_signatures ?? []),
+        ...(sections?.step_signatures ?? []),
+        ...(sections?.goal_signatures ?? []),
+      ]),
+    ]
+      .map(parseConstructionSignature)
+      .filter((m): m is ConstructionMarker => m !== null);
+    const geometry = [
+      ...parseJgexGeometry(problem),
+      ...geomFromSignatures([...new Set(sections?.construction_signatures ?? [])]),
+    ];
+    const extraGeometry = geomFromSignatures([
+      ...new Set([
+        ...(sections?.step_signatures ?? []),
+        ...(sections?.goal_signatures ?? []),
+      ]),
+    ]);
     renderer.proofSketch = points.length > 0
-      ? { points, geometry: parseJgexGeometry(problem) }
+      ? { points, geometry, extraGeometry, markers }
       : null;
     if (renderer.proofSketch && userPoints.length === 0) {
       viewport.fitPoints(renderer.proofSketch.points);
     }
   } else {
+    lastJobResult = null;
     renderer.proofSketch = null;
   }
   requestRedraw();
