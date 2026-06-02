@@ -25,6 +25,8 @@ export interface ConstructionObject {
   // Full lines through the two points, extended infinitely in both directions.
   lines?: Array<[ObjectId, ObjectId]>;
   circles: Array<{ center: ObjectId; radius: number }>;  // circles to draw
+  // Circles through three points; the renderer derives center and radius.
+  circumcircles?: Array<[ObjectId, ObjectId, ObjectId]>;
 }
 
 // Mode-tagged: 'center-through' is the variant in scope here. The
