@@ -398,6 +398,7 @@ export class Renderer {
   ): void {
     ctx.strokeStyle = STYLE.markerColor;
     ctx.lineWidth = 1.5;
+    ctx.beginPath();
     for (const marker of markers) {
       switch (marker.kind) {
         case 'midp': {
@@ -428,11 +429,9 @@ export class Renderer {
           const c1x = si.x + s * uABx, c1y = si.y + s * uABy;
           const c2x = c1x + s * uCDx, c2y = c1y + s * uCDy;
           const c3x = si.x + s * uCDx, c3y = si.y + s * uCDy;
-          ctx.beginPath();
           ctx.moveTo(c1x, c1y);
           ctx.lineTo(c2x, c2y);
           ctx.lineTo(c3x, c3y);
-          ctx.stroke();
           break;
         }
         case 'cong': {
@@ -455,6 +454,7 @@ export class Renderer {
           break;
       }
     }
+    ctx.stroke();
   }
 
   private canvasPoints(ctx: CanvasRenderingContext2D, points: SketchPoint[]): void {
@@ -512,10 +512,8 @@ function canvasTickMark(
   const len = Math.hypot(dx, dy);
   if (len < 1e-6) return;
   const px = -dy / len, py = dx / len;
-  ctx.beginPath();
   ctx.moveTo(mx - halfLen * px, my - halfLen * py);
   ctx.lineTo(mx + halfLen * px, my + halfLen * py);
-  ctx.stroke();
 }
 
 function canvasChevron(
@@ -536,12 +534,10 @@ function canvasChevron(
   const tx = mx + arm * ux, ty = my + arm * uy;
   const l1x = mx - arm * ux + arm * vx, l1y = my - arm * uy + arm * vy;
   const l2x = mx - arm * ux - arm * vx, l2y = my - arm * uy - arm * vy;
-  ctx.beginPath();
   ctx.moveTo(l1x, l1y);
   ctx.lineTo(tx, ty);
   ctx.moveTo(l2x, l2y);
   ctx.lineTo(tx, ty);
-  ctx.stroke();
 }
 
 // -------- pure helpers, no SVG, no class --------
