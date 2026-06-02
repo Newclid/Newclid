@@ -57,7 +57,7 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     id: 'midpoint', label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '–·–',
     slotLabels: ['M', 'A', 'B'],
     slotGroups: [{ label: 'Midpoint', count: 1 }, { label: 'Segment', count: 2 }],
-    buildJgex: (ns) => `midpoint ${ns.join(' ')}`,
+    buildJgex: (ns) => `midp ${ns.join(' ')}`,
   },
   {
     id: 'eqangle', label: 'Equal Angles', shorthand: '∠(AB,CD) = ∠(EF,GH)', icon: '∠',
