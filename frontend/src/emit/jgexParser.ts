@@ -1,3 +1,15 @@
+export interface ConstructionMarker {
+  kind: string;
+  args: string[];
+}
+
+export function parseConstructionSignature(sig: string): ConstructionMarker | null {
+  const parts = sig.trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return null;
+  const [kind, ...args] = parts;
+  return { kind, args };
+}
+
 export type SketchGeom =
   | { kind: 'segment';      p1: string; p2: string }
   | { kind: 'line';         p1: string; p2: string }
@@ -184,6 +196,64 @@ function geomForConstruction(name: string, args: string[]): SketchGeom[] {
     default:
       return [];
   }
+}
+
+function geomForPredicate(kind: string, args: string[]): SketchGeom[] {
+  switch (kind) {
+    case 'midp': {
+      const [, a, b] = args;
+      return a && b ? [ln(a, b)] : [];
+    }
+    case 'coll': {
+      return args.length >= 2 ? [ln(args[0], args[1])] : [];
+    }
+    case 'perp':
+    case 'para': {
+      const [a, b, c, d] = args;
+      return a && b && c && d ? [ln(a, b), ln(c, d)] : [];
+    }
+    case 'cong': {
+      const [a, b, c, d] = args;
+      return a && b && c && d ? [seg(a, b), seg(c, d)] : [];
+    }
+    case 'eqangle': {
+      if (args.length < 8) return [];
+      const [a, b, c, d, e, f, g, h] = args;
+      return [ln(a, b), ln(c, d), ln(e, f), ln(g, h)];
+    }
+    case 'eqratio': {
+      if (args.length < 8) return [];
+      const [a, b, c, d, e, f, g, h] = args;
+      return [seg(a, b), seg(c, d), seg(e, f), seg(g, h)];
+    }
+    case 'cyclic': {
+      return args.length >= 3 ? [circumcirc(args[0], args[1], args[2])] : [];
+    }
+    case 'circle': {
+      return args.length >= 2 ? [circ(args[0], args[1])] : [];
+    }
+    case 'simtri':
+    case 'simtrir':
+    case 'contri':
+    case 'contrir': {
+      if (args.length < 6) return [];
+      const [a, b, c, d, e, f] = args;
+      return [...triangle(a, b, c), ...triangle(d, e, f)];
+    }
+    default:
+      return [];
+  }
+}
+
+export function geomFromSignatures(sigs: string[]): SketchGeom[] {
+  const result: SketchGeom[] = [];
+  for (const sig of sigs) {
+    const parts = sig.trim().split(/\s+/).filter(Boolean);
+    if (parts.length < 1) continue;
+    const [kind, ...args] = parts;
+    result.push(...geomForPredicate(kind, args));
+  }
+  return result;
 }
 
 export function parseJgexGeometry(jgex: string): SketchGeom[] {

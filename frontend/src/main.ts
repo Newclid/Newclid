@@ -10,7 +10,8 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
-import { parseJgexGeometry } from './emit/jgexParser';
+import { geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
+import type { ConstructionMarker } from './emit/jgexParser';
 import { TERMINAL_STATUSES } from './api/types';
 import type { SceneSnapshot } from './scene/scene';
 import './style.css';
@@ -112,6 +113,7 @@ function normalizeSketchPoints(
 
 let savedSceneSnapshot: SceneSnapshot | null = null;
 let wasInProofMode = false;
+let lastJobResult: unknown = null;
 
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
@@ -129,16 +131,40 @@ appStore.subscribe(() => {
 
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
-    const raw = job?.result?.sketch_points ?? [];
+    const result = job?.result;
+    if (result === lastJobResult) { requestRedraw(); return; }
+    lastJobResult = result;
+    const raw = result?.sketch_points ?? [];
     const sketchPoints = normalizeSketchPoints(raw);
     const problem = job?.problem ?? '';
+    const sections = result?.proof_sections;
+    const markers = [
+      ...new Set([
+        ...(sections?.construction_signatures ?? []),
+        ...(sections?.step_signatures ?? []),
+        ...(sections?.goal_signatures ?? []),
+      ]),
+    ]
+      .map(parseConstructionSignature)
+      .filter((m): m is ConstructionMarker => m !== null);
+    const geometry = [
+      ...parseJgexGeometry(problem),
+      ...geomFromSignatures([...new Set(sections?.construction_signatures ?? [])]),
+    ];
+    const extraGeometry = geomFromSignatures([
+      ...new Set([
+        ...(sections?.step_signatures ?? []),
+        ...(sections?.goal_signatures ?? []),
+      ]),
+    ]);
     renderer.proofSketch = sketchPoints.length > 0
-      ? { points: sketchPoints, geometry: parseJgexGeometry(problem) }
+      ? { points: sketchPoints, geometry, extraGeometry, markers }
       : null;
     if (renderer.proofSketch) {
       viewport.fitPoints(renderer.proofSketch.points);
     }
   } else {
+    lastJobResult = null;
     renderer.proofSketch = null;
   }
   requestRedraw();
