@@ -16,6 +16,16 @@ Additional attributions for this distribution:
     - Sponsored major refactoring to simplify architecture, decouple components, and align with mathematical terminology
     - Added animation output, GeoGebra support, standardized data formats, and plugin-based configuration system
 
+- Portions contributed by Petar Iliev
+
+  These modifications were made in 2026 as part of the TU Delft Computer
+  Science and Engineering Software Project, where the project team worked on
+  extending Newclid with support for user-defined rules.
+
+  Modifications:
+
+    - Added support for registering additional custom rules in the geometric
+      solver API and forwarding non-standard rules to the Yuclid engine adapter.
 
 Licensed under the Apache License, Version 2.0. You must preserve this NOTICE in redistributions.
 
