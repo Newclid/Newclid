@@ -1,5 +1,7 @@
 #include "matchers/rule_plan.hpp"
-#include "matchers/predicate_matching_metadata.hpp"
+
+#include <algorithm>
+#include <utility>
 
 namespace Yuclid {
 
@@ -35,10 +37,12 @@ namespace Yuclid {
             RulePlan &plan,
             const RulePredicatePattern &pattern
         ) {
+            const RuleSchema &plan_schema = *plan.schema;
+
             PlannedPredicate planned {
                 .pattern = pattern,
                 .metadata = predicate_matching_metadata(pattern.name),
-                .variables = extract_variables(*plan.schema, pattern),
+                .variables = extract_variables(plan_schema, pattern),
             };
 
             switch (planned.metadata.role) {
