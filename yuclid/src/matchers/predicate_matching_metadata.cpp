@@ -19,13 +19,6 @@ constexpr PredicateMetadataDefinition PREDICATE_METADATA_DEFINITIONS[] = {
     {"para", PredicateMatchingRole::CandidateGenerator, 30},
     {"perp", PredicateMatchingRole::CandidateGenerator, 30},
 
-    // Candidate filters.
-    // These predicates reject states once all required variables are assigned.
-    {"diff", PredicateMatchingRole::CandidateFilter, 50},
-    {"ncoll", PredicateMatchingRole::CandidateFilter, 50},
-    {"npara", PredicateMatchingRole::CandidateFilter, 60},
-    {"nperp", PredicateMatchingRole::CandidateFilter, 60},
-
     // Validators.
     // These predicates are used in the final step of theorem validation,
     // but are not used during optimized search yet.

@@ -39,6 +39,10 @@ enum class PredicateMatchingRole {
      * The predicate does not generate candidates, but can reject a matching
      * state once all variables used by the predicate are assigned.
      *
+     * Note: this example is here to demonstrate how in future it might work
+     * Currently no parser supports those predicates and Yuclid also doesn't support
+     * them anywhere so for now such example is not possible
+     *
      * Example predicates:
      *   diff, ncoll, npara, nperp
      *
