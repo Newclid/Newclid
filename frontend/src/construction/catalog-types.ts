@@ -5,9 +5,10 @@ import type { WorldPoint } from '../geometry/coords';
 // Bindings: maps slot name → picked ObjectId or computed scalar value.
 export type Bindings = Record<string, ObjectId | number>;
 
-// Aux geometry shown while a `derive` slot is active.
+// Aux geometry shown while a construction is in progress.
 export type DerivePreview =
-  | { kind: 'auxLine'; from: WorldPoint; to: WorldPoint };
+  | { kind: 'auxLine'; from: WorldPoint; to: WorldPoint }
+  | { kind: 'circle'; center: { x: number; y: number }; through: { x: number; y: number } };
 
 // One input step in a construction
 export type SlotSpec =
@@ -48,6 +49,9 @@ export interface CatalogEntry {
   sketch: (b: Bindings, scene: Scene) => Omit<ConstructionObject, 'id'>;
   // Optional guard. Returns null = OK, string = error message to console.warn.
   validate?: (b: Bindings, scene: Scene) => string | null;
+  // Optional live preview while the construction is in progress, given the
+  // current cursor — e.g. the circle a final point would form.
+  preview?: (b: Bindings, scene: Scene, cursor: WorldPoint) => DerivePreview[];
 }
 
 

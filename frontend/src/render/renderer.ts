@@ -173,45 +173,67 @@ export class Renderer {
   }
 
   private drawConstructions(): void {
-    for (const o of this.scene.objects.values()) {
-      if (o.kind !== 'construction') continue;
-      for (const [p1Id, p2Id] of o.edges) {
-        const p1 = this.scene.objects.get(p1Id);
-        const p2 = this.scene.objects.get(p2Id);
-        if (p1?.kind !== 'point' || p2?.kind !== 'point') continue;
-        const s1 = this.viewport.worldToScreen(world(p1.x, p1.y));
-        const s2 = this.viewport.worldToScreen(world(p2.x, p2.y));
-        this.line(s1.x, s1.y, s2.x, s2.y, '#888', 1.5);
-      }
-      for (const [p1Id, p2Id] of o.lines ?? []) {
-        const p1 = this.scene.objects.get(p1Id);
-        const p2 = this.scene.objects.get(p2Id);
-        if (p1?.kind !== 'point' || p2?.kind !== 'point') continue;
-        const s1 = this.viewport.worldToScreen(world(p1.x, p1.y));
-        const s2 = this.viewport.worldToScreen(world(p2.x, p2.y));
-        const dx = s2.x - s1.x, dy = s2.y - s1.y;
-        const len = Math.hypot(dx, dy);
-        if (len < 1e-6) continue;
-        const ext = 10000;
-        const nx = (dx / len) * ext, ny = (dy / len) * ext;
-        this.line(s1.x - nx, s1.y - ny, s1.x + nx, s1.y + ny, '#888', 1.5);
-      }
-      for (const circ of o.circles) {
-        const c = this.scene.objects.get(circ.center);
-        if (c?.kind !== 'point') continue;
-        const sc = this.viewport.worldToScreen(world(c.x, c.y));
-        const r = circ.radius * this.viewport.scale;
-        const el = document.createElementNS(SVG_NS, 'circle');
-        el.setAttribute('cx', String(sc.x));
-        el.setAttribute('cy', String(sc.y));
-        el.setAttribute('r', String(r));
-        el.setAttribute('fill', 'none');
-        el.setAttribute('stroke', '#888');
-        el.setAttribute('stroke-width', '1.5');
-        this.svg.appendChild(el);
-      }
+  for (const o of this.scene.objects.values()) {
+    if (o.kind !== 'construction') continue;
+    // Draw edges
+    for (const [p1Id, p2Id] of o.edges) {
+      const p1 = this.scene.objects.get(p1Id);
+      const p2 = this.scene.objects.get(p2Id);
+      if (p1?.kind !== 'point' || p2?.kind !== 'point') continue;
+      const s1 = this.viewport.worldToScreen(world(p1.x, p1.y));
+      const s2 = this.viewport.worldToScreen(world(p2.x, p2.y));
+      this.line(s1.x, s1.y, s2.x, s2.y, '#888', 1.5);  // construction color
+    }
+    // Draw lines: through both points, extended in both directions.
+    for (const [p1Id, p2Id] of o.lines ?? []) {
+      const p1 = this.scene.objects.get(p1Id);
+      const p2 = this.scene.objects.get(p2Id);
+      if (p1?.kind !== 'point' || p2?.kind !== 'point') continue;
+      const s1 = this.viewport.worldToScreen(world(p1.x, p1.y));
+      const s2 = this.viewport.worldToScreen(world(p2.x, p2.y));
+      const dx = s2.x - s1.x, dy = s2.y - s1.y;
+      const len = Math.hypot(dx, dy);
+      if (len < 1e-6) continue;
+      const ext = 10000;
+      const nx = (dx / len) * ext, ny = (dy / len) * ext;
+      this.line(s1.x - nx, s1.y - ny, s1.x + nx, s1.y + ny, '#888', 1.5);
+    }
+    // Draw circles
+    for (const circ of o.circles) {
+      const c = this.scene.objects.get(circ.center);
+      if (c?.kind !== 'point') continue;
+      const sc = this.viewport.worldToScreen(world(c.x, c.y));
+      const r = circ.radius * this.viewport.scale;
+      const el = document.createElementNS(SVG_NS, 'circle');
+      el.setAttribute('cx', String(sc.x));
+      el.setAttribute('cy', String(sc.y));
+      el.setAttribute('r', String(r));
+      el.setAttribute('fill', 'none');
+      el.setAttribute('stroke', '#888');
+      el.setAttribute('stroke-width', '1.5');
+      this.svg.appendChild(el);
+    }
+    // Draw circumcircles: the circle through three points.
+    for (const [p1Id, p2Id, p3Id] of o.circumcircles ?? []) {
+      const p1 = this.scene.objects.get(p1Id);
+      const p2 = this.scene.objects.get(p2Id);
+      const p3 = this.scene.objects.get(p3Id);
+      if (p1?.kind !== 'point' || p2?.kind !== 'point' || p3?.kind !== 'point') continue;
+      const cc = circumcenter(p1, p2, p3);
+      if (!cc) continue;
+      const sc = this.viewport.worldToScreen(world(cc.x, cc.y));
+      const r = Math.hypot(p1.x - cc.x, p1.y - cc.y) * this.viewport.scale;
+      const el = document.createElementNS(SVG_NS, 'circle');
+      el.setAttribute('cx', String(sc.x));
+      el.setAttribute('cy', String(sc.y));
+      el.setAttribute('r', String(r));
+      el.setAttribute('fill', 'none');
+      el.setAttribute('stroke', '#888');
+      el.setAttribute('stroke-width', '1.5');
+      this.svg.appendChild(el);
     }
   }
+}
 
   private drawCircles(): void {
     for (const o of this.scene.objects.values()) {
