@@ -31,7 +31,10 @@ export interface ProofSketch {
   geometry: SketchGeom[];
   extraGeometry?: SketchGeom[];
   markers?: ConstructionMarker[];
+  ptMap?: Map<string, SketchPoint>;
 }
+
+type CachedPerp = ConstructionMarker & { _worldPos?: { x: number; y: number } | null };
 
 export class Renderer {
   readonly svg: SVGSVGElement;
@@ -40,6 +43,19 @@ export class Renderer {
 
   get proofSketch(): ProofSketch | null { return this._proofSketch; }
   set proofSketch(sketch: ProofSketch | null) {
+    if (sketch) {
+      sketch.ptMap = new Map(sketch.points.map(p => [p.name, p]));
+      for (const marker of sketch.markers ?? []) {
+        if (marker.kind === 'perp') {
+          const [a, b, c, d] = marker.args;
+          const pa = sketch.ptMap.get(a), pb = sketch.ptMap.get(b);
+          const pc = sketch.ptMap.get(c), pd = sketch.ptMap.get(d);
+          (marker as CachedPerp)._worldPos = (pa && pb && pc && pd)
+            ? lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y)
+            : null;
+        }
+      }
+    }
     this._proofSketch = sketch;
     this._proofCanvas.style.display = sketch ? 'block' : 'none';
   }
@@ -296,7 +312,7 @@ export class Renderer {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
 
-    const ptMap = new Map(sketch.points.map(p => [p.name, p]));
+    const ptMap = sketch.ptMap!;
 
     ctx.strokeStyle = '#888';
     ctx.lineWidth = 1.5;
@@ -385,11 +401,11 @@ export class Renderer {
           break;
         }
         case 'perp': {
+          const ix = (marker as CachedPerp)._worldPos;
+          if (!ix) break;
           const [a, b, c, d] = marker.args;
           const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
           if (!pa || !pb || !pc || !pd) break;
-          const ix = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
-          if (!ix) break;
           const si = this.viewport.worldToScreen(world(ix.x, ix.y));
           const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
           const sb = this.viewport.worldToScreen(world(pb.x, pb.y));

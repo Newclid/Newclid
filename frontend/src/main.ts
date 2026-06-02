@@ -113,6 +113,7 @@ function normalizeSketchPoints(
 
 let savedSceneSnapshot: SceneSnapshot | null = null;
 let wasInProofMode = false;
+let lastJobResult: unknown = null;
 
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
@@ -130,10 +131,13 @@ appStore.subscribe(() => {
 
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
-    const raw = job?.result?.sketch_points ?? [];
+    const result = job?.result;
+    if (result === lastJobResult) { requestRedraw(); return; }
+    lastJobResult = result;
+    const raw = result?.sketch_points ?? [];
     const sketchPoints = normalizeSketchPoints(raw);
     const problem = job?.problem ?? '';
-    const sections = job?.result?.proof_sections;
+    const sections = result?.proof_sections;
     const markers = [
       ...new Set([
         ...(sections?.construction_signatures ?? []),
@@ -160,6 +164,7 @@ appStore.subscribe(() => {
       viewport.fitPoints(renderer.proofSketch.points);
     }
   } else {
+    lastJobResult = null;
     renderer.proofSketch = null;
   }
   requestRedraw();
