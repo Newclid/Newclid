@@ -44,6 +44,8 @@ export class Renderer {
   get proofSketch(): ProofSketch | null { return this._proofSketch; }
   set proofSketch(sketch: ProofSketch | null) {
     if (sketch) {
+      sketch.geometry = deduplicateGeom(sketch.geometry);
+      if (sketch.extraGeometry) sketch.extraGeometry = deduplicateGeom(sketch.extraGeometry);
       sketch.ptMap = new Map(sketch.points.map(p => [p.name, p]));
       for (const marker of sketch.markers ?? []) {
         if (marker.kind === 'perp') {
@@ -586,6 +588,26 @@ function niceStep(raw: number): number {
 function isCloseToMultiple(x: number, step: number): boolean {
   const ratio = x / step;
   return Math.abs(ratio - Math.round(ratio)) < 1e-9;
+}
+
+function geomKey(g: SketchGeom): string {
+  if (g.kind === 'segment' || g.kind === 'line') {
+    const [a, b] = g.p1 < g.p2 ? [g.p1, g.p2] : [g.p2, g.p1];
+    return `${g.kind}:${a}:${b}`;
+  }
+  if (g.kind === 'circle') return `circle:${g.center}:${g.through}`;
+  const pts = [g.p1, g.p2, g.p3].sort().join(':');
+  return `circumcircle:${pts}`;
+}
+
+function deduplicateGeom(geoms: SketchGeom[]): SketchGeom[] {
+  const seen = new Set<string>();
+  return geoms.filter(g => {
+    const k = geomKey(g);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
 }
 
 function formatNumber(n: number): string {
