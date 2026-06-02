@@ -27,13 +27,21 @@ export const appStore = new AppStore();
 export const backendClient = new BackendClient('/api');
 export const jobPoller = new JobPoller(backendClient, appStore);
 
-const onJgexSubmit = async (jgex: string) => {
+const onCanvasProofSubmit = async (jgex: string) => {
   appStore.setProblem(jgex);
   const resp = await backendClient.submitJob(jgex);
   appStore.addJob(resp.job_id, jgex);
   jobPoller.start(resp.job_id);
 };
-const toolbar = createToolbar(scene, onJgexSubmit, appStore);
+
+// For the raw JGEX text dialog: clear any existing canvas drawing first so
+// the proof sketch uses the backend's coordinates rather than the old drawing.
+const onJgexTextSubmit = async (jgex: string) => {
+  scene.clear();
+  return onCanvasProofSubmit(jgex);
+};
+
+const toolbar = createToolbar(scene, onCanvasProofSubmit, appStore, onJgexTextSubmit);
 root.appendChild(toolbar.root);
 attachToolbarResizer({ app: root, toolbar: toolbar.root });
 
