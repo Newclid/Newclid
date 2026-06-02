@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from newclid_backend.runner_models import (
     NewclidProofSections,
     NewclidRunResult,
@@ -51,6 +54,21 @@ def test_newclid_run_result_serializes_proof_output() -> None:
     ]
     assert dumped["stdout"] == ""
     assert dumped["stderr"] == ""
+
+
+def test_sketch_point_accepts_non_empty_name() -> None:
+    point = SketchPoint(name="A", x=0.0, y=0.0)
+    assert point.name == "A"
+
+
+def test_sketch_point_rejects_empty_name() -> None:
+    with pytest.raises(ValidationError):
+        SketchPoint(name="", x=0.0, y=0.0)
+
+
+def test_sketch_point_rejects_whitespace_only_name() -> None:
+    with pytest.raises(ValidationError):
+        SketchPoint(name="  ", x=0.0, y=0.0)
 
 
 def test_newclid_run_result_defaults_to_empty_sketch_points() -> None:
