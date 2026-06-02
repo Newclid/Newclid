@@ -94,6 +94,11 @@ function geomForConstruction(name: string, args: string[]): SketchGeom[] {
       const [x, y, a, b] = args;
       return [ln(x, y), ln(a, b)];
     }
+    case 'angle_bisector': {
+      // x a b c → arms b,a and b,c + bisector line through vertex b and x
+      const [x, a, b, c] = args;
+      return [ln(b, a), ln(b, c), ln(b, x)];
+    }
     case 'on_dia': {
       // x a b → line x,a + line x,b (right angle at x)
       const [x, a, b] = args;

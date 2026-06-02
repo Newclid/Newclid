@@ -33,6 +33,7 @@ class NewclidRunResult(BaseModel):
     # Solver statistics
     run_info: dict[str, Any] | None = None
 
+    # Points used by the frontend to draw the final sketch
     sketch_points: list[SketchPoint] = Field(default_factory=list)
 
     stdout: str = ""

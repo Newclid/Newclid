@@ -1,4 +1,8 @@
-from newclid_backend.runner_models import NewclidProofSections, NewclidRunResult
+from newclid_backend.runner_models import (
+    NewclidProofSections,
+    NewclidRunResult,
+    SketchPoint,
+)
 
 
 def test_newclid_run_result_serializes_proof_output() -> None:
@@ -19,6 +23,10 @@ def test_newclid_run_result_serializes_proof_output() -> None:
             "success": True,
             "steps": 1,
         },
+        sketch_points=[
+            SketchPoint(name="A", x=0.0, y=0.0),
+            SketchPoint(name="B", x=1.0, y=0.0),
+        ],
     )
 
     dumped = result.model_dump()
@@ -37,5 +45,19 @@ def test_newclid_run_result_serializes_proof_output() -> None:
         "success": True,
         "steps": 1,
     }
+    assert dumped["sketch_points"] == [
+        {"name": "A", "x": 0.0, "y": 0.0},
+        {"name": "B", "x": 1.0, "y": 0.0},
+    ]
     assert dumped["stdout"] == ""
     assert dumped["stderr"] == ""
+
+
+def test_newclid_run_result_defaults_to_empty_sketch_points() -> None:
+    result = NewclidRunResult(
+        status="failed",
+        message="Newclid failed.",
+    )
+
+    assert result.sketch_points == []
+    assert result.model_dump()["sketch_points"] == []
