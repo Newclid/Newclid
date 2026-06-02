@@ -11,7 +11,9 @@ import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
 import { parseJgexGeometry } from './emit/jgexParser';
+import { buildNameTable } from './emit/names';
 import { TERMINAL_STATUSES } from './api/types';
+import type { SketchPoint } from './api/types';
 import type { SceneSnapshot } from './scene/scene';
 import './style.css';
 
@@ -111,6 +113,7 @@ function normalizeSketchPoints(
 }
 
 let savedSceneSnapshot: SceneSnapshot | null = null;
+let savedSketchPoints: SketchPoint[] | null = null;
 let wasInProofMode = false;
 
 appStore.subscribe(() => {
@@ -118,24 +121,39 @@ appStore.subscribe(() => {
 
   if (proofMode && !wasInProofMode) {
     savedSceneSnapshot = scene.snapshot();
+    // Capture the user's point positions before clearing the scene so
+    // the proof sketch can render at the same coordinates the user drew.
+    const nameTable = buildNameTable(scene);
+    savedSketchPoints = [];
+    for (const obj of scene.objects.values()) {
+      if (obj.kind !== 'point') continue;
+      const name = nameTable.get(obj.id);
+      if (name) savedSketchPoints.push({ name, x: obj.x, y: obj.y });
+    }
     scene.clear();
   } else if (!proofMode && wasInProofMode) {
     if (savedSceneSnapshot) {
       scene.restore(savedSceneSnapshot);
       savedSceneSnapshot = null;
     }
+    savedSketchPoints = null;
   }
   wasInProofMode = proofMode;
 
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
-    const raw = job?.result?.sketch_points ?? [];
-    const sketchPoints = normalizeSketchPoints(raw);
     const problem = job?.problem ?? '';
-    renderer.proofSketch = sketchPoints.length > 0
-      ? { points: sketchPoints, geometry: parseJgexGeometry(problem) }
+    const userPoints = savedSketchPoints ?? [];
+    // Prefer the user's drawing coordinates. Fall back to backend coords
+    // (with normalisation + viewport fit) only for manually typed JGEX
+    // problems where the scene was empty when proof mode was entered.
+    const points: SketchPoint[] = userPoints.length > 0
+      ? userPoints
+      : normalizeSketchPoints(job?.result?.sketch_points ?? []);
+    renderer.proofSketch = points.length > 0
+      ? { points, geometry: parseJgexGeometry(problem) }
       : null;
-    if (renderer.proofSketch) {
+    if (renderer.proofSketch && userPoints.length === 0) {
       viewport.fitPoints(renderer.proofSketch.points);
     }
   } else {
