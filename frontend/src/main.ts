@@ -10,7 +10,7 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
-import { geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
+import { expandJgexPredicates, geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
 import type { ConstructionMarker } from './emit/jgexParser';
 import { TERMINAL_STATUSES } from './api/types';
 import type { SceneSnapshot } from './scene/scene';
@@ -27,9 +27,10 @@ export const backendClient = new BackendClient('/api');
 export const jobPoller = new JobPoller(backendClient, appStore);
 
 const onJgexSubmit = async (jgex: string) => {
-  appStore.setProblem(jgex);
-  const resp = await backendClient.submitJob(jgex);
-  appStore.addJob(resp.job_id, jgex);
+  const expanded = expandJgexPredicates(jgex);
+  appStore.setProblem(expanded);
+  const resp = await backendClient.submitJob(expanded);
+  appStore.addJob(resp.job_id, expanded);
   jobPoller.start(resp.job_id);
 };
 const toolbar = createToolbar(scene, onJgexSubmit, appStore);
