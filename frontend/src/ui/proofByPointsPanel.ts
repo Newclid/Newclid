@@ -187,18 +187,24 @@ export function createProofByPointsPanel(
     const nearest = pickNearestPoint(scene.objects, world(worldX, worldY), { tolerancePx: 12, scale });
     if (!nearest) return;
 
-    // Vacate any other slot that already holds this point.
-    const existing = slotAssignments.indexOf(nearest.id);
-    if (existing !== -1 && existing !== activeSlot) slotAssignments[existing] = null;
+    const groupIdx = getGroupForSlot(activeSlot);
 
-    // Restore the color of the point previously in this slot (if different).
+    // Vacate only slots in the SAME group that already hold this point —
+    // the same point is allowed across different groups (e.g. AB ∥ AC).
+    for (const groupSlot of getSlotsInSameGroup(activeSlot)) {
+      if (groupSlot !== activeSlot && slotAssignments[groupSlot] === nearest.id) {
+        slotAssignments[groupSlot] = null;
+      }
+    }
+
+    // Clear the point previously in this slot.
     const prevId = slotAssignments[activeSlot];
     if (prevId !== null && prevId !== nearest.id) {
       slotAssignments[activeSlot] = null;
-      unhighlightIfUnused(prevId);
+      updatePointHighlight(prevId);
     }
 
-    highlightPoint(nearest.id);
+    highlightPoint(nearest.id, GROUP_COLORS[groupIdx % GROUP_COLORS.length]);
     slotAssignments[activeSlot] = nearest.id;
 
     // Advance to the next unfilled slot.
@@ -239,7 +245,7 @@ export function createProofByPointsPanel(
       clearBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         slotAssignments[i] = null;
-        unhighlightIfUnused(assignedId);
+        updatePointHighlight(assignedId);
         activeSlot = i;
         render();
       });
@@ -342,7 +348,7 @@ export function createProofByPointsPanel(
           const lastId = slotAssignments[lastIdx];
           slotAssignments.pop();
           extraSlots--;
-          if (lastId !== null) unhighlightIfUnused(lastId);
+          if (lastId !== null) updatePointHighlight(lastId);
           if (activeSlot >= slotAssignments.length) activeSlot = slotAssignments.length - 1;
           render();
         });
