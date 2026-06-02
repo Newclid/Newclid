@@ -13,7 +13,7 @@ import { attachToolbarResizer } from './ui/toolbarResizer';
 import { parseJgexGeometry } from './emit/jgexParser';
 import { buildNameTable } from './emit/names';
 import { TERMINAL_STATUSES } from './api/types';
-import type { SketchPoint } from './api/types';
+import type { JobResultPayload, SketchPoint } from './api/types';
 import type { SceneSnapshot } from './scene/scene';
 import './style.css';
 
@@ -134,6 +134,7 @@ function normalizeSketchPoints(
 
 let savedSceneSnapshot: SceneSnapshot | null = null;
 let wasInProofMode = false;
+let lastJobResult: JobResultPayload | null | undefined;
 
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
@@ -151,6 +152,9 @@ appStore.subscribe(() => {
 
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
+    const result = job?.result;
+    if (result === lastJobResult) { requestRedraw(); return; }
+    lastJobResult = result;
     const problem = job?.problem ?? '';
     // Use the user's drawing coordinates stored at submission time.
     // Fall back to backend coords (with normalisation + viewport fit) only
@@ -158,7 +162,7 @@ appStore.subscribe(() => {
     const userPoints = job?.userSketchPoints ?? [];
     const points: SketchPoint[] = userPoints.length > 0
       ? userPoints
-      : normalizeSketchPoints(job?.result?.sketch_points ?? []);
+      : normalizeSketchPoints(result?.sketch_points ?? []);
     renderer.proofSketch = points.length > 0
       ? { points, geometry: parseJgexGeometry(problem) }
       : null;
