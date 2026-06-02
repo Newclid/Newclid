@@ -22,7 +22,9 @@ yuclid-compile-and-test-linux:
   interruptible: true
 
   rules:
-    - changes:
+    - exists:
+      - yuclid/tests/**/*
+      changes:
         - yuclid/**/*
         - .gitlab-ci.yml
     - when: never
@@ -171,6 +173,14 @@ backend-integration-tests-linux:
 
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - exists:
+      - backend/tests/integration/**/*
+      changes:
+        - backend/**/*
+        - yuclid/**/*
+        - pytest.ini
+        - uv.lock
+        - .gitlab-ci.yml
     - when: never
 
   variables:
