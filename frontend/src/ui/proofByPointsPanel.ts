@@ -106,21 +106,59 @@ export function createProofByPointsPanel(
     return [...base, ...extra];
   }
 
+  // ---- Group helpers ----
+
+  // One distinct color per slot-group so the user sees which points belong to which structure.
+  const GROUP_COLORS = ['#2A4A7F', '#8B3A2A', '#2A7A3A', '#7A5A1A'];
+
+  function getGroupForSlot(slotIndex: number): number {
+    if (!selectedPredicate?.slotGroups) return 0;
+    let offset = 0;
+    for (let g = 0; g < selectedPredicate.slotGroups.length; g++) {
+      offset += selectedPredicate.slotGroups[g].count;
+      if (slotIndex < offset) return g;
+    }
+    return selectedPredicate.slotGroups.length - 1;
+  }
+
+  function getSlotsInSameGroup(slotIndex: number): number[] {
+    if (!selectedPredicate?.slotGroups) {
+      // No groups defined → treat all slots as one group (no duplicates anywhere).
+      return slotAssignments.map((_, i) => i);
+    }
+    let offset = 0;
+    for (const group of selectedPredicate.slotGroups) {
+      const start = offset;
+      offset += group.count;
+      if (slotIndex < offset) {
+        return Array.from({ length: group.count }, (_, i) => start + i);
+      }
+    }
+    return [slotIndex];
+  }
+
   // ---- Highlight helpers ----
 
-  function highlightPoint(id: ObjectId): void {
+  function highlightPoint(id: ObjectId, color: string): void {
     if (!scene) return;
     const obj = scene.objects.get(id);
     if (!obj || obj.kind !== 'point') return;
     if (!originalColors.has(id)) originalColors.set(id, obj.color);
-    scene.setPointColor(id, '#2A4A7F');
+    scene.setPointColor(id, color);
   }
 
-  function unhighlightIfUnused(id: ObjectId): void {
-    const stillUsed = slotAssignments.some((sid) => sid === id);
-    if (!stillUsed && originalColors.has(id)) {
-      scene?.setPointColor(id, originalColors.get(id));
-      originalColors.delete(id);
+  // After a slot change, re-evaluate a point's color: restore original if it's
+  // no longer in any slot, or re-highlight with its remaining group's color.
+  function updatePointHighlight(id: ObjectId): void {
+    const remainingSlot = slotAssignments.findIndex((sid) => sid === id);
+    if (remainingSlot === -1) {
+      if (originalColors.has(id)) {
+        scene?.setPointColor(id, originalColors.get(id));
+        originalColors.delete(id);
+      }
+    } else {
+      const groupIdx = getGroupForSlot(remainingSlot);
+      scene?.setPointColor(id, GROUP_COLORS[groupIdx % GROUP_COLORS.length]);
     }
   }
 
