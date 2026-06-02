@@ -28,9 +28,21 @@ export const backendClient = new BackendClient('/api');
 export const jobPoller = new JobPoller(backendClient, appStore);
 
 const onCanvasProofSubmit = async (jgex: string) => {
+  // Capture user's point positions now, before the scene is cleared on proof-mode entry.
+  const nameTable = buildNameTable(scene);
+  const userSketchPoints: SketchPoint[] = [];
+  for (const obj of scene.objects.values()) {
+    if (obj.kind !== 'point') continue;
+    const name = nameTable.get(obj.id);
+    if (name) userSketchPoints.push({ name, x: obj.x, y: obj.y });
+  }
+
   appStore.setProblem(jgex);
   const resp = await backendClient.submitJob(jgex);
   appStore.addJob(resp.job_id, jgex);
+  if (userSketchPoints.length > 0) {
+    appStore.updateJob(resp.job_id, { userSketchPoints });
+  }
   jobPoller.start(resp.job_id);
 };
 
@@ -121,7 +133,6 @@ function normalizeSketchPoints(
 }
 
 let savedSceneSnapshot: SceneSnapshot | null = null;
-let savedSketchPoints: SketchPoint[] | null = null;
 let wasInProofMode = false;
 
 appStore.subscribe(() => {
@@ -129,32 +140,22 @@ appStore.subscribe(() => {
 
   if (proofMode && !wasInProofMode) {
     savedSceneSnapshot = scene.snapshot();
-    // Capture the user's point positions before clearing the scene so
-    // the proof sketch can render at the same coordinates the user drew.
-    const nameTable = buildNameTable(scene);
-    savedSketchPoints = [];
-    for (const obj of scene.objects.values()) {
-      if (obj.kind !== 'point') continue;
-      const name = nameTable.get(obj.id);
-      if (name) savedSketchPoints.push({ name, x: obj.x, y: obj.y });
-    }
     scene.clear();
   } else if (!proofMode && wasInProofMode) {
     if (savedSceneSnapshot) {
       scene.restore(savedSceneSnapshot);
       savedSceneSnapshot = null;
     }
-    savedSketchPoints = null;
   }
   wasInProofMode = proofMode;
 
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
     const problem = job?.problem ?? '';
-    const userPoints = savedSketchPoints ?? [];
-    // Prefer the user's drawing coordinates. Fall back to backend coords
-    // (with normalisation + viewport fit) only for manually typed JGEX
-    // problems where the scene was empty when proof mode was entered.
+    // Use the user's drawing coordinates stored at submission time.
+    // Fall back to backend coords (with normalisation + viewport fit) only
+    // for jobs submitted via raw JGEX text input (no canvas drawing).
+    const userPoints = job?.userSketchPoints ?? [];
     const points: SketchPoint[] = userPoints.length > 0
       ? userPoints
       : normalizeSketchPoints(job?.result?.sketch_points ?? []);

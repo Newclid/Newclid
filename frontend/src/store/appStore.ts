@@ -1,4 +1,4 @@
-import type { JobResultPayload, JobStatus } from '../api/types';
+import type { JobResultPayload, JobStatus, SketchPoint } from '../api/types';
 
 export interface JobRecord {
   jobId: string;
@@ -12,6 +12,9 @@ export interface JobRecord {
   result: JobResultPayload | null;
   error: string | null;
   submittedAt: number;
+  /** Point coordinates from the user's canvas drawing at submission time.
+   *  Undefined for jobs submitted via raw JGEX text input. */
+  userSketchPoints?: SketchPoint[];
 }
 
 export type PanelTab = 'toolbar' | 'proofs';
