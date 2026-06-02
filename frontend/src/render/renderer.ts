@@ -334,42 +334,48 @@ export class Renderer {
     geometry: SketchGeom[],
     ptMap: Map<string, SketchPoint>,
   ): void {
+    // Batch lines into one path
+    ctx.beginPath();
     for (const g of geometry) {
-      if (g.kind === 'segment') {
-        const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
-        if (!pa || !pb) continue;
-        const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
-        const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
-        ctx.beginPath();
-        ctx.moveTo(sa.x, sa.y);
-        ctx.lineTo(sb.x, sb.y);
-        ctx.stroke();
+      if (g.kind !== 'line') continue;
+      const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
+      if (!pa || !pb) continue;
+      const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+      const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+      const dx = sb.x - sa.x, dy = sb.y - sa.y;
+      const len = Math.hypot(dx, dy);
+      if (len < 1e-6) continue;
+      const ext = 10000;
+      const nx = (dx / len) * ext, ny = (dy / len) * ext;
+      ctx.moveTo(sa.x - nx, sa.y - ny);
+      ctx.lineTo(sa.x + nx, sa.y + ny);
+    }
+    ctx.stroke();
 
-      } else if (g.kind === 'line') {
-        const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
-        if (!pa || !pb) continue;
-        const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
-        const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
-        const dx = sb.x - sa.x, dy = sb.y - sa.y;
-        const len = Math.hypot(dx, dy);
-        if (len < 1e-6) continue;
-        const ext = 10000;
-        const nx = (dx / len) * ext, ny = (dy / len) * ext;
-        ctx.beginPath();
-        ctx.moveTo(sa.x - nx, sa.y - ny);
-        ctx.lineTo(sa.x + nx, sa.y + ny);
-        ctx.stroke();
+    // Batch segments into one path
+    ctx.beginPath();
+    for (const g of geometry) {
+      if (g.kind !== 'segment') continue;
+      const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2);
+      if (!pa || !pb) continue;
+      const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+      const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+      ctx.moveTo(sa.x, sa.y);
+      ctx.lineTo(sb.x, sb.y);
+    }
+    ctx.stroke();
 
-      } else if (g.kind === 'circle') {
+    // Batch circles into one path (moveTo arc-start prevents connecting lines between arcs)
+    ctx.beginPath();
+    for (const g of geometry) {
+      if (g.kind === 'circle') {
         const pc = ptMap.get(g.center), pt = ptMap.get(g.through);
         if (!pc || !pt) continue;
         const radiusWorld = Math.hypot(pt.x - pc.x, pt.y - pc.y);
         const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
         const r = radiusWorld * this.viewport.scale;
-        ctx.beginPath();
+        ctx.moveTo(sc.x + r, sc.y);
         ctx.arc(sc.x, sc.y, r, 0, 2 * Math.PI);
-        ctx.stroke();
-
       } else if (g.kind === 'circumcircle') {
         const pa = ptMap.get(g.p1), pb = ptMap.get(g.p2), pc = ptMap.get(g.p3);
         if (!pa || !pb || !pc) continue;
@@ -378,11 +384,11 @@ export class Renderer {
         const radiusWorld = Math.hypot(pa.x - cc.x, pa.y - cc.y);
         const sc = this.viewport.worldToScreen(world(cc.x, cc.y));
         const r = radiusWorld * this.viewport.scale;
-        ctx.beginPath();
+        ctx.moveTo(sc.x + r, sc.y);
         ctx.arc(sc.x, sc.y, r, 0, 2 * Math.PI);
-        ctx.stroke();
       }
     }
+    ctx.stroke();
   }
 
   private canvasMarkers(
