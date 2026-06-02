@@ -112,8 +112,9 @@ export interface ToolbarHandle {
 
 export function createToolbar(
   scene: Scene,
-  onJgexSubmit?: (jgex: string) => Promise<void>,
+  onCanvasProofSubmit?: (jgex: string) => Promise<void>,
   appStore?: AppStore,
+  onJgexTextSubmit?: (jgex: string) => Promise<void>,
 ): ToolbarHandle {
   const aside = el('aside', { class: 'toolbar' });
 
@@ -147,7 +148,7 @@ export function createToolbar(
 
   // ---------- create proof ----------
   // The JGEX input still exists; it is now reached through the choice modal.
-  const jgex = createJgexInput(onJgexSubmit);
+  const jgex = createJgexInput(onJgexTextSubmit ?? onCanvasProofSubmit);
   const proofChoice = createProofChoice({
     onJgex: () => jgex.open(),
     onPoints: () => appStore?.enterProofByPoints(),
@@ -174,8 +175,10 @@ export function createToolbar(
   // ---------- proof panel ----------
   const proofPanel = appStore ? createProofPanel(appStore) : null;
 
-  // ---------- proof-by-points plane (placeholder) ----------
-  const proofByPointsPanel = appStore ? createProofByPointsPanel(appStore) : null;
+  // ---------- proof-by-points plane ----------
+  const proofByPointsPanel = appStore
+    ? createProofByPointsPanel(appStore, scene, onCanvasProofSubmit)
+    : null;
 
   // ---------- panel tab switch (Toolbar | Proofs) ----------
   const panelTabSwitch = el('div', {

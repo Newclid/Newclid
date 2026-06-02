@@ -1,4 +1,4 @@
-import type { JobResultPayload, JobStatus } from '../api/types';
+import type { JobResultPayload, JobStatus, SketchPoint } from '../api/types';
 
 export interface JobRecord {
   jobId: string;
@@ -12,6 +12,9 @@ export interface JobRecord {
   result: JobResultPayload | null;
   error: string | null;
   submittedAt: number;
+  /** Point coordinates from the user's canvas drawing at submission time.
+   *  Undefined for jobs submitted via raw JGEX text input. */
+  userSketchPoints?: SketchPoint[];
 }
 
 export type PanelTab = 'toolbar' | 'proofs';
@@ -29,6 +32,8 @@ export class AppStore {
   proofByPointsMode = false;
   // Which section of the side panel is currently shown.
   panelTab: PanelTab = 'toolbar';
+  // Callback registered by proofByPointsPanel so canvas clicks route to the goal picker.
+  goalPickCallback: ((worldX: number, worldY: number, scale: number) => void) | null = null;
 
   private readonly listeners = new Set<() => void>();
 
@@ -75,7 +80,12 @@ export class AppStore {
 
   exitProofByPoints(): void {
     this.proofByPointsMode = false;
+    this.goalPickCallback = null;
     this.emit();
+  }
+
+  setGoalPickCallback(cb: ((worldX: number, worldY: number, scale: number) => void) | null): void {
+    this.goalPickCallback = cb;
   }
 
   setPanelTab(tab: PanelTab): void {

@@ -12,7 +12,9 @@ import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
 import { geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
 import type { ConstructionMarker } from './emit/jgexParser';
+import { buildNameTable } from './emit/names';
 import { TERMINAL_STATUSES } from './api/types';
+import type { JobResultPayload, SketchPoint } from './api/types';
 import type { SceneSnapshot } from './scene/scene';
 import './style.css';
 
@@ -26,13 +28,33 @@ export const appStore = new AppStore();
 export const backendClient = new BackendClient('/api');
 export const jobPoller = new JobPoller(backendClient, appStore);
 
-const onJgexSubmit = async (jgex: string) => {
+const onCanvasProofSubmit = async (jgex: string) => {
+  // Capture user's point positions now, before the scene is cleared on proof-mode entry.
+  const nameTable = buildNameTable(scene);
+  const userSketchPoints: SketchPoint[] = [];
+  for (const obj of scene.objects.values()) {
+    if (obj.kind !== 'point') continue;
+    const name = nameTable.get(obj.id);
+    if (name) userSketchPoints.push({ name, x: obj.x, y: obj.y });
+  }
+
   appStore.setProblem(jgex);
   const resp = await backendClient.submitJob(jgex);
   appStore.addJob(resp.job_id, jgex);
+  if (userSketchPoints.length > 0) {
+    appStore.updateJob(resp.job_id, { userSketchPoints });
+  }
   jobPoller.start(resp.job_id);
 };
-const toolbar = createToolbar(scene, onJgexSubmit, appStore);
+
+// For the raw JGEX text dialog: clear any existing canvas drawing first so
+// the proof sketch uses the backend's coordinates rather than the old drawing.
+const onJgexTextSubmit = async (jgex: string) => {
+  scene.clear();
+  return onCanvasProofSubmit(jgex);
+};
+
+const toolbar = createToolbar(scene, onCanvasProofSubmit, appStore, onJgexTextSubmit);
 root.appendChild(toolbar.root);
 attachToolbarResizer({ app: root, toolbar: toolbar.root });
 
@@ -113,7 +135,7 @@ function normalizeSketchPoints(
 
 let savedSceneSnapshot: SceneSnapshot | null = null;
 let wasInProofMode = false;
-let lastJobResult: unknown = null;
+let lastJobResult: JobResultPayload | null | undefined;
 
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
@@ -134,9 +156,14 @@ appStore.subscribe(() => {
     const result = job?.result;
     if (result === lastJobResult) { requestRedraw(); return; }
     lastJobResult = result;
-    const raw = result?.sketch_points ?? [];
-    const sketchPoints = normalizeSketchPoints(raw);
     const problem = job?.problem ?? '';
+    // Use the user's drawing coordinates stored at submission time.
+    // Fall back to backend coords (with normalisation + viewport fit) only
+    // for jobs submitted via raw JGEX text input (no canvas drawing).
+    const userPoints = job?.userSketchPoints ?? [];
+    const points: SketchPoint[] = userPoints.length > 0
+      ? userPoints
+      : normalizeSketchPoints(result?.sketch_points ?? []);
     const sections = result?.proof_sections;
     const markers = [
       ...new Set([
@@ -157,10 +184,10 @@ appStore.subscribe(() => {
         ...(sections?.goal_signatures ?? []),
       ]),
     ]);
-    renderer.proofSketch = sketchPoints.length > 0
-      ? { points: sketchPoints, geometry, extraGeometry, markers }
+    renderer.proofSketch = points.length > 0
+      ? { points, geometry, extraGeometry, markers }
       : null;
-    if (renderer.proofSketch) {
+    if (renderer.proofSketch && userPoints.length === 0) {
       viewport.fitPoints(renderer.proofSketch.points);
     }
   } else {
