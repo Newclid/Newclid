@@ -8,6 +8,19 @@ export function distanceToCircle(p: WorldPoint, center: WorldPoint, radius: numb
   return Math.abs(distance(p, center) - radius);
 }
 
+// Orthogonal projection of p onto the line through a and b (nearest point on the line).
+export function projectOntoLine(
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+  p: { x: number; y: number },
+): { x: number; y: number } {
+  const abx = b.x - a.x;
+  const aby = b.y - a.y;
+  const len2 = abx * abx + aby * aby;
+  const t = ((p.x - a.x) * abx + (p.y - a.y) * aby) / len2;
+  return { x: a.x + t * abx, y: a.y + t * aby };
+}
+
 // Center of the circle through three points, or null if they are collinear.
 export function circumcenter(
   p1: { x: number; y: number },

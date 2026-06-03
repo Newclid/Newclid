@@ -4,6 +4,7 @@ import { angleBisector } from "./entries/angle_bisector";
 import { line } from "./entries/line";
 import { segment } from "./entries/segment";
 import { circumcircle } from "./entries/circumcircle";
+import { onLine } from "./entries/on_line";
 
 export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [line.name]: line,
@@ -11,4 +12,5 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [midpoint.name]: midpoint,
   [angleBisector.name]: angleBisector,
   [circumcircle.name]: circumcircle,
+  [onLine.name]: onLine,
 };
