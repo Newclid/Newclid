@@ -7,6 +7,8 @@ import { circumcircle } from "./entries/circumcircle";
 import { perpendicular } from "./entries/perpendicular";
 import { parallel } from "./entries/parallel";
 import { foot } from "./entries/foot";
+import { parallelogram } from "./entries/parallelogram";
+import { equilateralTriangle } from "./entries/equilateral_triangle";
 
 export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [line.name]: line,
@@ -17,4 +19,6 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [perpendicular.name]: perpendicular,
   [parallel.name]: parallel,
   [foot.name]: foot,
+  [parallelogram.name]: parallelogram,
+  [equilateralTriangle.name]: equilateralTriangle,
 };
