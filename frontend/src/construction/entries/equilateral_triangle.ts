@@ -3,30 +3,31 @@ import type { ObjectId, PointObject } from '../../geometry/types-object';
 import { world } from '../../geometry/coords';
 import { iconWrap, svgEl } from '../../ui/icon-helpers';
 
+type Pt = { x: number; y: number };
+
 /**
-Apex of the equilateral triangle on base a-b, on whichever side of the base the
-cursor is. The apex sits on the perpendicular bisector at height (sqrt3/2)|ab|
-from the midpoint, so all three sides come out equal; the cursor only chooses
-up or down.
+The two equilateral apexes for base a-b: both sit on the perpendicular bisector
+at height (sqrt3/2)|ab| from the midpoint, one on each side, so either makes an
+equal-sided triangle.
 **/
-function equilateralApex(
-  a: { x: number; y: number },
-  b: { x: number; y: number },
-  cursor: { x: number; y: number },
-): { x: number; y: number } {
+function apexCandidates(a: Pt, b: Pt): { up: Pt; down: Pt } {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const len = Math.hypot(dx, dy);
   const mx = (a.x + b.x) / 2;
   const my = (a.y + b.y) / 2;
-  // Unit perpendicular to the base and the equilateral apex height.
-  const nx = -dy / len;
-  const ny = dx / len;
+  // Unit perpendicular to the base, scaled to the equilateral apex height.
   const h = (Math.sqrt(3) / 2) * len;
-  // Which half-plane is the cursor in? (0 falls through to the +n side.)
-  const cross = dx * (cursor.y - a.y) - dy * (cursor.x - a.x);
-  const side = cross < 0 ? -1 : 1;
-  return { x: mx + side * h * nx, y: my + side * h * ny };
+  const ox = (-dy / len) * h;
+  const oy = (dx / len) * h;
+  return { up: { x: mx + ox, y: my + oy }, down: { x: mx - ox, y: my - oy } };
+}
+
+// The apex on whichever side of the base the cursor is (0 falls through to up).
+function equilateralApex(a: Pt, b: Pt, cursor: Pt): Pt {
+  const { up, down } = apexCandidates(a, b);
+  const cross = (b.x - a.x) * (cursor.y - a.y) - (b.y - a.y) * (cursor.x - a.x);
+  return cross < 0 ? down : up;
 }
 
 /**
@@ -70,16 +71,18 @@ export const equilateralTriangle: CatalogEntry = {
   ],
   edges: [{ pointIds: ['a', 'b'] }],
   circles: [],
-  // While placing the apex, preview the two equal sides closing the triangle.
-  preview: (binds, scene, cursor) => {
+  // While placing the apex, preview both possible triangles so the user sees
+  // the apex can land above or below the base. The cursor-side apex is the one
+  // the derive slot highlights as the point to be placed.
+  preview: (binds, scene) => {
     const a = scene.objects.get(binds.a as ObjectId) as PointObject | undefined;
     const b = scene.objects.get(binds.b as ObjectId) as PointObject | undefined;
     if (!a || !b) return [];
-    const apex = equilateralApex(a, b, cursor);
-    return [
-      { kind: 'auxLine', from: world(a.x, a.y), to: world(apex.x, apex.y) },
-      { kind: 'auxLine', from: world(b.x, b.y), to: world(apex.x, apex.y) },
-    ];
+    const { up, down } = apexCandidates(a, b);
+    return [up, down].flatMap((apex) => [
+      { kind: 'auxLine' as const, from: world(a.x, a.y), to: world(apex.x, apex.y) },
+      { kind: 'auxLine' as const, from: world(b.x, b.y), to: world(apex.x, apex.y) },
+    ]);
   },
   sketch: (binds) => {
     const aId = binds.a as ObjectId;
