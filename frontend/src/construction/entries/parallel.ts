@@ -58,6 +58,11 @@ export const parallel: CatalogEntry = {
       circles: [],
     };
   },
+  // Tell the engine the new line is parallel to the reference line: on_pline
+  // defines q on the line through p parallel to a-b (clause: para q p a b).
+  jgex: [
+    { def: 'on_pline', signature: ['q', 'p', 'a', 'b'], produces: ['q'] },
+  ],
   // Commit the reference line once its two points are placed.
   onSlotFilled: drawReferenceLineOnSlotB,
   // Preview the parallel through the cursor; the reference line is already drawn.

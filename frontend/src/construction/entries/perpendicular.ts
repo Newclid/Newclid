@@ -64,6 +64,12 @@ export const perpendicular: CatalogEntry = {
       circles: [],
     };
   },
+  // Tell the engine the new line is perpendicular to the reference line:
+  // on_tline defines q on the line through p perpendicular to a-b (clause:
+  // perp q p a b).
+  jgex: [
+    { def: 'on_tline', signature: ['q', 'p', 'a', 'b'], produces: ['q'] },
+  ],
   // Commit the reference line once its two points are placed.
   onSlotFilled: drawReferenceLineOnSlotB,
   // Preview the perpendicular through the cursor; the reference line is already drawn.

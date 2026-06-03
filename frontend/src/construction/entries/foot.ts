@@ -73,6 +73,11 @@ export const foot: CatalogEntry = {
       circles: [],
     };
   },
+  // Tell the engine the foot is the perpendicular projection onto the line:
+  // foot defines f with perp f p a b and coll f a b.
+  jgex: [
+    { def: 'foot', signature: ['f', 'p', 'a', 'b'], produces: ['f'] },
+  ],
   // Commit the reference line once its two points are placed.
   onSlotFilled: drawReferenceLineOnSlotB,
   // Preview the drop from the cursor to its foot; the reference line is already drawn.
