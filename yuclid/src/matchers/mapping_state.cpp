@@ -85,4 +85,20 @@ namespace Yuclid {
 
         return variables;
     }
+
+    std::optional<RuleMapping> MappingState::to_rule_mapping() const {
+        if(!is_complete()) {
+            return std::nullopt;
+        }
+
+        RuleMapping rule_mapping;
+            
+        for(const std::string &variable : m_rule_variables) {
+            const std::optional<Point> &point = m_mapping.at(variable);
+
+            rule_mapping.emplace(variable, point.value());
+        }
+
+        return rule_mapping;
+    }
 }
