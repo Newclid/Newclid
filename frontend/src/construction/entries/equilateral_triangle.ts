@@ -63,19 +63,9 @@ export const equilateralTriangle: CatalogEntry = {
         const apex = equilateralApex(a, b, cursor);
         return world(apex.x, apex.y);
       },
-      /**
-      Guide line for the apex: the perpendicular bisector segment running between
-      the two candidate apexes, so the user sees the "up or down" track. Finite,
-      so it stays cheap to render.
-      **/
-      preview: (binds, scene) => {
-        const a = scene.objects.get(binds.a as ObjectId) as PointObject | undefined;
-        const b = scene.objects.get(binds.b as ObjectId) as PointObject | undefined;
-        if (!a || !b) return [];
-        const up = equilateralApex(a, b, { x: a.x - (b.y - a.y), y: a.y + (b.x - a.x) });
-        const down = equilateralApex(a, b, { x: a.x + (b.y - a.y), y: a.y - (b.x - a.x) });
-        return [{ kind: 'auxLine', from: world(up.x, up.y), to: world(down.x, down.y) }];
-      },
+      // The two triangle sides already preview the apex (see entry-level
+      // preview below), so the derive slot draws no extra guide line.
+      preview: () => [],
     },
   ],
   edges: [{ pointIds: ['a', 'b'] }],
