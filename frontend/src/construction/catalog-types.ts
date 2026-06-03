@@ -54,8 +54,8 @@ export interface CatalogEntry {
   preview?: (b: Bindings, scene: Scene, cursor: WorldPoint) => DerivePreview[];
   /**
   Optional hook fired after each slot is bound, before the construction
-  finishes. Lets an entry emit intermediate objects, e.g. build the line as
-  soon as its two points are placed.
+  finishes. Lets an entry emit intermediate objects, e.g. build the reference
+  line as soon as its two points are placed.
   **/
   onSlotFilled?: (slotName: string, b: Bindings, scene: Scene) => void;
 }

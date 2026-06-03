@@ -48,7 +48,7 @@ export class ConstructionTool implements Tool {
 
     /**
     Let the entry emit intermediate geometry now that this slot is bound,
-    e.g. build the line once both of its points exist.
+    e.g. build the reference line once both of its points exist.
     **/
     this.catalogEntry.onSlotFilled?.(slot.name, this.bindings, ctx.scene);
 
