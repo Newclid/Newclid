@@ -52,6 +52,12 @@ export interface CatalogEntry {
   // Optional live preview while the construction is in progress, given the
   // current cursor — e.g. the circle a final point would form.
   preview?: (b: Bindings, scene: Scene, cursor: WorldPoint) => DerivePreview[];
+  /**
+  Optional hook fired after each slot is bound, before the construction
+  finishes. Lets an entry emit intermediate objects, e.g. build the line as
+  soon as its two points are placed.
+  **/
+  onSlotFilled?: (slotName: string, b: Bindings, scene: Scene) => void;
 }
 
 

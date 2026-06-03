@@ -1,8 +1,9 @@
 import type { CatalogEntry } from '../catalog-types';
 import type { ObjectId, PointObject } from '../../geometry/types-object';
-import { world } from '../../geometry/coords';
 import { projectOntoLine } from '../../geometry/primitives';
+import { world } from '../../geometry/coords';
 import { iconWrap, svgEl } from '../../ui/icon-helpers';
+import { line } from './line';
 
 /**
 Point on a line. Slots a and b set the line; slot p is a point constrained to
@@ -31,23 +32,9 @@ export const onLine: CatalogEntry = {
       name: 'p',
       kind: 'derive',
       label: 'Place the point on the line',
-      // Show the line while the point is being placed so its landing spot reads.
-      preview: (binds, scene) => {
-        const a = scene.objects.get(binds.a as ObjectId) as PointObject | undefined;
-        const b = scene.objects.get(binds.b as ObjectId) as PointObject | undefined;
-        if (!a || !b) return [];
-        const len = Math.hypot(b.x - a.x, b.y - a.y);
-        if (len < 1e-9) return [];
-        const ux = (b.x - a.x) / len;
-        const uy = (b.y - a.y) / len;
-        return [
-          {
-            kind: 'auxLine',
-            from: world(a.x - ux * len, a.y - uy * len),
-            to: world(b.x + ux * len, b.y + uy * len),
-          },
-        ];
-      },
+      // The line is already built (see onSlotFilled); the tool draws the
+      // highlight at the projected position, so no extra preview is needed.
+      preview: () => [],
       // Snap the cursor onto the line so the point is exactly on it, not near it.
       project: (binds, scene, cursor) => {
         const a = scene.objects.get(binds.a as ObjectId) as PointObject;
@@ -59,6 +46,11 @@ export const onLine: CatalogEntry = {
   ],
   edges: [],
   circles: [],
+  // Build the line as a real object once its two points are placed.
+  onSlotFilled: (slotName, binds, scene) => {
+    if (slotName !== 'b') return;
+    scene.addObject(line.sketch({ a: binds.a, b: binds.b }, scene));
+  },
   sketch: (binds) => {
     const aId = binds.a as ObjectId;
     const bId = binds.b as ObjectId;
@@ -68,7 +60,6 @@ export const onLine: CatalogEntry = {
       name: 'on_line',
       bindings: { a: aId, b: bId, p: pId },
       edges: [],
-      lines: [[aId, bId]],
       circles: [],
     };
   },
