@@ -46,6 +46,11 @@ export const onLine: CatalogEntry = {
   ],
   edges: [],
   circles: [],
+  // Tell the engine the point lies on the line: on_line defines p collinear
+  // with a and b (clause: coll p a b).
+  jgex: [
+    { def: 'on_line', signature: ['p', 'a', 'b'], produces: ['p'] },
+  ],
   // Build the line as a real object once its two points are placed.
   onSlotFilled: (slotName, binds, scene) => {
     if (slotName !== 'b') return;
