@@ -6,6 +6,7 @@ import { segment } from "./entries/segment";
 import { circumcircle } from "./entries/circumcircle";
 import { perpendicular } from "./entries/perpendicular";
 import { parallel } from "./entries/parallel";
+import { foot } from "./entries/foot";
 
 export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [line.name]: line,
@@ -15,4 +16,5 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [circumcircle.name]: circumcircle,
   [perpendicular.name]: perpendicular,
   [parallel.name]: parallel,
+  [foot.name]: foot,
 };
