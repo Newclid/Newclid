@@ -73,6 +73,10 @@ namespace Yuclid {
             add_planned_predicate(plan, hypothesis);
         }
 
+        for(const RulePredicatePattern &conclusion: schema.conclusions) {
+            add_planned_predicate(plan, conclusion);
+        }
+
         return plan;
     }
 
