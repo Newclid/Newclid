@@ -2,12 +2,13 @@ import type { CatalogEntry } from '../catalog-types';
 import type { ObjectId, PointObject } from '../../geometry/types-object';
 import { world } from '../../geometry/coords';
 import { iconWrap, svgEl } from '../../ui/icon-helpers';
+import { drawReferenceLineOnSlotB } from '../reference-line';
 
 /**
-Parallel line. Pick two points for the reference line, then a third point the
-new line runs through; the line through that point parallel to the reference
-is drawn. While placing the third point, both the reference line and the
-parallel preview live so you can see where it lands.
+Parallel line through a point. Slots a and b set the reference line; slot p
+is the point the parallel passes through. The reference line is committed
+once a and b are placed (see onSlotFilled), so sketch emits only the parallel
+through p.
 **/
 export const parallel: CatalogEntry = {
   name: 'parallel',
@@ -53,12 +54,13 @@ export const parallel: CatalogEntry = {
       name: 'parallel',
       bindings: { a: aId, b: bId, p: pId, q: qId },
       edges: [],
-      lines: [[aId, bId], [pId, qId]],
+      lines: [[pId, qId]],
       circles: [],
     };
   },
-  // While placing the through-point, preview the reference line and the
-  // parallel running through the cursor.
+  // Commit the reference line once its two points are placed.
+  onSlotFilled: drawReferenceLineOnSlotB,
+  // Preview the parallel through the cursor; the reference line is already drawn.
   preview: (binds, scene, cursor) => {
     const a = scene.objects.get(binds.a as ObjectId) as PointObject | undefined;
     const b = scene.objects.get(binds.b as ObjectId) as PointObject | undefined;
@@ -67,15 +69,9 @@ export const parallel: CatalogEntry = {
     if (len < 1e-9) return [];
     const ux = (b.x - a.x) / len;
     const uy = (b.y - a.y) / len;
-    // Keep the preview a short stub scaled to the reference length; the full
-    // infinite line is drawn only once the point is committed.
+    // Short stub scaled to the reference length; the full line is drawn on commit.
     const ext = len;
     return [
-      {
-        kind: 'auxLine',
-        from: world(a.x - ux * ext, a.y - uy * ext),
-        to: world(a.x + ux * ext, a.y + uy * ext),
-      },
       {
         kind: 'auxLine',
         from: world(cursor.x - ux * ext, cursor.y - uy * ext),
