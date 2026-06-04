@@ -19,6 +19,7 @@ const STYLE = {
   circleStroke: '#1A1816',
   circleStrokeWidth: 1.75,
   snapStroke: '#2A4A7F',
+  highlightStroke: '#C0392B',
   previewStroke: '#8C887F',
   previewStrokeWidth: 1.5,
   previewDash: '5 4',
@@ -351,14 +352,15 @@ export class Renderer {
     ctx.setLineDash([]);
 
     if (sketch.highlightGeometry?.length) {
-      ctx.strokeStyle = STYLE.snapStroke;
+      ctx.strokeStyle = STYLE.highlightStroke;
       ctx.lineWidth = 2.5;
       this.canvasGeometry(ctx, sketch.highlightGeometry, ptMap);
       ctx.strokeStyle = '#888';
       ctx.lineWidth = 1.5;
     }
 
-    if (sketch.markers?.length) this.canvasMarkers(ctx, sketch.markers, ptMap);
+    const markerColor = sketch.highlightGeometry?.length ? STYLE.highlightStroke : STYLE.markerColor;
+    if (sketch.markers?.length) this.canvasMarkers(ctx, sketch.markers, ptMap, markerColor);
 
     const highlightSet = sketch.highlightPoints?.length
       ? new Set(sketch.highlightPoints)
@@ -432,8 +434,9 @@ export class Renderer {
     ctx: CanvasRenderingContext2D,
     markers: ConstructionMarker[],
     ptMap: Map<string, SketchPoint>,
+    color = STYLE.markerColor,
   ): void {
-    ctx.strokeStyle = STYLE.markerColor;
+    ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     for (const marker of markers) {
@@ -487,6 +490,41 @@ export class Renderer {
           canvasChevron(ctx, this.viewport, pc, pd);
           break;
         }
+        case 'eqangle': {
+          if (marker.args.length < 8) break;
+          const [a, b, c, d, e, f, g, h] = marker.args;
+          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+          const pe = ptMap.get(e), pf = ptMap.get(f), pg = ptMap.get(g), ph = ptMap.get(h);
+          if (pa && pb && pc && pd) {
+            const v1 = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+            if (v1) {
+              const rayA = Math.hypot(pa.x - v1.x, pa.y - v1.y) > 1e-6 ? pa : pb;
+              const rayC = Math.hypot(pc.x - v1.x, pc.y - v1.y) > 1e-6 ? pc : pd;
+              canvasAngleArc(ctx, this.viewport, v1, rayA, rayC);
+            }
+          }
+          if (pe && pf && pg && ph) {
+            const v2 = lineIntersect(pe.x, pe.y, pf.x, pf.y, pg.x, pg.y, ph.x, ph.y);
+            if (v2) {
+              const rayE = Math.hypot(pe.x - v2.x, pe.y - v2.y) > 1e-6 ? pe : pf;
+              const rayG = Math.hypot(pg.x - v2.x, pg.y - v2.y) > 1e-6 ? pg : ph;
+              canvasAngleArc(ctx, this.viewport, v2, rayE, rayG);
+            }
+          }
+          break;
+        }
+        case 'aconst': {
+          if (marker.args.length < 4) break;
+          const [a, b, c, d] = marker.args;
+          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+          if (!pa || !pb || !pc || !pd) break;
+          const v = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+          if (!v) break;
+          const rayA = Math.hypot(pa.x - v.x, pa.y - v.y) > 1e-6 ? pa : pb;
+          const rayC = Math.hypot(pc.x - v.x, pc.y - v.y) > 1e-6 ? pc : pd;
+          canvasAngleArc(ctx, this.viewport, v, rayA, rayC);
+          break;
+        }
         default:
           break;
       }
@@ -499,7 +537,7 @@ export class Renderer {
     for (const p of points) {
       const highlighted = highlightSet?.has(p.name) ?? false;
       const s = this.viewport.worldToScreen(world(p.x, p.y));
-      ctx.fillStyle = highlighted ? STYLE.snapStroke : '#1a1a1a';
+      ctx.fillStyle = highlighted ? STYLE.highlightStroke : '#1a1a1a';
       ctx.beginPath();
       ctx.arc(s.x, s.y, highlighted ? 5.5 : 4.25, 0, 2 * Math.PI);
       ctx.fill();
@@ -576,6 +614,25 @@ function canvasChevron(
   ctx.lineTo(tx, ty);
   ctx.moveTo(l2x, l2y);
   ctx.lineTo(tx, ty);
+}
+
+function canvasAngleArc(
+  ctx: CanvasRenderingContext2D,
+  vp: Viewport,
+  vertex: { x: number; y: number },
+  pa: { x: number; y: number },
+  pb: { x: number; y: number },
+  arcR = 14,
+): void {
+  const sv = vp.worldToScreen(world(vertex.x, vertex.y));
+  const sa = vp.worldToScreen(world(pa.x, pa.y));
+  const sb = vp.worldToScreen(world(pb.x, pb.y));
+  const startA = Math.atan2(sa.y - sv.y, sa.x - sv.x);
+  let diff = Math.atan2(sb.y - sv.y, sb.x - sv.x) - startA;
+  if (diff > Math.PI) diff -= 2 * Math.PI;
+  if (diff < -Math.PI) diff += 2 * Math.PI;
+  ctx.moveTo(sv.x + arcR * Math.cos(startA), sv.y + arcR * Math.sin(startA));
+  ctx.arc(sv.x, sv.y, arcR, startA, startA + diff, diff < 0);
 }
 
 // -------- pure helpers, no SVG, no class --------
