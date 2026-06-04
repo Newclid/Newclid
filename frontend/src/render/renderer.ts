@@ -30,6 +30,8 @@ export interface ProofSketch {
   points: SketchPoint[];
   geometry: SketchGeom[];
   extraGeometry?: SketchGeom[];
+  highlightGeometry?: SketchGeom[];
+  highlightPoints?: string[];
   markers?: ConstructionMarker[];
   ptMap?: Map<string, SketchPoint>;
 }
@@ -46,6 +48,7 @@ export class Renderer {
     if (sketch) {
       sketch.geometry = deduplicateGeom(sketch.geometry);
       if (sketch.extraGeometry) sketch.extraGeometry = deduplicateGeom(sketch.extraGeometry);
+      if (sketch.highlightGeometry) sketch.highlightGeometry = deduplicateGeom(sketch.highlightGeometry);
       sketch.ptMap = new Map(sketch.points.map(p => [p.name, p]));
       for (const marker of sketch.markers ?? []) {
         if (marker.kind === 'perp') {
@@ -347,8 +350,20 @@ export class Renderer {
     this.canvasGeometry(ctx, sketch.extraGeometry ?? [], ptMap);
     ctx.setLineDash([]);
 
+    if (sketch.highlightGeometry?.length) {
+      ctx.strokeStyle = STYLE.snapStroke;
+      ctx.lineWidth = 2.5;
+      this.canvasGeometry(ctx, sketch.highlightGeometry, ptMap);
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1.5;
+    }
+
     if (sketch.markers?.length) this.canvasMarkers(ctx, sketch.markers, ptMap);
-    this.canvasPoints(ctx, sketch.points);
+
+    const highlightSet = sketch.highlightPoints?.length
+      ? new Set(sketch.highlightPoints)
+      : null;
+    this.canvasPoints(ctx, sketch.points, highlightSet);
   }
 
   private canvasGeometry(
@@ -479,13 +494,14 @@ export class Renderer {
     ctx.stroke();
   }
 
-  private canvasPoints(ctx: CanvasRenderingContext2D, points: SketchPoint[]): void {
-    ctx.fillStyle = '#1a1a1a';
+  private canvasPoints(ctx: CanvasRenderingContext2D, points: SketchPoint[], highlightSet?: Set<string> | null): void {
     ctx.font = 'italic 14px system-ui, sans-serif';
     for (const p of points) {
+      const highlighted = highlightSet?.has(p.name) ?? false;
       const s = this.viewport.worldToScreen(world(p.x, p.y));
+      ctx.fillStyle = highlighted ? STYLE.snapStroke : '#1a1a1a';
       ctx.beginPath();
-      ctx.arc(s.x, s.y, 4.25, 0, 2 * Math.PI);
+      ctx.arc(s.x, s.y, highlighted ? 5.5 : 4.25, 0, 2 * Math.PI);
       ctx.fill();
       ctx.fillText(displayPointName(p.name), s.x + 9, s.y - 9);
     }
