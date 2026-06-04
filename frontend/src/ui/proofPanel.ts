@@ -2,6 +2,19 @@ import { AppStore } from '../store/appStore';
 import type { NewclidProofSections } from '../api/types';
 import { el } from './dom';
 
+// Count the number of canvas-visible construction premise sub-steps in a raw proof step string.
+function countConstructionSubSteps(rawStep: string, constructionSigs: string[]): number {
+  const premiseSection = rawStep.match(/^\d+\.\s*\|\s*(.+?)\s*=\(/)?.[1] ?? '';
+  const regex = /\[C(\d+)\]/g;
+  let m;
+  let count = 0;
+  while ((m = regex.exec(premiseSection)) !== null) {
+    const cIdx = parseInt(m[1], 10);
+    if (cIdx >= 0 && cIdx < constructionSigs.length && constructionSigs[cIdx]) count++;
+  }
+  return count;
+}
+
 export interface ProofPanelHandle {
   root: HTMLElement;
   destroy(): void;
