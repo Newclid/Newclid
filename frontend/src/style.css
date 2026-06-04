@@ -662,6 +662,22 @@ body.is-resizing {
   word-break: break-word;
 }
 
+.proof-step-premise.is-active-substep {
+  background: rgba(200, 134, 10, 0.18);
+  color: #7A5000;
+  border-radius: 3px;
+  padding-left: 4px;
+  margin-left: -4px;
+}
+
+.proof-step-conclusion.is-active-substep {
+  background: rgba(26, 122, 26, 0.18);
+  color: #0A4A0A;
+  border-radius: 3px;
+  padding-left: 4px;
+  margin-left: -4px;
+}
+
 .proof-step-rule {
   font-family: var(--font-sans);
   font-size: 11px;

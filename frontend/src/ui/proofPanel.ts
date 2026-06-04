@@ -121,18 +121,15 @@ function buildStepNavigator(sections: NewclidProofSections, appStore: AppStore):
   nav.appendChild(nextBtn);
   section.appendChild(nav);
 
-  // Compute sub-steps for the current step.
-  const constructionSigs = sections.construction_signatures ?? [];
+  // Sub-step count = one per text premise + one for the conclusion.
   const rawStepText = steps[index] ?? '';
-  const premiseIndices = sections.step_premise_indices?.[index] ?? [];
-  const constructionSubStepCount = countConstructionSubSteps(rawStepText, constructionSigs);
-  const premiseSubStepCount = constructionSubStepCount + premiseIndices.length;
+  const premiseSubStepCount = countTextPremises(rawStepText);
   const conclusionSubStep = premiseSubStepCount;
   const rawSubStep = appStore.activeProofSubStepIndex ?? 0;
   const subStep = Math.max(0, Math.min(rawSubStep, conclusionSubStep));
 
-  // Build the step card and color its left border based on sub-step type.
-  const card = buildProofStepItem(steps[index]);
+  // Build the step card, highlighting the active premise/conclusion line.
+  const card = buildProofStepItem(steps[index], subStep);
   card.classList.add('is-active');
   card.classList.add(subStep < premiseSubStepCount ? 'is-substep-premise' : 'is-substep-conclusion');
 
