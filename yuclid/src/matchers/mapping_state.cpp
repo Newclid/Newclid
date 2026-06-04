@@ -102,6 +102,7 @@ namespace Yuclid {
 
     std::vector<RuleVariableIndex> MappingState::unassigned_variables() const {
         std::vector<RuleVariableIndex> result;
+        result.reserve(m_schema->variables.size());
 
         for(RuleVariableIndex curr = 0; curr < m_schema->variables.size(); curr++) {
             if(!is_assigned(curr)) result.push_back(curr);
