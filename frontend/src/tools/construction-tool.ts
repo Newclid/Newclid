@@ -21,8 +21,12 @@ export class ConstructionTool implements Tool {
     if (!slot) return;
 
     let pointId: ObjectId;
-    if (slot.kind === 'pick' || slot.kind === 'place-free') {
+    if (slot.kind === 'pick') {
       pointId = getOrCreatePoint(ctx);
+    } else if (slot.kind === 'place-free') {
+      // Always drop a fresh point at the cursor, never snapping to an existing
+      // one — this is the plain point-placement step.
+      pointId = ctx.scene.addPoint(ctx.world.x, ctx.world.y);
     } else if (slot.kind === 'derive') {
       // Project the cursor onto the constrained locus, then materialise a
       // fresh point at the projected position.
@@ -53,9 +57,10 @@ export class ConstructionTool implements Tool {
     this.catalogEntry.onSlotFilled?.(slot.name, this.bindings, ctx.scene);
 
     if (this.currentSlotIndex >= this.catalogEntry.slots.length) {
-      // Done: call sketch and add to scene
+      // Done: sketch may emit a final object, or null when the slots already
+      // created everything (e.g. a bare point).
       const obj = this.catalogEntry.sketch(this.bindings, ctx.scene);
-      ctx.scene.addObject(obj);
+      if (obj) ctx.scene.addObject(obj);
       this.reset();
     }
   }
@@ -94,10 +99,11 @@ export class ConstructionTool implements Tool {
       }
       const projected = slot.project(this.bindings, ctx.scene, ctx.world);
       previews.push({ kind: 'highlightPoint', pos: { x: projected.x, y: projected.y } });
-    } else if (slot.kind === 'pick' || slot.kind === 'place-free') {
+    } else if (slot.kind === 'pick') {
       previews.push(...snapHighlight(ctx));
     }
-    // scalar: nothing to preview — falls through.
+    // place-free always drops a new point (no snapping), scalar has no cursor
+    // geometry — both fall through with nothing to preview.
 
     // Layer 3: entry-level live preview (e.g. the circle a final point forms).
     for (const p of this.catalogEntry.preview?.(this.bindings, ctx.scene, ctx.world) ?? []) {

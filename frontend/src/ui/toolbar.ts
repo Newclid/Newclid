@@ -10,49 +10,6 @@ import { createProofsList } from './proofsList';
 import { createProofChoice } from './proofChoice';
 import { createProofByPointsPanel } from './proofByPointsPanel';
 
-function cursorIcon(): SVGSVGElement {
-  return iconWrap([
-    svgEl('path', {
-      d: 'M5 4 L5 18 L9 14 L11.5 19 L13.5 18 L11 13 L16 13 Z',
-      fill: 'currentColor',
-      stroke: 'currentColor',
-      'stroke-width': '1',
-      'stroke-linejoin': 'round',
-    }),
-  ]);
-}
-
-function pointIcon(): SVGSVGElement {
-  return iconWrap([
-    svgEl('circle', { cx: '11', cy: '11', r: '3', fill: 'currentColor' }),
-    svgEl(
-      'text',
-      {
-        x: '15',
-        y: '9',
-        'font-family': 'var(--font-display)',
-        'font-style': 'italic',
-        'font-size': '9',
-        fill: 'currentColor',
-      },
-      'A',
-    ),
-  ]);
-}
-
-function circleIcon(): SVGSVGElement {
-  return iconWrap([
-    svgEl('circle', {
-      cx: '11',
-      cy: '11',
-      r: '8',
-      fill: 'none',
-      stroke: 'currentColor',
-      'stroke-width': '1.6',
-    }),
-  ]);
-}
-
 function trashIcon(): SVGSVGElement {
   return iconWrap([
     svgEl('path', {
@@ -90,20 +47,13 @@ interface ToolEntry {
   icon: () => SVGSVGElement;
 }
 
-const tools: ToolEntry[] = [
-  { name: 'select', label: 'Select', shortcut: 'V', icon: cursorIcon },
-  { name: 'point', label: 'Point', shortcut: 'P', icon: pointIcon },
-  { name: 'circle', label: 'Circle', shortcut: 'C', icon: circleIcon },
-];
-
-for (const entry of Object.values(CONSTRUCTION_CATALOG)) {
-  tools.push({
-    name: entry.name,
-    label: entry.label,
-    shortcut: entry.shortcut,
-    icon: entry.icon,
-  });
-}
+// Every tool — select, point, circle included — comes from the catalog.
+const tools: ToolEntry[] = Object.values(CONSTRUCTION_CATALOG).map((entry) => ({
+  name: entry.name,
+  label: entry.label,
+  shortcut: entry.shortcut,
+  icon: entry.icon,
+}));
 
 export interface ToolbarHandle {
   root: HTMLElement;

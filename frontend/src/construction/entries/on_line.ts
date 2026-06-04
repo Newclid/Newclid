@@ -54,7 +54,8 @@ export const onLine: CatalogEntry = {
   // Build the line as a real object once its two points are placed.
   onSlotFilled: (slotName, binds, scene) => {
     if (slotName !== 'b') return;
-    scene.addObject(line.sketch({ a: binds.a, b: binds.b }, scene));
+    const obj = line.sketch({ a: binds.a, b: binds.b }, scene);
+    if (obj) scene.addObject(obj);
   },
   sketch: (binds) => {
     const aId = binds.a as ObjectId;
