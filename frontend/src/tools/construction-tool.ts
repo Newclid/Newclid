@@ -46,6 +46,12 @@ export class ConstructionTool implements Tool {
     this.bindings = tentative;
     this.currentSlotIndex++;
 
+    /**
+    Let the entry emit intermediate geometry now that this slot is bound,
+    e.g. build the reference line once both of its points exist.
+    **/
+    this.catalogEntry.onSlotFilled?.(slot.name, this.bindings, ctx.scene);
+
     if (this.currentSlotIndex >= this.catalogEntry.slots.length) {
       // Done: call sketch and add to scene
       const obj = this.catalogEntry.sketch(this.bindings, ctx.scene);
@@ -78,7 +84,11 @@ export class ConstructionTool implements Tool {
     // Layer 2: per-slot aux geometry + cursor preview.
     if (slot.kind === 'derive') {
       for (const aux of slot.preview(this.bindings, ctx.scene)) {
-        previews.push({ kind: 'auxLine', from: aux.from, to: aux.to });
+        if (aux.kind === 'auxLine') {
+          previews.push({ kind: 'auxLine', from: aux.from, to: aux.to });
+        } else if (aux.kind === 'circle') {
+          previews.push({ kind: 'rubberCircle', center: aux.center, radiusVec: aux.through });
+        }
       }
       const projected = slot.project(this.bindings, ctx.scene, ctx.world);
       previews.push({ kind: 'highlightPoint', pos: { x: projected.x, y: projected.y } });
@@ -86,6 +96,15 @@ export class ConstructionTool implements Tool {
       previews.push(...snapHighlight(ctx));
     }
     // scalar: nothing to preview — falls through.
+
+    // Layer 3: entry-level live preview (e.g. the circle a final point forms).
+    for (const p of this.catalogEntry.preview?.(this.bindings, ctx.scene, ctx.world) ?? []) {
+      if (p.kind === 'auxLine') {
+        previews.push({ kind: 'auxLine', from: p.from, to: p.to });
+      } else if (p.kind === 'circle') {
+        previews.push({ kind: 'rubberCircle', center: p.center, radiusVec: p.through });
+      }
+    }
 
     return previews;
   }
