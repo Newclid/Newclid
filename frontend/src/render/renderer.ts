@@ -8,6 +8,13 @@ import type { ConstructionMarker, SketchGeom } from '../emit/jgexParser';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+const PALETTE = [
+  '#e6194b','#3cb44b','#ffe119','#4363d8','#f58231','#911eb4',
+  '#31a8a8','#f032e6','#bcf60c','#fabebe','#008080','#e6beff',
+  '#9a6324','#fffac8','#800000','#aaffc3','#808000','#ffd8b1',
+  '#0000cd','#808080','#00ff73','#ffffff',
+];
+
 const STYLE = {
   background: '#fafafa',
   gridMinor: '#ececec',
@@ -450,6 +457,58 @@ export class Renderer {
     ptMap: Map<string, SketchPoint>,
     color = STYLE.markerColor,
   ): void {
+    const perpColor = color === STYLE.markerColor ? '#FFE100' : color;
+
+    // Pre-assign PALETTE colors to each angle/para marker in order
+    const markerPaletteColors: string[] = [];
+    let paletteIdx = 0;
+    for (const marker of markers) {
+      if (marker.kind === 'eqangle' || marker.kind === 'aconst' || marker.kind === 'para') {
+        markerPaletteColors.push(PALETTE[paletteIdx++ % PALETTE.length]);
+      } else {
+        markerPaletteColors.push('');
+      }
+    }
+
+    // Pass 1: filled wedges for angle markers
+    for (let i = 0; i < markers.length; i++) {
+      const marker = markers[i];
+      const fillColor = markerPaletteColors[i];
+      if (marker.kind === 'eqangle') {
+        if (marker.args.length < 8) continue;
+        const [a, b, c, d, e, f, g, h] = marker.args;
+        const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+        const pe = ptMap.get(e), pf = ptMap.get(f), pg = ptMap.get(g), ph = ptMap.get(h);
+        if (pa && pb && pc && pd) {
+          const v1 = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+          if (v1) {
+            const rayA = Math.hypot(pa.x - v1.x, pa.y - v1.y) > 1e-6 ? pa : pb;
+            const rayC = Math.hypot(pc.x - v1.x, pc.y - v1.y) > 1e-6 ? pc : pd;
+            canvasAngleWedgeFill(ctx, this.viewport, v1, rayA, rayC, fillColor);
+          }
+        }
+        if (pe && pf && pg && ph) {
+          const v2 = lineIntersect(pe.x, pe.y, pf.x, pf.y, pg.x, pg.y, ph.x, ph.y);
+          if (v2) {
+            const rayE = Math.hypot(pe.x - v2.x, pe.y - v2.y) > 1e-6 ? pe : pf;
+            const rayG = Math.hypot(pg.x - v2.x, pg.y - v2.y) > 1e-6 ? pg : ph;
+            canvasAngleWedgeFill(ctx, this.viewport, v2, rayE, rayG, fillColor);
+          }
+        }
+      } else if (marker.kind === 'aconst') {
+        if (marker.args.length < 4) continue;
+        const [a, b, c, d] = marker.args;
+        const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+        if (!pa || !pb || !pc || !pd) continue;
+        const v = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+        if (!v) continue;
+        const rayA = Math.hypot(pa.x - v.x, pa.y - v.y) > 1e-6 ? pa : pb;
+        const rayC = Math.hypot(pc.x - v.x, pc.y - v.y) > 1e-6 ? pc : pd;
+        canvasAngleWedgeFill(ctx, this.viewport, v, rayA, rayC, fillColor);
+      }
+    }
+
+    // Pass 2a: arc outlines (eqangle/aconst) + tick marks (midp/cong) — semantic color
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -463,45 +522,12 @@ export class Renderer {
           canvasTickMark(ctx, this.viewport, pm, pb, 12);
           break;
         }
-        case 'perp': {
-          const ix = (marker as CachedPerp)._worldPos;
-          if (!ix) break;
-          const [a, b, c, d] = marker.args;
-          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
-          if (!pa || !pb || !pc || !pd) break;
-          const si = this.viewport.worldToScreen(world(ix.x, ix.y));
-          const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
-          const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
-          const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
-          const sd = this.viewport.worldToScreen(world(pd.x, pd.y));
-          const lenAB = Math.hypot(sb.x - sa.x, sb.y - sa.y);
-          const lenCD = Math.hypot(sd.x - sc.x, sd.y - sc.y);
-          if (lenAB < 1e-6 || lenCD < 1e-6) break;
-          const uABx = (sb.x - sa.x) / lenAB, uABy = (sb.y - sa.y) / lenAB;
-          const uCDx = (sd.x - sc.x) / lenCD, uCDy = (sd.y - sc.y) / lenCD;
-          const s = STYLE.markerSize;
-          const c1x = si.x + s * uABx, c1y = si.y + s * uABy;
-          const c2x = c1x + s * uCDx, c2y = c1y + s * uCDy;
-          const c3x = si.x + s * uCDx, c3y = si.y + s * uCDy;
-          ctx.moveTo(c1x, c1y);
-          ctx.lineTo(c2x, c2y);
-          ctx.lineTo(c3x, c3y);
-          break;
-        }
         case 'cong': {
           const [a, b, c, d] = marker.args;
           const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
           if (!pa || !pb || !pc || !pd) break;
           canvasTickMark(ctx, this.viewport, pa, pb, 12);
           canvasTickMark(ctx, this.viewport, pc, pd, 12);
-          break;
-        }
-        case 'para': {
-          const [a, b, c, d] = marker.args;
-          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
-          if (!pa || !pb || !pc || !pd) break;
-          canvasChevron(ctx, this.viewport, pa, pb);
-          canvasChevron(ctx, this.viewport, pc, pd);
           break;
         }
         case 'eqangle': {
@@ -514,7 +540,7 @@ export class Renderer {
             if (v1) {
               const rayA = Math.hypot(pa.x - v1.x, pa.y - v1.y) > 1e-6 ? pa : pb;
               const rayC = Math.hypot(pc.x - v1.x, pc.y - v1.y) > 1e-6 ? pc : pd;
-              canvasAngleArc(ctx, this.viewport, v1, rayA, rayC);
+              canvasAngleArcPath(ctx, this.viewport, v1, rayA, rayC);
             }
           }
           if (pe && pf && pg && ph) {
@@ -522,7 +548,7 @@ export class Renderer {
             if (v2) {
               const rayE = Math.hypot(pe.x - v2.x, pe.y - v2.y) > 1e-6 ? pe : pf;
               const rayG = Math.hypot(pg.x - v2.x, pg.y - v2.y) > 1e-6 ? pg : ph;
-              canvasAngleArc(ctx, this.viewport, v2, rayE, rayG);
+              canvasAngleArcPath(ctx, this.viewport, v2, rayE, rayG);
             }
           }
           break;
@@ -536,7 +562,7 @@ export class Renderer {
           if (!v) break;
           const rayA = Math.hypot(pa.x - v.x, pa.y - v.y) > 1e-6 ? pa : pb;
           const rayC = Math.hypot(pc.x - v.x, pc.y - v.y) > 1e-6 ? pc : pd;
-          canvasAngleArc(ctx, this.viewport, v, rayA, rayC);
+          canvasAngleArcPath(ctx, this.viewport, v, rayA, rayC);
           break;
         }
         default:
@@ -544,6 +570,52 @@ export class Renderer {
       }
     }
     ctx.stroke();
+
+    // Pass 2b: perp squares — yellow in base mode, semantic color when highlighted/premise
+    ctx.strokeStyle = perpColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (const marker of markers) {
+      if (marker.kind !== 'perp') continue;
+      const ix = (marker as CachedPerp)._worldPos;
+      if (!ix) continue;
+      const [a, b, c, d] = marker.args;
+      const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+      if (!pa || !pb || !pc || !pd) continue;
+      const si = this.viewport.worldToScreen(world(ix.x, ix.y));
+      const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+      const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+      const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
+      const sd = this.viewport.worldToScreen(world(pd.x, pd.y));
+      const lenAB = Math.hypot(sb.x - sa.x, sb.y - sa.y);
+      const lenCD = Math.hypot(sd.x - sc.x, sd.y - sc.y);
+      if (lenAB < 1e-6 || lenCD < 1e-6) continue;
+      const uABx = (sb.x - sa.x) / lenAB, uABy = (sb.y - sa.y) / lenAB;
+      const uCDx = (sd.x - sc.x) / lenCD, uCDy = (sd.y - sc.y) / lenCD;
+      const s = STYLE.markerSize;
+      const c1x = si.x + s * uABx, c1y = si.y + s * uABy;
+      const c2x = c1x + s * uCDx, c2y = c1y + s * uCDy;
+      const c3x = si.x + s * uCDx, c3y = si.y + s * uCDy;
+      ctx.moveTo(c1x, c1y);
+      ctx.lineTo(c2x, c2y);
+      ctx.lineTo(c3x, c3y);
+    }
+    ctx.stroke();
+
+    // Pass 2c: para marks — offset parallel tick, PALETTE color per pair
+    for (let i = 0; i < markers.length; i++) {
+      const marker = markers[i];
+      if (marker.kind !== 'para') continue;
+      const [a, b, c, d] = marker.args;
+      const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+      if (!pa || !pb || !pc || !pd) continue;
+      ctx.strokeStyle = markerPaletteColors[i];
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      canvasParaMark(ctx, this.viewport, pa, pb);
+      canvasParaMark(ctx, this.viewport, pc, pd);
+      ctx.stroke();
+    }
   }
 
   private canvasPoints(
@@ -612,7 +684,7 @@ function canvasTickMark(
   ctx.lineTo(mx + halfLen * px, my + halfLen * py);
 }
 
-function canvasChevron(
+function canvasParaMark(
   ctx: CanvasRenderingContext2D,
   vp: Viewport,
   pa: { x: number; y: number },
@@ -620,23 +692,47 @@ function canvasChevron(
 ): void {
   const sa = vp.worldToScreen(world(pa.x, pa.y));
   const sb = vp.worldToScreen(world(pb.x, pb.y));
-  const mx = (sa.x + sb.x) / 2, my = (sa.y + sb.y) / 2;
   const dx = sb.x - sa.x, dy = sb.y - sa.y;
   const len = Math.hypot(dx, dy);
   if (len < 1e-6) return;
   const ux = dx / len, uy = dy / len;
-  const vx = -uy, vy = ux;
-  const arm = 12;
-  const tx = mx + arm * ux, ty = my + arm * uy;
-  const l1x = mx - arm * ux + arm * vx, l1y = my - arm * uy + arm * vy;
-  const l2x = mx - arm * ux - arm * vx, l2y = my - arm * uy - arm * vy;
-  ctx.moveTo(l1x, l1y);
-  ctx.lineTo(tx, ty);
-  ctx.moveTo(l2x, l2y);
-  ctx.lineTo(tx, ty);
+  const px = -uy, py = ux;
+  const offset = 10;
+  const tickLen = Math.min(len * 0.4, 32);
+  const mx = (sa.x + sb.x) / 2, my = (sa.y + sb.y) / 2;
+  const ox = mx + offset * px, oy = my + offset * py;
+  ctx.moveTo(ox - (tickLen / 2) * ux, oy - (tickLen / 2) * uy);
+  ctx.lineTo(ox + (tickLen / 2) * ux, oy + (tickLen / 2) * uy);
 }
 
-function canvasAngleArc(
+function canvasAngleWedgeFill(
+  ctx: CanvasRenderingContext2D,
+  vp: Viewport,
+  vertex: { x: number; y: number },
+  pa: { x: number; y: number },
+  pb: { x: number; y: number },
+  fillColor: string,
+  arcR = 26,
+): void {
+  const sv = vp.worldToScreen(world(vertex.x, vertex.y));
+  const sa = vp.worldToScreen(world(pa.x, pa.y));
+  const sb = vp.worldToScreen(world(pb.x, pb.y));
+  const startA = Math.atan2(sa.y - sv.y, sa.x - sv.x);
+  let diff = Math.atan2(sb.y - sv.y, sb.x - sv.x) - startA;
+  if (diff > Math.PI) diff -= 2 * Math.PI;
+  if (diff < -Math.PI) diff += 2 * Math.PI;
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = fillColor;
+  ctx.beginPath();
+  ctx.moveTo(sv.x, sv.y);
+  ctx.arc(sv.x, sv.y, arcR, startA, startA + diff, diff < 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function canvasAngleArcPath(
   ctx: CanvasRenderingContext2D,
   vp: Viewport,
   vertex: { x: number; y: number },
