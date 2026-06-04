@@ -213,4 +213,25 @@ namespace Yuclid {
 
         return rule_mapping;
     }
+
+    std::optional<RuleMapping> MappingState::to_partial_rule_mapping() const {
+        RuleMapping rule_mapping;
+        
+        for(RuleVariableIndex curr_idx = 0; curr_idx < m_schema->variables.size(); curr_idx++) {
+            const ProblemPointIndex point_idx = m_point_by_variable[curr_idx];
+            
+            assert(point_idx != UNASSIGNED_POINT);
+            assert(point_idx < m_used_points.size());
+
+            const std::string &variable_name = m_schema->variables[curr_idx];
+
+            rule_mapping.emplace(
+                variable_name,
+                Point(point_idx, m_problem)
+            );
+        }
+
+        return rule_mapping;
+    }
+
 }
