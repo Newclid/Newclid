@@ -136,6 +136,8 @@ function normalizeSketchPoints(
 let savedSceneSnapshot: SceneSnapshot | null = null;
 let wasInProofMode = false;
 let lastJobResult: JobResultPayload | null | undefined;
+// Use a sentinel so the first run always builds the sketch.
+let lastStepIndex: number | null = -1 as unknown as null;
 
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
@@ -154,8 +156,18 @@ appStore.subscribe(() => {
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
     const result = job?.result;
-    if (result === lastJobResult) { requestRedraw(); return; }
+    const stepIndex = appStore.activeProofStepIndex;
+
+    // Auto-initialise to step 0 when result first arrives.
+    if (result && result !== lastJobResult && (result.proof_sections?.proof_steps.length ?? 0) > 0 && stepIndex === null) {
+      appStore.setActiveProofStep(0);
+      return; // setActiveProofStep will trigger another subscription call
+    }
+
+    if (result === lastJobResult && stepIndex === lastStepIndex) { requestRedraw(); return; }
     lastJobResult = result;
+    lastStepIndex = stepIndex;
+
     const problem = job?.problem ?? '';
     // Use the user's drawing coordinates stored at submission time.
     // Fall back to backend coords (with normalisation + viewport fit) only
@@ -165,33 +177,64 @@ appStore.subscribe(() => {
       ? userPoints
       : normalizeSketchPoints(result?.sketch_points ?? []);
     const sections = result?.proof_sections;
-    const markers = [
-      ...new Set([
-        ...(sections?.construction_signatures ?? []),
-        ...(sections?.step_signatures ?? []),
-        ...(sections?.goal_signatures ?? []),
-      ]),
-    ]
-      .map(parseConstructionSignature)
-      .filter((m): m is ConstructionMarker => m !== null);
-    const geometry = [
+    const stepSigs = sections?.step_signatures ?? [];
+
+    const baseGeometry = [
       ...parseJgexGeometry(problem),
       ...geomFromSignatures([...new Set(sections?.construction_signatures ?? [])]),
     ];
-    const extraGeometry = geomFromSignatures([
+
+    let geometry = baseGeometry;
+    let extraGeometry = geomFromSignatures([
       ...new Set([
         ...(sections?.step_signatures ?? []),
         ...(sections?.goal_signatures ?? []),
       ]),
     ]);
+    let highlightGeometry: ReturnType<typeof geomFromSignatures> | undefined;
+    let highlightPoints: string[] | undefined;
+    let markers: ConstructionMarker[];
+
+    if (stepIndex !== null && stepSigs[stepIndex] !== undefined) {
+      // Past steps merged into solid base geometry (no markers).
+      const pastSigs = [...new Set(stepSigs.slice(0, stepIndex))];
+      geometry = [...baseGeometry, ...geomFromSignatures(pastSigs)];
+      extraGeometry = [];
+
+      // Current step highlighted.
+      highlightGeometry = geomFromSignatures([stepSigs[stepIndex]]);
+      highlightPoints = highlightGeometry.flatMap((g) => {
+        if (g.kind === 'segment' || g.kind === 'line') return [g.p1, g.p2];
+        if (g.kind === 'circle') return [g.center, g.through];
+        if (g.kind === 'circumcircle') return [g.p1, g.p2, g.p3];
+        return [];
+      });
+
+      // Only current step's markers.
+      const m = parseConstructionSignature(stepSigs[stepIndex]);
+      markers = m ? [m] : [];
+    } else {
+      // Fallback: no step selected — show everything at once (original behaviour).
+      markers = [
+        ...new Set([
+          ...(sections?.construction_signatures ?? []),
+          ...(sections?.step_signatures ?? []),
+          ...(sections?.goal_signatures ?? []),
+        ]),
+      ]
+        .map(parseConstructionSignature)
+        .filter((m): m is ConstructionMarker => m !== null);
+    }
+
     renderer.proofSketch = points.length > 0
-      ? { points, geometry, extraGeometry, markers }
+      ? { points, geometry, extraGeometry, highlightGeometry, highlightPoints, markers }
       : null;
     if (renderer.proofSketch && userPoints.length === 0) {
       viewport.fitPoints(renderer.proofSketch.points);
     }
   } else {
     lastJobResult = null;
+    lastStepIndex = -1 as unknown as null;
     renderer.proofSketch = null;
   }
   requestRedraw();
