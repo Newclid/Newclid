@@ -38,4 +38,16 @@ public:
     ) const = 0;
 };
 
+
+class PredicateProviderRegistry {
+    public:
+        PredicateProviderRegistry(std::unique_ptr<PredicateProvider> fallback_provider);
+        void register_provider(const std::string& predicate_name, std::unique_ptr<PredicateProvider> provider);
+        [[nodiscard]] PredicateProvider* get_provider(const std::string& predicate_name) const;
+
+    private:
+        std::unordered_map<std::string, std::unique_ptr<PredicateProvider>> m_providers;
+        std::unique_ptr<PredicateProvider> m_fallback_provider;
+};
+
 }
