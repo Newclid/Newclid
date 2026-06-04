@@ -1,4 +1,5 @@
 import { AppStore } from '../store/appStore';
+import type { NewclidProofSections } from '../api/types';
 import { el } from './dom';
 
 export interface ProofPanelHandle {
@@ -63,15 +64,41 @@ function buildProofStepItem(raw: string): HTMLElement {
   return card;
 }
 
-function buildProofStepsSection(title: string, steps: string[]): HTMLElement {
+function buildStepNavigator(steps: string[], appStore: AppStore): HTMLElement {
   const section = el('div', { class: 'proof-section' });
-  section.appendChild(el('div', { class: 'proof-section-title' }, [title]));
-  const list = el('ol', { class: 'proof-steps-list' });
-  for (const step of steps) {
-    list.appendChild(buildProofStepItem(step));
-  }
-  section.appendChild(list);
+  section.appendChild(el('div', { class: 'proof-section-title' }, ['Proof Steps']));
+
+  const total = steps.length;
+  const rawIndex = appStore.activeProofStepIndex ?? 0;
+  const index = Math.max(0, Math.min(rawIndex, total - 1));
+
+  const nav = el('div', { class: 'proof-step-nav' });
+
+  const prevBtn = el('button', { class: 'proof-step-nav-btn', type: 'button' }, ['← Prev']) as HTMLButtonElement;
+  prevBtn.disabled = index === 0;
+  prevBtn.addEventListener('click', () => appStore.setActiveProofStep(index - 1));
+
+  const counter = el('span', { class: 'proof-step-counter' }, [`Step ${index + 1} of ${total}`]);
+
+  const nextBtn = el('button', { class: 'proof-step-nav-btn', type: 'button' }, ['Next →']) as HTMLButtonElement;
+  nextBtn.disabled = index === total - 1;
+  nextBtn.addEventListener('click', () => appStore.setActiveProofStep(index + 1));
+
+  nav.appendChild(prevBtn);
+  nav.appendChild(counter);
+  nav.appendChild(nextBtn);
+  section.appendChild(nav);
+
+  const card = buildProofStepItem(steps[index]);
+  card.classList.add('is-active');
+  section.appendChild(card);
+
   return section;
+}
+
+function buildStepNavigatorFromSections(sections: NewclidProofSections, appStore: AppStore): HTMLElement | null {
+  if (sections.proof_steps.length === 0) return null;
+  return buildStepNavigator(sections.proof_steps, appStore);
 }
 
 export function createProofPanel(appStore: AppStore): ProofPanelHandle {
@@ -120,7 +147,8 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
           content.appendChild(buildSection('Unproven Goals', unproven_goals));
         }
         if (proof_steps.length > 0) {
-          content.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
+          const nav = buildStepNavigatorFromSections(job.result.proof_sections, appStore);
+          if (nav) content.appendChild(nav);
         }
       } else {
         if (job.result.message) {
@@ -139,7 +167,8 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
             content.appendChild(buildSection('Proved So Far', proven_goals));
           }
           if (proof_steps.length > 0) {
-            content.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
+            const nav = buildStepNavigatorFromSections(job.result.proof_sections, appStore);
+            if (nav) content.appendChild(nav);
           }
         }
         if (job.result.stderr) {

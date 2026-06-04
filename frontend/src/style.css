@@ -705,6 +705,45 @@ body.is-resizing {
   max-height: 200px;
 }
 
+.proof-step-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.proof-step-nav-btn {
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink-mid);
+  flex-shrink: 0;
+}
+
+.proof-step-nav-btn:hover:not(:disabled) {
+  background: rgba(26, 24, 22, 0.05);
+}
+
+.proof-step-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.proof-step-counter {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.proof-step-card.is-active {
+  border-left-color: #2A4A7F;
+  background: rgba(42, 74, 127, 0.06);
+}
+
 /* ---------- Goal picker (visual problem definition) ---------- */
 
 .goal-chooser-section {
