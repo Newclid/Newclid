@@ -129,6 +129,9 @@ namespace Yuclid {
 
             const ProblemPointIndex point_idx = m_point_by_variable[curr_idx];
 
+            assert(point_idx != UNASSIGNED_POINT);
+            assert(point_idx < m_used_points.size());
+
             m_used_points[point_idx] = 0;
             m_point_by_variable[curr_idx] = UNASSIGNED_POINT;
         }
