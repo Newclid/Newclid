@@ -2,16 +2,12 @@ import { AppStore } from '../store/appStore';
 import type { NewclidProofSections } from '../api/types';
 import { el } from './dom';
 
-// Count the number of canvas-visible construction premise sub-steps in a raw proof step string.
-function countConstructionSubSteps(rawStep: string, constructionSigs: string[]): number {
+// Count text premises in a raw proof step string (each ends with a bracket ref like [C0], [N1], [36]).
+function countTextPremises(rawStep: string): number {
   const premiseSection = rawStep.match(/^\d+\.\s*\|\s*(.+?)\s*=\(/)?.[1] ?? '';
-  const regex = /\[C(\d+)\]/g;
-  let m;
+  const premRegex = /.*?\[\w*\d+\]/g;
   let count = 0;
-  while ((m = regex.exec(premiseSection)) !== null) {
-    const cIdx = parseInt(m[1], 10);
-    if (cIdx >= 0 && cIdx < constructionSigs.length && constructionSigs[cIdx]) count++;
-  }
+  while (premRegex.exec(premiseSection) !== null) count++;
   return count;
 }
 
@@ -51,29 +47,54 @@ interface ParsedProofStep {
 }
 
 function parseProofStep(raw: string): ParsedProofStep | null {
-  const match = raw.match(/^(\d+)\.\s*\|\s*(.+?)\s*=\((.+?)\)>\s*(.+)$/);
-  if (!match) return null;
+  const topMatch = raw.match(/^(\d+)\.\s*\|\s*(.+?)\s*=\((.+?)\)>\s*(.+)$/);
+  if (!topMatch) return null;
+
+  const premiseSection = topMatch[2];
+  // Each premise ends with a bracket ref like [C0], [N1], [36].
+  const premises: string[] = [];
+  const premRegex = /.*?\[\w*\d+\]/g;
+  let m;
+  while ((m = premRegex.exec(premiseSection)) !== null) {
+    const trimmed = m[0].replace(/^[,\s]+/, '').trim();
+    if (trimmed) premises.push(trimmed);
+  }
+  // Fallback for malformed steps without bracket refs.
+  if (premises.length === 0 && premiseSection.trim()) {
+    premises.push(...premiseSection.split(',').map(p => p.trim()).filter(Boolean));
+  }
+
   return {
-    num: match[1],
-    premises: match[2].split(',').map((p) => p.trim()),
-    rule: match[3].trim(),
-    conclusion: match[4].trim(),
+    num: topMatch[1],
+    premises,
+    rule: topMatch[3].trim(),
+    conclusion: topMatch[4].trim(),
   };
 }
 
-function buildProofStepItem(raw: string): HTMLElement {
+function buildProofStepItem(raw: string, activeSubStep?: number): HTMLElement {
   const parsed = parseProofStep(raw);
   if (!parsed) {
     return el('li', { class: 'proof-step-item' }, [raw]);
   }
 
+  const conclusionSubStep = parsed.premises.length;
   const card = el('li', { class: 'proof-step-card' });
   card.appendChild(el('span', { class: 'proof-step-num' }, [parsed.num]));
-  for (const premise of parsed.premises) {
-    card.appendChild(el('span', { class: 'proof-step-premise' }, [premise]));
+
+  for (let i = 0; i < parsed.premises.length; i++) {
+    const cls = (activeSubStep === i)
+      ? 'proof-step-premise is-active-substep'
+      : 'proof-step-premise';
+    card.appendChild(el('span', { class: cls }, [parsed.premises[i]]));
   }
+
   card.appendChild(el('span', { class: 'proof-step-rule' }, [parsed.rule]));
-  card.appendChild(el('span', { class: 'proof-step-conclusion' }, [parsed.conclusion]));
+
+  const conclusionCls = (activeSubStep === conclusionSubStep)
+    ? 'proof-step-conclusion is-active-substep'
+    : 'proof-step-conclusion';
+  card.appendChild(el('span', { class: conclusionCls }, [parsed.conclusion]));
   return card;
 }
 
