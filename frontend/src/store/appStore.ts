@@ -30,6 +30,8 @@ export class AppStore {
   proofMode = false;
   // Index of the currently-displayed proof step (0-based), or null when no step is active.
   activeProofStepIndex: number | null = null;
+  // Index of the currently-displayed sub-step within the active proof step (0-based).
+  activeProofSubStepIndex: number | null = 0;
   // True while the "proof by points" plane is shown (blank placeholder for now).
   proofByPointsMode = false;
   // Which section of the side panel is currently shown.
@@ -72,11 +74,18 @@ export class AppStore {
   exitProofMode(): void {
     this.proofMode = false;
     this.activeProofStepIndex = null;
+    this.activeProofSubStepIndex = null;
     this.emit();
   }
 
   setActiveProofStep(index: number | null): void {
     this.activeProofStepIndex = index;
+    this.activeProofSubStepIndex = 0;
+    this.emit();
+  }
+
+  setActiveProofSubStep(index: number | null): void {
+    this.activeProofSubStepIndex = index;
     this.emit();
   }
 

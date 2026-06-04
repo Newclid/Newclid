@@ -26,13 +26,13 @@ const STYLE = {
   circleStroke: '#1A1816',
   circleStrokeWidth: 1.75,
   snapStroke: '#2A4A7F',
-  highlightStroke: '#C0392B',
+  highlightStroke: '#1A7A1A',  // green — used for the conclusion/deduction
   previewStroke: '#8C887F',
   previewStrokeWidth: 1.5,
   previewDash: '5 4',
   markerColor: '#2266cc',
   markerSize: 16,
-  premiseStroke: '#27AE60',
+  premiseStroke: '#C8860A',    // amber/gold — used for premises and assumptions
 };
 
 export interface ProofSketch {
