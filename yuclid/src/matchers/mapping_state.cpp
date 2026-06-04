@@ -36,9 +36,9 @@ namespace Yuclid {
         const Problem &problem
     )
         :m_schema(&schema),
-        m_problem(&problem),
-        m_point_by_variable(schema.variables.size(), UNASSIGNED_POINT),
-        m_used_points(problem.num_points(), 0)
+         m_problem(&problem),
+         m_point_by_variable(schema.variables.size(), UNASSIGNED_POINT),
+         m_used_points(problem.num_points(), 0)
     {
         if (schema.variables.size() > 64) {
             throw std::invalid_argument("MappingState supports at most 64 rule variables");
@@ -112,8 +112,8 @@ namespace Yuclid {
 
     MappingStateSnapshot MappingState::snapshot() const {
         return {
-            m_assigned_variables,
-            m_assigned_count
+            .assigned_variables=m_assigned_variables,
+            .assigned_count=m_assigned_count
         };
     }
 
@@ -144,12 +144,7 @@ namespace Yuclid {
         if(point_idx >= m_used_points.size()) return false;
 
         if(is_assigned(variable_idx)) {
-            if(m_point_by_variable[variable_idx] == point_idx) {
-                return true;
-            }
-            else {
-                return false;
-            }
+            return m_point_by_variable[variable_idx] == point_idx;
         }
 
         if(is_point_used(point_idx)) return false;
