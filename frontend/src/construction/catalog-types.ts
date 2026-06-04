@@ -1,9 +1,18 @@
-import type { ConstructionObject, ObjectId } from '../geometry/types-object';
+import type { GeoObject, ObjectId } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
 import type { WorldPoint } from '../geometry/coords';
 
 // Bindings: maps slot name → picked ObjectId or computed scalar value.
 export type Bindings = Record<string, ObjectId | number>;
+
+// Distributive Omit so a union (e.g. CircleObject) keeps its discriminated arms.
+type DistOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+/**
+What an entry's sketch emits: any GeoObject minus its id (the scene assigns
+it), or null when the slots already created everything (e.g. a bare point).
+**/
+export type SketchResult = DistOmit<GeoObject, 'id'> | null;
 
 // Aux geometry shown while a construction is in progress.
 export type DerivePreview =
@@ -46,7 +55,9 @@ export interface CatalogEntry {
   edges: EdgeSpec[];
   circles: CircleSpec[];
   // Final emit: caller passes the shape minus `id`, scene.addObject assigns it.
-  sketch: (b: Bindings, scene: Scene) => Omit<ConstructionObject, 'id'>;
+  // Returns null when the slots already created the geometry (e.g. a free point)
+  // or the entry produces nothing on completion (e.g. select).
+  sketch: (b: Bindings, scene: Scene) => SketchResult;
   // Optional guard. Returns null = OK, string = error message to console.warn.
   validate?: (b: Bindings, scene: Scene) => string | null;
   // Optional live preview while the construction is in progress, given the

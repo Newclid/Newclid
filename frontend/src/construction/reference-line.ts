@@ -20,7 +20,8 @@ Reuses the `line` entry so a line object has a single definition.
 **/
 export function ensureReferenceLine(scene: Scene, aId: ObjectId, bId: ObjectId): void {
   if (aId === bId || lineExists(scene, aId, bId)) return;
-  scene.addObject(line.sketch({ a: aId, b: bId }, scene));
+  const obj = line.sketch({ a: aId, b: bId }, scene);
+  if (obj) scene.addObject(obj);
 }
 
 /**
