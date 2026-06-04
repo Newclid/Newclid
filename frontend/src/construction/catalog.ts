@@ -1,4 +1,7 @@
 import type { CatalogEntry } from "./catalog-types";
+import { select } from "./entries/select";
+import { point } from "./entries/point";
+import { circle } from "./entries/circle";
 import { midpoint } from "./entries/midpoint";
 import { angleBisector } from "./entries/angle_bisector";
 import { line } from "./entries/line";
@@ -12,6 +15,9 @@ import { equilateralTriangle } from "./entries/equilateral_triangle";
 import { onLine } from "./entries/on_line";
 
 export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
+  [select.name]: select,
+  [point.name]: point,
+  [circle.name]: circle,
   [line.name]: line,
   [segment.name]: segment,
   [midpoint.name]: midpoint,

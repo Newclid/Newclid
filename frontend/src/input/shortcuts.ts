@@ -5,14 +5,10 @@ import type { ToolName } from '../geometry/types-object';
 import { CONSTRUCTION_CATALOG } from '../construction/catalog';
 import type { AppStore } from '../store/appStore';
 
-const SHORTCUTS: Record<string, ToolName> = {
-  v: 'select',
-  p: 'point',
-  c: 'circle',
-};
+const SHORTCUTS: Record<string, ToolName> = {};
 
-// Merge catalog shortcuts at module init. First-defined wins; collisions
-// are warned, not enforced, since shortcuts are static config.
+// Build the shortcut map from the catalog at module init. First-defined wins;
+// collisions are warned, not enforced, since shortcuts are static config.
 for (const entry of Object.values(CONSTRUCTION_CATALOG)) {
   const key = entry.shortcut.toLowerCase();
   if (SHORTCUTS[key]) {
