@@ -1,11 +1,10 @@
 import pytest
-from pydantic import ValidationError
-
 from newclid_backend.runner_models import (
     NewclidProofSections,
     NewclidRunResult,
     SketchPoint,
 )
+from pydantic import ValidationError
 
 
 def test_newclid_run_result_serializes_proof_output() -> None:
