@@ -9,6 +9,7 @@ import { parallel } from "./entries/parallel";
 import { foot } from "./entries/foot";
 import { parallelogram } from "./entries/parallelogram";
 import { equilateralTriangle } from "./entries/equilateral_triangle";
+import { rectangle } from "./entries/rectangle";
 import { onLine } from "./entries/on_line";
 
 export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
@@ -22,5 +23,6 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [foot.name]: foot,
   [parallelogram.name]: parallelogram,
   [equilateralTriangle.name]: equilateralTriangle,
+  [rectangle.name]: rectangle,
   [onLine.name]: onLine,
 };
