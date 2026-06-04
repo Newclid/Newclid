@@ -193,6 +193,9 @@ appStore.subscribe(() => {
     ]);
     let highlightGeometry: ReturnType<typeof geomFromSignatures> | undefined;
     let highlightPoints: string[] | undefined;
+    let premiseGeometry: ReturnType<typeof geomFromSignatures> | undefined;
+    let premisePoints: string[] | undefined;
+    let premiseMarkers: ConstructionMarker[] | undefined;
     let markers: ConstructionMarker[];
 
     if (stepIndex !== null && stepSigs[stepIndex] !== undefined) {
@@ -213,6 +216,41 @@ appStore.subscribe(() => {
       // Only current step's markers.
       const m = parseConstructionSignature(stepSigs[stepIndex]);
       markers = m ? [m] : [];
+
+      // Premise steps highlighted in green.
+      // premise strings have a "[id]" suffix appended by proof_writing.py — strip it before matching.
+      const stripId = (s: string) => s.replace(/\s*\[\d+\]$/, '').trim();
+      const sigToStepIndex = new Map<string, number>();
+      for (let i = 0; i < stepSigs.length; i++) {
+        if (stepSigs[i]) sigToStepIndex.set(stepSigs[i].trim(), i);
+      }
+      const constructionSigSet = new Set<string>(
+        (sections?.construction_signatures ?? []).map(s => s.trim()),
+      );
+      const stepRaw = sections?.proof_steps[stepIndex] ?? '';
+      const premiseMatch = stepRaw.match(/^\d+\.\s*\|\s*(.+?)\s*=\(/);
+      const premiseClean = premiseMatch
+        ? premiseMatch[1].split(',').map(p => stripId(p))
+        : [];
+      const premiseSigs: string[] = [];
+      for (const p of premiseClean) {
+        if (sigToStepIndex.has(p)) {
+          premiseSigs.push(stepSigs[sigToStepIndex.get(p)!]);
+        } else if (constructionSigSet.has(p)) {
+          premiseSigs.push(p);
+        }
+      }
+      const uniquePremiseSigs = [...new Set(premiseSigs)];
+      premiseGeometry = geomFromSignatures(uniquePremiseSigs);
+      premiseMarkers = uniquePremiseSigs
+        .map(parseConstructionSignature)
+        .filter((pm): pm is ConstructionMarker => pm !== null);
+      premisePoints = premiseGeometry.flatMap((g) => {
+        if (g.kind === 'segment' || g.kind === 'line') return [g.p1, g.p2];
+        if (g.kind === 'circle') return [g.center, g.through];
+        if (g.kind === 'circumcircle') return [g.p1, g.p2, g.p3];
+        return [];
+      });
     } else {
       // Fallback: no step selected — show everything at once (original behaviour).
       markers = [
@@ -227,7 +265,8 @@ appStore.subscribe(() => {
     }
 
     renderer.proofSketch = points.length > 0
-      ? { points, geometry, extraGeometry, highlightGeometry, highlightPoints, markers }
+      ? { points, geometry, extraGeometry, highlightGeometry, highlightPoints,
+          premiseGeometry, premisePoints, premiseMarkers, markers }
       : null;
     if (renderer.proofSketch && userPoints.length === 0) {
       viewport.fitPoints(renderer.proofSketch.points);
