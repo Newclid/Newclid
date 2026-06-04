@@ -217,32 +217,15 @@ appStore.subscribe(() => {
       const m = parseConstructionSignature(stepSigs[stepIndex]);
       markers = m ? [m] : [];
 
-      // Premise steps highlighted in green.
-      // premise strings have a "[id]" suffix appended by proof_writing.py — strip it before matching.
-      const stripId = (s: string) => s.replace(/\s*\[\d+\]$/, '').trim();
-      const sigToStepIndex = new Map<string, number>();
-      for (let i = 0; i < stepSigs.length; i++) {
-        if (stepSigs[i]) sigToStepIndex.set(stepSigs[i].trim(), i);
-      }
-      const constructionSigSet = new Set<string>(
-        (sections?.construction_signatures ?? []).map(s => s.trim()),
-      );
-      const stepRaw = sections?.proof_steps[stepIndex] ?? '';
-      const premiseMatch = stepRaw.match(/^\d+\.\s*\|\s*(.+?)\s*=\(/);
-      const premiseClean = premiseMatch
-        ? premiseMatch[1].split(',').map(p => stripId(p))
-        : [];
-      const premiseSigs: string[] = [];
-      for (const p of premiseClean) {
-        if (sigToStepIndex.has(p)) {
-          premiseSigs.push(stepSigs[sigToStepIndex.get(p)!]);
-        } else if (constructionSigSet.has(p)) {
-          premiseSigs.push(p);
-        }
-      }
-      const uniquePremiseSigs = [...new Set(premiseSigs)];
-      premiseGeometry = geomFromSignatures(uniquePremiseSigs);
-      premiseMarkers = uniquePremiseSigs
+      // Premise steps highlighted in green — use backend-provided indices.
+      const premiseIndices = sections?.step_premise_indices?.[stepIndex] ?? [];
+      const premiseSigs = [...new Set(
+        premiseIndices
+          .filter(i => i >= 0 && i < stepSigs.length && stepSigs[i])
+          .map(i => stepSigs[i]),
+      )];
+      premiseGeometry = geomFromSignatures(premiseSigs);
+      premiseMarkers = premiseSigs
         .map(parseConstructionSignature)
         .filter((pm): pm is ConstructionMarker => pm !== null);
       premisePoints = premiseGeometry.flatMap((g) => {
