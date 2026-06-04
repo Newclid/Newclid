@@ -173,6 +173,7 @@ appStore.subscribe(() => {
     const job = appStore.jobs.get(activeJobId);
     const result = job?.result;
     const stepIndex = appStore.activeProofStepIndex;
+    const subStepIndex = appStore.activeProofSubStepIndex;
 
     // Auto-initialise to step 0 when result first arrives.
     if (result && result !== lastJobResult && (result.proof_sections?.proof_steps.length ?? 0) > 0 && stepIndex === null) {
@@ -180,9 +181,10 @@ appStore.subscribe(() => {
       return; // setActiveProofStep will trigger another subscription call
     }
 
-    if (result === lastJobResult && stepIndex === lastStepIndex) { requestRedraw(); return; }
+    if (result === lastJobResult && stepIndex === lastStepIndex && subStepIndex === lastSubStepIndex) { requestRedraw(); return; }
     lastJobResult = result;
     lastStepIndex = stepIndex;
+    lastSubStepIndex = subStepIndex;
 
     const problem = job?.problem ?? '';
     // Use the user's drawing coordinates stored at submission time.
@@ -220,36 +222,54 @@ appStore.subscribe(() => {
       geometry = [...baseGeometry, ...geomFromSignatures(pastSigs)];
       extraGeometry = [];
 
-      // Current step highlighted.
-      highlightGeometry = geomFromSignatures([stepSigs[stepIndex]]);
-      highlightPoints = highlightGeometry.flatMap((g) => {
-        if (g.kind === 'segment' || g.kind === 'line') return [g.p1, g.p2];
-        if (g.kind === 'circle') return [g.center, g.through];
-        if (g.kind === 'circumcircle') return [g.p1, g.p2, g.p3];
-        return [];
-      });
-
-      // Only current step's markers.
-      const m = parseConstructionSignature(stepSigs[stepIndex]);
-      markers = m ? [m] : [];
-
-      // Premise steps highlighted in green — use backend-provided indices.
+      const constructionSigs = sections?.construction_signatures ?? [];
+      const rawStepText = sections?.proof_steps?.[stepIndex] ?? '';
       const premiseIndices = sections?.step_premise_indices?.[stepIndex] ?? [];
-      const premiseSigs = [...new Set(
-        premiseIndices
-          .filter(i => i >= 0 && i < stepSigs.length && stepSigs[i])
-          .map(i => stepSigs[i]),
-      )];
-      premiseGeometry = geomFromSignatures(premiseSigs);
-      premiseMarkers = premiseSigs
-        .map(parseConstructionSignature)
-        .filter((pm): pm is ConstructionMarker => pm !== null);
-      premisePoints = premiseGeometry.flatMap((g) => {
-        if (g.kind === 'segment' || g.kind === 'line') return [g.p1, g.p2];
-        if (g.kind === 'circle') return [g.center, g.through];
-        if (g.kind === 'circumcircle') return [g.p1, g.p2, g.p3];
-        return [];
-      });
+
+      // Construction premise sub-steps ([Cn] references in premise text).
+      const constructionRefs = extractConstructionRefs(rawStepText, constructionSigs);
+
+      // Total canvas-visible premise sub-steps: construction refs + step premises.
+      const premiseSubStepCount = constructionRefs.length + premiseIndices.length;
+      const conclusionSubStep = premiseSubStepCount;
+      const rawSubStep = appStore.activeProofSubStepIndex ?? 0;
+      const subStep = Math.max(0, Math.min(rawSubStep, conclusionSubStep));
+
+      // Helper to extract point names from geometry.
+      const geomPoints = (geoms: ReturnType<typeof geomFromSignatures>): string[] =>
+        geoms.flatMap((g) => {
+          if (g.kind === 'segment' || g.kind === 'line') return [g.p1, g.p2];
+          if (g.kind === 'circle') return [g.center, g.through];
+          if (g.kind === 'circumcircle') return [g.p1, g.p2, g.p3];
+          return [];
+        });
+
+      if (subStep === conclusionSubStep) {
+        // Conclusion sub-step: highlight the deduction in green.
+        highlightGeometry = geomFromSignatures([stepSigs[stepIndex]]);
+        highlightPoints = geomPoints(highlightGeometry);
+        const m = parseConstructionSignature(stepSigs[stepIndex]);
+        markers = m ? [m] : [];
+      } else if (subStep < constructionRefs.length) {
+        // Construction premise sub-step: highlight assumption geometry in amber.
+        const cSig = constructionSigs[constructionRefs[subStep]];
+        premiseGeometry = geomFromSignatures([cSig]);
+        premisePoints = geomPoints(premiseGeometry);
+        const pm = parseConstructionSignature(cSig);
+        premiseMarkers = pm ? [pm] : [];
+        markers = [];
+      } else {
+        // Step premise sub-step: highlight a prior proof step in amber.
+        const stepPremiseIdx = premiseIndices[subStep - constructionRefs.length];
+        const pSig = stepPremiseIdx !== undefined ? stepSigs[stepPremiseIdx] : undefined;
+        if (pSig) {
+          premiseGeometry = geomFromSignatures([pSig]);
+          premisePoints = geomPoints(premiseGeometry);
+          const pm = parseConstructionSignature(pSig);
+          premiseMarkers = pm ? [pm] : [];
+        }
+        markers = [];
+      }
     } else {
       // Fallback: no step selected — show everything at once (original behaviour).
       markers = [
