@@ -163,6 +163,8 @@ namespace Yuclid {
 
         [[nodiscard]] std::optional<RuleMapping> to_rule_mapping() const;
 
+        [[nodiscard]] std::optional<RuleMapping> to_partial_rule_mapping() const;
+
     private:
         /**
          * Bit for variable_idx in m_assigned_variables.
