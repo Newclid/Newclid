@@ -68,14 +68,10 @@ function geomForConstruction(name: string, args: string[]): SketchGeom[] {
     }
     case 'circle':
     case 'circumcenter': {
-      // x p1 p2 ... → circle centered at x through p1, polygon connecting all outer points
-      const [x, ...rest] = args;
-      if (!x || rest.length === 0) return [];
-      const geoms: SketchGeom[] = [circ(x, rest[0])];
-      for (let i = 0; i < rest.length; i++) {
-        geoms.push(seg(rest[i], rest[(i + 1) % rest.length]));
-      }
-      return geoms;
+      // x a b c → circle center x through a + show triangle a,b,c
+      const [x, a, b, c] = args;
+      if (!x || !a || !b || !c) return [];
+      return [circ(x, a), ...triangle(a, b, c)];
     }
     case 'on_circle': {
       // _x o a → circle centered at o through a
@@ -299,16 +295,28 @@ function expandGoal(goal: string): string[] {
 
 export function expandJgexPredicates(jgex: string): string {
   const GOAL_SEP = ' ? ';
-  const MULTI_GOAL_SEP = '; ';
+  const CLAUSE_SEP = '; ';
   const goalIdx = jgex.indexOf(GOAL_SEP);
   if (goalIdx === -1) return jgex;
-  const setup = jgex.slice(0, goalIdx);
+
+  const setupStr = jgex.slice(0, goalIdx);
   const goalsStr = jgex.slice(goalIdx + GOAL_SEP.length);
+
+  const expandedSetup = setupStr
+    .split(CLAUSE_SEP)
+    .flatMap(clause => {
+      const trimmed = clause.trim();
+      if (!trimmed || trimmed.includes('=')) return [clause];
+      return expandGoal(trimmed);
+    })
+    .join(CLAUSE_SEP);
+
   const expandedGoals = goalsStr
-    .split(MULTI_GOAL_SEP)
+    .split(CLAUSE_SEP)
     .flatMap(g => (g.trim() ? expandGoal(g.trim()) : []))
-    .join(MULTI_GOAL_SEP);
-  return `${setup}${GOAL_SEP}${expandedGoals}`;
+    .join(CLAUSE_SEP);
+
+  return `${expandedSetup}${GOAL_SEP}${expandedGoals}`;
 }
 
 export function parseJgexGeometry(jgex: string): SketchGeom[] {
