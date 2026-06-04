@@ -112,7 +112,7 @@ namespace Yuclid {
         );
 
         [[nodiscard]] bool is_rule_variable(
-            RuleVariableIndex &variable
+            RuleVariableIndex variable_idx
         ) const;
 
         [[nodiscard]] bool is_assigned(
@@ -137,7 +137,7 @@ namespace Yuclid {
 
         [[nodiscard]] std::vector<RuleVariableIndex> unassigned_variables() const;
 
-        [[nodiscard]] MappingStateSnapshot snapshot() const;
+        MappingStateSnapshot snapshot() const;
 
         void rollback(
             MappingStateSnapshot snapshot
@@ -151,6 +151,10 @@ namespace Yuclid {
         [[nodiscard]] bool try_apply_assignment(
             RuleVariableIndex variable_idx,
             Point point
+        );
+
+        [[nodiscard]] bool try_apply_assignment(
+            const MappingAssignment &assignment
         );
 
         [[nodiscard]] bool try_apply_extension(
