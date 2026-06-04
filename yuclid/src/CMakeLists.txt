@@ -14,6 +14,7 @@ add_library(yuclid
   matchers/mapping_state.cpp
   matchers/rule_plan.cpp
   matchers/generic_rule_matcher.cpp
+  matchers/predicate_provider.cpp
   numbers/add_circle.cpp
   numbers/posreal.cpp
   numbers/root_rat.cpp
