@@ -46,7 +46,7 @@ def run_data_generation_loop(generation_config: DiagramGenerationConfig) -> int:
             to_write = Datapoint(
                 subproblem=datapoint, generation_metadata=generation_metadata
             )
-            with generation_config.jsonl_dump_file.open("a") as file:
+            with generation_config.jsonl_dump_file.open("a", encoding="utf-8") as file:
                 file.write(to_write.model_dump_json() + "\n")
 
             dp_idx += 1
