@@ -133,11 +133,27 @@ function normalizeSketchPoints(
   }));
 }
 
+// Parse [Cn] construction references from the premise section of a raw proof step string.
+function extractConstructionRefs(rawStep: string, constructionSigs: string[]): number[] {
+  const premiseSection = rawStep.match(/^\d+\.\s*\|\s*(.+?)\s*=\(/)?.[1] ?? '';
+  const regex = /\[C(\d+)\]/g;
+  let m;
+  const refs: number[] = [];
+  while ((m = regex.exec(premiseSection)) !== null) {
+    const cIdx = parseInt(m[1], 10);
+    if (cIdx >= 0 && cIdx < constructionSigs.length && constructionSigs[cIdx]) {
+      refs.push(cIdx);
+    }
+  }
+  return refs;
+}
+
 let savedSceneSnapshot: SceneSnapshot | null = null;
 let wasInProofMode = false;
 let lastJobResult: JobResultPayload | null | undefined;
-// Use a sentinel so the first run always builds the sketch.
+// Use sentinels so the first run always builds the sketch.
 let lastStepIndex: number | null = -1 as unknown as null;
+let lastSubStepIndex: number | null = -1 as unknown as null;
 
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
