@@ -10,7 +10,7 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { createJobStatusBanner } from './ui/jobStatusBanner';
 import { attachToolbarResizer } from './ui/toolbarResizer';
-import { geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
+import { expandJgexPredicates, geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
 import type { ConstructionMarker } from './emit/jgexParser';
 import { buildNameTable } from './emit/names';
 import { TERMINAL_STATUSES } from './api/types';
@@ -29,6 +29,7 @@ export const backendClient = new BackendClient('/api');
 export const jobPoller = new JobPoller(backendClient, appStore);
 
 const onCanvasProofSubmit = async (jgex: string) => {
+  const expanded = expandJgexPredicates(jgex);
   // Capture user's point positions now, before the scene is cleared on proof-mode entry.
   const nameTable = buildNameTable(scene);
   const userSketchPoints: SketchPoint[] = [];
@@ -38,9 +39,9 @@ const onCanvasProofSubmit = async (jgex: string) => {
     if (name) userSketchPoints.push({ name, x: obj.x, y: obj.y });
   }
 
-  appStore.setProblem(jgex);
-  const resp = await backendClient.submitJob(jgex);
-  appStore.addJob(resp.job_id, jgex);
+  appStore.setProblem(expanded);
+  const resp = await backendClient.submitJob(expanded);
+  appStore.addJob(resp.job_id, expanded);
   if (userSketchPoints.length > 0) {
     appStore.updateJob(resp.job_id, { userSketchPoints });
   }

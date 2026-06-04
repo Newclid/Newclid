@@ -1,12 +1,19 @@
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class SketchPoint(BaseModel):
     name: str
     x: float
     y: float
+
+    @field_validator("name")
+    @classmethod
+    def name_must_not_be_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("name must not be empty")
+        return v
 
 
 class NewclidProofSections(BaseModel):

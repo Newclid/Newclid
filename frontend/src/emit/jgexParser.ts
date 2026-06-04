@@ -70,6 +70,7 @@ function geomForConstruction(name: string, args: string[]): SketchGeom[] {
     case 'circumcenter': {
       // x a b c → circle center x through a + show triangle a,b,c
       const [x, a, b, c] = args;
+      if (!x || !a || !b || !c) return [];
       return [circ(x, a), ...triangle(a, b, c)];
     }
     case 'on_circle': {
@@ -254,6 +255,68 @@ export function geomFromSignatures(sigs: string[]): SketchGeom[] {
     result.push(...geomForPredicate(kind, args));
   }
   return result;
+}
+
+function expandGoal(goal: string): string[] {
+  const parts = goal.trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 1) return [goal];
+  const [kind, ...args] = parts;
+  switch (kind) {
+    case 'coll': {
+      if (args.length <= 3) return [goal];
+      const windows: string[] = [];
+      for (let i = 0; i <= args.length - 3; i++) {
+        windows.push(`coll ${args[i]} ${args[i + 1]} ${args[i + 2]}`);
+      }
+      return windows;
+    }
+    case 'cyclic': {
+      if (args.length <= 4) return [goal];
+      const windows: string[] = [];
+      for (let i = 0; i <= args.length - 4; i++) {
+        windows.push(`cyclic ${args[i]} ${args[i + 1]} ${args[i + 2]} ${args[i + 3]}`);
+      }
+      return windows;
+    }
+    case 'circle': {
+      // circle center p1 p2 ... — center is fixed, slide window of 3 over the rest
+      if (args.length <= 4) return [goal];
+      const [center, ...rest] = args;
+      const windows: string[] = [];
+      for (let i = 0; i <= rest.length - 3; i++) {
+        windows.push(`circle ${center} ${rest[i]} ${rest[i + 1]} ${rest[i + 2]}`);
+      }
+      return windows;
+    }
+    default:
+      return [goal];
+  }
+}
+
+export function expandJgexPredicates(jgex: string): string {
+  const GOAL_SEP = ' ? ';
+  const CLAUSE_SEP = '; ';
+  const goalIdx = jgex.indexOf(GOAL_SEP);
+  if (goalIdx === -1) return jgex;
+
+  const setupStr = jgex.slice(0, goalIdx);
+  const goalsStr = jgex.slice(goalIdx + GOAL_SEP.length);
+
+  const expandedSetup = setupStr
+    .split(CLAUSE_SEP)
+    .flatMap(clause => {
+      const trimmed = clause.trim();
+      if (!trimmed || trimmed.includes('=')) return [clause];
+      return expandGoal(trimmed);
+    })
+    .join(CLAUSE_SEP);
+
+  const expandedGoals = goalsStr
+    .split(CLAUSE_SEP)
+    .flatMap(g => (g.trim() ? expandGoal(g.trim()) : []))
+    .join(CLAUSE_SEP);
+
+  return `${expandedSetup}${GOAL_SEP}${expandedGoals}`;
 }
 
 export function parseJgexGeometry(jgex: string): SketchGeom[] {
