@@ -88,6 +88,8 @@ export class ConstructionTool implements Tool {
           previews.push({ kind: 'auxLine', from: aux.from, to: aux.to });
         } else if (aux.kind === 'circle') {
           previews.push({ kind: 'rubberCircle', center: aux.center, radiusVec: aux.through });
+        } else if (aux.kind === 'point') {
+          previews.push({ kind: 'highlightPoint', pos: { x: aux.at.x, y: aux.at.y } });
         }
       }
       const projected = slot.project(this.bindings, ctx.scene, ctx.world);
@@ -103,6 +105,8 @@ export class ConstructionTool implements Tool {
         previews.push({ kind: 'auxLine', from: p.from, to: p.to });
       } else if (p.kind === 'circle') {
         previews.push({ kind: 'rubberCircle', center: p.center, radiusVec: p.through });
+      } else if (p.kind === 'point') {
+        previews.push({ kind: 'highlightPoint', pos: { x: p.at.x, y: p.at.y } });
       }
     }
 

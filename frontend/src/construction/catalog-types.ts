@@ -8,7 +8,8 @@ export type Bindings = Record<string, ObjectId | number>;
 // Aux geometry shown while a construction is in progress.
 export type DerivePreview =
   | { kind: 'auxLine'; from: WorldPoint; to: WorldPoint }
-  | { kind: 'circle'; center: { x: number; y: number }; through: { x: number; y: number } };
+  | { kind: 'circle'; center: { x: number; y: number }; through: { x: number; y: number } }
+  | { kind: 'point'; at: WorldPoint };
 
 // One input step in a construction
 export type SlotSpec =
