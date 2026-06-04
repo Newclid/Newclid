@@ -744,6 +744,57 @@ body.is-resizing {
   background: rgba(42, 74, 127, 0.06);
 }
 
+.proof-step-card.is-active.is-substep-premise {
+  border-left-color: #C8860A;
+  background: rgba(200, 134, 10, 0.06);
+}
+
+.proof-step-card.is-active.is-substep-conclusion {
+  border-left-color: #1A7A1A;
+  background: rgba(26, 122, 26, 0.06);
+}
+
+/* Sub-step navigation (inside the active step card) */
+
+.proof-substep-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.proof-substep-nav-btn {
+  font-size: 11px;
+  padding: 2px 6px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink-mid);
+  flex-shrink: 0;
+}
+
+.proof-substep-nav-btn:hover:not(:disabled) {
+  background: rgba(26, 24, 22, 0.05);
+  color: var(--ink-strong);
+}
+
+.proof-substep-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.proof-substep-counter {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
 /* ---------- Goal picker (visual problem definition) ---------- */
 
 .goal-chooser-section {

@@ -77,41 +77,74 @@ function buildProofStepItem(raw: string): HTMLElement {
   return card;
 }
 
-function buildStepNavigator(steps: string[], appStore: AppStore): HTMLElement {
-  const section = el('div', { class: 'proof-section' });
-  section.appendChild(el('div', { class: 'proof-section-title' }, ['Proof Steps']));
-
+function buildStepNavigator(sections: NewclidProofSections, appStore: AppStore): HTMLElement {
+  const steps = sections.proof_steps;
   const total = steps.length;
   const rawIndex = appStore.activeProofStepIndex ?? 0;
   const index = Math.max(0, Math.min(rawIndex, total - 1));
 
-  const nav = el('div', { class: 'proof-step-nav' });
+  const section = el('div', { class: 'proof-section' });
+  section.appendChild(el('div', { class: 'proof-section-title' }, ['Proof Steps']));
 
+  // Outer step navigation.
+  const nav = el('div', { class: 'proof-step-nav' });
   const prevBtn = el('button', { class: 'proof-step-nav-btn', type: 'button' }, ['← Prev']) as HTMLButtonElement;
   prevBtn.disabled = index === 0;
   prevBtn.addEventListener('click', () => appStore.setActiveProofStep(index - 1));
-
   const counter = el('span', { class: 'proof-step-counter' }, [`Step ${index + 1} of ${total}`]);
-
   const nextBtn = el('button', { class: 'proof-step-nav-btn', type: 'button' }, ['Next →']) as HTMLButtonElement;
   nextBtn.disabled = index === total - 1;
   nextBtn.addEventListener('click', () => appStore.setActiveProofStep(index + 1));
-
   nav.appendChild(prevBtn);
   nav.appendChild(counter);
   nav.appendChild(nextBtn);
   section.appendChild(nav);
 
+  // Compute sub-steps for the current step.
+  const constructionSigs = sections.construction_signatures ?? [];
+  const rawStepText = steps[index] ?? '';
+  const premiseIndices = sections.step_premise_indices?.[index] ?? [];
+  const constructionSubStepCount = countConstructionSubSteps(rawStepText, constructionSigs);
+  const premiseSubStepCount = constructionSubStepCount + premiseIndices.length;
+  const conclusionSubStep = premiseSubStepCount;
+  const rawSubStep = appStore.activeProofSubStepIndex ?? 0;
+  const subStep = Math.max(0, Math.min(rawSubStep, conclusionSubStep));
+
+  // Build the step card and color its left border based on sub-step type.
   const card = buildProofStepItem(steps[index]);
   card.classList.add('is-active');
-  section.appendChild(card);
+  card.classList.add(subStep < premiseSubStepCount ? 'is-substep-premise' : 'is-substep-conclusion');
 
+  // Sub-step navigation row (only shown when there are premise sub-steps to navigate).
+  if (premiseSubStepCount > 0) {
+    const subNav = el('div', { class: 'proof-substep-nav' });
+
+    const prevSubBtn = el('button', { class: 'proof-substep-nav-btn', type: 'button' }, ['← Prev']) as HTMLButtonElement;
+    prevSubBtn.disabled = subStep === 0;
+    prevSubBtn.addEventListener('click', () => appStore.setActiveProofSubStep(subStep - 1));
+
+    const subLabel = subStep < premiseSubStepCount
+      ? `Premise ${subStep + 1} of ${premiseSubStepCount}`
+      : 'Conclusion';
+    const subCounter = el('span', { class: 'proof-substep-counter' }, [subLabel]);
+
+    const nextSubBtn = el('button', { class: 'proof-substep-nav-btn', type: 'button' }, ['Next →']) as HTMLButtonElement;
+    nextSubBtn.disabled = subStep === conclusionSubStep;
+    nextSubBtn.addEventListener('click', () => appStore.setActiveProofSubStep(subStep + 1));
+
+    subNav.appendChild(prevSubBtn);
+    subNav.appendChild(subCounter);
+    subNav.appendChild(nextSubBtn);
+    card.appendChild(subNav);
+  }
+
+  section.appendChild(card);
   return section;
 }
 
 function buildStepNavigatorFromSections(sections: NewclidProofSections, appStore: AppStore): HTMLElement | null {
   if (sections.proof_steps.length === 0) return null;
-  return buildStepNavigator(sections.proof_steps, appStore);
+  return buildStepNavigator(sections, appStore);
 }
 
 export function createProofPanel(appStore: AppStore): ProofPanelHandle {
