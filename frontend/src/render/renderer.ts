@@ -24,7 +24,7 @@ const STYLE = {
   previewStrokeWidth: 1.5,
   previewDash: '5 4',
   markerColor: '#2266cc',
-  markerSize: 12,
+  markerSize: 16,
   premiseStroke: '#27AE60',
 };
 
@@ -459,8 +459,8 @@ export class Renderer {
           const [m, a, b] = marker.args;
           const pm = ptMap.get(m), pa = ptMap.get(a), pb = ptMap.get(b);
           if (!pm || !pa || !pb) break;
-          canvasTickMark(ctx, this.viewport, pm, pa, 9);
-          canvasTickMark(ctx, this.viewport, pm, pb, 9);
+          canvasTickMark(ctx, this.viewport, pm, pa, 12);
+          canvasTickMark(ctx, this.viewport, pm, pb, 12);
           break;
         }
         case 'perp': {
@@ -492,8 +492,8 @@ export class Renderer {
           const [a, b, c, d] = marker.args;
           const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
           if (!pa || !pb || !pc || !pd) break;
-          canvasTickMark(ctx, this.viewport, pa, pb, 9);
-          canvasTickMark(ctx, this.viewport, pc, pd, 9);
+          canvasTickMark(ctx, this.viewport, pa, pb, 12);
+          canvasTickMark(ctx, this.viewport, pc, pd, 12);
           break;
         }
         case 'para': {
@@ -626,7 +626,7 @@ function canvasChevron(
   if (len < 1e-6) return;
   const ux = dx / len, uy = dy / len;
   const vx = -uy, vy = ux;
-  const arm = 9;
+  const arm = 12;
   const tx = mx + arm * ux, ty = my + arm * uy;
   const l1x = mx - arm * ux + arm * vx, l1y = my - arm * uy + arm * vy;
   const l2x = mx - arm * ux - arm * vx, l2y = my - arm * uy - arm * vy;
@@ -642,7 +642,7 @@ function canvasAngleArc(
   vertex: { x: number; y: number },
   pa: { x: number; y: number },
   pb: { x: number; y: number },
-  arcR = 20,
+  arcR = 26,
 ): void {
   const sv = vp.worldToScreen(world(vertex.x, vertex.y));
   const sa = vp.worldToScreen(world(pa.x, pa.y));
