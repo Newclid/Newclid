@@ -13,6 +13,7 @@ import { foot } from "./entries/foot";
 import { parallelogram } from "./entries/parallelogram";
 import { equilateralTriangle } from "./entries/equilateral_triangle";
 import { mirror } from "./entries/mirror";
+import { angleMirror } from "./entries/angle_mirror";
 import { rectangle } from "./entries/rectangle";
 import { onLine } from "./entries/on_line";
 
@@ -31,6 +32,7 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [parallelogram.name]: parallelogram,
   [equilateralTriangle.name]: equilateralTriangle,
   [mirror.name]: mirror,
+  [angleMirror.name]: angleMirror,
   [rectangle.name]: rectangle,
   [onLine.name]: onLine,
 };
