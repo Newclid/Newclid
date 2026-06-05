@@ -12,7 +12,7 @@ namespace Yuclid {
             const RulePredicatePattern &pattern,
             const MappingState &mapping,
             const ProblemGeometryCache &cache,
-            PredicateMatchingMetadata predicate_metadata
+            const PredicateMatchingMetadata &predicate_metadata
         ) const override;
 
         [[nodiscard]] std::generator<MappingExtension> generate_extensions(
