@@ -20,9 +20,11 @@ export type DerivePreview =
   | { kind: 'circle'; center: { x: number; y: number }; through: { x: number; y: number } }
   | { kind: 'point'; at: WorldPoint };
 
-// One input step in a construction
+// One input step in a construction. 'pick' snaps to an existing point or
+// creates one; 'pick-existing' only accepts an existing point; 'place-free'
+// always drops a new point.
 export type SlotSpec =
-  | { name: string; kind: 'pick' | 'place-free'; label: string }
+  | { name: string; kind: 'pick' | 'place-free' | 'pick-existing'; label: string }
   | {
       name: string;
       kind: 'derive';
