@@ -6,21 +6,34 @@
 
 namespace Yuclid {
      namespace {
+        // TODO: Test this extensively!
+        // Relies on the sequence from middle to last element being sorted in ascending order
         template<class BidirIt>
         bool next_partial_permutation(BidirIt first, BidirIt middle, BidirIt last) {
+            // Reverse the order from middle to last element
+            // Since the inital sequence was in ascending order, this puts the elements from 
+            // middle to last in descending order
             std::reverse(middle, last);
+
+            // Next_permutation is implemented in a way, where looking from right to left, 
+            // it will skip the elements that are in descending order (descending read from left to right)
+            // untill it finds the one that isn't (in this case, because we reversed the sequence, that will be the element just before middle).
+            // When it finds that element, the method will swap it with the smallest larger element it can find on the right (the descending sequence).
+            // Finally the method will reverse the descending sequence and it will put it again in ascending order.
             return std::next_permutation(first, last);
         }
 
         MappingExtension get_extension_from_permutation(
             const std::vector<RuleVariableIndex> &var_indexes, 
-            const std::vector<std::size_t> &point_indexes
+            const std::vector<std::size_t> &point_indexes,
+            MappingExtension &result
         ) {
-            MappingExtension extension;
+            // TODO: implement this method for mapping extension to avoid allocating/deallocating memory every time
+            // result.clear_assignments();
             for(std::size_t i = 0; i < var_indexes.size(); ++i) {
-                extension.add_assignment(var_indexes[i], point_indexes[i]);
+                result.add_assignment(var_indexes[i], point_indexes[i]);
             }
-            return extension;
+            return result;
         }
 
         std::size_t variation_with_cap(std::size_t size_of_set, std::size_t num_total_elements) {
@@ -50,9 +63,9 @@ namespace Yuclid {
         [[maybe_unused]] const ProblemGeometryCache &cache,
         [[maybe_unused]] const PredicateMatchingMetadata &predicate_metadata
     ) const {
-        // TODO get the total number of points, once the cache is actually implemented
         std::size_t num_unassigned_vars = mapping.unassigned_variables().size();
-        std::size_t num_free_points; // = cache.get_problem()->num_points() - unassigned_vars;
+        // TODO: get the total number of points, once the cache is actually implemented, remove the placeholder
+        std::size_t num_free_points = 0; // = cache.get_problem()->num_points() - unassigned_vars;
         std::size_t estimate = predicate_metadata.base_cost + variation_with_cap(num_unassigned_vars, num_free_points);
 
         return estimate;
@@ -63,13 +76,14 @@ namespace Yuclid {
         const MappingState &mapping,
         [[maybe_unused]] const ProblemGeometryCache &cache
     ) const {
-        // TODO get the total number of points, once the cache is actually implemented
+        // TODO: get the total number of points, once the cache is actually implemented
         std::size_t num_points; // = cache.get_problem()->num_points();
         std::vector<RuleVariableIndex> unassigned_vars = mapping.unassigned_variables();
         std::vector<std::size_t> free_points;
 
         for(std::size_t i = 0; i < num_points; ++i){
             if(!mapping.is_point_used(i)){
+                // Points are uniquely represented by their indexes the list of all points in the problem object
                 free_points.push_back(i);
             }
         }
@@ -78,26 +92,32 @@ namespace Yuclid {
             throw std::runtime_error("The custom theorem requires more unique points than the problem contains.");
         }
 
+        // This will point past the last position we need for the variation of points
+        // This means that if we need 3 points assigned, this will point to the forth one in the vector 
+        // it could potentially point to .end() but the check above ensures it will not go past
         std::vector<std::size_t>::iterator nth_position = free_points.begin() + unassigned_vars.size();
+        MappingExtension next_extension;
 
-
-        while(next_partial_permutation(free_points.begin(), nth_position, free_points.end())){
-            MappingExtension next_extension = get_extension_from_permutation(unassigned_vars, free_points);
+        do {
+            next_extension = get_extension_from_permutation(unassigned_vars, free_points, next_extension);
             co_yield next_extension;
-        }
+        } while(next_partial_permutation(free_points.begin(), nth_position, free_points.end()));
     }
 
+    // TODO: Ensure this is not called on unsupported predicates (ones that will break the statement_builder)
     bool BaseProvider::is_satisfied(
         const RulePredicatePattern &pattern,
         const MappingState &mapping,
         [[maybe_unused]] const ProblemGeometryCache &cache
     ) const {
+        // Cast partial mapping to rule mapping
         auto optional_rule_mapping = mapping.to_partial_rule_mapping();
 
         if (!optional_rule_mapping.has_value()) {
             return false;
         }
 
+        // Build statement from pattern and mapping
         auto statements = build_statements_from_pattern(pattern, optional_rule_mapping.value());
         
         for(const auto &statement : statements) {

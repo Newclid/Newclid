@@ -6,6 +6,9 @@
 
 namespace Yuclid {
 
+    /** @brief This class represents the default Provider.
+     * It will be used for predicates that dont have a specific one implemented.
+    */
     class BaseProvider : public PredicateProvider {
     public:
         [[nodiscard]] std::size_t estimate_extensions(
