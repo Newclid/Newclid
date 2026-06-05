@@ -15,6 +15,7 @@ import { equilateralTriangle } from "./entries/equilateral_triangle";
 import { isoscelesTriangle } from "./entries/isosceles_triangle";
 import { mirror } from "./entries/mirror";
 import { rectangle } from "./entries/rectangle";
+import { tangentLine } from "./entries/tangent_line";
 import { onLine } from "./entries/on_line";
 
 export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
@@ -34,5 +35,6 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [isoscelesTriangle.name]: isoscelesTriangle,
   [mirror.name]: mirror,
   [rectangle.name]: rectangle,
+  [tangentLine.name]: tangentLine,
   [onLine.name]: onLine,
 };

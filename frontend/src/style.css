@@ -184,6 +184,11 @@ body.is-resizing {
   flex-direction: column;
   gap: 2px;
   margin-top: 12px;
+  /* Take the leftover height and scroll the tool list so the action buttons
+     below stay pinned as the catalog grows. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .tool-btn {
@@ -246,7 +251,9 @@ body.is-resizing {
 }
 
 .toolbar-spacer {
-  flex: 1;
+  /* The tool group now fills the leftover space, so the spacer no longer needs
+     to grow; the proofs tab uses its own flex:1 panel. */
+  flex: 0 0 auto;
 }
 
 .tool-btn-danger {
