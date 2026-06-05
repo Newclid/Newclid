@@ -54,7 +54,7 @@ namespace Yuclid{
         * @param cache The geometry cache used to find valid points.
         * @return a generator that produces mapping extensions
         */
-        virtual std::generator<MappingExtension> generate_extensions(
+        [[nodiscard]] virtual std::generator<MappingExtension> generate_extensions(
             const RulePredicatePattern &pattern,
             const MappingState &mapping,
             const ProblemGeometryCache &cache
