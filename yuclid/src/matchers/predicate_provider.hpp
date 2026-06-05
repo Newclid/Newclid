@@ -41,7 +41,7 @@ namespace Yuclid{
             const RulePredicatePattern &pattern,
             const MappingState &mapping,
             const ProblemGeometryCache &cache,
-            const PredicateMatchingMetadata predicate_metadata
+            const PredicateMatchingMetadata &predicate_metadata
         ) const = 0;
 
         /**
