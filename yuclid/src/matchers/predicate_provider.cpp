@@ -3,7 +3,9 @@
 
 namespace Yuclid {
     PredicateProviderRegistry::PredicateProviderRegistry(std::unique_ptr<PredicateProvider> fallback_provider) 
-        : m_fallback_provider(std::move(fallback_provider)) {}
+        : m_fallback_provider(fallback_provider == nullptr 
+         ? throw std::runtime_error("There should be an existing default provider.") 
+         : std::move(fallback_provider)) {}
 
     // Newly registered providers for the same predicate will overwrite the old ones
     void PredicateProviderRegistry::register_provider(const std::string& predicate_name, std::unique_ptr<PredicateProvider> provider) {
