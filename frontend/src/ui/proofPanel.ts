@@ -1,5 +1,15 @@
 import { AppStore } from '../store/appStore';
+import type { NewclidProofSections } from '../api/types';
 import { el } from './dom';
+
+// Count text premises in a raw proof step string (each ends with a bracket ref like [C0], [N1], [36]).
+function countTextPremises(rawStep: string): number {
+  const premiseSection = rawStep.match(/^\d+\.\s*\|\s*(.+?)\s*=\(/)?.[1] ?? '';
+  const premRegex = /.*?\[\w*\d+\]/g;
+  let count = 0;
+  while (premRegex.exec(premiseSection) !== null) count++;
+  return count;
+}
 
 export interface ProofPanelHandle {
   root: HTMLElement;
@@ -37,41 +47,122 @@ interface ParsedProofStep {
 }
 
 function parseProofStep(raw: string): ParsedProofStep | null {
-  const match = raw.match(/^(\d+)\.\s*\|\s*(.+?)\s*=\((.+?)\)>\s*(.+)$/);
-  if (!match) return null;
+  const topMatch = raw.match(/^(\d+)\.\s*\|\s*(.+?)\s*=\((.+?)\)>\s*(.+)$/);
+  if (!topMatch) return null;
+
+  const premiseSection = topMatch[2];
+  // Each premise ends with a bracket ref like [C0], [N1], [36].
+  const premises: string[] = [];
+  const premRegex = /.*?\[\w*\d+\]/g;
+  let m;
+  while ((m = premRegex.exec(premiseSection)) !== null) {
+    const trimmed = m[0].replace(/^[,\s]+/, '').trim();
+    if (trimmed) premises.push(trimmed);
+  }
+  // Fallback for malformed steps without bracket refs.
+  if (premises.length === 0 && premiseSection.trim()) {
+    premises.push(...premiseSection.split(',').map(p => p.trim()).filter(Boolean));
+  }
+
   return {
-    num: match[1],
-    premises: match[2].split(',').map((p) => p.trim()),
-    rule: match[3].trim(),
-    conclusion: match[4].trim(),
+    num: topMatch[1],
+    premises,
+    rule: topMatch[3].trim(),
+    conclusion: topMatch[4].trim(),
   };
 }
 
-function buildProofStepItem(raw: string): HTMLElement {
+function buildProofStepItem(raw: string, activeSubStep?: number): HTMLElement {
   const parsed = parseProofStep(raw);
   if (!parsed) {
     return el('li', { class: 'proof-step-item' }, [raw]);
   }
 
+  const conclusionSubStep = parsed.premises.length;
   const card = el('li', { class: 'proof-step-card' });
   card.appendChild(el('span', { class: 'proof-step-num' }, [parsed.num]));
-  for (const premise of parsed.premises) {
-    card.appendChild(el('span', { class: 'proof-step-premise' }, [premise]));
+
+  for (let i = 0; i < parsed.premises.length; i++) {
+    const cls = (activeSubStep === i)
+      ? 'proof-step-premise is-active-substep'
+      : 'proof-step-premise';
+    card.appendChild(el('span', { class: cls }, [parsed.premises[i]]));
   }
+
   card.appendChild(el('span', { class: 'proof-step-rule' }, [parsed.rule]));
-  card.appendChild(el('span', { class: 'proof-step-conclusion' }, [parsed.conclusion]));
+
+  const conclusionCls = (activeSubStep === conclusionSubStep)
+    ? 'proof-step-conclusion is-active-substep'
+    : 'proof-step-conclusion';
+  card.appendChild(el('span', { class: conclusionCls }, [parsed.conclusion]));
   return card;
 }
 
-function buildProofStepsSection(title: string, steps: string[]): HTMLElement {
+function buildStepNavigator(sections: NewclidProofSections, appStore: AppStore): HTMLElement {
+  const steps = sections.proof_steps;
+  const total = steps.length;
+  const rawIndex = appStore.activeProofStepIndex ?? 0;
+  const index = Math.max(0, Math.min(rawIndex, total - 1));
+
   const section = el('div', { class: 'proof-section' });
-  section.appendChild(el('div', { class: 'proof-section-title' }, [title]));
-  const list = el('ol', { class: 'proof-steps-list' });
-  for (const step of steps) {
-    list.appendChild(buildProofStepItem(step));
+  section.appendChild(el('div', { class: 'proof-section-title' }, ['Proof Steps']));
+
+  // Outer step navigation.
+  const nav = el('div', { class: 'proof-step-nav' });
+  const prevBtn = el('button', { class: 'proof-step-nav-btn', type: 'button' }, ['← Prev']) as HTMLButtonElement;
+  prevBtn.disabled = index === 0;
+  prevBtn.addEventListener('click', () => appStore.setActiveProofStep(index - 1));
+  const counter = el('span', { class: 'proof-step-counter' }, [`Step ${index + 1} of ${total}`]);
+  const nextBtn = el('button', { class: 'proof-step-nav-btn', type: 'button' }, ['Next →']) as HTMLButtonElement;
+  nextBtn.disabled = index === total - 1;
+  nextBtn.addEventListener('click', () => appStore.setActiveProofStep(index + 1));
+  nav.appendChild(prevBtn);
+  nav.appendChild(counter);
+  nav.appendChild(nextBtn);
+  section.appendChild(nav);
+
+  // Sub-step count = one per text premise + one for the conclusion.
+  const rawStepText = steps[index] ?? '';
+  const premiseSubStepCount = countTextPremises(rawStepText);
+  const conclusionSubStep = premiseSubStepCount;
+  const rawSubStep = appStore.activeProofSubStepIndex ?? 0;
+  const subStep = Math.max(0, Math.min(rawSubStep, conclusionSubStep));
+
+  // Build the step card, highlighting the active premise/conclusion line.
+  const card = buildProofStepItem(steps[index], subStep);
+  card.classList.add('is-active');
+  card.classList.add(subStep < premiseSubStepCount ? 'is-substep-premise' : 'is-substep-conclusion');
+
+  // Sub-step navigation row (only shown when there are premise sub-steps to navigate).
+  if (premiseSubStepCount > 0) {
+    const subNav = el('div', { class: 'proof-substep-nav' });
+
+    const prevSubBtn = el('button', { class: 'proof-substep-nav-btn', type: 'button' }, ['← Prev']) as HTMLButtonElement;
+    prevSubBtn.disabled = subStep === 0;
+    prevSubBtn.addEventListener('click', () => appStore.setActiveProofSubStep(subStep - 1));
+
+    const subLabel = subStep < premiseSubStepCount
+      ? `Premise ${subStep + 1} of ${premiseSubStepCount}`
+      : 'Conclusion';
+    const subCounter = el('span', { class: 'proof-substep-counter' }, [subLabel]);
+
+    const nextSubBtn = el('button', { class: 'proof-substep-nav-btn', type: 'button' }, ['Next →']) as HTMLButtonElement;
+    nextSubBtn.disabled = subStep === conclusionSubStep;
+    nextSubBtn.addEventListener('click', () => appStore.setActiveProofSubStep(subStep + 1));
+
+    subNav.appendChild(prevSubBtn);
+    subNav.appendChild(subCounter);
+    subNav.appendChild(nextSubBtn);
+    card.appendChild(subNav);
   }
-  section.appendChild(list);
+
+  section.appendChild(card);
   return section;
+}
+
+function buildStepNavigatorFromSections(sections: NewclidProofSections, appStore: AppStore): HTMLElement | null {
+  if (sections.proof_steps.length === 0) return null;
+  return buildStepNavigator(sections, appStore);
 }
 
 export function createProofPanel(appStore: AppStore): ProofPanelHandle {
@@ -120,7 +211,8 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
           content.appendChild(buildSection('Unproven Goals', unproven_goals));
         }
         if (proof_steps.length > 0) {
-          content.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
+          const nav = buildStepNavigatorFromSections(job.result.proof_sections, appStore);
+          if (nav) content.appendChild(nav);
         }
       } else {
         if (job.result.message) {
@@ -139,7 +231,8 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
             content.appendChild(buildSection('Proved So Far', proven_goals));
           }
           if (proof_steps.length > 0) {
-            content.appendChild(buildProofStepsSection('Proof Steps', proof_steps));
+            const nav = buildStepNavigatorFromSections(job.result.proof_sections, appStore);
+            if (nav) content.appendChild(nav);
           }
         }
         if (job.result.stderr) {

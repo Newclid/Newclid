@@ -134,9 +134,55 @@ function normalizeSketchPoints(
   }));
 }
 
+// Parse premises in text order and resolve each one's canvas geometry signature (if any).
+// Each premise ends with a bracket ref: [Cn] = construction, [Nn] = numerical (no canvas), [\d+] = step ref.
+function buildTextPremiseSigs(
+  rawStep: string,
+  stepSigs: string[],
+  constructionSigs: string[],
+  proofSteps: string[],
+): Array<string | null> {
+  const premiseSection = rawStep.match(/^\d+\.\s*\|\s*(.+?)\s*=\(/)?.[1] ?? '';
+
+  // Build step-number (as printed, e.g. 36 from "036.") → step_signatures index.
+  const stepNumToSigIdx = new Map<number, number>();
+  for (let i = 0; i < proofSteps.length; i++) {
+    const nm = proofSteps[i].match(/^0*(\d+)\./);
+    if (nm) stepNumToSigIdx.set(parseInt(nm[1], 10), i);
+  }
+
+  const result: Array<string | null> = [];
+  const premRegex = /.*?\[\w*\d+\]/g;
+  let m;
+  while ((m = premRegex.exec(premiseSection)) !== null) {
+    const prem = m[0].replace(/^[,\s]+/, '').trim();
+    const cMatch = prem.match(/\[C(\d+)\]$/);
+    const nMatch = prem.match(/\[N\d+\]$/);
+    const stepMatch = prem.match(/\[(\d+)\]$/);
+
+    if (cMatch) {
+      const cIdx = parseInt(cMatch[1], 10);
+      result.push((cIdx >= 0 && cIdx < constructionSigs.length && constructionSigs[cIdx])
+        ? constructionSigs[cIdx] : null);
+    } else if (nMatch) {
+      result.push(null); // numerical check — no canvas geometry
+    } else if (stepMatch) {
+      const stepNum = parseInt(stepMatch[1], 10);
+      const sigIdx = stepNumToSigIdx.get(stepNum);
+      result.push((sigIdx !== undefined && stepSigs[sigIdx]) ? stepSigs[sigIdx] : null);
+    } else {
+      result.push(null);
+    }
+  }
+  return result;
+}
+
 let savedSceneSnapshot: SceneSnapshot | null = null;
 let wasInProofMode = false;
 let lastJobResult: JobResultPayload | null | undefined;
+// Use sentinels so the first run always builds the sketch.
+let lastStepIndex: number | null = -1 as unknown as null;
+let lastSubStepIndex: number | null = -1 as unknown as null;
 
 appStore.subscribe(() => {
   const { proofMode, activeJobId } = appStore;
@@ -155,8 +201,20 @@ appStore.subscribe(() => {
   if (proofMode && activeJobId) {
     const job = appStore.jobs.get(activeJobId);
     const result = job?.result;
-    if (result === lastJobResult) { requestRedraw(); return; }
+    const stepIndex = appStore.activeProofStepIndex;
+    const subStepIndex = appStore.activeProofSubStepIndex;
+
+    // Auto-initialise to step 0 when result first arrives.
+    if (result && result !== lastJobResult && (result.proof_sections?.proof_steps.length ?? 0) > 0 && stepIndex === null) {
+      appStore.setActiveProofStep(0);
+      return; // setActiveProofStep will trigger another subscription call
+    }
+
+    if (result === lastJobResult && stepIndex === lastStepIndex && subStepIndex === lastSubStepIndex) { requestRedraw(); return; }
     lastJobResult = result;
+    lastStepIndex = stepIndex;
+    lastSubStepIndex = subStepIndex;
+
     const problem = job?.problem ?? '';
     // Use the user's drawing coordinates stored at submission time.
     // Fall back to backend coords (with normalisation + viewport fit) only
@@ -166,33 +224,95 @@ appStore.subscribe(() => {
       ? userPoints
       : normalizeSketchPoints(result?.sketch_points ?? []);
     const sections = result?.proof_sections;
-    const markers = [
-      ...new Set([
-        ...(sections?.construction_signatures ?? []),
-        ...(sections?.step_signatures ?? []),
-        ...(sections?.goal_signatures ?? []),
-      ]),
-    ]
-      .map(parseConstructionSignature)
-      .filter((m): m is ConstructionMarker => m !== null);
-    const geometry = [
+    const stepSigs = sections?.step_signatures ?? [];
+
+    const baseGeometry = [
       ...parseJgexGeometry(problem),
       ...geomFromSignatures([...new Set(sections?.construction_signatures ?? [])]),
     ];
-    const extraGeometry = geomFromSignatures([
+
+    let geometry = baseGeometry;
+    let extraGeometry = geomFromSignatures([
       ...new Set([
         ...(sections?.step_signatures ?? []),
         ...(sections?.goal_signatures ?? []),
       ]),
     ]);
+    let highlightGeometry: ReturnType<typeof geomFromSignatures> | undefined;
+    let highlightPoints: string[] | undefined;
+    let premiseGeometry: ReturnType<typeof geomFromSignatures> | undefined;
+    let premisePoints: string[] | undefined;
+    let premiseMarkers: ConstructionMarker[] | undefined;
+    let markers: ConstructionMarker[];
+
+    if (stepIndex !== null && stepSigs[stepIndex] !== undefined) {
+      // Past steps merged into solid base geometry (no markers).
+      const pastSigs = [...new Set(stepSigs.slice(0, stepIndex))];
+      geometry = [...baseGeometry, ...geomFromSignatures(pastSigs)];
+      extraGeometry = [];
+
+      const constructionSigs = sections?.construction_signatures ?? [];
+      const rawStepText = sections?.proof_steps?.[stepIndex] ?? '';
+
+      // Premises in text order; each entry is a canvas signature or null (no geometry).
+      const textPremiseSigs = buildTextPremiseSigs(
+        rawStepText, stepSigs, constructionSigs, sections?.proof_steps ?? [],
+      );
+
+      // Sub-steps: one per text premise + the conclusion.
+      const conclusionSubStep = textPremiseSigs.length;
+      const rawSubStep = appStore.activeProofSubStepIndex ?? 0;
+      const subStep = Math.max(0, Math.min(rawSubStep, conclusionSubStep));
+
+      const geomPoints = (geoms: ReturnType<typeof geomFromSignatures>): string[] =>
+        geoms.flatMap((g) => {
+          if (g.kind === 'segment' || g.kind === 'line') return [g.p1, g.p2];
+          if (g.kind === 'circle') return [g.center, g.through];
+          if (g.kind === 'circumcircle') return [g.p1, g.p2, g.p3];
+          return [];
+        });
+
+      if (subStep === conclusionSubStep) {
+        // Conclusion: highlight the deduction in green.
+        highlightGeometry = geomFromSignatures([stepSigs[stepIndex]]);
+        highlightPoints = geomPoints(highlightGeometry);
+        const m = parseConstructionSignature(stepSigs[stepIndex]);
+        markers = m ? [m] : [];
+      } else {
+        // Premise sub-step: highlight in amber if this premise has canvas geometry.
+        const pSig = textPremiseSigs[subStep];
+        if (pSig) {
+          premiseGeometry = geomFromSignatures([pSig]);
+          premisePoints = geomPoints(premiseGeometry);
+          const pm = parseConstructionSignature(pSig);
+          premiseMarkers = pm ? [pm] : [];
+        }
+        // If pSig is null (e.g. [N-type] premise): canvas shows no highlight — correct.
+        markers = [];
+      }
+    } else {
+      // Fallback: no step selected — show everything at once (original behaviour).
+      markers = [
+        ...new Set([
+          ...(sections?.construction_signatures ?? []),
+          ...(sections?.step_signatures ?? []),
+          ...(sections?.goal_signatures ?? []),
+        ]),
+      ]
+        .map(parseConstructionSignature)
+        .filter((m): m is ConstructionMarker => m !== null);
+    }
+
     renderer.proofSketch = points.length > 0
-      ? { points, geometry, extraGeometry, markers }
+      ? { points, geometry, extraGeometry, highlightGeometry, highlightPoints,
+          premiseGeometry, premisePoints, premiseMarkers, markers }
       : null;
     if (renderer.proofSketch && userPoints.length === 0) {
       viewport.fitPoints(renderer.proofSketch.points);
     }
   } else {
     lastJobResult = null;
+    lastStepIndex = -1 as unknown as null;
     renderer.proofSketch = null;
   }
   requestRedraw();

@@ -8,6 +8,13 @@ import type { ConstructionMarker, SketchGeom } from '../emit/jgexParser';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+const PALETTE = [
+  '#e6194b','#3cb44b','#ffe119','#4363d8','#f58231','#911eb4',
+  '#31a8a8','#f032e6','#bcf60c','#fabebe','#008080','#e6beff',
+  '#9a6324','#fffac8','#800000','#aaffc3','#808000','#ffd8b1',
+  '#0000cd','#808080','#00ff73','#ffffff',
+];
+
 const STYLE = {
   background: '#fafafa',
   gridMinor: '#ececec',
@@ -19,17 +26,24 @@ const STYLE = {
   circleStroke: '#1A1816',
   circleStrokeWidth: 1.75,
   snapStroke: '#2A4A7F',
+  highlightStroke: '#1A7A1A',  // green — used for the conclusion/deduction
   previewStroke: '#8C887F',
   previewStrokeWidth: 1.5,
   previewDash: '5 4',
   markerColor: '#2266cc',
-  markerSize: 8,
+  markerSize: 16,
+  premiseStroke: '#C8860A',    // amber/gold — used for premises and assumptions
 };
 
 export interface ProofSketch {
   points: SketchPoint[];
   geometry: SketchGeom[];
   extraGeometry?: SketchGeom[];
+  highlightGeometry?: SketchGeom[];
+  highlightPoints?: string[];
+  premiseGeometry?: SketchGeom[];
+  premisePoints?: string[];
+  premiseMarkers?: ConstructionMarker[];
   markers?: ConstructionMarker[];
   ptMap?: Map<string, SketchPoint>;
 }
@@ -46,8 +60,10 @@ export class Renderer {
     if (sketch) {
       sketch.geometry = deduplicateGeom(sketch.geometry);
       if (sketch.extraGeometry) sketch.extraGeometry = deduplicateGeom(sketch.extraGeometry);
+      if (sketch.highlightGeometry) sketch.highlightGeometry = deduplicateGeom(sketch.highlightGeometry);
+      if (sketch.premiseGeometry) sketch.premiseGeometry = deduplicateGeom(sketch.premiseGeometry);
       sketch.ptMap = new Map(sketch.points.map(p => [p.name, p]));
-      for (const marker of sketch.markers ?? []) {
+      for (const marker of [...(sketch.markers ?? []), ...(sketch.premiseMarkers ?? [])]) {
         if (marker.kind === 'perp') {
           const [a, b, c, d] = marker.args;
           const pa = sketch.ptMap.get(a), pb = sketch.ptMap.get(b);
@@ -347,8 +363,30 @@ export class Renderer {
     this.canvasGeometry(ctx, sketch.extraGeometry ?? [], ptMap);
     ctx.setLineDash([]);
 
-    if (sketch.markers?.length) this.canvasMarkers(ctx, sketch.markers, ptMap);
-    this.canvasPoints(ctx, sketch.points);
+    if (sketch.premiseGeometry?.length) {
+      ctx.strokeStyle = STYLE.premiseStroke;
+      ctx.lineWidth = 2.0;
+      ctx.setLineDash([]);
+      this.canvasGeometry(ctx, sketch.premiseGeometry, ptMap);
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1.5;
+    }
+    if (sketch.premiseMarkers?.length) this.canvasMarkers(ctx, sketch.premiseMarkers, ptMap, STYLE.premiseStroke);
+
+    if (sketch.highlightGeometry?.length) {
+      ctx.strokeStyle = STYLE.highlightStroke;
+      ctx.lineWidth = 2.5;
+      this.canvasGeometry(ctx, sketch.highlightGeometry, ptMap);
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1.5;
+    }
+
+    const markerColor = sketch.highlightGeometry?.length ? STYLE.highlightStroke : STYLE.markerColor;
+    if (sketch.markers?.length) this.canvasMarkers(ctx, sketch.markers, ptMap, markerColor);
+
+    const highlightSet = sketch.highlightPoints?.length ? new Set(sketch.highlightPoints) : null;
+    const premiseSet = sketch.premisePoints?.length ? new Set(sketch.premisePoints) : null;
+    this.canvasPoints(ctx, sketch.points, highlightSet, premiseSet);
   }
 
   private canvasGeometry(
@@ -417,8 +455,61 @@ export class Renderer {
     ctx: CanvasRenderingContext2D,
     markers: ConstructionMarker[],
     ptMap: Map<string, SketchPoint>,
+    color = STYLE.markerColor,
   ): void {
-    ctx.strokeStyle = STYLE.markerColor;
+    const perpColor = color === STYLE.markerColor ? '#FFE100' : color;
+
+    // Pre-assign PALETTE colors to each angle/para marker in order
+    const markerPaletteColors: string[] = [];
+    let paletteIdx = 0;
+    for (const marker of markers) {
+      if (marker.kind === 'eqangle' || marker.kind === 'aconst' || marker.kind === 'para') {
+        markerPaletteColors.push(PALETTE[paletteIdx++ % PALETTE.length]);
+      } else {
+        markerPaletteColors.push('');
+      }
+    }
+
+    // Pass 1: filled wedges for angle markers
+    for (let i = 0; i < markers.length; i++) {
+      const marker = markers[i];
+      const fillColor = markerPaletteColors[i];
+      if (marker.kind === 'eqangle') {
+        if (marker.args.length < 8) continue;
+        const [a, b, c, d, e, f, g, h] = marker.args;
+        const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+        const pe = ptMap.get(e), pf = ptMap.get(f), pg = ptMap.get(g), ph = ptMap.get(h);
+        if (pa && pb && pc && pd) {
+          const v1 = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+          if (v1) {
+            const rayA = Math.hypot(pa.x - v1.x, pa.y - v1.y) > 1e-6 ? pa : pb;
+            const rayC = Math.hypot(pc.x - v1.x, pc.y - v1.y) > 1e-6 ? pc : pd;
+            canvasAngleWedgeFill(ctx, this.viewport, v1, rayA, rayC, fillColor);
+          }
+        }
+        if (pe && pf && pg && ph) {
+          const v2 = lineIntersect(pe.x, pe.y, pf.x, pf.y, pg.x, pg.y, ph.x, ph.y);
+          if (v2) {
+            const rayE = Math.hypot(pe.x - v2.x, pe.y - v2.y) > 1e-6 ? pe : pf;
+            const rayG = Math.hypot(pg.x - v2.x, pg.y - v2.y) > 1e-6 ? pg : ph;
+            canvasAngleWedgeFill(ctx, this.viewport, v2, rayE, rayG, fillColor);
+          }
+        }
+      } else if (marker.kind === 'aconst') {
+        if (marker.args.length < 4) continue;
+        const [a, b, c, d] = marker.args;
+        const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+        if (!pa || !pb || !pc || !pd) continue;
+        const v = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+        if (!v) continue;
+        const rayA = Math.hypot(pa.x - v.x, pa.y - v.y) > 1e-6 ? pa : pb;
+        const rayC = Math.hypot(pc.x - v.x, pc.y - v.y) > 1e-6 ? pc : pd;
+        canvasAngleWedgeFill(ctx, this.viewport, v, rayA, rayC, fillColor);
+      }
+    }
+
+    // Pass 2a: arc outlines (eqangle/aconst) + tick marks (midp/cong) — semantic color
+    ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     for (const marker of markers) {
@@ -427,49 +518,51 @@ export class Renderer {
           const [m, a, b] = marker.args;
           const pm = ptMap.get(m), pa = ptMap.get(a), pb = ptMap.get(b);
           if (!pm || !pa || !pb) break;
-          canvasTickMark(ctx, this.viewport, pm, pa, 6);
-          canvasTickMark(ctx, this.viewport, pm, pb, 6);
-          break;
-        }
-        case 'perp': {
-          const ix = (marker as CachedPerp)._worldPos;
-          if (!ix) break;
-          const [a, b, c, d] = marker.args;
-          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
-          if (!pa || !pb || !pc || !pd) break;
-          const si = this.viewport.worldToScreen(world(ix.x, ix.y));
-          const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
-          const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
-          const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
-          const sd = this.viewport.worldToScreen(world(pd.x, pd.y));
-          const lenAB = Math.hypot(sb.x - sa.x, sb.y - sa.y);
-          const lenCD = Math.hypot(sd.x - sc.x, sd.y - sc.y);
-          if (lenAB < 1e-6 || lenCD < 1e-6) break;
-          const uABx = (sb.x - sa.x) / lenAB, uABy = (sb.y - sa.y) / lenAB;
-          const uCDx = (sd.x - sc.x) / lenCD, uCDy = (sd.y - sc.y) / lenCD;
-          const s = STYLE.markerSize;
-          const c1x = si.x + s * uABx, c1y = si.y + s * uABy;
-          const c2x = c1x + s * uCDx, c2y = c1y + s * uCDy;
-          const c3x = si.x + s * uCDx, c3y = si.y + s * uCDy;
-          ctx.moveTo(c1x, c1y);
-          ctx.lineTo(c2x, c2y);
-          ctx.lineTo(c3x, c3y);
+          canvasTickMark(ctx, this.viewport, pm, pa, 12);
+          canvasTickMark(ctx, this.viewport, pm, pb, 12);
           break;
         }
         case 'cong': {
           const [a, b, c, d] = marker.args;
           const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
           if (!pa || !pb || !pc || !pd) break;
-          canvasTickMark(ctx, this.viewport, pa, pb, 6);
-          canvasTickMark(ctx, this.viewport, pc, pd, 6);
+          canvasTickMark(ctx, this.viewport, pa, pb, 12);
+          canvasTickMark(ctx, this.viewport, pc, pd, 12);
           break;
         }
-        case 'para': {
+        case 'eqangle': {
+          if (marker.args.length < 8) break;
+          const [a, b, c, d, e, f, g, h] = marker.args;
+          const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+          const pe = ptMap.get(e), pf = ptMap.get(f), pg = ptMap.get(g), ph = ptMap.get(h);
+          if (pa && pb && pc && pd) {
+            const v1 = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+            if (v1) {
+              const rayA = Math.hypot(pa.x - v1.x, pa.y - v1.y) > 1e-6 ? pa : pb;
+              const rayC = Math.hypot(pc.x - v1.x, pc.y - v1.y) > 1e-6 ? pc : pd;
+              canvasAngleArcPath(ctx, this.viewport, v1, rayA, rayC);
+            }
+          }
+          if (pe && pf && pg && ph) {
+            const v2 = lineIntersect(pe.x, pe.y, pf.x, pf.y, pg.x, pg.y, ph.x, ph.y);
+            if (v2) {
+              const rayE = Math.hypot(pe.x - v2.x, pe.y - v2.y) > 1e-6 ? pe : pf;
+              const rayG = Math.hypot(pg.x - v2.x, pg.y - v2.y) > 1e-6 ? pg : ph;
+              canvasAngleArcPath(ctx, this.viewport, v2, rayE, rayG);
+            }
+          }
+          break;
+        }
+        case 'aconst': {
+          if (marker.args.length < 4) break;
           const [a, b, c, d] = marker.args;
           const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
           if (!pa || !pb || !pc || !pd) break;
-          canvasChevron(ctx, this.viewport, pa, pb);
-          canvasChevron(ctx, this.viewport, pc, pd);
+          const v = lineIntersect(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, pd.x, pd.y);
+          if (!v) break;
+          const rayA = Math.hypot(pa.x - v.x, pa.y - v.y) > 1e-6 ? pa : pb;
+          const rayC = Math.hypot(pc.x - v.x, pc.y - v.y) > 1e-6 ? pc : pd;
+          canvasAngleArcPath(ctx, this.viewport, v, rayA, rayC);
           break;
         }
         default:
@@ -477,15 +570,68 @@ export class Renderer {
       }
     }
     ctx.stroke();
+
+    // Pass 2b: perp squares — yellow in base mode, semantic color when highlighted/premise
+    ctx.strokeStyle = perpColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (const marker of markers) {
+      if (marker.kind !== 'perp') continue;
+      const ix = (marker as CachedPerp)._worldPos;
+      if (!ix) continue;
+      const [a, b, c, d] = marker.args;
+      const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+      if (!pa || !pb || !pc || !pd) continue;
+      const si = this.viewport.worldToScreen(world(ix.x, ix.y));
+      const sa = this.viewport.worldToScreen(world(pa.x, pa.y));
+      const sb = this.viewport.worldToScreen(world(pb.x, pb.y));
+      const sc = this.viewport.worldToScreen(world(pc.x, pc.y));
+      const sd = this.viewport.worldToScreen(world(pd.x, pd.y));
+      const lenAB = Math.hypot(sb.x - sa.x, sb.y - sa.y);
+      const lenCD = Math.hypot(sd.x - sc.x, sd.y - sc.y);
+      if (lenAB < 1e-6 || lenCD < 1e-6) continue;
+      const uABx = (sb.x - sa.x) / lenAB, uABy = (sb.y - sa.y) / lenAB;
+      const uCDx = (sd.x - sc.x) / lenCD, uCDy = (sd.y - sc.y) / lenCD;
+      const s = STYLE.markerSize;
+      const c1x = si.x + s * uABx, c1y = si.y + s * uABy;
+      const c2x = c1x + s * uCDx, c2y = c1y + s * uCDy;
+      const c3x = si.x + s * uCDx, c3y = si.y + s * uCDy;
+      ctx.moveTo(c1x, c1y);
+      ctx.lineTo(c2x, c2y);
+      ctx.lineTo(c3x, c3y);
+    }
+    ctx.stroke();
+
+    // Pass 2c: para marks — offset parallel tick, PALETTE color per pair
+    for (let i = 0; i < markers.length; i++) {
+      const marker = markers[i];
+      if (marker.kind !== 'para') continue;
+      const [a, b, c, d] = marker.args;
+      const pa = ptMap.get(a), pb = ptMap.get(b), pc = ptMap.get(c), pd = ptMap.get(d);
+      if (!pa || !pb || !pc || !pd) continue;
+      ctx.strokeStyle = markerPaletteColors[i];
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      canvasParaMark(ctx, this.viewport, pa, pb);
+      canvasParaMark(ctx, this.viewport, pc, pd);
+      ctx.stroke();
+    }
   }
 
-  private canvasPoints(ctx: CanvasRenderingContext2D, points: SketchPoint[]): void {
-    ctx.fillStyle = '#1a1a1a';
+  private canvasPoints(
+    ctx: CanvasRenderingContext2D,
+    points: SketchPoint[],
+    highlightSet?: Set<string> | null,
+    premiseSet?: Set<string> | null,
+  ): void {
     ctx.font = 'italic 14px system-ui, sans-serif';
     for (const p of points) {
+      const highlighted = highlightSet?.has(p.name) ?? false;
+      const isPremise = !highlighted && (premiseSet?.has(p.name) ?? false);
       const s = this.viewport.worldToScreen(world(p.x, p.y));
+      ctx.fillStyle = highlighted ? STYLE.highlightStroke : isPremise ? STYLE.premiseStroke : '#1a1a1a';
       ctx.beginPath();
-      ctx.arc(s.x, s.y, 4.25, 0, 2 * Math.PI);
+      ctx.arc(s.x, s.y, highlighted || isPremise ? 5.5 : 4.25, 0, 2 * Math.PI);
       ctx.fill();
       ctx.fillText(displayPointName(p.name), s.x + 9, s.y - 9);
     }
@@ -538,7 +684,7 @@ function canvasTickMark(
   ctx.lineTo(mx + halfLen * px, my + halfLen * py);
 }
 
-function canvasChevron(
+function canvasParaMark(
   ctx: CanvasRenderingContext2D,
   vp: Viewport,
   pa: { x: number; y: number },
@@ -546,20 +692,63 @@ function canvasChevron(
 ): void {
   const sa = vp.worldToScreen(world(pa.x, pa.y));
   const sb = vp.worldToScreen(world(pb.x, pb.y));
-  const mx = (sa.x + sb.x) / 2, my = (sa.y + sb.y) / 2;
   const dx = sb.x - sa.x, dy = sb.y - sa.y;
   const len = Math.hypot(dx, dy);
   if (len < 1e-6) return;
   const ux = dx / len, uy = dy / len;
-  const vx = -uy, vy = ux;
-  const arm = 6;
-  const tx = mx + arm * ux, ty = my + arm * uy;
-  const l1x = mx - arm * ux + arm * vx, l1y = my - arm * uy + arm * vy;
-  const l2x = mx - arm * ux - arm * vx, l2y = my - arm * uy - arm * vy;
-  ctx.moveTo(l1x, l1y);
-  ctx.lineTo(tx, ty);
-  ctx.moveTo(l2x, l2y);
-  ctx.lineTo(tx, ty);
+  const px = -uy, py = ux;
+  const offset = 10;
+  const tickLen = Math.min(len * 0.4, 32);
+  const mx = (sa.x + sb.x) / 2, my = (sa.y + sb.y) / 2;
+  const ox = mx + offset * px, oy = my + offset * py;
+  ctx.moveTo(ox - (tickLen / 2) * ux, oy - (tickLen / 2) * uy);
+  ctx.lineTo(ox + (tickLen / 2) * ux, oy + (tickLen / 2) * uy);
+}
+
+function canvasAngleWedgeFill(
+  ctx: CanvasRenderingContext2D,
+  vp: Viewport,
+  vertex: { x: number; y: number },
+  pa: { x: number; y: number },
+  pb: { x: number; y: number },
+  fillColor: string,
+  arcR = 26,
+): void {
+  const sv = vp.worldToScreen(world(vertex.x, vertex.y));
+  const sa = vp.worldToScreen(world(pa.x, pa.y));
+  const sb = vp.worldToScreen(world(pb.x, pb.y));
+  const startA = Math.atan2(sa.y - sv.y, sa.x - sv.x);
+  let diff = Math.atan2(sb.y - sv.y, sb.x - sv.x) - startA;
+  if (diff > Math.PI) diff -= 2 * Math.PI;
+  if (diff < -Math.PI) diff += 2 * Math.PI;
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = fillColor;
+  ctx.beginPath();
+  ctx.moveTo(sv.x, sv.y);
+  ctx.arc(sv.x, sv.y, arcR, startA, startA + diff, diff < 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function canvasAngleArcPath(
+  ctx: CanvasRenderingContext2D,
+  vp: Viewport,
+  vertex: { x: number; y: number },
+  pa: { x: number; y: number },
+  pb: { x: number; y: number },
+  arcR = 26,
+): void {
+  const sv = vp.worldToScreen(world(vertex.x, vertex.y));
+  const sa = vp.worldToScreen(world(pa.x, pa.y));
+  const sb = vp.worldToScreen(world(pb.x, pb.y));
+  const startA = Math.atan2(sa.y - sv.y, sa.x - sv.x);
+  let diff = Math.atan2(sb.y - sv.y, sb.x - sv.x) - startA;
+  if (diff > Math.PI) diff -= 2 * Math.PI;
+  if (diff < -Math.PI) diff += 2 * Math.PI;
+  ctx.moveTo(sv.x + arcR * Math.cos(startA), sv.y + arcR * Math.sin(startA));
+  ctx.arc(sv.x, sv.y, arcR, startA, startA + diff, diff < 0);
 }
 
 // -------- pure helpers, no SVG, no class --------
