@@ -113,7 +113,7 @@ namespace Yuclid{
             * @return PredicateProvider* Pointer to the requested provider, or the fallback provider 
             * if the name is not registered.
             */
-            [[nodiscard]] PredicateProvider* get_provider(const std::string& predicate_name) const;
+            [[nodiscard]] const PredicateProvider* get_provider(const std::string& predicate_name) const;
 
         private:
             std::unordered_map<std::string, std::unique_ptr<PredicateProvider>> m_providers;

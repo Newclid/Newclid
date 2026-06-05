@@ -12,7 +12,7 @@ namespace Yuclid {
         m_providers.insert_or_assign(predicate_name, std::move(provider));
     }
 
-    PredicateProvider* PredicateProviderRegistry::get_provider(const std::string& predicate_name) const {
+    const PredicateProvider* PredicateProviderRegistry::get_provider(const std::string& predicate_name) const {
         auto provider_iterator = m_providers.find(predicate_name);
         if(provider_iterator != m_providers.end()){
             return provider_iterator->second.get();
