@@ -17,6 +17,7 @@ import { mirror } from "./entries/mirror";
 import { angleMirror } from "./entries/angle_mirror";
 import { rectangle } from "./entries/rectangle";
 import { tangentLine } from "./entries/tangent_line";
+import { intersectionLL } from "./entries/intersection_ll";
 import { intersectionCC } from "./entries/intersection_cc";
 import { intersectionLC } from "./entries/intersection_lc";
 import { onCircle } from "./entries/on_circle";
@@ -41,6 +42,7 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [angleMirror.name]: angleMirror,
   [rectangle.name]: rectangle,
   [tangentLine.name]: tangentLine,
+  [intersectionLL.name]: intersectionLL,
   [intersectionCC.name]: intersectionCC,
   [intersectionLC.name]: intersectionLC,
   [onCircle.name]: onCircle,
