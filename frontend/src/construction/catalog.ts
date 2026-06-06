@@ -18,6 +18,7 @@ import { angleMirror } from "./entries/angle_mirror";
 import { rectangle } from "./entries/rectangle";
 import { tangentLine } from "./entries/tangent_line";
 import { intersectionLC } from "./entries/intersection_lc";
+import { onCircle } from "./entries/on_circle";
 import { onLine } from "./entries/on_line";
 
 export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
@@ -40,5 +41,6 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [rectangle.name]: rectangle,
   [tangentLine.name]: tangentLine,
   [intersectionLC.name]: intersectionLC,
+  [onCircle.name]: onCircle,
   [onLine.name]: onLine,
 };
