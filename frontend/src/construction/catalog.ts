@@ -16,6 +16,7 @@ import { isoscelesTriangle } from "./entries/isosceles_triangle";
 import { mirror } from "./entries/mirror";
 import { angleMirror } from "./entries/angle_mirror";
 import { rectangle } from "./entries/rectangle";
+import { eqdistance } from "./entries/eqdistance";
 import { tangentLine } from "./entries/tangent_line";
 import { intersectionLL } from "./entries/intersection_ll";
 import { intersectionCC } from "./entries/intersection_cc";
@@ -41,6 +42,7 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [mirror.name]: mirror,
   [angleMirror.name]: angleMirror,
   [rectangle.name]: rectangle,
+  [eqdistance.name]: eqdistance,
   [tangentLine.name]: tangentLine,
   [intersectionLL.name]: intersectionLL,
   [intersectionCC.name]: intersectionCC,
