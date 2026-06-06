@@ -5,8 +5,8 @@ import { iconWrap, svgEl } from '../../ui/icon-helpers';
 
 /**
 Circle through three points (the circumcircle). The user picks three
-non-collinear points and the circle through them is drawn; no extra
-center point is created (the renderer derives the center and radius).
+non-collinear points; the circle through them is drawn and its centre (the
+circumcentre, equidistant from all three) is placed as a point.
 **/
 export const circumcircle: CatalogEntry = {
   name: 'circumcircle',
@@ -30,14 +30,22 @@ export const circumcircle: CatalogEntry = {
   ],
   edges: [],
   circles: [],
-  sketch: (binds) => {
+  sketch: (binds, scene) => {
     const aId = binds.a as ObjectId;
     const bId = binds.b as ObjectId;
     const cId = binds.c as ObjectId;
+    const pa = scene.objects.get(aId) as PointObject;
+    const pb = scene.objects.get(bId) as PointObject;
+    const pc = scene.objects.get(cId) as PointObject;
+
+    // The circumcentre; validate has rejected collinear points, so it exists.
+    const cc = circumcenter(pa, pb, pc) ?? { x: pa.x, y: pa.y };
+    const xId = scene.addPoint(cc.x, cc.y);
+
     return {
       kind: 'construction',
       name: 'circumcircle',
-      bindings: { a: aId, b: bId, c: cId },
+      bindings: { a: aId, b: bId, c: cId, x: xId },
       edges: [],
       circles: [],
       circumcircles: [[aId, bId, cId]],
@@ -54,6 +62,11 @@ export const circumcircle: CatalogEntry = {
     if (!cc) return []; // cursor collinear with a and b: no finite circle
     return [{ kind: 'circle', center: cc, through: { x: pa.x, y: pa.y } }];
   },
+  // Tell the engine the centre is equidistant from the three points:
+  // circumcenter defines x with cong x a x b, cong x b x c.
+  jgex: [
+    { def: 'circumcenter', signature: ['x', 'a', 'b', 'c'], produces: ['x'] },
+  ],
   validate: (binds, scene) => {
     const { a, b, c } = binds;
     if (a === undefined || b === undefined || c === undefined) return null;

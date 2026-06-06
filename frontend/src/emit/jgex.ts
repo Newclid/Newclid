@@ -103,8 +103,8 @@ export function emitScene(scene: Scene): string {
     }
 
     for (const block of entry.jgex) {
-      // Skip a block whose output point was never created, e.g. the second
-      // line/circle intersection when the line is tangent.
+      // Skip a block whose output point was never created, e.g. when two
+      // circles are tangent or a line is tangent to a circle.
       const emits: JgexEmitType[] = 'combine' in block ? block.clauses : [block];
       const producedSlots = emits.flatMap(e => e.produces);
       if (producedSlots.length > 0 && producedSlots.some(slot => !obj.bindings[slot])) continue;
