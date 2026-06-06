@@ -77,7 +77,7 @@ namespace Yuclid {
         [[maybe_unused]] const ProblemGeometryCache &cache
     ) const {
         // TODO: get the total number of points, once the cache is actually implemented
-        std::size_t num_points; // = cache.get_problem()->num_points();
+        std::size_t num_points = 0; // = cache.get_problem()->num_points();
         std::vector<RuleVariableIndex> unassigned_vars = mapping.unassigned_variables();
         std::vector<std::size_t> free_points;
 
