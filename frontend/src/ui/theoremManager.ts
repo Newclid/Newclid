@@ -381,7 +381,7 @@ export function createTheoremManager(
 
     // Name field
     const nameGroup = el('div', { class: 'theorem-field' });
-    nameGroup.appendChild(el('label', { class: 'theorem-field-label', for: 'th-name' }, ['Name (unique ID, no spaces):']));
+    nameGroup.appendChild(el('label', { class: 'theorem-field-label', for: 'th-name' }, ['Name (unique, no spaces):']));
     const nameInput = el('input', {
       type: 'text',
       id: 'th-name',
@@ -409,12 +409,21 @@ export function createTheoremManager(
     content.appendChild(renderSection('premises', premises));
     content.appendChild(renderSection('conclusions', conclusions));
 
-    const errorEl = el('p', { class: 'jgex-error' }, [saveError]);
-    content.appendChild(errorEl);
+    root.appendChild(content);
+
+    // ---- Pinned footer (always visible, never scrolls away) ----
+    const footer = el('div', { class: 'theorem-builder-footer' });
+
+    if (saveError) {
+      const errorBox = el('div', { class: 'theorem-error-box' });
+      errorBox.appendChild(el('span', { class: 'theorem-error-icon' }, ['⚠']));
+      errorBox.appendChild(el('span', {}, [saveError]));
+      footer.appendChild(errorBox);
+    }
 
     const saveBtn = el('button', {
       type: 'button',
-      class: 'jgex-btn jgex-btn-accent goal-submit-btn',
+      class: 'jgex-btn jgex-btn-accent theorem-save-btn',
     }, ['Save Theorem']) as HTMLButtonElement;
     saveBtn.addEventListener('click', () => {
       const err = validate();
@@ -428,9 +437,9 @@ export function createTheoremManager(
       });
       enterList();
     });
-    content.appendChild(saveBtn);
+    footer.appendChild(saveBtn);
 
-    root.appendChild(content);
+    root.appendChild(footer);
   }
 
   // ============================================================

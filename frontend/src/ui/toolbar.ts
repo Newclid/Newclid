@@ -141,7 +141,7 @@ export function createToolbar(
     title: 'Manage custom theorems',
   }) as HTMLButtonElement;
   manageTheoremsBtn.appendChild(theoremIcon());
-  manageTheoremsBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Theorems']));
+  manageTheoremsBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['User-Defined Theorems']));
   manageTheoremsBtn.addEventListener('click', () => appStore?.enterTheoremManager());
 
   // ---------- clear ----------
