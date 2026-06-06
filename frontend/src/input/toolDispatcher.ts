@@ -49,7 +49,18 @@ export function attachToolDispatcher(
     }
     const tool = getTool(scene.tool);
     if (!tool) return;
+    // Record one undo step per click. Capture the scene and the tool's
+    // in-progress state up front; afterwards, record only if the click changed
+    // the scene or advanced a slot, so undo rewinds exactly one step (and a
+    // tool-only step, e.g. picking an existing point, is still undoable).
+    const before = scene.snapshot();
+    const rev = scene.revision;
+    const toolBefore = tool.captureState?.();
     tool.onClick(buildCtx(e));
+    const slotChanged = tool.captureState?.().currentSlotIndex !== toolBefore?.currentSlotIndex;
+    if (scene.revision !== rev || slotChanged) {
+      scene.pushUndo(before, toolBefore ? () => tool.restoreState?.(toolBefore) : undefined);
+    }
   };
 
   const onPointerMove = (e: PointerEvent) => {
