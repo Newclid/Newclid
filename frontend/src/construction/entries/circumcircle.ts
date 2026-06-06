@@ -24,9 +24,9 @@ export const circumcircle: CatalogEntry = {
       svgEl('circle', { cx: '5', cy: '15', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick first point' },
-    { name: 'b', kind: 'pick', label: 'Pick second point' },
-    { name: 'c', kind: 'pick', label: 'Pick third point' },
+    { name: 'a', kind: 'pick', label: 'Pick a point on the circle (1 of 3)' },
+    { name: 'b', kind: 'pick', label: 'Pick a point on the circle (2 of 3)' },
+    { name: 'c', kind: 'pick', label: 'Pick a point on the circle (3 of 3)' },
   ],
   edges: [],
   circles: [],

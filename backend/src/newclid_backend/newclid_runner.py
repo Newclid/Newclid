@@ -53,15 +53,16 @@ def _build_proof_sections(proof_data: Any) -> NewclidProofSections:
 
     # Compute per-step premise indices from proof_data (not available in proof_sections output).
     id_to_step_idx: dict[str, int] = {
-        step.proven_predicate.id: i
-        for i, step in enumerate(proof_data.proof_steps)
+        step.proven_predicate.id: i for i, step in enumerate(proof_data.proof_steps)
     }
     result.step_premise_indices = [
-        sorted({
-            id_to_step_idx[pid]
-            for pid in step.applied_on_predicates
-            if pid in id_to_step_idx
-        })
+        sorted(
+            {
+                id_to_step_idx[pid]
+                for pid in step.applied_on_predicates
+                if pid in id_to_step_idx
+            }
+        )
         for step in proof_data.proof_steps
     ]
     return result

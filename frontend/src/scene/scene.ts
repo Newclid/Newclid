@@ -22,6 +22,15 @@ export interface SceneSnapshot {
   nextLabelCode: number;
 }
 
+/**
+One step of undo history: the scene state before an action, plus an optional
+callback to rewind the active tool's in-progress slots in step with the scene.
+**/
+export interface UndoEntry {
+  snapshot: SceneSnapshot;
+  restoreTool?: () => void;
+}
+
 // Frontend -> backend snapshot.
 export interface SerializedScene {
   points: { id: ObjectId; label: string; x: number; y: number }[];
@@ -45,10 +54,23 @@ export class Scene {
   so a pointermove burst doesn't re-run every subscriber.
   **/
   previews: ToolPreview[] = [];
+  // Current construction slot instruction shown in the canvas hint UI.
+  slotHint: string | null = null;
 
   private nextId = 1;
   private nextLabelCode = 65; // 'A'
   private listeners = new Set<() => void>();
+  /**
+  Undo history. Each entry pairs the scene snapshot taken just before a user
+  action with an optional callback that rewinds the active tool's in-progress
+  state, so undoing mid-construction steps back one slot rather than cancelling.
+  Capped so long sessions don't grow without bound; oldest states drop first.
+  **/
+  private undoStack: UndoEntry[] = [];
+  // Bumped by every real mutation so callers can tell whether a click changed
+  // the scene (a click may advance a tool slot without touching the scene).
+  private _revision = 0;
+  private static readonly MAX_UNDO = 100;
 
   // ---------- read-only convenience ----------
 
@@ -73,6 +95,11 @@ export class Scene {
     this.emit();
   }
 
+  setSlotHint(s: string | null): void {
+    this.slotHint = s;
+    this.emit();
+  }
+
   setPreviews(p: ToolPreview[]): void {
     this.previews = p;
   }
@@ -81,6 +108,7 @@ export class Scene {
     const id = `p${this.nextId++}`;
     const label = String.fromCharCode(this.nextLabelCode++);
     this.objects.set(id, { id, kind: 'point', x, y, label });
+    this._revision++;
     this.emit();
     return id;
   }
@@ -92,6 +120,7 @@ export class Scene {
   addObject(obj: DistOmit<GeoObject, 'id'>): ObjectId {
     const id = `o${this.nextId++}`;
     this.objects.set(id, { ...obj, id } as GeoObject);
+    this._revision++;
     this.emit();
     return id;
   }
@@ -100,6 +129,7 @@ export class Scene {
     const o = this.objects.get(id);
     if (!o || o.kind !== 'point') return;
     this.objects.set(id, { ...o, x, y });
+    this._revision++;
     this.emit();
   }
 
@@ -107,12 +137,14 @@ export class Scene {
     const o = this.objects.get(id);
     if (!o || o.kind !== 'point') return;
     this.objects.set(id, { ...o, color });
+    this._revision++;
     this.emit();
   }
 
   removeObject(id: ObjectId): void {
     if (!this.objects.has(id)) return;
     this.objects.delete(id);
+    this._revision++;
     /**
     Cascade: any shape referencing this id loses its definition.
     Adding line/segment/triangle later is one more `else if` arm.
@@ -144,7 +176,45 @@ export class Scene {
     this.previews = [];
     this.nextId = 1;
     this.nextLabelCode = 65;
+    this.undoStack = [];
     this.emit();
+  }
+
+  // ---------- undo history ----------
+
+  // Monotonic counter of real mutations. The dispatcher compares it across a
+  // click to tell whether the scene changed (vs. only a tool slot advancing).
+  get revision(): number {
+    return this._revision;
+  }
+
+  /**
+  Record one undo step: the pre-action scene snapshot plus an optional callback
+  that rewinds the active tool's in-progress slots. Called once per user action
+  by the dispatcher, so a multi-point construction is a single undo step.
+  **/
+  pushUndo(snapshot: SceneSnapshot, restoreTool?: () => void): void {
+    this.undoStack.push({ snapshot, restoreTool });
+    if (this.undoStack.length > Scene.MAX_UNDO) this.undoStack.shift();
+  }
+
+  // Revert the most recent recorded action, rewinding both scene and tool.
+  // Returns false when history is empty.
+  undo(): boolean {
+    const entry = this.undoStack.pop();
+    if (!entry) return false;
+    const { snapshot } = entry;
+    this.objects.clear();
+    for (const [k, v] of snapshot.objects) this.objects.set(k, v);
+    this.nextId = snapshot.nextId;
+    this.nextLabelCode = snapshot.nextLabelCode;
+    this.toolState = null;
+    this.previews = [];
+    // Rewind the tool's in-progress slots so the next click continues the
+    // construction from the step we just undid.
+    entry.restoreTool?.();
+    this.emit();
+    return true;
   }
 
   snapshot(): SceneSnapshot {
@@ -162,6 +232,9 @@ export class Scene {
     this.nextLabelCode = snap.nextLabelCode;
     this.toolState = null;
     this.previews = [];
+    // Wholesale state replacement (e.g. proof-mode enter/exit): drop canvas
+    // undo history so Ctrl+Z can't walk back across the boundary.
+    this.undoStack = [];
     this.emit();
   }
 

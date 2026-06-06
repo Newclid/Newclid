@@ -1,4 +1,4 @@
-import { Tool, ToolContext, ToolPreview } from './tool';
+import { Tool, ToolContext, ToolPreview, ToolSnapshot } from './tool';
 import type { CatalogEntry } from '../construction/catalog-types';
 import { getOrCreatePoint, pickExistingPoint, snapHighlight } from './sharedHelpers';
 import type { ObjectId, ToolName } from '../geometry/types-object';
@@ -126,6 +126,23 @@ export class ConstructionTool implements Tool {
 
   onDeactivate(_ctx: { scene: Scene }): void {
     this.reset();
+  }
+
+  // Label of the slot the user needs to fill next, or null when no
+  // construction is in progress (tool is idle after reset).
+  currentSlotLabel(): string | null {
+    return this.catalogEntry.slots[this.currentSlotIndex]?.label ?? null;
+  }
+
+  // Snapshot the in-progress slots so undo can rewind exactly one step.
+  captureState(): ToolSnapshot {
+    return { bindings: { ...this.bindings }, currentSlotIndex: this.currentSlotIndex };
+  }
+
+  // Replay a captured state, e.g. after an undo rewinds the scene one click.
+  restoreState(state: ToolSnapshot): void {
+    this.bindings = { ...state.bindings };
+    this.currentSlotIndex = state.currentSlotIndex;
   }
 
   private reset(): void {

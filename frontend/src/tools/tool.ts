@@ -1,6 +1,16 @@
 import type { WorldPoint, ScreenPoint } from '../geometry/coords';
-import type { ToolName } from '../geometry/types-object';
+import type { ToolName, ObjectId } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
+
+/**
+A tool's restorable transient state: the slots bound so far and which step the
+user is on. Captured before a click and replayed on undo so an in-progress
+construction rewinds one slot in step with the scene.
+**/
+export interface ToolSnapshot {
+  bindings: Record<string, ObjectId>;
+  currentSlotIndex: number;
+}
 
 /**
 Context handed to a tool on every event. Tools mutate the scene
@@ -47,4 +57,10 @@ export interface Tool {
   any transient state the tool was holding.
   **/
   onDeactivate(ctx: { scene: Scene }): void;
+  // Snapshot the tool's in-progress state so undo can rewind one slot.
+  captureState?(): ToolSnapshot;
+  // Restore a previously captured in-progress state.
+  restoreState?(state: ToolSnapshot): void;
+  // Label of the slot the user needs to fill next; null when idle.
+  currentSlotLabel?(): string | null;
 }
