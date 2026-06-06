@@ -24,7 +24,8 @@ export class ConstructionTool implements Tool {
     if (slot.kind === 'pick') {
       pointId = getOrCreatePoint(ctx);
     } else if (slot.kind === 'pick-existing') {
-      // Only bind to an existing point; ignore clicks on empty space.
+      // Only reference points already in the scene; ignore clicks on empty space
+      // so this slot can never spawn a stray, unconnected point.
       const existing = pickExistingPoint(ctx);
       if (!existing) return;
       pointId = existing;

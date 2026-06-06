@@ -18,6 +18,7 @@ import { angleMirror } from "./entries/angle_mirror";
 import { rectangle } from "./entries/rectangle";
 import { eqdistance } from "./entries/eqdistance";
 import { tangentLine } from "./entries/tangent_line";
+import { onAline } from "./entries/on_aline";
 import { intersectionLL } from "./entries/intersection_ll";
 import { intersectionCC } from "./entries/intersection_cc";
 import { intersectionLC } from "./entries/intersection_lc";
@@ -44,6 +45,7 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [rectangle.name]: rectangle,
   [eqdistance.name]: eqdistance,
   [tangentLine.name]: tangentLine,
+  [onAline.name]: onAline,
   [intersectionLL.name]: intersectionLL,
   [intersectionCC.name]: intersectionCC,
   [intersectionLC.name]: intersectionLC,
