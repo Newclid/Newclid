@@ -217,10 +217,14 @@ namespace Yuclid {
         return rule_mapping;
     }
 
-    std::optional<RuleMapping> MappingState::to_partial_rule_mapping() const {
+    RuleMapping MappingState::to_partial_rule_mapping() const {
         RuleMapping rule_mapping;
         
         for(RuleVariableIndex curr_idx = 0; curr_idx < m_schema->variables.size(); curr_idx++) {
+            if (!is_assigned(curr_idx)) {
+                continue;
+            }
+
             const ProblemPointIndex point_idx = m_point_by_variable[curr_idx];
             
             assert(point_idx != UNASSIGNED_POINT);
