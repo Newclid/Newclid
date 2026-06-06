@@ -128,6 +128,12 @@ export class ConstructionTool implements Tool {
     this.reset();
   }
 
+  // Label of the slot the user needs to fill next, or null when no
+  // construction is in progress (tool is idle after reset).
+  currentSlotLabel(): string | null {
+    return this.catalogEntry.slots[this.currentSlotIndex]?.label ?? null;
+  }
+
   // Snapshot the in-progress slots so undo can rewind exactly one step.
   captureState(): ToolSnapshot {
     return { bindings: { ...this.bindings }, currentSlotIndex: this.currentSlotIndex };

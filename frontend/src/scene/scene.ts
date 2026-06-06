@@ -54,11 +54,12 @@ export class Scene {
   so a pointermove burst doesn't re-run every subscriber.
   **/
   previews: ToolPreview[] = [];
+  // Current construction slot instruction shown in the canvas hint UI.
+  slotHint: string | null = null;
 
   private nextId = 1;
   private nextLabelCode = 65; // 'A'
   private listeners = new Set<() => void>();
-
   /**
   Undo history. Each entry pairs the scene snapshot taken just before a user
   action with an optional callback that rewinds the active tool's in-progress
@@ -91,6 +92,11 @@ export class Scene {
 
   setToolState(s: ToolState): void {
     this.toolState = s;
+    this.emit();
+  }
+
+  setSlotHint(s: string | null): void {
+    this.slotHint = s;
     this.emit();
   }
 

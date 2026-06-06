@@ -208,11 +208,19 @@ aside.appendChild(group);
   }
 
   // ---------- subscription ----------
+  let lastToolSeen = '';
   const updateActive = () => {
     for (const [name, btn] of buttons) {
       const active = name === scene.tool;
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+    // Show the first slot's instruction the moment the user switches tool.
+    // Guard against re-firing on every emit (setSlotHint itself calls emit).
+    if (scene.tool !== lastToolSeen) {
+      lastToolSeen = scene.tool;
+      const entry = CONSTRUCTION_CATALOG[scene.tool];
+      scene.setSlotHint(entry?.slots[0]?.label ?? null);
     }
   };
   updateActive();

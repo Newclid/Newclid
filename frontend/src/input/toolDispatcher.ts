@@ -49,17 +49,25 @@ export function attachToolDispatcher(
     }
     const tool = getTool(scene.tool);
     if (!tool) return;
-    // Record one undo step per click. Capture the scene and the tool's
-    // in-progress state up front; afterwards, record only if the click changed
-    // the scene or advanced a slot, so undo rewinds exactly one step (and a
-    // tool-only step, e.g. picking an existing point, is still undoable).
+    // Capture state before the click so we can record one undo step and update
+    // the hint label, even for clicks that advance a slot without mutating the
+    // scene (e.g. snapping to an existing point via pick-existing).
     const before = scene.snapshot();
     const rev = scene.revision;
     const toolBefore = tool.captureState?.();
     tool.onClick(buildCtx(e));
-    const slotChanged = tool.captureState?.().currentSlotIndex !== toolBefore?.currentSlotIndex;
+    const toolAfter = tool.captureState?.();
+    const slotChanged = toolAfter?.currentSlotIndex !== toolBefore?.currentSlotIndex;
     if (scene.revision !== rev || slotChanged) {
       scene.pushUndo(before, toolBefore ? () => tool.restoreState?.(toolBefore) : undefined);
+    }
+    // Clear the hint when the construction just completed (tool reset to slot 0
+    // with empty bindings), otherwise advance it to the next slot's label.
+    if (toolBefore && toolAfter) {
+      const justCompleted = toolBefore.currentSlotIndex > 0
+        && toolAfter.currentSlotIndex === 0
+        && Object.keys(toolAfter.bindings).length === 0;
+      scene.setSlotHint(justCompleted ? null : (tool.currentSlotLabel?.() ?? null));
     }
   };
 
