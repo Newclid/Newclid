@@ -14,14 +14,16 @@ export function getOrCreatePoint(ctx: ToolContext): ObjectId {
   return ctx.scene.addPoint(ctx.world.x, ctx.world.y); // create a new one
 }
 
-// Like getOrCreatePoint but never creates: returns the existing point under the
-// cursor, or null when there is none. Read only.
+// Like getOrCreatePoint, but never creates: returns an existing point's id when
+// the cursor is within snap range, otherwise null so the caller can ignore the
+// click. Used by pick-existing slots that may only reference points already in
+// the scene.
 export function pickExistingPoint(ctx: ToolContext): ObjectId | null {
   const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
     tolerancePx: SNAP_PX,
     scale: ctx.scale,
   });
-  return hit ? hit.id : null;
+  return hit?.id ?? null;
 }
 
 // Runs the exact same detection - returns a preview instruction
