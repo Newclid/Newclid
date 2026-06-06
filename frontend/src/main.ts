@@ -15,6 +15,8 @@ import type { ConstructionMarker } from './emit/jgexParser';
 import { buildNameTable } from './emit/names';
 import { TERMINAL_STATUSES } from './api/types';
 import type { JobResultPayload, SketchPoint } from './api/types';
+import { theoremStore } from './store/theoremStore';
+import { predicateToJgex } from './types/theorem';
 import type { SceneSnapshot } from './scene/scene';
 import './style.css';
 
@@ -28,6 +30,15 @@ export const appStore = new AppStore();
 export const backendClient = new BackendClient('/api');
 export const jobPoller = new JobPoller(backendClient, appStore);
 
+function buildCustomTheoremPayloads() {
+  return theoremStore.getAll().map((t) => ({
+    name: t.name,
+    description: t.description,
+    premises: t.premises.map(predicateToJgex),
+    conclusions: t.conclusions.map(predicateToJgex),
+  }));
+}
+
 const onCanvasProofSubmit = async (jgex: string) => {
   const expanded = expandJgexPredicates(jgex);
   // Capture user's point positions now, before the scene is cleared on proof-mode entry.
@@ -40,7 +51,7 @@ const onCanvasProofSubmit = async (jgex: string) => {
   }
 
   appStore.setProblem(expanded);
-  const resp = await backendClient.submitJob(expanded);
+  const resp = await backendClient.submitJob(expanded, buildCustomTheoremPayloads());
   appStore.addJob(resp.job_id, expanded);
   if (userSketchPoints.length > 0) {
     appStore.updateJob(resp.job_id, { userSketchPoints });
