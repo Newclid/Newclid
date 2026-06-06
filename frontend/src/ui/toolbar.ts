@@ -9,6 +9,8 @@ import { createProofPanel } from './proofPanel';
 import { createProofsList } from './proofsList';
 import { createProofChoice } from './proofChoice';
 import { createProofByPointsPanel } from './proofByPointsPanel';
+import { createTheoremManager } from './theoremManager';
+import { theoremStore } from '../store/theoremStore';
 
 function trashIcon(): SVGSVGElement {
   return iconWrap([
@@ -21,6 +23,26 @@ function trashIcon(): SVGSVGElement {
       stroke: 'currentColor',
       'stroke-width': '1.4',
       'stroke-linejoin': 'round',
+      'stroke-linecap': 'round',
+    }),
+  ]);
+}
+
+function theoremIcon(): SVGSVGElement {
+  return iconWrap([
+    svgEl('path', {
+      d: 'M5 4 L5 18 M5 4 Q5 3 6 3 L16 3 Q17 3 17 4 L17 14 Q17 15 16 15 L5 15',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '1.4',
+      'stroke-linejoin': 'round',
+      'stroke-linecap': 'round',
+    }),
+    svgEl('path', {
+      d: 'M8 7 L13 7 M8 10 L13 10',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '1.4',
       'stroke-linecap': 'round',
     }),
   ]);
@@ -112,6 +134,16 @@ export function createToolbar(
   createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Solve new problem']));
   createProofBtn.addEventListener('click', () => proofChoice.open());
 
+  // ---------- theorems ----------
+  const manageTheoremsBtn = el('button', {
+    type: 'button',
+    class: 'tool-btn',
+    title: 'Manage custom theorems',
+  }) as HTMLButtonElement;
+  manageTheoremsBtn.appendChild(theoremIcon());
+  manageTheoremsBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Theorems']));
+  manageTheoremsBtn.addEventListener('click', () => appStore?.enterTheoremManager());
+
   // ---------- clear ----------
   const clearBtn = el('button', {
     type: 'button',
@@ -128,6 +160,11 @@ export function createToolbar(
   // ---------- proof-by-points plane ----------
   const proofByPointsPanel = appStore
     ? createProofByPointsPanel(appStore, scene, onCanvasProofSubmit)
+    : null;
+
+  // ---------- theorem manager panel ----------
+  const theoremManagerPanel = appStore
+    ? createTheoremManager(appStore, theoremStore)
     : null;
 
   // ---------- panel tab switch (Toolbar | Proofs) ----------
@@ -159,17 +196,22 @@ export function createToolbar(
     proofsContent.appendChild(proofsList.root);
   }
 
-  const toolElements = [group, proofsContent, spacer, panelTabSwitch, createProofBtn, clearBtn];
+  const toolElements = [
+    group, proofsContent, spacer, panelTabSwitch,
+    createProofBtn, manageTheoremsBtn, clearBtn,
+  ];
 
   const syncPanelState = () => {
     if (!appStore) return;
     const showProof = appStore.proofMode;
     const showPoints = appStore.proofByPointsMode;
+    const showTheorems = appStore.theoremManagerMode;
+    const anyFullPanel = showProof || showPoints || showTheorems;
     const inToolbarTab = appStore.panelTab === 'toolbar';
 
-    // Tool elements hide whenever either full-panel mode is active.
+    // Tool elements hide whenever any full-panel mode is active.
     for (const node of toolElements) {
-      node.style.display = showProof || showPoints ? 'none' : '';
+      node.style.display = anyFullPanel ? 'none' : '';
     }
     if (proofPanel) {
       proofPanel.root.style.display = showProof ? '' : 'none';
@@ -177,7 +219,10 @@ export function createToolbar(
     if (proofByPointsPanel) {
       proofByPointsPanel.root.style.display = showPoints ? '' : 'none';
     }
-    if (!showProof && !showPoints) {
+    if (theoremManagerPanel) {
+      theoremManagerPanel.root.style.display = showTheorems ? '' : 'none';
+    }
+    if (!anyFullPanel) {
       group.style.display = inToolbarTab ? '' : 'none';
       proofsContent.style.display = inToolbarTab ? 'none' : '';
       // In the Proofs tab the list fills the space, so the spacer is not needed.
@@ -192,11 +237,12 @@ export function createToolbar(
 
   // ---------- assemble ----------
   aside.appendChild(brand);
-aside.appendChild(group);
+  aside.appendChild(group);
   aside.appendChild(proofsContent);
   aside.appendChild(spacer);
   aside.appendChild(panelTabSwitch);
   aside.appendChild(createProofBtn);
+  aside.appendChild(manageTheoremsBtn);
   aside.appendChild(clearBtn);
   if (proofPanel) {
     proofPanel.root.style.display = 'none';
@@ -205,6 +251,10 @@ aside.appendChild(group);
   if (proofByPointsPanel) {
     proofByPointsPanel.root.style.display = 'none';
     aside.appendChild(proofByPointsPanel.root);
+  }
+  if (theoremManagerPanel) {
+    theoremManagerPanel.root.style.display = 'none';
+    aside.appendChild(theoremManagerPanel.root);
   }
 
   // ---------- subscription ----------
@@ -236,6 +286,7 @@ aside.appendChild(group);
       unsubscribeStore?.();
       proofPanel?.destroy();
       proofByPointsPanel?.destroy();
+      theoremManagerPanel?.destroy();
       proofsList?.destroy();
       proofChoice.destroy();
       jgex.destroy();

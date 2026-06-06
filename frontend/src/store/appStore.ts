@@ -34,6 +34,8 @@ export class AppStore {
   activeProofSubStepIndex: number | null = 0;
   // True while the "proof by points" plane is shown (blank placeholder for now).
   proofByPointsMode = false;
+  // True while the theorem manager panel is shown.
+  theoremManagerMode = false;
   // Which section of the side panel is currently shown.
   panelTab: PanelTab = 'toolbar';
   // Callback registered by proofByPointsPanel so canvas clicks route to the goal picker.
@@ -99,6 +101,18 @@ export class AppStore {
   exitProofByPoints(): void {
     this.proofByPointsMode = false;
     this.goalPickCallback = null;
+    this.emit();
+  }
+
+  enterTheoremManager(): void {
+    this.theoremManagerMode = true;
+    this.proofMode = false;
+    this.proofByPointsMode = false;
+    this.emit();
+  }
+
+  exitTheoremManager(): void {
+    this.theoremManagerMode = false;
     this.emit();
   }
 
