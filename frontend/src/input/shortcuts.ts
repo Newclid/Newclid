@@ -30,6 +30,19 @@ export function attachShortcuts(scene: Scene, appStore?: AppStore): ShortcutsHan
     **/
     const t = e.target as HTMLElement | null;
     if (t?.tagName === 'INPUT' || t?.tagName === 'TEXTAREA') return;
+
+    /**
+    Ctrl/Cmd+Z undoes the last canvas action, rewinding both the scene and the
+    active tool's in-progress slots. Shift+Ctrl+Z (redo) and the proof view are
+    left untouched.
+    **/
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
+      if (appStore?.proofMode) return;
+      scene.undo();
+      e.preventDefault();
+      return;
+    }
+
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (appStore?.proofMode) return;
     const tool = SHORTCUTS[e.key.toLowerCase()];
