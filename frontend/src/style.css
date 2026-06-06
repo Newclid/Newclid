@@ -1161,6 +1161,131 @@ body.is-resizing {
   word-break: break-all;
 }
 
+/* ---------- Theorem manager — builder: predicate picker + editable rows ---------- */
+
+.theorem-pred-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(26, 24, 22, 0.02);
+  border: 1px solid var(--rule-soft);
+  border-radius: 6px;
+}
+
+.theorem-pred-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theorem-pred-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.theorem-picker-cancel {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.theorem-add-pred-btn {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.theorem-editable-pred {
+  border: 1px solid var(--rule-mid);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theorem-editable-pred-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.theorem-editable-pred-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.theorem-pred-delete-btn {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink-soft);
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+.theorem-pred-delete-btn:hover {
+  color: #8B2828;
+  background: rgba(139, 40, 40, 0.06);
+}
+
+.theorem-args {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.theorem-arg-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.theorem-arg-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-strong);
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.theorem-arg-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 3px 7px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  background: var(--bg-canvas);
+  color: var(--ink-strong);
+  min-width: 0;
+}
+
+.theorem-arg-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.theorem-arg-input-fraction {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  max-width: 80px;
+}
+
 /* ---------- Construction slot hint ---------- */
 
 .slot-hint {

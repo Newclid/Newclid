@@ -36,7 +36,6 @@ export function createTheoremManager(
   let premises: EditablePredicate[] = [];
   let conclusions: EditablePredicate[] = [];
   let addingTo: SectionKind | null = null;
-  let saveError = '';
 
   // ---- Navigation ----
 
@@ -47,7 +46,6 @@ export function createTheoremManager(
     premises = theorem?.premises.map((p) => ({ predicateId: p.predicateId, args: [...p.args] })) ?? [];
     conclusions = theorem?.conclusions.map((p) => ({ predicateId: p.predicateId, args: [...p.args] })) ?? [];
     addingTo = null;
-    saveError = '';
     view = 'builder';
     render();
   }
@@ -63,10 +61,6 @@ export function createTheoremManager(
     return def.argLabels.map((label, i) =>
       def.argTypes[i] === 'fraction' ? '1' : label,
     );
-  }
-
-  function toTheoremPredicate(ep: EditablePredicate): TheoremPredicate {
-    return { predicateId: ep.predicateId, args: [...ep.args] };
   }
 
   // ============================================================
