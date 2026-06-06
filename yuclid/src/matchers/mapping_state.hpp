@@ -163,7 +163,7 @@ namespace Yuclid {
 
         [[nodiscard]] std::optional<RuleMapping> to_rule_mapping() const;
 
-        [[nodiscard]] std::optional<RuleMapping> to_partial_rule_mapping() const;
+        [[nodiscard]] RuleMapping to_partial_rule_mapping() const;
 
     private:
         /**
