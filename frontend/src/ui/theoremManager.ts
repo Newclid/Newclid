@@ -284,7 +284,13 @@ export function createTheoremManager(
     if (def.groups) {
       let offset = 0;
       for (const group of def.groups) {
-        argsWrap.appendChild(el('div', { class: 'goal-slot-group-label' }, [group.label]));
+        // For circumcenter the "Triangle" group grows dynamically — relabel when > 3 polygon points.
+        let groupLabel = group.label;
+        if (def.id === 'circumcenter' && group.label === 'Triangle') {
+          const polyCount = ep.args.length - 1; // args minus the center point
+          if (polyCount > 3) groupLabel = `${polyCount}-gon`;
+        }
+        argsWrap.appendChild(el('div', { class: 'goal-slot-group-label' }, [groupLabel]));
         const groupEl = el('div', { class: 'goal-slot-group' });
         for (let j = 0; j < group.count && offset + j < ep.args.length; j++) {
           groupEl.appendChild(renderArgInput(ep, def, offset + j));
