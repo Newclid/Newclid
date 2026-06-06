@@ -14,6 +14,16 @@ export function getOrCreatePoint(ctx: ToolContext): ObjectId {
   return ctx.scene.addPoint(ctx.world.x, ctx.world.y); // create a new one
 }
 
+// Like getOrCreatePoint but never creates: returns the existing point under the
+// cursor, or null when there is none. Read only.
+export function pickExistingPoint(ctx: ToolContext): ObjectId | null {
+  const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
+    tolerancePx: SNAP_PX,
+    scale: ctx.scale,
+  });
+  return hit ? hit.id : null;
+}
+
 // Runs the exact same detection - returns a preview instruction
 export function snapHighlight(ctx: ToolContext): ToolPreview[] {
   const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {

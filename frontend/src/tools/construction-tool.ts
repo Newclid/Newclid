@@ -1,6 +1,6 @@
 import { Tool, ToolContext, ToolPreview, ToolSnapshot } from './tool';
 import type { CatalogEntry } from '../construction/catalog-types';
-import { getOrCreatePoint, snapHighlight } from './sharedHelpers';
+import { getOrCreatePoint, pickExistingPoint, snapHighlight } from './sharedHelpers';
 import type { ObjectId, ToolName } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
 
@@ -23,6 +23,11 @@ export class ConstructionTool implements Tool {
     let pointId: ObjectId;
     if (slot.kind === 'pick') {
       pointId = getOrCreatePoint(ctx);
+    } else if (slot.kind === 'pick-existing') {
+      // Only bind to an existing point; ignore clicks on empty space.
+      const existing = pickExistingPoint(ctx);
+      if (!existing) return;
+      pointId = existing;
     } else if (slot.kind === 'place-free') {
       // Always drop a fresh point at the cursor, never snapping to an existing
       // one — this is the plain point-placement step.
@@ -99,7 +104,7 @@ export class ConstructionTool implements Tool {
       }
       const projected = slot.project(this.bindings, ctx.scene, ctx.world);
       previews.push({ kind: 'highlightPoint', pos: { x: projected.x, y: projected.y } });
-    } else if (slot.kind === 'pick') {
+    } else if (slot.kind === 'pick' || slot.kind === 'pick-existing') {
       previews.push(...snapHighlight(ctx));
     }
     // place-free always drops a new point (no snapping), scalar has no cursor
