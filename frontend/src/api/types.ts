@@ -13,6 +13,13 @@ export const TERMINAL_STATUSES = new Set<JobStatus>([
   'cancelled',
 ]);
 
+export interface CustomTheoremPayload {
+  name: string;
+  description: string;
+  premises: string[];     // JGEX predicate strings, e.g. "cong A B C D"
+  conclusions: string[];
+}
+
 export interface SubmitJobResponse {
   job_id: string;
   status: JobStatus;
