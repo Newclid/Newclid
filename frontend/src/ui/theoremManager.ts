@@ -409,13 +409,25 @@ export function createTheoremManager(
     content.appendChild(renderSection('premises', premises));
     content.appendChild(renderSection('conclusions', conclusions));
 
-    // Placeholder save button — validation + wiring added in next commit
+    const errorEl = el('p', { class: 'jgex-error' }, [saveError]);
+    content.appendChild(errorEl);
+
     const saveBtn = el('button', {
       type: 'button',
       class: 'jgex-btn jgex-btn-accent goal-submit-btn',
-      disabled: 'true',
-      title: 'Save — coming in next step',
     }, ['Save Theorem']) as HTMLButtonElement;
+    saveBtn.addEventListener('click', () => {
+      const err = validate();
+      if (err) { saveError = err; render(); return; }
+      store.save({
+        id: nameVal.trim(),
+        name: nameVal.trim(),
+        description: descVal.trim(),
+        premises: premises.map(toTheoremPredicate),
+        conclusions: conclusions.map(toTheoremPredicate),
+      });
+      enterList();
+    });
     content.appendChild(saveBtn);
 
     root.appendChild(content);
