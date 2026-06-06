@@ -61,4 +61,6 @@ export interface Tool {
   captureState?(): ToolSnapshot;
   // Restore a previously captured in-progress state.
   restoreState?(state: ToolSnapshot): void;
+  // Label of the slot the user needs to fill next; null when idle.
+  currentSlotLabel?(): string | null;
 }

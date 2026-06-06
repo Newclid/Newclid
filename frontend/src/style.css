@@ -1056,3 +1056,22 @@ body.is-resizing {
 .job-banner-close:hover {
   opacity: 1;
 }
+
+/* ---------- Construction slot hint ---------- */
+
+.slot-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26, 24, 22, 0.72);
+  color: #FAF8F4;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  pointer-events: none;
+  z-index: 6;
+  white-space: nowrap;
+  user-select: none;
+}

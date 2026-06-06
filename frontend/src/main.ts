@@ -117,6 +117,16 @@ attachShortcuts(scene, appStore);
 
 scene.subscribe(requestRedraw);
 
+// Floating hint pill that shows the current construction slot instruction.
+const hintEl = document.createElement('div');
+hintEl.className = 'slot-hint';
+hintEl.hidden = true;
+canvasHost.appendChild(hintEl);
+scene.subscribe(() => {
+  hintEl.textContent = scene.slotHint ?? '';
+  hintEl.hidden = !scene.slotHint;
+});
+
 function normalizeSketchPoints(
   pts: { name: string; x: number; y: number }[],
 ): { name: string; x: number; y: number }[] {
