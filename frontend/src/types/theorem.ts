@@ -57,14 +57,14 @@ export const PREDICATE_DEFINITIONS: PredicateDef[] = [
   },
   {
     id: 'midp', jgexName: 'midp',
-    label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '⊕',
+    label: 'Midpoint', shorthand: 'M midpoint of AB', icon: '–·–',
     minArgs: 3, argLabels: ['M', 'A', 'B'],
     argTypes: ['point', 'point', 'point'],
     groups: [{ label: 'Midpoint', count: 1 }, { label: 'Segment', count: 2 }],
   },
   {
     id: 'eqangle6', jgexName: 'eqangle',
-    label: 'Equal Angles', shorthand: '∠ABC = ∠DEF', icon: '∠',
+    label: 'Equal Angles', shorthand: '∠ABC = ∠DEF', icon: '∠∠',
     minArgs: 6, argLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
     argTypes: ['point', 'point', 'point', 'point', 'point', 'point'],
     groups: [{ label: 'Angle 1', count: 3 }, { label: 'Angle 2', count: 3 }],
@@ -92,7 +92,7 @@ export const PREDICATE_DEFINITIONS: PredicateDef[] = [
   },
   {
     id: 'simtrir', jgexName: 'simtrir',
-    label: 'Similar Tri. (rev)', shorthand: '△ABC ~ᵣ △DEF', icon: '~ᵣ',
+    label: 'Similar Tri. (rev)', shorthand: '△ABC ~ᵣ △DEF', icon: '~△ᵣ',
     minArgs: 6, argLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
     argTypes: ['point', 'point', 'point', 'point', 'point', 'point'],
     groups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
@@ -106,7 +106,7 @@ export const PREDICATE_DEFINITIONS: PredicateDef[] = [
   },
   {
     id: 'contrir', jgexName: 'contrir',
-    label: 'Congruent Tri. (rev)', shorthand: '△ABC ≅ᵣ △DEF', icon: '≅ᵣ',
+    label: 'Congruent Tri. (rev)', shorthand: '△ABC ≅ᵣ △DEF', icon: '≅△ᵣ',
     minArgs: 6, argLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
     argTypes: ['point', 'point', 'point', 'point', 'point', 'point'],
     groups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
@@ -120,19 +120,19 @@ export const PREDICATE_DEFINITIONS: PredicateDef[] = [
   },
   {
     id: 'obtuse_angle', jgexName: 'obtuse_angle',
-    label: 'Obtuse Angle', shorthand: '∠ABC is obtuse', icon: '∢',
+    label: 'Obtuse Angle', shorthand: '∠ABC is obtuse', icon: '↖↗',
     minArgs: 3, argLabels: ['A', 'B', 'C'],
     argTypes: ['point', 'point', 'point'],
   },
   {
     id: 'sameside', jgexName: 'sameside',
-    label: 'Same Side', shorthand: 'A,B same side of CD w.r.t. EF', icon: '||',
+    label: 'Same Side', shorthand: 'A,B same side of CD w.r.t. EF', icon: '↑↑',
     minArgs: 6, argLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
     argTypes: ['point', 'point', 'point', 'point', 'point', 'point'],
   },
   {
     id: 'nsameside', jgexName: 'nsameside',
-    label: 'Different Side', shorthand: 'A,B diff. sides of CD', icon: '|≠|',
+    label: 'Different Side', shorthand: 'A,B diff. sides of CD', icon: '↑↓',
     minArgs: 6, argLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
     argTypes: ['point', 'point', 'point', 'point', 'point', 'point'],
   },
