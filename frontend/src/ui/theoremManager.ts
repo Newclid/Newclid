@@ -41,7 +41,8 @@ export function createTheoremManager(
 
   const THEOREM_NAME_RE = /^[A-Za-z_][A-Za-z0-9_-]*$/;
   const POINT_NAME_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
-  const FRACTION_RE = /^-?[0-9]+(\/-?[0-9]+)?$/;
+  // Accepts plain rationals (1/2, 3) and angle constants as fractions of π (pi/4, 11pi/36).
+  const FRACTION_RE = /^-?[0-9]+(\/-?[0-9]+)?$|^-?[0-9]*pi\/-?[0-9]+$/;
 
   function validate(): string | null {
     if (!THEOREM_NAME_RE.test(nameVal.trim())) {
@@ -237,14 +238,15 @@ export function createTheoremManager(
     const row = el('div', { class: 'theorem-arg-row' });
     row.appendChild(el('span', { class: 'theorem-arg-label' }, [label]));
 
+    const isAngle = isFraction && def.id === 'aconst';
     const input = el('input', {
       type: 'text',
       class: `theorem-arg-input${isFraction ? ' theorem-arg-input-fraction' : ''}`,
       value: ep.args[argIdx] ?? '',
-      placeholder: isFraction ? 'e.g. 1/2' : label,
-      title: isFraction
-        ? 'Rational constant, e.g. 1/2 or 3'
-        : 'Variable name, e.g. A or P1',
+      placeholder: isAngle ? 'e.g. pi/4' : (isFraction ? 'e.g. 1/2' : label),
+      title: isAngle
+        ? 'Angle in radians as a fraction of π — e.g. pi/4 (45°), pi/2 (90°), 11pi/36 (55°)'
+        : (isFraction ? 'Rational constant, e.g. 1/2 or 3' : 'Variable name, e.g. A or P1'),
     }) as HTMLInputElement;
     input.addEventListener('input', () => {
       ep.args[argIdx] = input.value;

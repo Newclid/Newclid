@@ -131,7 +131,7 @@ body.is-resizing {
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--toolbar-width, 280px);
+  width: var(--toolbar-width, 350px);
   height: 100%;
   z-index: 10;
 }
