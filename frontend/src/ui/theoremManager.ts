@@ -5,7 +5,6 @@ import {
   PREDICATE_DEFINITIONS,
   PREDICATE_BY_ID,
   predicateToJgex,
-  extraArgLabel,
 } from '../types/theorem';
 import type { CustomTheorem, TheoremPredicate, PredicateDef } from '../types/theorem';
 
@@ -101,8 +100,8 @@ export function createTheoremManager(
   }
 
   function defaultArgs(def: PredicateDef): string[] {
-    return def.argLabels.map((label, i) =>
-      def.argTypes[i] === 'fraction' ? '1' : label,
+    return def.argLabels.map((_, i) =>
+      def.argTypes[i] === 'fraction' ? '1' : '',
     );
   }
 
@@ -200,7 +199,7 @@ export function createTheoremManager(
       const btn = el('button', {
         type: 'button',
         class: 'goal-pred-btn',
-        title: def.shorthand,
+        title: def.shorthand([]),
       }) as HTMLButtonElement;
       btn.appendChild(el('span', { class: 'goal-pred-icon' }, [def.icon]));
       btn.appendChild(el('span', { class: 'goal-pred-label' }, [def.label]));
@@ -229,8 +228,11 @@ export function createTheoremManager(
 
   function renderArgInput(ep: EditablePredicate, def: PredicateDef, argIdx: number): HTMLElement {
     const argType = argIdx < def.argTypes.length ? def.argTypes[argIdx] : 'point';
-    const label = argIdx < def.argLabels.length ? def.argLabels[argIdx] : extraArgLabel(argIdx);
     const isFraction = argType === 'fraction';
+    // Fraction args keep their semantic label (k); point args use global position (P1, P2, …).
+    const label = isFraction
+      ? (argIdx < def.argLabels.length ? def.argLabels[argIdx] : 'k')
+      : `P${argIdx + 1}`;
 
     const row = el('div', { class: 'theorem-arg-row' });
     row.appendChild(el('span', { class: 'theorem-arg-label' }, [label]));
@@ -244,7 +246,13 @@ export function createTheoremManager(
         ? 'Rational constant, e.g. 1/2 or 3'
         : 'Variable name, e.g. A or P1',
     }) as HTMLInputElement;
-    input.addEventListener('input', () => { ep.args[argIdx] = input.value; });
+    input.addEventListener('input', () => {
+      ep.args[argIdx] = input.value;
+      // Update the header shorthand live so the user sees their variable names reflected.
+      const predEl = row.closest('.theorem-editable-pred');
+      const nameSpan = predEl?.querySelector('.theorem-editable-pred-name');
+      if (nameSpan) nameSpan.textContent = `${def.label} — ${def.shorthand(ep.args)}`;
+    });
     row.appendChild(input);
     return row;
   }
@@ -264,7 +272,7 @@ export function createTheoremManager(
     // Header: predicate description + delete button
     const header = el('div', { class: 'theorem-editable-pred-header' });
     header.appendChild(
-      el('span', { class: 'theorem-editable-pred-name' }, [`${def.label} — ${def.shorthand}`]),
+      el('span', { class: 'theorem-editable-pred-name' }, [`${def.label} — ${def.shorthand(ep.args)}`]),
     );
     const delBtn = el('button', {
       type: 'button',
@@ -318,7 +326,7 @@ export function createTheoremManager(
 
       const addArgBtn = el('button', { type: 'button', class: 'goal-var-btn' }, ['+ Add point']);
       addArgBtn.addEventListener('click', () => {
-        ep.args.push(extraArgLabel(ep.args.length));
+        ep.args.push('');
         renderKeepingScroll();
       });
       varControls.appendChild(addArgBtn);
