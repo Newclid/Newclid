@@ -243,9 +243,9 @@ export function createTheoremManager(
       type: 'text',
       class: `theorem-arg-input${isFraction ? ' theorem-arg-input-fraction' : ''}`,
       value: ep.args[argIdx] ?? '',
-      placeholder: isAngle ? 'e.g. pi/4' : (isFraction ? 'e.g. 1/2' : label),
+      placeholder: isAngle ? 'pi/4' : (isFraction ? 'e.g. 1/2' : label),
       title: isAngle
-        ? 'Angle in radians as a fraction of π — e.g. pi/4 (45°), pi/2 (90°), 11pi/36 (55°)'
+        ? 'Angle as a fraction of π: pi/4 = 45°, pi/2 = 90°, pi/3 = 60°, pi/6 = 30°'
         : (isFraction ? 'Rational constant, e.g. 1/2 or 3' : 'Variable name, e.g. A or P1'),
     }) as HTMLInputElement;
     input.addEventListener('input', () => {
@@ -256,6 +256,9 @@ export function createTheoremManager(
       if (nameSpan) nameSpan.textContent = `${def.label} — ${def.shorthand(ep.args)}`;
     });
     row.appendChild(input);
+    if (isAngle) {
+      row.appendChild(el('span', { class: 'theorem-arg-unit' }, ['× π rad']));
+    }
     return row;
   }
 

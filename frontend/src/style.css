@@ -1329,6 +1329,14 @@ body.is-resizing {
   max-width: 80px;
 }
 
+.theorem-arg-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* ---------- Theorem builder — pinned save footer ---------- */
 
 .theorem-builder-footer {

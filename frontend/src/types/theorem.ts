@@ -211,7 +211,7 @@ export const PREDICATE_DEFINITIONS: PredicateDef[] = [
   {
     id: 'aconst', jgexName: 'aconst',
     label: 'Line Angle = Const (rad)',
-    shorthand: (a) => `∠(${p(a,0)}${p(a,1)},${p(a,2)}${p(a,3)}) = ${a[4]?.trim() || 'k·π'}`,
+    shorthand: (a) => `∠(${p(a,0)}${p(a,1)},${p(a,2)}${p(a,3)}) = ${a[4]?.trim() || 'k'} × π rad`,
     icon: '∠=k',
     minArgs: 5, argLabels: ['A', 'B', 'C', 'D', 'k'],
     argTypes: ['point', 'point', 'point', 'point', 'fraction'],
