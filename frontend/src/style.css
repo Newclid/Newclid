@@ -131,7 +131,7 @@ body.is-resizing {
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--toolbar-width, 240px);
+  width: var(--toolbar-width, 280px);
   height: 100%;
   z-index: 10;
 }
@@ -1264,9 +1264,8 @@ body.is-resizing {
   color: var(--ink-mid);
   flex: 1;
   min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .theorem-pred-delete-btn {
