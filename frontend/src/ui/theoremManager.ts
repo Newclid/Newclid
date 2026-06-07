@@ -319,7 +319,7 @@ export function createTheoremManager(
       const addArgBtn = el('button', { type: 'button', class: 'goal-var-btn' }, ['+ Add point']);
       addArgBtn.addEventListener('click', () => {
         ep.args.push(extraArgLabel(ep.args.length));
-        render();
+        renderKeepingScroll();
       });
       varControls.appendChild(addArgBtn);
 
@@ -328,7 +328,7 @@ export function createTheoremManager(
           type: 'button',
           class: 'goal-var-btn goal-var-btn-remove',
         }, ['− Remove last']);
-        remArgBtn.addEventListener('click', () => { ep.args.pop(); render(); });
+        remArgBtn.addEventListener('click', () => { ep.args.pop(); renderKeepingScroll(); });
         varControls.appendChild(remArgBtn);
       }
       row.appendChild(varControls);
@@ -455,6 +455,15 @@ export function createTheoremManager(
   function render(): void {
     if (view === 'list') renderList();
     else renderBuilder();
+  }
+
+  // Re-render while keeping the scroll position of the content area.
+  // Used by add/remove arg buttons so the user stays at the same spot.
+  function renderKeepingScroll(): void {
+    const scrollTop = root.querySelector('.proof-panel-content')?.scrollTop ?? 0;
+    render();
+    const content = root.querySelector('.proof-panel-content');
+    if (content) content.scrollTop = scrollTop;
   }
 
   // Reset to list whenever the panel is opened fresh
