@@ -43,9 +43,22 @@ namespace Yuclid {
          */
         [[nodiscard]] const SegmentBuckets &segment_length_buckets() const;
 
+        /**
+         * Returns point pairs grouped by undirected line orientation.
+         *
+         * Each PointPair is interpreted as the line through its two points for this
+         * cache view. Buckets store PointPairId values pointing into point_pairs().
+         *
+         * This is intended for para/perp providers:
+         *   - para uses point pairs with matching orientation
+         *   - perp uses point pairs whose orientation differs by 90 degrees
+         */
+        [[nodiscard]] const LineOrientationBuckets &line_orientation_buckets() const;
+
     private:
         [[nodiscard]] std::vector<PointPair> build_point_pairs() const;
         [[nodiscard]] SegmentBuckets build_segment_length_buckets() const;
+        [[nodiscard]] LineOrientationBuckets build_line_orientation_buckets() const;
 
         const Problem* m_problem;
 
@@ -54,5 +67,8 @@ namespace Yuclid {
 
         // Lazily initialized by segment_length_buckets().
         mutable std::optional<SegmentBuckets> m_segment_length_buckets;
+
+        // Lazily initialized by line_orientation_buckets().
+        mutable std::optional<LineOrientationBuckets> m_line_orientation_buckets;
     };
 }

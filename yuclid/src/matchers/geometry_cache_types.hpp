@@ -31,4 +31,25 @@ namespace Yuclid {
     struct SegmentBuckets {
         std::vector<std::vector<PointPairId>> buckets;
     };
+
+    /**
+     * Point pairs grouped by undirected line orientation.
+     *
+     * The actual PointPair objects are stored once in LazyGeometryCache::point_pairs().
+     * This cache view stores an ordered list of PointPairId values plus bucket ranges
+     * into that ordered list.
+     *
+     * A bucket's key is the representative orientation of all point pairs in that
+     * bucket. Orientation is undirected: AB and BA represent the same line orientation.
+     */
+    struct LineOrientationBuckets {
+        struct BucketRange {
+            double key;
+            std::size_t begin;
+            std::size_t end;
+        };
+
+        std::vector<PointPairId> ordered_point_pair_ids;
+        std::vector<BucketRange> buckets;
+    };
 }

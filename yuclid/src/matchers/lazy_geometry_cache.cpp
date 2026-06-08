@@ -4,11 +4,36 @@
 #include <vector>
 
 #include "matchers/geometry_bucket_utils.hpp"
+#include "numbers/add_circle.hpp"
 #include "numbers/util.hpp"
 #include "problem.hpp"
+#include "type/slope_angle.hpp"
 #include "type/squared_dist.hpp"
 
 namespace Yuclid {
+
+    namespace {
+
+        /**
+         * Computes the numeric bucket key for the line through two points.
+         *
+         * SlopeAngle gives the orientation of the line, ignoring the finite segment
+         * length. Converting it to AddCircle<double> normalizes that orientation
+         * modulo pi, so opposite point orders such as AB and BA represent the same
+         * line orientation.
+         *
+         * The returned number is used for sorting/grouping. Keys that differ by 0.5
+         * represent perpendicular line orientations.
+         */
+        double line_orientation_key(Point first, Point second) {
+            const SlopeAngle slope_angle(first, second);
+            const AddCircle<double> orientation =
+                static_cast<AddCircle<double>>(slope_angle);
+
+            return orientation.number();
+        }
+    }
+
     LazyGeometryCache::LazyGeometryCache(const Problem &problem)
         : m_problem(&problem)
     {}
@@ -35,6 +60,14 @@ namespace Yuclid {
         m_segment_length_buckets = build_segment_length_buckets();
 
         return *m_segment_length_buckets;
+    }
+
+    const LineOrientationBuckets &LazyGeometryCache::line_orientation_buckets() const {
+        if(!m_line_orientation_buckets.has_value()) {
+            m_line_orientation_buckets = build_line_orientation_buckets();
+        }
+
+        return *m_line_orientation_buckets;
     }
 
     std::vector<PointPair> LazyGeometryCache::build_point_pairs() const {
@@ -92,13 +125,65 @@ namespace Yuclid {
         for_each_bucket_from_sorted_keyed_ids(
             keyed_segments,
             EPS,
-            [&](std::vector<PointPairId> bucket) {
+            [&](std::vector<PointPairId> bucket, [[maybe_unused]] double bucket_key) {
                 result.buckets.push_back(std::move(bucket));
             },
             2,
             "segment lengths"
         );
 
+
+        return result;
+    }
+
+    LineOrientationBuckets LazyGeometryCache::build_line_orientation_buckets() const {
+        const std::vector<PointPair> &all_point_pairs = point_pairs();
+
+        // Build a temporary sorted list:
+        //   key = undirected line orientation of the point pair
+        //   id  = index into all_point_pairs
+        //
+        // The base PointPair list is stored once by point_pairs(). This cache view
+        // only stores PointPairId values, interpreting each pair as the line through
+        // its two points.
+        const std::vector<KeyedId<PointPairId>> keyed_point_pairs =
+        build_sorted_keyed_ids<PointPairId>(
+            all_point_pairs.size(),
+            [&](PointPairId point_pair_id) {
+                const PointPair &point_pair = all_point_pairs[point_pair_id];
+
+                return line_orientation_key(
+                    point(point_pair.first),
+                    point(point_pair.second)
+                );
+            }
+        );
+        
+        LineOrientationBuckets result;
+        result.ordered_point_pair_ids.reserve(keyed_point_pairs.size());
+
+        // Group point pairs by equal/similar line orientation.
+        for_each_bucket_from_sorted_keyed_ids(
+            keyed_point_pairs,
+            EPS,
+            [&](std::vector<PointPairId> bucket, double bucket_key) {
+                const std::size_t begin = result.ordered_point_pair_ids.size();
+
+                for (PointPairId point_pair_id : bucket) {
+                    result.ordered_point_pair_ids.push_back(point_pair_id);
+                }
+
+                const std::size_t end = result.ordered_point_pair_ids.size();
+
+                result.buckets.push_back(LineOrientationBuckets::BucketRange{
+                    .key = bucket_key,
+                    .begin = begin,
+                    .end = end,
+                });
+            },
+            1,
+            "line orientations"
+        );
 
         return result;
     }
