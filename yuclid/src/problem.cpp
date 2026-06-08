@@ -89,4 +89,11 @@ namespace Yuclid {
     throw runtime_error(format("Point named {} not found in the problem", name));
   }
 
+  Point Problem::point_at(const size_t index) const {
+    if(index >= num_points())
+        throw runtime_error(format("Point with index {} was not found in the problem", index));
+    
+    return Point(index, this);
+  }
+
 } // namespace Yuclid
