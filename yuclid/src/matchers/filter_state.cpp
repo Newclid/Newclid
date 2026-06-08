@@ -38,13 +38,13 @@ namespace Yuclid {
 
     FilterStateSnapshot FilterState::snapshot() const {
         return {
-            .passed_filters=m_used_filters,
+            .used_filters=m_used_filters,
         };
     }
 
     void FilterState::rollback(
         FilterStateSnapshot snapshot
     ) {
-        m_used_filters = snapshot.passed_filters;
+        m_used_filters = snapshot.used_filters;
     }
 }
