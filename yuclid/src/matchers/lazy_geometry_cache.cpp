@@ -1,9 +1,9 @@
 #include "matchers/lazy_geometry_cache.hpp"
 
-#include <algorithm>
 #include <utility>
 #include <vector>
 
+#include "matchers/geometry_bucket_utils.hpp"
 #include "numbers/util.hpp"
 #include "problem.hpp"
 #include "type/squared_dist.hpp"
@@ -60,73 +60,42 @@ namespace Yuclid {
     }
 
     SegmentBuckets LazyGeometryCache::build_segment_length_buckets() const {
-        struct KeyedSegment {
-            double key;
-            SegmentId segment_id;
-        };
-
         const std::vector<Segment> &all_segments = segments();
-
-        std::vector<KeyedSegment> keyed_segments;
-        keyed_segments.reserve(all_segments.size());
         
-        // Compute one numeric key per object.
-        // Here:
-        //   object = Segment
-        //   key    = squared length of the segment
-        for(SegmentId segment_id = 0; segment_id < all_segments.size(); segment_id++) {
-            const Segment &segment = all_segments[segment_id];
+        // Build a temporary sorted list:
+        //   key = squared segment length
+        //   id  = index into all_segments
+        //
+        // The cache stores segments only once in segments(). The bucket view below
+        // stores only SegmentId values pointing back into that shared segment list.
+        const std::vector<KeyedId<SegmentId>> keyed_segments =
+            build_sorted_keyed_ids<SegmentId>(
+                all_segments.size(),
+                [&](SegmentId segment_id) {
+                    const Segment &segment = all_segments[segment_id];
 
-            const double length_key = static_cast<double>(
-                SquaredDist(
-                    point(segment.first),
-                    point(segment.second)
-                )
+                    return static_cast<double>(
+                        SquaredDist(
+                            point(segment.first),
+                            point(segment.second)
+                        )
+                    );
+                }
             );
-
-            keyed_segments.push_back(KeyedSegment{
-                .key = length_key,
-                .segment_id = segment_id,
-            });
-        }
-
-        std::sort(
-            keyed_segments.begin(),
-            keyed_segments.end(),
-            [](const KeyedSegment &left, const KeyedSegment &right) {
-                return left.key < right.key;
-            }
-        );
-
+        
         SegmentBuckets result;
 
-        // Scan sorted keys and split them into buckets.
-        for(std::size_t start = 0; start < keyed_segments.size();) {
-            std::size_t end = start + 1;
-
-            // TODO: align this tolerance with existing TheoremMatcher numeric bucket logic.
-            while (
-                end < keyed_segments.size() &&
-                keyed_segments[end].key <= keyed_segments[start].key + EPS
-            ) {
-                ++end;
-            }
-
-            std::vector<SegmentId> bucket;
-            bucket.reserve(end - start);
-
-            // Store only IDs into the shared segment list.
-            // Do not store Segment copies and do not store segment pairs/combinations.
-            for (std::size_t i = start; i < end; ++i) {
-                bucket.push_back(keyed_segments[i].segment_id);
-            }
-            
-            if (bucket.size() >= 2) {
+        // Group segments by equal/similar squared length.
+        for_each_bucket_from_sorted_keyed_ids(
+            keyed_segments,
+            EPS,
+            [&](std::vector<SegmentId> bucket) {
                 result.buckets.push_back(std::move(bucket));
-            }
+            },
+            2,
+            "segment lengths"
+        );
 
-            start = end;
-        }
 
         return result;
     }
