@@ -10,6 +10,7 @@ add_library(yuclid
   ar/linear_system.cpp
   ar/reduced_equation.cpp
   config_options.cpp
+  matchers/filter_state.cpp
   matchers/matcher.cpp
   matchers/mapping_state.cpp
   matchers/rule_plan.cpp
