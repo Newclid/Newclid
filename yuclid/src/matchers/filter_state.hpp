@@ -5,7 +5,7 @@
 
 namespace Yuclid {
     struct FilterStateSnapshot {
-        std::uint64_t passed_filters;
+        std::uint64_t used_filters;
     };
 
     class FilterState {
