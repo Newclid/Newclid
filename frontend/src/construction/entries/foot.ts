@@ -46,9 +46,9 @@ export const foot: CatalogEntry = {
       svgEl('circle', { cx: '11', cy: '17', r: '1.8', fill: 'red' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick first point of the line' },
-    { name: 'b', kind: 'pick', label: 'Pick second point of the line' },
-    { name: 'p', kind: 'pick', label: 'Pick the point to drop from' },
+    { name: 'a', kind: 'pick', label: 'Pick a point on the line to project onto (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick another point on the line (2 of 2)' },
+    { name: 'p', kind: 'pick', label: 'Pick the point you want to drop the perpendicular from' },
   ],
   edges: [],
   circles: [],

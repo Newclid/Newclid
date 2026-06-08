@@ -60,15 +60,15 @@ export const onAline: CatalogEntry = {
       svgEl('circle', { cx: '20', cy: '11', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'c', kind: 'pick-existing', label: 'Angle to copy: first arm point (c)' },
-    { name: 'd', kind: 'pick-existing', label: 'Angle to copy: vertex (d)' },
-    { name: 'e', kind: 'pick-existing', label: 'Angle to copy: second arm point (e)' },
-    { name: 'a', kind: 'pick-existing', label: 'Vertex to copy the angle onto (a)' },
-    { name: 'b', kind: 'pick-existing', label: 'Reference line point (b): the angle is measured from a-b' },
+    { name: 'c', kind: 'pick-existing', label: 'Pick the first arm point of the angle to copy' },
+    { name: 'd', kind: 'pick-existing', label: 'Pick the vertex of the angle to copy' },
+    { name: 'e', kind: 'pick-existing', label: 'Pick the second arm point of the angle to copy' },
+    { name: 'a', kind: 'pick-existing', label: 'Pick the new vertex to copy the angle onto' },
+    { name: 'b', kind: 'pick-existing', label: 'Pick a point on the reference direction from the new vertex' },
     {
       name: 'x',
       kind: 'derive',
-      label: 'Place x (either side of a-b sets the angle direction)',
+      label: 'Place the new point (side of the line sets the angle direction)',
       // Snap x onto whichever of the two copied-angle lines is nearer the cursor.
       project: (binds, scene, cursor) => {
         const a = scene.objects.get(binds.a as ObjectId) as PointObject;

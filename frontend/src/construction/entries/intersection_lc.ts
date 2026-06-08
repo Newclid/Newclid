@@ -76,9 +76,9 @@ export const intersectionLC: CatalogEntry = {
       svgEl('circle', { cx: '16', cy: '15', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick the first point of the line' },
-    { name: 'b', kind: 'pick', label: 'Pick the second point of the line' },
-    { name: 'o', kind: 'pick-existing', label: "Pick the circle's centre" },
+    { name: 'a', kind: 'pick', label: 'Pick a point on the line (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick another point on the line (2 of 2)' },
+    { name: 'o', kind: 'pick-existing', label: 'Pick the centre of the circle' },
   ],
   edges: [],
   circles: [],

@@ -28,8 +28,8 @@ export const tangentLine: CatalogEntry = {
       svgEl('circle', { cx: '15', cy: '11', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick the point of tangency (on the circle)' },
-    { name: 'o', kind: 'pick', label: 'Pick the circle centre' },
+    { name: 'a', kind: 'pick', label: 'Pick the point on the circle where the tangent touches' },
+    { name: 'o', kind: 'pick', label: 'Pick the centre of the circle' },
   ],
   edges: [],
   circles: [],

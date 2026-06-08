@@ -27,9 +27,9 @@ export const parallel: CatalogEntry = {
       }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick first point of the line' },
-    { name: 'b', kind: 'pick', label: 'Pick second point of the line' },
-    { name: 'p', kind: 'pick', label: 'Pick the point the parallel runs through' },
+    { name: 'a', kind: 'pick', label: 'Pick a point on the reference line (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick another point on the reference line (2 of 2)' },
+    { name: 'p', kind: 'pick', label: 'Pick the point you want the parallel to pass through' },
   ],
   edges: [],
   circles: [],

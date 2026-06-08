@@ -19,8 +19,8 @@ export const circle: CatalogEntry = {
       }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick the centre' },
-    { name: 'b', kind: 'pick', label: 'Pick a point on the circle' },
+    { name: 'a', kind: 'pick', label: 'Pick the centre of the circle' },
+    { name: 'b', kind: 'pick', label: 'Pick a point on the circle to set the radius' },
   ],
   edges: [],
   circles: [],
