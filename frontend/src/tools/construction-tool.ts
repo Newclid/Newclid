@@ -47,7 +47,7 @@ export class ConstructionTool implements Tool {
     const tentative = { ...this.bindings, [slot.name]: pointId };
     const err = this.catalogEntry.validate?.(tentative, ctx.scene);
     if (err) {
-      console.warn(`[${this.catalogEntry.name}] ${err}`);
+      ctx.scene.setSlotError(err);
       // Roll back the auto-created point so a rejected derive doesn't leak.
       if (slot.kind === 'derive') ctx.scene.removeObject(pointId);
       return;

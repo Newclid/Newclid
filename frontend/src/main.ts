@@ -122,9 +122,65 @@ const hintEl = document.createElement('div');
 hintEl.className = 'slot-hint';
 hintEl.hidden = true;
 canvasHost.appendChild(hintEl);
+
+// Error pill shown above the hint when a click is rejected by validation.
+const errorEl = document.createElement('div');
+errorEl.className = 'slot-error';
+errorEl.hidden = true;
+canvasHost.appendChild(errorEl);
+
+// Track what the error pill is currently showing so unrelated scene emits
+// don't restart the fade timer.
+let shownError: string | null = null;
+let errorFadeTimer: number | null = null;
+let errorHideTimer: number | null = null;
+
+function clearErrorDisplay() {
+  if (errorFadeTimer !== null) { clearTimeout(errorFadeTimer); errorFadeTimer = null; }
+  if (errorHideTimer !== null) { clearTimeout(errorHideTimer); errorHideTimer = null; }
+  errorEl.style.transition = 'none';
+  errorEl.style.opacity = '0';
+  errorEl.hidden = true;
+  shownError = null;
+}
+
 scene.subscribe(() => {
   hintEl.textContent = scene.slotHint ?? '';
   hintEl.hidden = !scene.slotHint;
+
+  const err = scene.slotError;
+
+  if (!err) {
+    if (shownError !== null) clearErrorDisplay();
+    return;
+  }
+
+  // Same error already showing — don't restart the countdown.
+  if (err === shownError) return;
+
+  // New error: reset and start fresh.
+  clearErrorDisplay();
+  shownError = err;
+  errorEl.textContent = err;
+  errorEl.style.transition = 'none';
+  errorEl.style.opacity = '1';
+  errorEl.hidden = false;
+  void errorEl.offsetWidth; // flush so the reset applies before the transition starts
+
+  // Start fading at 3.5 s.
+  errorFadeTimer = window.setTimeout(() => {
+    errorEl.style.transition = 'opacity 1.5s ease';
+    errorEl.style.opacity = '0';
+  }, 3500);
+
+  // Fully hide at 5 s and clean up scene state.
+  errorHideTimer = window.setTimeout(() => {
+    errorEl.hidden = true;
+    shownError = null;
+    errorFadeTimer = null;
+    errorHideTimer = null;
+    scene.setSlotError(null);
+  }, 5000);
 });
 
 function normalizeSketchPoints(
