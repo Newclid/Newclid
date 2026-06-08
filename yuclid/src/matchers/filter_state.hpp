@@ -32,6 +32,6 @@ namespace Yuclid {
         ) const;
 
         std::size_t m_filter_count;
-        std::uint64_t m_passed_filters = 0;
+        std::uint64_t m_used_filters = 0;
     };
 }
