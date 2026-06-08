@@ -21,10 +21,10 @@ namespace Yuclid {
         return m_problem->point_at(index);
     }
 
-    const std::vector<Segment> &LazyGeometryCache::segments() const {
-        if(!m_segments.has_value()) m_segments = build_segments();
+    const std::vector<PointPair> &LazyGeometryCache::point_pairs() const {
+        if(!m_point_pairs.has_value()) m_point_pairs = build_point_pairs();
 
-        return *m_segments;
+        return *m_point_pairs;
     }
 
     const SegmentBuckets &LazyGeometryCache::segment_length_buckets() const {
@@ -37,8 +37,8 @@ namespace Yuclid {
         return *m_segment_length_buckets;
     }
 
-    std::vector<Segment> LazyGeometryCache::build_segments() const {
-        std::vector<Segment> result;
+    std::vector<PointPair> LazyGeometryCache::build_point_pairs() const {
+        std::vector<PointPair> result;
         std::size_t point_count = num_points();
 
         if(point_count < 2) return result;
@@ -48,7 +48,7 @@ namespace Yuclid {
         for(ProblemPointIndex first = 0; first < point_count; first++) {
             for(ProblemPointIndex second = first + 1; second < point_count; second++) {
                 result.push_back(
-                    Segment {
+                    PointPair {
                         first,
                         second
                     }
@@ -60,19 +60,21 @@ namespace Yuclid {
     }
 
     SegmentBuckets LazyGeometryCache::build_segment_length_buckets() const {
-        const std::vector<Segment> &all_segments = segments();
+        const std::vector<PointPair> &all_point_pairs = point_pairs();
         
-        // Build a temporary sorted list:
-        //   key = squared segment length
-        //   id  = index into all_segments
-        //
-        // The cache stores segments only once in segments(). The bucket view below
-        // stores only SegmentId values pointing back into that shared segment list.
-        const std::vector<KeyedId<SegmentId>> keyed_segments =
-            build_sorted_keyed_ids<SegmentId>(
-                all_segments.size(),
-                [&](SegmentId segment_id) {
-                    const Segment &segment = all_segments[segment_id];
+        /* Build a temporary sorted list:
+         *   key = squared distance between the two points in the pair
+         *   id  = index into all_point_pairs
+         *
+         * The base PointPair list is stored once by point_pairs(). This bucket view
+         * stores only PointPairId values, so it does not duplicate point-pair data or
+         * precompute equal-length segment combinations.
+         */
+        const std::vector<KeyedId<PointPairId>> keyed_segments =
+            build_sorted_keyed_ids<PointPairId>(
+                all_point_pairs.size(),
+                [&](PointPairId segment_id) {
+                    const PointPair &segment = all_point_pairs[segment_id];
 
                     return static_cast<double>(
                         SquaredDist(
@@ -85,11 +87,12 @@ namespace Yuclid {
         
         SegmentBuckets result;
 
-        // Group segments by equal/similar squared length.
+        // Group point pairs by equal/similar segment length. Singleton buckets are
+        // skipped because they cannot produce equal-length segment pairs.
         for_each_bucket_from_sorted_keyed_ids(
             keyed_segments,
             EPS,
-            [&](std::vector<SegmentId> bucket) {
+            [&](std::vector<PointPairId> bucket) {
                 result.buckets.push_back(std::move(bucket));
             },
             2,
