@@ -6,20 +6,47 @@
 
 namespace Yuclid {
      namespace {
-        // TODO: Test this extensively!
-        // Relies on the sequence from middle to last element being sorted in ascending order
+        // Generates the next partial permutation of a sequence.
+        // PRECONDITION: The tail range [middle, last) MUST be sorted in ascending order.
         template<class BidirIt>
         bool next_partial_permutation(BidirIt first, BidirIt middle, BidirIt last) {
-            // Reverse the order from middle to last element
-            // Since the inital sequence was in ascending order, this puts the elements from 
-            // middle to last in descending order
+            
+            // STEP 1: Reverse the tail.
+            // This turns our ascending tail into a strictly descending tail.
+            // Example: [ 1 2 | 3 4 5 ] becomes [ 1 2 | 5 4 3 ]
             std::reverse(middle, last);
 
-            // Next_permutation is implemented in a way, where looking from right to left, 
-            // it will skip the elements that are in descending order (descending read from left to right)
-            // untill it finds the one that isn't (in this case, because we reversed the sequence, that will be the element just before middle).
-            // When it finds that element, the method will swap it with the smallest larger element it can find on the right (the descending sequence).
-            // Finally the method will reverse the descending sequence and it will put it again in ascending order.
+            // STEP 2: Let std::next_permutation give the next perumtation.
+            // next_permutation scans right-to-left to find the first element smaller 
+            // than the one to its right (the "pivot"). 
+            // Because we made the tail descending, the scan skips the entire tail 
+            // and is forced to pick the element immediately before `middle` as the pivot.
+            // It swaps that pivot with the smallest element larger than the pivot it can find in the tail.
+            // Finally, it automatically reverses the tail back to ascending order.
+            // This guarantees that we'll get all partial permutations
+            //
+            // An example run over a vector {1, 2, 3, 4, 5}, where we generate 
+            // partial permutations on the first 2 positions:
+            // [ 1 2 | 3 4 5 ]
+            // [ 1 3 | 2 4 5 ]
+            // [ 1 4 | 2 3 5 ]
+            // [ 1 5 | 2 3 4 ]
+            // [ 2 1 | 3 4 5 ]
+            // [ 2 3 | 1 4 5 ]
+            // [ 2 4 | 1 3 5 ]
+            // [ 2 5 | 1 3 4 ]
+            // [ 3 1 | 2 4 5 ]
+            // [ 3 2 | 1 4 5 ]
+            // [ 3 4 | 1 2 5 ]
+            // [ 3 5 | 1 2 4 ]
+            // [ 4 1 | 2 3 5 ]
+            // [ 4 2 | 1 3 5 ]
+            // [ 4 3 | 1 2 5 ]
+            // [ 4 5 | 1 2 3 ]
+            // [ 5 1 | 2 3 4 ]
+            // [ 5 2 | 1 3 4 ]
+            // [ 5 3 | 1 2 4 ]
+            // [ 5 4 | 1 2 3 ]
             return std::next_permutation(first, last);
         }
 
