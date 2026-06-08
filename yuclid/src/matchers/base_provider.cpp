@@ -138,14 +138,10 @@ namespace Yuclid {
         [[maybe_unused]] const ProblemGeometryCache &cache
     ) const {
         // Cast partial mapping to rule mapping
-        auto optional_rule_mapping = mapping.to_partial_rule_mapping();
-
-        if (!optional_rule_mapping.has_value()) {
-            return false;
-        }
+        RuleMapping rule_mapping = mapping.to_partial_rule_mapping();
 
         // Build statement from pattern and mapping
-        auto statements = build_statements_from_pattern(pattern, optional_rule_mapping.value());
+        auto statements = build_statements_from_pattern(pattern, rule_mapping);
         
         for(const auto &statement : statements) {
             if(!statement->check_numerically()){
