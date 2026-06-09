@@ -1,6 +1,8 @@
 #include "matchers/rule_plan.hpp"
 
 #include <algorithm>
+#include <iterator>
+#include <stdexcept>
 #include <utility>
 
 namespace Yuclid {
@@ -14,23 +16,40 @@ namespace Yuclid {
             return std::ranges::find(schema.variables, arg) != schema.variables.end();
         }
 
-        std::vector<std::string> extract_variables(
+        RuleVariableIndex find_rule_variable_index (
+            const RuleSchema &schema,
+            const std::string &variable
+        ) {
+            auto it = std::ranges::find(schema.variables, variable);
+
+            if(it == schema.variables.end()) {
+                throw std::runtime_error("Unknown rule variable in predicate: " + variable);
+            }
+
+            return static_cast<RuleVariableIndex>(
+                std::distance(schema.variables.begin(), it)
+            );
+        }
+
+        std::vector<RuleVariableIndex> extract_variables(
             const RuleSchema &schema,
             const RulePredicatePattern &pattern
         ) {
-            std::vector<std::string> variables;
+            std::vector<RuleVariableIndex> variable_indices;
+            variable_indices.reserve(pattern.args.size());
 
             for(const std::string &arg : pattern.args) {
                 if(!is_rule_variable(schema, arg)) {
                     continue;
                 }
 
-                if(std::ranges::find(variables, arg) == variables.end()) {
-                    variables.push_back(arg);
-                }
+                RuleVariableIndex variable_index = 
+                    find_rule_variable_index(schema, arg);
+
+                variable_indices.push_back(variable_index);
             }
 
-            return variables;
+            return variable_indices;
         }
 
         void add_planned_predicate(
@@ -42,7 +61,7 @@ namespace Yuclid {
             PlannedPredicate planned {
                 .pattern = pattern,
                 .metadata = predicate_matching_metadata(pattern.name),
-                .variables = extract_variables(plan_schema, pattern),
+                .variable_indices = extract_variables(plan_schema, pattern),
             };
 
             switch (planned.metadata.role) {

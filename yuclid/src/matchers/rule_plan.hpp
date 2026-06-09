@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <string>
+#include "matchers/matching_types.hpp"
 #include "matchers/predicate_matching_metadata.hpp"
 #include "rules/rule_schema.hpp"
 
@@ -10,7 +10,7 @@ namespace Yuclid {
 struct PlannedPredicate {
     RulePredicatePattern pattern;
     PredicateMatchingMetadata metadata;
-    std::vector<std::string> variables;
+    std::vector<RuleVariableIndex> variable_indices;
 };
 
 /**
