@@ -45,6 +45,8 @@ namespace Yuclid {
             RuleVariableIndex variable_idx,
             Point point
         );
+        
+        void clear_assignments();
 
         [[nodiscard]] const std::vector<MappingAssignment> &assignments() const;
 
