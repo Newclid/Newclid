@@ -91,8 +91,14 @@ namespace Yuclid {
         [[maybe_unused]] const MappingState &mapping,
         [[maybe_unused]] const LazyGeometryCache &cache,
     ) const {
-        std::size_t num_unassigned_vars = mapping.unassigned_variables().size();
-        std::size_t num_free_points = cache.num_points() - unassigned_vars;
+        std::size_t num_unassigned_vars = 0;
+        for(RuleVariableIndex variableIdx: predicate.variables){
+            if(!mapping.is_assigned(variableIdx)) {
+                num_unassigned_vars++;
+            }
+        }
+
+        std::size_t num_free_points = cache.num_points() - mapping.assigned_count;
         std::size_t estimate = predicate.metadata.base_cost + variation_with_cap(num_unassigned_vars, num_free_points);
 
         return estimate;
@@ -103,12 +109,19 @@ namespace Yuclid {
         const MappingState &mapping,
         [[maybe_unused]] const LazyGeometryCache &cache
     ) const {
-        std::vector<RuleVariableIndex> unassigned_vars = mapping.unassigned_variables();
-        std::vector<std::size_t> free_points;
 
+        std::vector<RuleVariableIndex> unassigned_vars;
+        unassigned_vars.reserve(predicate.variables.size());
+        for(RuleVariableIndex variableIdx: predicate.variables){
+            if(!mapping.is_assigned(variableIdx)) {
+                unassigned_vars.push_back(variableIdx);
+            }
+        }
+
+        std::vector<ProblemPointIndex> free_points;
+        free_points.reserve(cache.num_points());
         for(std::size_t i = 0; i < cache.num_points(); ++i){
             if(!mapping.is_point_used(i)){
-                // Points are uniquely represented by their indexes the list of all points in the problem object
                 free_points.push_back(i);
             }
         }
@@ -120,7 +133,7 @@ namespace Yuclid {
         // This will point past the last position we need for the variation of points
         // This means that if we need 3 points assigned, this will point to the forth one in the vector 
         // it could potentially point to .end() but the check above ensures it will not go past
-        std::vector<std::size_t>::iterator nth_position = free_points.begin() + unassigned_vars.size();
+        std::vector<ProblemPointIndex>::iterator nth_position = free_points.begin() + unassigned_vars.size();
         MappingExtension next_extension;
 
         do {
