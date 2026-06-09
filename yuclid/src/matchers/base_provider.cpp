@@ -3,6 +3,9 @@
 #include "predicate_matching_metadata.hpp"
 #include "statement/statement.hpp"
 #include "matchers/mapping_state.hpp"
+#include "lazy_geometry_cache.hpp"
+#include "matching_types.hpp"
+#include "rule_plan.hpp"
 
 namespace Yuclid {
      namespace {
@@ -52,17 +55,19 @@ namespace Yuclid {
 
         MappingExtension get_extension_from_permutation(
             const std::vector<RuleVariableIndex> &var_indexes, 
-            const std::vector<std::size_t> &point_indexes,
+            const std::vector<ProblemPointIndex> &point_indexes,
             MappingExtension &result
         ) {
-            // TODO: implement this method for mapping extension to avoid allocating/deallocating memory every time
-            // result.clear_assignments();
+            result.clear_assignments();
             for(std::size_t i = 0; i < var_indexes.size(); ++i) {
                 result.add_assignment(var_indexes[i], point_indexes[i]);
             }
             return result;
         }
 
+        // Computes the number of partial permutations P(n, k), which is the number of 
+        // ways to choose and arrange `size_of_set` elements from `num_total_elements`.
+        // Returns MAX_ESTIMATE_CAP if the result would overflow or exceed the cap.
         std::size_t variation_with_cap(std::size_t size_of_set, std::size_t num_total_elements) {
             if (size_of_set > num_total_elements) return 0;
 
@@ -85,32 +90,41 @@ namespace Yuclid {
 
 
     std::size_t BaseProvider::estimate_extensions(
-        [[maybe_unused]] const RulePredicatePattern &pattern,
+        [[maybe_unused]] const PlannedPredicate &predicate,
         [[maybe_unused]] const MappingState &mapping,
-        [[maybe_unused]] const ProblemGeometryCache &cache,
-        [[maybe_unused]] const PredicateMatchingMetadata &predicate_metadata
+        [[maybe_unused]] const LazyGeometryCache &cache
     ) const {
-        std::size_t num_unassigned_vars = mapping.unassigned_variables().size();
-        // TODO: get the total number of points, once the cache is actually implemented, remove the placeholder
-        std::size_t num_free_points = 0; // = cache.get_problem()->num_points() - unassigned_vars;
-        std::size_t estimate = predicate_metadata.base_cost + variation_with_cap(num_unassigned_vars, num_free_points);
+        std::size_t num_unassigned_vars = 0;
+        for(RuleVariableIndex variableIdx: predicate.variable_indices){
+            if(!mapping.is_assigned(variableIdx)) {
+                num_unassigned_vars++;
+            }
+        }
+
+        std::size_t num_free_points = cache.num_points() - mapping.assigned_count();
+        std::size_t estimate = predicate.metadata.base_cost + variation_with_cap(num_unassigned_vars, num_free_points);
 
         return estimate;
     }
 
     std::generator<MappingExtension> BaseProvider::generate_extensions(
-        [[maybe_unused]] const RulePredicatePattern &pattern,
+        [[maybe_unused]] const PlannedPredicate &predicate,
         const MappingState &mapping,
-        [[maybe_unused]] const ProblemGeometryCache &cache
+        [[maybe_unused]] const LazyGeometryCache &cache
     ) const {
-        // TODO: get the total number of points, once the cache is actually implemented
-        std::size_t num_points = 0; // = cache.get_problem()->num_points();
-        std::vector<RuleVariableIndex> unassigned_vars = mapping.unassigned_variables();
-        std::vector<std::size_t> free_points;
 
-        for(std::size_t i = 0; i < num_points; ++i){
+        std::vector<RuleVariableIndex> unassigned_vars;
+        unassigned_vars.reserve(predicate.variable_indices.size());
+        for(RuleVariableIndex variableIdx: predicate.variable_indices){
+            if(!mapping.is_assigned(variableIdx)) {
+                unassigned_vars.push_back(variableIdx);
+            }
+        }
+
+        std::vector<ProblemPointIndex> free_points;
+        free_points.reserve(cache.num_points());
+        for(std::size_t i = 0; i < cache.num_points(); ++i){
             if(!mapping.is_point_used(i)){
-                // Points are uniquely represented by their indexes the list of all points in the problem object
                 free_points.push_back(i);
             }
         }
@@ -119,10 +133,11 @@ namespace Yuclid {
             throw std::runtime_error("The custom theorem requires more unique points than the problem contains.");
         }
 
-        // This will point past the last position we need for the variation of points
-        // This means that if we need 3 points assigned, this will point to the forth one in the vector 
-        // it could potentially point to .end() but the check above ensures it will not go past
-        std::vector<std::size_t>::iterator nth_position = free_points.begin() + unassigned_vars.size();
+        // Defines the boundary split for next_partial_permutation.
+        // Elements in [begin, nth_position) are actively permuted and assigned to variables.
+        // Elements in [nth_position, end) serve as the available pool (the tail).
+        // The guard check above ensures `nth_position` never exceeds free_points.end().
+        std::vector<ProblemPointIndex>::iterator nth_position = free_points.begin() + unassigned_vars.size();
         MappingExtension next_extension;
 
         do {
@@ -131,17 +146,14 @@ namespace Yuclid {
         } while(next_partial_permutation(free_points.begin(), nth_position, free_points.end()));
     }
 
-    // TODO: Ensure this is not called on unsupported predicates (ones that will break the statement_builder)
+    // Ensure this is not called on unsupported predicates (ones that will break the statement_builder)
     bool BaseProvider::is_satisfied(
-        const RulePredicatePattern &pattern,
+        const PlannedPredicate &predicate,
         const MappingState &mapping,
-        [[maybe_unused]] const ProblemGeometryCache &cache
+        [[maybe_unused]] const LazyGeometryCache &cache
     ) const {
-        // Cast partial mapping to rule mapping
         RuleMapping rule_mapping = mapping.to_partial_rule_mapping();
-
-        // Build statement from pattern and mapping
-        auto statements = build_statements_from_pattern(pattern, rule_mapping);
+        auto statements = build_statements_from_pattern(predicate.pattern, rule_mapping);
         
         for(const auto &statement : statements) {
             if(!statement->check_numerically()){
