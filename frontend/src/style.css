@@ -131,7 +131,7 @@ body.is-resizing {
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--toolbar-width, 240px);
+  width: var(--toolbar-width, 350px);
   height: 100%;
   z-index: 10;
 }
@@ -1055,6 +1055,320 @@ body.is-resizing {
 
 .job-banner-close:hover {
   opacity: 1;
+}
+
+/* ---------- Theorem manager — list view ---------- */
+
+.theorem-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.theorem-create-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.theorem-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.theorem-saved-card {
+  border: 1px solid var(--rule-mid);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--bg-canvas);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theorem-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.theorem-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-strong);
+  word-break: break-all;
+}
+
+.theorem-card-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.theorem-card-action-btn {
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  color: var(--ink-mid);
+  background: var(--bg-elevated);
+  transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
+}
+
+.theorem-card-action-btn:hover {
+  background: rgba(26, 24, 22, 0.06);
+  color: var(--ink-strong);
+}
+
+.theorem-card-delete-btn:hover {
+  color: #8B2828;
+  border-color: rgba(139, 40, 40, 0.4);
+  background: rgba(139, 40, 40, 0.05);
+}
+
+.theorem-card-desc {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.theorem-card-predicates {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.theorem-card-pred-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-soft);
+}
+
+.theorem-card-pred {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-strong);
+  background: rgba(26, 24, 22, 0.04);
+  border-radius: 3px;
+  padding: 2px 5px;
+  word-break: break-all;
+}
+
+/* ---------- Theorem manager — builder: name/description form fields ---------- */
+
+.theorem-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theorem-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+
+.theorem-field-input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  padding: 6px 9px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 5px;
+  background: var(--bg-canvas);
+  color: var(--ink-strong);
+  box-sizing: border-box;
+}
+
+.theorem-field-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.theorem-field-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.theorem-field-textarea {
+  font-family: var(--font-sans);
+  resize: vertical;
+  min-height: 54px;
+  line-height: 1.4;
+}
+
+/* ---------- Theorem manager — builder: predicate picker + editable rows ---------- */
+
+.theorem-pred-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(26, 24, 22, 0.02);
+  border: 1px solid var(--rule-soft);
+  border-radius: 6px;
+}
+
+.theorem-pred-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theorem-pred-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.theorem-picker-cancel {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.theorem-add-pred-btn {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.theorem-editable-pred {
+  border: 1px solid var(--rule-mid);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theorem-editable-pred-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.theorem-editable-pred-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.theorem-pred-delete-btn {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink-soft);
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+.theorem-pred-delete-btn:hover {
+  color: #8B2828;
+  background: rgba(139, 40, 40, 0.06);
+}
+
+.theorem-args {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.theorem-arg-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.theorem-arg-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-strong);
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.theorem-arg-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 3px 7px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  background: var(--bg-canvas);
+  color: var(--ink-strong);
+  min-width: 0;
+}
+
+.theorem-arg-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.theorem-arg-input-fraction {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  max-width: 80px;
+}
+
+.theorem-arg-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---------- Theorem builder — pinned save footer ---------- */
+
+.theorem-builder-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--rule-mid);
+}
+
+.theorem-error-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 10px;
+  background: rgba(139, 40, 40, 0.07);
+  border: 1px solid rgba(139, 40, 40, 0.22);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #7A1F1F;
+  line-height: 1.45;
+}
+
+.theorem-error-icon {
+  flex-shrink: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.theorem-save-btn {
+  align-self: flex-end;
 }
 
 /* ---------- Construction slot hint ---------- */
