@@ -3,6 +3,8 @@
 #include "predicate_provider.hpp"
 #include "predicate_matching_metadata.hpp"
 #include "mapping_state.hpp"
+#include "lazy_geometry_cache.hpp"
+#include "rule_plan.hpp"
 
 namespace Yuclid {
 
@@ -12,22 +14,21 @@ namespace Yuclid {
     class BaseProvider : public PredicateProvider {
     public:
         [[nodiscard]] std::size_t estimate_extensions(
-            const RulePredicatePattern &pattern,
+            const PlannedPredicate &predicate,
             const MappingState &mapping,
-            const ProblemGeometryCache &cache,
-            const PredicateMatchingMetadata &predicate_metadata
+            const LazyGeometryCache &cache,
         ) const override;
 
         [[nodiscard]] std::generator<MappingExtension> generate_extensions(
-            const RulePredicatePattern &pattern,
+            const PlannedPredicate &predicate,
             const MappingState &mapping,
-            const ProblemGeometryCache &cache
+            const LazyGeometryCache &cache
         ) const override;
 
         [[nodiscard]] bool is_satisfied(
-            const RulePredicatePattern &pattern,
+            const PlannedPredicate &predicate,
             const MappingState &mapping,
-            const ProblemGeometryCache &cache
+            const LazyGeometryCache &cache
         ) const override;
     };
 
