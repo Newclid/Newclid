@@ -16,7 +16,7 @@ namespace Yuclid {
         [[nodiscard]] std::size_t estimate_extensions(
             const PlannedPredicate &predicate,
             const MappingState &mapping,
-            const LazyGeometryCache &cache,
+            const LazyGeometryCache &cache
         ) const override;
 
         [[nodiscard]] std::generator<MappingExtension> generate_extensions(

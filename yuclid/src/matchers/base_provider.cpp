@@ -65,6 +65,9 @@ namespace Yuclid {
             return result;
         }
 
+        // Computes the number of partial permutations P(n, k), which is the number of 
+        // ways to choose and arrange `size_of_set` elements from `num_total_elements`.
+        // Returns MAX_ESTIMATE_CAP if the result would overflow or exceed the cap.
         std::size_t variation_with_cap(std::size_t size_of_set, std::size_t num_total_elements) {
             if (size_of_set > num_total_elements) return 0;
 
@@ -89,16 +92,16 @@ namespace Yuclid {
     std::size_t BaseProvider::estimate_extensions(
         [[maybe_unused]] const PlannedPredicate &predicate,
         [[maybe_unused]] const MappingState &mapping,
-        [[maybe_unused]] const LazyGeometryCache &cache,
+        [[maybe_unused]] const LazyGeometryCache &cache
     ) const {
         std::size_t num_unassigned_vars = 0;
-        for(RuleVariableIndex variableIdx: predicate.variables){
+        for(RuleVariableIndex variableIdx: predicate.variable_indices){
             if(!mapping.is_assigned(variableIdx)) {
                 num_unassigned_vars++;
             }
         }
 
-        std::size_t num_free_points = cache.num_points() - mapping.assigned_count;
+        std::size_t num_free_points = cache.num_points() - mapping.assigned_count();
         std::size_t estimate = predicate.metadata.base_cost + variation_with_cap(num_unassigned_vars, num_free_points);
 
         return estimate;
@@ -111,8 +114,8 @@ namespace Yuclid {
     ) const {
 
         std::vector<RuleVariableIndex> unassigned_vars;
-        unassigned_vars.reserve(predicate.variables.size());
-        for(RuleVariableIndex variableIdx: predicate.variables){
+        unassigned_vars.reserve(predicate.variable_indices.size());
+        for(RuleVariableIndex variableIdx: predicate.variable_indices){
             if(!mapping.is_assigned(variableIdx)) {
                 unassigned_vars.push_back(variableIdx);
             }
@@ -130,9 +133,10 @@ namespace Yuclid {
             throw std::runtime_error("The custom theorem requires more unique points than the problem contains.");
         }
 
-        // This will point past the last position we need for the variation of points
-        // This means that if we need 3 points assigned, this will point to the forth one in the vector 
-        // it could potentially point to .end() but the check above ensures it will not go past
+        // Defines the boundary split for next_partial_permutation.
+        // Elements in [begin, nth_position) are actively permuted and assigned to variables.
+        // Elements in [nth_position, end) serve as the available pool (the tail).
+        // The guard check above ensures `nth_position` never exceeds free_points.end().
         std::vector<ProblemPointIndex>::iterator nth_position = free_points.begin() + unassigned_vars.size();
         MappingExtension next_extension;
 
@@ -148,10 +152,7 @@ namespace Yuclid {
         const MappingState &mapping,
         [[maybe_unused]] const LazyGeometryCache &cache
     ) const {
-        // Cast partial mapping to rule mapping
         RuleMapping rule_mapping = mapping.to_partial_rule_mapping();
-
-        // Build statement from pattern and mapping
         auto statements = build_statements_from_pattern(predicate.pattern, rule_mapping);
         
         for(const auto &statement : statements) {
