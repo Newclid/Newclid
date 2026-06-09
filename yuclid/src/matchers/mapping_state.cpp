@@ -23,6 +23,10 @@ namespace Yuclid {
         add_assignment(variable_idx, point.get());
     }
 
+    void MappingExtension::clear_assignments() {
+        m_assignments.clear();
+    }
+
     const std::vector<MappingAssignment> &MappingExtension::assignments() const {
         return m_assignments;
     }
