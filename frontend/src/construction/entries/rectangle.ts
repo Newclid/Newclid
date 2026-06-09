@@ -25,8 +25,8 @@ export const rectangle: CatalogEntry = {
       svgEl('circle', { cx: '4', cy: '17', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick the first corner' },
-    { name: 'c', kind: 'pick', label: 'Pick the opposite corner' },
+    { name: 'a', kind: 'pick', label: 'Pick the first corner (1 of 2)' },
+    { name: 'c', kind: 'pick', label: 'Pick the opposite corner (2 of 2)' },
   ],
   edges: [],
   circles: [],

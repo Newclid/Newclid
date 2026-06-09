@@ -26,9 +26,9 @@ export const parallelogram: CatalogEntry = {
       svgEl('circle', { cx: '9', cy: '16', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick first vertex' },
-    { name: 'b', kind: 'pick', label: 'Pick second vertex' },
-    { name: 'c', kind: 'pick', label: 'Pick third vertex' },
+    { name: 'a', kind: 'pick', label: 'Pick the first vertex (1 of 3)' },
+    { name: 'b', kind: 'pick', label: 'Pick the second vertex (2 of 3)' },
+    { name: 'c', kind: 'pick', label: 'Pick the third vertex (3 of 3)' },
   ],
   edges: [{ pointIds: ['a', 'b'] }, { pointIds: ['b', 'c'] }],
   circles: [],

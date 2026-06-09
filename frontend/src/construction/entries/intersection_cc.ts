@@ -12,23 +12,36 @@ interface PickedCircle {
 }
 
 /**
-Find the center-through circle whose centre is the given point, reading its
-radius from the centre and the point it passes through. Returns null when no
-circle is centred there.
+Find a circle whose centre is the given point. Handles both center-through
+circles and circumcircle constructions (which store their centre as a derived
+point in bindings.x rather than as a CircleObject).
 **/
 function circleAtCentre(scene: Scene, centreId: ObjectId): PickedCircle | null {
   const centre = scene.objects.get(centreId);
   if (centre?.kind !== 'point') return null;
+
   for (const o of scene.objects.values()) {
-    if (o.kind !== 'circle' || o.mode !== 'center-through' || o.center !== centreId) continue;
-    const through = scene.objects.get(o.through);
-    if (through?.kind !== 'point') continue;
-    return {
-      center: centre,
-      through: through.id,
-      radius: Math.hypot(through.x - centre.x, through.y - centre.y),
-    };
+    if (o.kind === 'circle' && o.mode === 'center-through' && o.center === centreId) {
+      const through = scene.objects.get(o.through);
+      if (through?.kind !== 'point') continue;
+      return {
+        center: centre,
+        through: through.id,
+        radius: Math.hypot(through.x - centre.x, through.y - centre.y),
+      };
+    }
+
+    if (o.kind === 'construction' && o.name === 'circumcircle' && o.bindings.x === centreId) {
+      const a = scene.objects.get(o.bindings.a as ObjectId);
+      if (a?.kind !== 'point') continue;
+      return {
+        center: centre,
+        through: a.id,
+        radius: Math.hypot(a.x - centre.x, a.y - centre.y),
+      };
+    }
   }
+
   return null;
 }
 
@@ -73,8 +86,8 @@ export const intersectionCC: CatalogEntry = {
       svgEl('circle', { cx: '11', cy: '15', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'o', kind: 'pick-existing', label: "Pick the first circle's centre" },
-    { name: 'w', kind: 'pick-existing', label: "Pick the second circle's centre" },
+    { name: 'o', kind: 'pick-existing', label: 'Pick the centre of the first circle (1 of 2)' },
+    { name: 'w', kind: 'pick-existing', label: 'Pick the centre of the second circle (2 of 2)' },
   ],
   edges: [],
   circles: [],

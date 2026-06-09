@@ -1389,3 +1389,20 @@ body.is-resizing {
   white-space: nowrap;
   user-select: none;
 }
+
+.slot-error {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(200, 40, 40, 0.88);
+  color: #FFF;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-family: var(--font-sans);
+  pointer-events: none;
+  z-index: 6;
+  white-space: nowrap;
+  user-select: none;
+}

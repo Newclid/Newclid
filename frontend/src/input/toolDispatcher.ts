@@ -58,11 +58,11 @@ export function attachToolDispatcher(
     tool.onClick(buildCtx(e));
     const toolAfter = tool.captureState?.();
     const slotChanged = toolAfter?.currentSlotIndex !== toolBefore?.currentSlotIndex;
-    if (scene.revision !== rev || slotChanged) {
+    const clickAccepted = scene.revision !== rev || slotChanged;
+    if (clickAccepted) {
       scene.pushUndo(before, toolBefore ? () => tool.restoreState?.(toolBefore) : undefined);
+      scene.setSlotError(null);
     }
-    // Clear the hint when the construction just completed (tool reset to slot 0
-    // with empty bindings), otherwise advance it to the next slot's label.
     if (toolBefore && toolAfter) {
       const justCompleted = toolBefore.currentSlotIndex > 0
         && toolAfter.currentSlotIndex === 0

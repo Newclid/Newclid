@@ -26,12 +26,12 @@ export const onLine: CatalogEntry = {
       svgEl('circle', { cx: '11', cy: '11', r: '2', fill: 'red' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick first point of the line' },
-    { name: 'b', kind: 'pick', label: 'Pick second point of the line' },
+    { name: 'a', kind: 'pick', label: 'Pick a point on the line (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick another point on the line (2 of 2)' },
     {
       name: 'p',
       kind: 'derive',
-      label: 'Place the point on the line',
+      label: 'Place the new point on the line',
       // The line is already built (see onSlotFilled); the tool draws the
       // highlight at the projected position, so no extra preview is needed.
       preview: () => [],

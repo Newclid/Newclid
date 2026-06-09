@@ -20,8 +20,8 @@ export const segment: CatalogEntry = {
       svgEl('circle', { cx: '18', cy: '11', r: '1.8', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick the first endpoint of the segment' },
-    { name: 'b', kind: 'pick', label: 'Pick the second endpoint of the segment' },
+    { name: 'a', kind: 'pick', label: 'Pick the first endpoint (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick the second endpoint (2 of 2)' },
   ],
   edges: [{ pointIds: ['a', 'b'] }],
   circles: [],

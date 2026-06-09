@@ -29,13 +29,13 @@ export const eqdistance: CatalogEntry = {
       }),
     ]),
   slots: [
-    { name: 'b', kind: 'pick-existing', label: 'Pick the first reference point (existing)' },
-    { name: 'c', kind: 'pick-existing', label: 'Pick the second reference point (existing)' },
-    { name: 'a', kind: 'pick', label: 'Pick the base point (can be b or c)' },
+    { name: 'b', kind: 'pick-existing', label: 'Pick the first point of the length to copy (1 of 2)' },
+    { name: 'c', kind: 'pick-existing', label: 'Pick the second point of the length to copy (2 of 2)' },
+    { name: 'a', kind: 'pick', label: 'Pick the point where you want to copy this length from' },
     {
       name: 'x',
       kind: 'derive',
-      label: 'Place x at that distance from the base',
+      label: 'Place the new point at the same distance',
       // Snap x onto the circle of radius |bc| around a, in the cursor direction.
       project: (binds, scene, cursor) => {
         const a = scene.objects.get(binds.a as ObjectId) as PointObject;

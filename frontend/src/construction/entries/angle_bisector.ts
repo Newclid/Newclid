@@ -26,9 +26,9 @@ export const angleBisector: CatalogEntry = {
       svgEl('circle', { cx: '20', cy: '11', r: '1.8', fill: 'red' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick first ray point' },
-    { name: 'b', kind: 'pick', label: 'Pick angle vertex' },
-    { name: 'c', kind: 'pick', label: 'Pick second ray point' },
+    { name: 'a', kind: 'pick', label: 'Pick a point on the first ray (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick the angle vertex' },
+    { name: 'c', kind: 'pick', label: 'Pick a point on the second ray (2 of 2)' },
   ],
   edges: [{ pointIds: ['a', 'b'] }, { pointIds: ['b', 'c'] }],
   circles: [],

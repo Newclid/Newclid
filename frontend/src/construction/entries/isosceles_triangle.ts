@@ -61,8 +61,8 @@ export const isoscelesTriangle: CatalogEntry = {
       svgEl('circle', { cx: '4', cy: '19', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick first base point' },
-    { name: 'b', kind: 'pick', label: 'Pick second base point' },
+    { name: 'a', kind: 'pick', label: 'Pick the first base point (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick the second base point (2 of 2)' },
     {
       name: 'c',
       kind: 'derive',

@@ -25,12 +25,12 @@ export const onCircle: CatalogEntry = {
       svgEl('circle', { cx: '18', cy: '11', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'o', kind: 'pick', label: "Pick the circle's centre" },
-    { name: 'a', kind: 'pick', label: 'Pick a point on the circle (sets the radius)' },
+    { name: 'o', kind: 'pick', label: 'Pick the centre of the circle' },
+    { name: 'a', kind: 'pick', label: 'Pick a point on the circle to set its radius' },
     {
       name: 'x',
       kind: 'derive',
-      label: 'Place x on the circle',
+      label: 'Place the new point on the circle',
       // Snap x onto the circle of radius |oa| around o, in the cursor direction.
       project: (binds, scene, cursor) => {
         const o = scene.objects.get(binds.o as ObjectId) as PointObject;

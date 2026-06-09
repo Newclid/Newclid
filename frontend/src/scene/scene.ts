@@ -56,6 +56,8 @@ export class Scene {
   previews: ToolPreview[] = [];
   // Current construction slot instruction shown in the canvas hint UI.
   slotHint: string | null = null;
+  // Validation error from the last rejected click — shown in a separate box above the hint.
+  slotError: string | null = null;
 
   private nextId = 1;
   private nextLabelCode = 65; // 'A'
@@ -97,6 +99,11 @@ export class Scene {
 
   setSlotHint(s: string | null): void {
     this.slotHint = s;
+    this.emit();
+  }
+
+  setSlotError(s: string | null): void {
+    this.slotError = s;
     this.emit();
   }
 

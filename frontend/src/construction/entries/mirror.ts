@@ -25,8 +25,8 @@ export const mirror: CatalogEntry = {
       svgEl('circle', { cx: '18', cy: '11', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick the point to reflect' },
-    { name: 'b', kind: 'pick', label: 'Pick the mirror point (centre of reflection)' },
+    { name: 'a', kind: 'pick', label: 'Pick the point you want to reflect' },
+    { name: 'b', kind: 'pick', label: 'Pick the point to reflect through' },
   ],
   edges: [],
   circles: [],

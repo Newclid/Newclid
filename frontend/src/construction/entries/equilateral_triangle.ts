@@ -51,12 +51,12 @@ export const equilateralTriangle: CatalogEntry = {
       svgEl('circle', { cx: '3', cy: '18', r: '1.6', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick first base point' },
-    { name: 'b', kind: 'pick', label: 'Pick second base point' },
+    { name: 'a', kind: 'pick', label: 'Pick the first base point (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick the second base point (2 of 2)' },
     {
       name: 'c',
       kind: 'derive',
-      label: 'Place the apex (above or below the base)',
+      label: 'Place the apex above or below the base',
       // Snap the apex to the equilateral position on the cursor's side.
       project: (binds, scene, cursor) => {
         const a = scene.objects.get(binds.a as ObjectId) as PointObject;

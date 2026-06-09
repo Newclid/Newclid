@@ -22,8 +22,8 @@ export const line: CatalogEntry = {
       svgEl('circle', { cx: '14', cy: '9', r: '1.8', fill: 'currentColor' }),
     ]),
   slots: [
-    { name: 'a', kind: 'pick', label: 'Pick the first point on the line' },
-    { name: 'b', kind: 'pick', label: 'Pick the second point on the line' },
+    { name: 'a', kind: 'pick', label: 'Pick the first point on the line (1 of 2)' },
+    { name: 'b', kind: 'pick', label: 'Pick the second point on the line (2 of 2)' },
   ],
   edges: [],
   circles: [],

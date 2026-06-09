@@ -3,6 +3,7 @@
 import { Scene } from '../scene/scene';
 import type { ToolName } from '../geometry/types-object';
 import { CONSTRUCTION_CATALOG } from '../construction/catalog';
+import { getTool } from '../tools/registry';
 import type { AppStore } from '../store/appStore';
 
 const SHORTCUTS: Record<string, ToolName> = {};
@@ -39,6 +40,10 @@ export function attachShortcuts(scene: Scene, appStore?: AppStore): ShortcutsHan
     if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
       if (appStore?.proofMode) return;
       scene.undo();
+      scene.setSlotError(null);
+      // Sync the slot hint to wherever the tool landed after rewinding.
+      const activeTool = getTool(scene.tool);
+      scene.setSlotHint(activeTool?.currentSlotLabel?.() ?? null);
       e.preventDefault();
       return;
     }
