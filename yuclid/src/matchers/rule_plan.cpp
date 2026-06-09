@@ -46,7 +46,9 @@ namespace Yuclid {
                 RuleVariableIndex variable_index = 
                     find_rule_variable_index(schema, arg);
 
-                variable_indices.push_back(variable_index);
+                if(std::ranges::find(variable_indices, variable_index) == variable_indices.end()) {
+                    variable_indices.push_back(variable_index);
+                }
             }
 
             return variable_indices;
