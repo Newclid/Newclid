@@ -9,16 +9,16 @@
 
 #include "predicate_matching_metadata.hpp"
 #include "mapping_state.hpp"
+#include "lazy_geometry_cache.hpp"
+#include "rule_plan.hpp"
 
 namespace Yuclid{
-
-    struct ProblemGeometryCache {};
 
     /**
     * @brief Abstract interface for predicate-specific optimized matching.
     * 
     * The generic matcher asks a PredicateProvider to generate or verify mappings using 
-    * the ProblemGeometryCache. Most custom geometric predicates (e.g. coll, cong) 
+    * the LazyGeometryCache. Most custom geometric predicates (e.g. coll, cong) 
     * should (eventually) have their own provider implementations.
     */
     class PredicateProvider {
@@ -31,17 +31,15 @@ namespace Yuclid{
         * The matcher uses this to dynamically choose the cheapest predicate
         * to expand next.
         *  
-        * @param pattern The specific rule predicate being evaluated (e.g., "coll A B C").
+        * @param predicate The rule predicate being evaluated. Along with its metadata and a vector containing the indexes of the variables it uses.
         * @param mapping The current state of assigned points to variables.
         * @param cache The geometry cache.
-        * @param predicate_metadata Metadata containing base costs and roles.
         * @return std::size_t The estimated number of branches (mapping extensions) this predicate will create.
         */
         [[nodiscard]] virtual std::size_t estimate_extensions(
-            const RulePredicatePattern &pattern,
+            const PlannedPredicate &predicate,
             const MappingState &mapping,
-            const ProblemGeometryCache &cache,
-            const PredicateMatchingMetadata &predicate_metadata
+            const LazyGeometryCache &cache
         ) const = 0;
 
         /**
@@ -49,15 +47,15 @@ namespace Yuclid{
         * 
         * Uses a generator pattern.
         * 
-        * @param pattern The specific rule predicate being evaluated.
+        * @param predicate The rule predicate being evaluated. Along with its metadata and a vector containing the indexes of the variables it uses.
         * @param mapping The current state of assigned points to variables.
         * @param cache The geometry cache used to find valid points.
         * @return a generator that produces mapping extensions
         */
         [[nodiscard]] virtual std::generator<MappingExtension> generate_extensions(
-            const RulePredicatePattern &pattern,
+            const PlannedPredicate &predicate,
             const MappingState &mapping,
-            const ProblemGeometryCache &cache
+            const LazyGeometryCache &cache
         ) const = 0;
 
         /**
@@ -67,16 +65,16 @@ namespace Yuclid{
         * It allows the matcher to prune invalid branches as early as possible 
         * before generating the rest of the rule variables.
         * 
-        * @param pattern The specific rule predicate to check.
+        * @param predicate The rule predicate to check. Along with its metadata and a vector containing the indexes of the variables it uses.
         * @param mapping The mapping state containing the fully bound variables for this pattern.
         * @param cache The geometry cache to verify the geometry.
         * @return true If the geometric constraint is valid.
         * @return false If the constraint fails.
         */
         [[nodiscard]] virtual bool is_satisfied(
-            const RulePredicatePattern &pattern,
+            const PlannedPredicate &predicate,
             const MappingState &mapping,
-            const ProblemGeometryCache &cache
+            const LazyGeometryCache &cache
         ) const = 0;
     };
 
