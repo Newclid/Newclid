@@ -32,26 +32,43 @@ namespace Yuclid {
          *
          * Built lazily on first use.
          */
-        [[nodiscard]] const std::vector<Segment> &segments() const;
+        [[nodiscard]] const std::vector<PointPair> &point_pairs() const;
 
         /**
-         * Returns segments grouped by equal/similar length.
+         * Returns point pairs grouped by equal/similar segment length.
          *
-         * The buckets store SegmentId values pointing into segments(), so
-         * segment data is stored once and combinations are generated on demand.
+         * Each PointPair is interpreted as a finite segment for this cache view.
+         * Buckets store PointPairId values pointing into point_pairs(), so point-pair
+         * data is stored once and combinations are generated on demand.
          */
         [[nodiscard]] const SegmentBuckets &segment_length_buckets() const;
 
+        /**
+         * Returns point pairs grouped by undirected line orientation.
+         *
+         * Each PointPair is interpreted as the line through its two points for this
+         * cache view. Buckets store PointPairId values pointing into point_pairs().
+         *
+         * This is intended for para/perp providers:
+         *   - para uses point pairs with matching orientation
+         *   - perp uses point pairs whose orientation differs by 90 degrees
+         */
+        [[nodiscard]] const LineOrientationBuckets &line_orientation_buckets() const;
+
     private:
-        [[nodiscard]] std::vector<Segment> build_segments() const;
+        [[nodiscard]] std::vector<PointPair> build_point_pairs() const;
         [[nodiscard]] SegmentBuckets build_segment_length_buckets() const;
+        [[nodiscard]] LineOrientationBuckets build_line_orientation_buckets() const;
 
         const Problem* m_problem;
 
-        // Lazily initialized by segments().
-        mutable std::optional<std::vector<Segment>> m_segments;
+        // Lazily initialized by point_pairs().
+        mutable std::optional<std::vector<PointPair>> m_point_pairs;
 
         // Lazily initialized by segment_length_buckets().
         mutable std::optional<SegmentBuckets> m_segment_length_buckets;
+
+        // Lazily initialized by line_orientation_buckets().
+        mutable std::optional<LineOrientationBuckets> m_line_orientation_buckets;
     };
 }

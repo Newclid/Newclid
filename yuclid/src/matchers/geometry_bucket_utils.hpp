@@ -10,18 +10,16 @@
 namespace Yuclid {
 
     /**
-     * Temporary helper object used while building geometry buckets.
+     * Temporary key/id pair used while building bucketed cache views.
      *
      * key:
      *   Numeric value used for sorting/grouping.
      *
      * id:
-     *   Index into the cache-owned geometry list.
+     *   Index into a cache-owned object list.
      *
-     * Examples:
-     *   SegmentId   -> index into LazyGeometryCache::segments()
-     *   AngleId     -> index into LazyGeometryCache::angles()
-     *   TriangleId  -> index into LazyGeometryCache::triangles()
+     * Example:
+     *   PointPairId -> index into LazyGeometryCache::point_pairs()
      */
     template <typename Id>
     struct KeyedId {
@@ -30,15 +28,15 @@ namespace Yuclid {
     };
 
     /**
-     * Builds a sorted temporary list of geometry IDs ordered by their numeric key.
+     * Builds a temporary list of IDs sorted by their numeric key.
      *
-     * The cache owns the real geometry objects. This function stores only IDs,
-     * not copies of the geometry objects.
+     * The cache owns the actual objects. This function stores only IDs plus their
+     * computed keys, not copies of the objects.
      *
      * Example:
-     *   build_sorted_keyed_ids<SegmentId>(
-     *       segments.size(),
-     *       [&](SegmentId id) { return squared_length_of_segment(id); }
+     *   build_sorted_keyed_ids<PointPairId>(
+     *       point_pairs.size(),
+     *       [&](PointPairId id) { return squared_length_of_point_pair(id); }
      *   )
      *
      * Result:
@@ -73,7 +71,7 @@ namespace Yuclid {
     }
 
     /**
-     * Iterates over stored ID buckets built from an already sorted keyed-ID list.
+     * Iterates over buckets built from an already sorted keyed-ID list.
      *
      * This follows the same tolerance style as the current TheoremMatcher:
      *
@@ -85,8 +83,11 @@ namespace Yuclid {
      * The warning matches the old matcher behavior. It does not split or skip
      * the bucket, because doing so would change matching behavior.
      *
-     * For every completed bucket, add_bucket is called with a std::vector<Id>.
-     * The caller decides where to store that bucket.
+     * For every completed bucket, add_bucket is called with:
+     *   - std::vector<Id>: IDs belonging to the bucket
+     *   - double: representative bucket key, taken from the first keyed item
+     *
+     * The caller decides how to store the bucket.
      */
     template <typename Id, typename AddBucketFn>
     void for_each_bucket_from_sorted_keyed_ids(
@@ -115,7 +116,7 @@ namespace Yuclid {
                 bucket.push_back(sorted_ids[i].id);
             }
 
-            add_bucket(std::move(bucket));
+            add_bucket(std::move(bucket), sorted_ids[begin].key);
         };
 
         std::size_t start_bucket_index = 0;
@@ -154,24 +155,24 @@ namespace Yuclid {
     }
 
     /**
-     * Iterates over all unique unordered pairs inside one stored ID bucket.
+     * Iterates over all unique unordered pairs inside one vector.
      *
      * Example:
-     *   bucket = [0, 3, 5]
+     *   values = [A, B, C]
      *
      * pair_fn receives:
-     *   (0, 3)
-     *   (0, 5)
-     *   (3, 5)
+     *   (A, B)
+     *   (A, C)
+     *   (B, C)
      */
-    template <typename Id, typename PairFn>
+    template <typename Value, typename PairFn>
     void for_each_unordered_pair(
-        const std::vector<Id> &bucket,
+        const std::vector<Value> &values,
         PairFn pair_fn
     ) {
-        for (std::size_t i = 0; i < bucket.size(); i++) {
-            for (std::size_t j = i + 1; j < bucket.size(); j++) {
-                pair_fn(bucket[i], bucket[j]);
+        for (std::size_t i = 0; i < values.size(); ++i) {
+            for (std::size_t j = i + 1; j < values.size(); ++j) {
+                pair_fn(values[i], values[j]);
             }
         }
     }
