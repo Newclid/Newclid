@@ -132,15 +132,29 @@ namespace Yuclid {
 
         return all_correct_generated_theorems;
     }
-
+    
     const PlannedPredicate* GenericRuleMatcher::get_cheapest_predicate(
         const std::vector<PlannedPredicate> &predicates,
         const MappingState &state,
         LazyGeometryCache &cache
-    ) const {}
+    ) const {
+
+    }
 
     std::vector<Theorem> GenericRuleMatcher::build_valid_theorems_from_mappings(const RuleSchema &schema, const std::vector<RuleMapping> &mappings) const {
+        std::vector<Theorem> theorems;
 
+        for(const RuleMapping &mapping: mappings){
+            Theorem candidate = build_theorem_from_rule_schema(schema, mapping);
+            if (!candidate.check_hypotheses_nondeg_numerically()) {
+                continue;
+            }
+            if(candidate.check_numerically()){
+                theorems.push_back(candidate.normalize());
+            }
+        }
+
+        return theorems;
     }
 
     void GenericRuleMatcher::search(
