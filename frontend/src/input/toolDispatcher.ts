@@ -47,6 +47,7 @@ export function attachToolDispatcher(
       appStore.goalPickCallback?.(ctx.world.x, ctx.world.y, ctx.scale);
       return;
     }
+    if (!appStore?.activeToolGroup) return;
     const tool = getTool(scene.tool);
     if (!tool) return;
     // Capture state before the click so we can record one undo step and update
@@ -78,6 +79,10 @@ export function attachToolDispatcher(
       const nearest = pickNearestPoint(scene.objects, ctx.world, { tolerancePx: 12, scale: ctx.scale });
       scene.setPreviews(nearest ? [{ kind: 'highlightPoint', pos: { x: nearest.x, y: nearest.y } }] : []);
       requestRedraw();
+      return;
+    }
+    if (!appStore?.activeToolGroup) {
+      if (scene.previews.length > 0) { scene.setPreviews([]); requestRedraw(); }
       return;
     }
     const tool = getTool(scene.tool);
