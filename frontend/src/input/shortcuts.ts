@@ -63,7 +63,7 @@ export function attachShortcuts(scene: Scene, appStore?: AppStore): ShortcutsHan
     }
 
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (appStore?.proofMode) return;
+    if (appStore?.proofMode || appStore?.theoremManagerMode || appStore?.panelTab !== 'toolbar') return;
     const tool = SHORTCUTS[e.key.toLowerCase()];
     if (!tool) return;
     scene.setTool(tool);

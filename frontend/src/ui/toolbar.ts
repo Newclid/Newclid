@@ -128,7 +128,7 @@ export function createToolbar(
       }) as HTMLButtonElement;
       btn.appendChild(el('span', { class: 'tool-btn-label' }, [g.label]));
       btn.appendChild(el('span', { class: 'tool-group-arrow' }, ['›']));
-      btn.addEventListener('click', () => { activeGroup = g.id; appStore?.setLastToolGroup(g.id); refresh(); });
+      btn.addEventListener('click', () => { activeGroup = g.id; appStore?.setLastToolGroup(g.id); appStore?.setActiveToolGroup(g.id); refresh(); });
       group.appendChild(btn);
       groupBtns.set(g.id, btn);
     }
@@ -148,7 +148,7 @@ export function createToolbar(
       title: 'Back to all tools',
     }) as HTMLButtonElement;
     back.appendChild(el('span', { class: 'tool-btn-label' }, ['← All tools']));
-    back.addEventListener('click', () => { activeGroup = null; appStore?.setLastToolGroup(null); refresh(); scene.setTool('select'); });
+    back.addEventListener('click', () => { activeGroup = null; appStore?.setLastToolGroup(null); appStore?.setActiveToolGroup(null); refresh(); scene.setTool('select'); });
     group.appendChild(back);
 
     group.appendChild(el('div', { class: 'toolbar-sep' }));
@@ -242,9 +242,13 @@ export function createToolbar(
       activeGroup = appStore.lastToolGroup;
       refresh();
     }
+    appStore?.setActiveToolGroup(activeGroup);
     appStore?.setPanelTab('toolbar');
   });
-  proofsTabBtn.addEventListener('click', () => appStore?.setPanelTab('proofs'));
+  proofsTabBtn.addEventListener('click', () => {
+    appStore?.setActiveToolGroup(null);
+    appStore?.setPanelTab('proofs');
+  });
 
   // Proofs-tab history list.
   const proofsContent = el('section', { class: 'panel-proofs' });

@@ -43,6 +43,9 @@ export class AppStore {
   // Last tool group the user had open before entering proof mode, so the
   // Toolbar tab can restore it when they come back.
   lastToolGroup: string | null = null;
+  // Non-null only when the user has drilled into a tool group in the Toolbar.
+  // Read directly by toolDispatcher to gate canvas drawing.
+  activeToolGroup: string | null = null;
   // Callback registered by proofByPointsPanel so canvas clicks route to the goal picker.
   goalPickCallback: ((worldX: number, worldY: number, scale: number) => void) | null = null;
 
@@ -69,12 +72,14 @@ export class AppStore {
     this.proofMode = true;
     this.proofByPointsMode = false;
     this.activeProofStepIndex = null;
+    this.activeToolGroup = null;
     this.emit();
   }
 
   enterProofMode(): void {
     this.proofMode = true;
     this.proofByPointsMode = false;
+    this.activeToolGroup = null;
     this.emit();
   }
 
@@ -89,6 +94,11 @@ export class AppStore {
   setLastToolGroup(groupId: string | null): void {
     this.lastToolGroup = groupId;
     // No emit — this is a hint for the toolbar, not reactive UI state.
+  }
+
+  setActiveToolGroup(groupId: string | null): void {
+    this.activeToolGroup = groupId;
+    // No emit — read directly by the dispatcher, not a reactive UI concern.
   }
 
   setActiveProofStep(index: number | null): void {
@@ -106,6 +116,7 @@ export class AppStore {
     this.proofByPointsMode = true;
     // The two full-panel modes are mutually exclusive.
     this.proofMode = false;
+    this.activeToolGroup = null;
     this.emit();
   }
 
@@ -119,6 +130,7 @@ export class AppStore {
     this.theoremManagerMode = true;
     this.proofMode = false;
     this.proofByPointsMode = false;
+    this.activeToolGroup = null;
     this.emit();
   }
 
