@@ -264,6 +264,53 @@ body.is-resizing {
   color: #8B2828;
 }
 
+/* ---------- Toolbar group buttons ---------- */
+
+/* Thin rule separating select from the group list */
+.toolbar-sep {
+  height: 1px;
+  background: var(--rule-soft);
+  margin: 6px 0;
+}
+
+/* A group-level button has no icon so the label starts at the left edge */
+.tool-group-btn .tool-btn-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mid);
+}
+
+/* Subtle highlight when the active tool lives inside this group */
+.tool-group-btn.has-active {
+  background: var(--accent-soft);
+}
+
+.tool-group-btn.has-active .tool-btn-label {
+  color: var(--accent);
+}
+
+/* Arrow chevron at the right edge of a group button */
+.tool-group-arrow {
+  font-size: 14px;
+  color: var(--ink-faint);
+  margin-left: auto;
+  line-height: 1;
+}
+
+.tool-group-btn.has-active .tool-group-arrow {
+  color: var(--accent);
+}
+
+/* "← All tools" back button */
+.tool-group-back .tool-btn-label {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.tool-group-back:hover {
+  background: var(--accent-soft);
+}
+
 /* ---------- Panel tab switch (Toolbar | Proofs) ---------- */
 
 .panel-tab-switch {

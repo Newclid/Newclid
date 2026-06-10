@@ -4,6 +4,8 @@ import { svgEl, iconWrap } from './icon-helpers';
 import { el } from './dom';
 import { createJgexInput } from './jgexInput';
 import { CONSTRUCTION_CATALOG } from '../construction/catalog';
+import { TOOL_GROUPS } from '../tools/groups';
+import type { CatalogEntry } from '../construction/catalog-types';
 import { AppStore } from '../store/appStore';
 import { createProofPanel } from './proofPanel';
 import { createProofsList } from './proofsList';
@@ -62,20 +64,6 @@ function jgexIcon(): SVGSVGElement {
   ]);
 }
 
-interface ToolEntry {
-  name: ToolName;
-  label: string;
-  shortcut: string;
-  icon: () => SVGSVGElement;
-}
-
-// Every tool — select, point, circle included — comes from the catalog.
-const tools: ToolEntry[] = Object.values(CONSTRUCTION_CATALOG).map((entry) => ({
-  name: entry.name,
-  label: entry.label,
-  shortcut: entry.shortcut,
-  icon: entry.icon,
-}));
 
 export interface ToolbarHandle {
   root: HTMLElement;
@@ -96,23 +84,86 @@ export function createToolbar(
     el('span', { class: 'toolbar-brand-name' }, ['Newclid']),
   ]);
 
-  // ---------- tool group ----------
+  // ---------- tool group (grouped / filtered) ----------
   const group = el('div', { class: 'toolbar-group' });
-  // Map from tool name to button so updateActive() doesn't query the DOM.
+
+  // Cleared on every render — only holds buttons currently in the DOM.
   const buttons = new Map<ToolName, HTMLButtonElement>();
-  for (const t of tools) {
+  // Empty in filtered view, so updateActive skips the has-active pass then.
+  let groupBtns = new Map<string, HTMLButtonElement>();
+
+  let activeGroup: string | null = null;
+
+  function makeToolBtn(entry: CatalogEntry): HTMLButtonElement {
     const btn = el('button', {
       type: 'button',
       class: 'tool-btn',
-      title: `${t.label} (${t.shortcut})`,
+      title: `${entry.label} (${entry.shortcut})`,
       'aria-pressed': 'false',
     }) as HTMLButtonElement;
-    btn.appendChild(t.icon());
-    btn.appendChild(el('span', { class: 'tool-btn-label' }, [t.label]));
-    btn.appendChild(el('span', { class: 'tool-btn-key' }, [t.shortcut]));
-    btn.addEventListener('click', () => scene.setTool(t.name));
-    group.appendChild(btn);
-    buttons.set(t.name, btn);
+    btn.appendChild(entry.icon());
+    btn.appendChild(el('span', { class: 'tool-btn-label' }, [entry.label]));
+    btn.addEventListener('click', () => scene.setTool(entry.name));
+    buttons.set(entry.name, btn);
+    return btn;
+  }
+
+  function renderGroupedView(): void {
+    group.innerHTML = '';
+    buttons.clear();
+    groupBtns = new Map();
+
+    // Select lives outside any group — it never navigates to a sublist.
+    const selectEntry = CONSTRUCTION_CATALOG['select'];
+    if (selectEntry) group.appendChild(makeToolBtn(selectEntry));
+
+    group.appendChild(el('div', { class: 'toolbar-sep' }));
+
+    for (const g of TOOL_GROUPS) {
+      const btn = el('button', {
+        type: 'button',
+        class: 'tool-btn tool-group-btn',
+        title: g.label,
+        'aria-pressed': 'false',
+      }) as HTMLButtonElement;
+      btn.appendChild(el('span', { class: 'tool-btn-label' }, [g.label]));
+      btn.appendChild(el('span', { class: 'tool-group-arrow' }, ['›']));
+      btn.addEventListener('click', () => { activeGroup = g.id; refresh(); });
+      group.appendChild(btn);
+      groupBtns.set(g.id, btn);
+    }
+  }
+
+  function renderFilteredView(groupId: string): void {
+    group.innerHTML = '';
+    buttons.clear();
+    groupBtns = new Map();
+
+    const g = TOOL_GROUPS.find((grp) => grp.id === groupId);
+    if (!g) { activeGroup = null; renderGroupedView(); return; }
+
+    const back = el('button', {
+      type: 'button',
+      class: 'tool-btn tool-group-back',
+      title: 'Back to all tools',
+    }) as HTMLButtonElement;
+    back.appendChild(el('span', { class: 'tool-btn-label' }, ['← All tools']));
+    back.addEventListener('click', () => { activeGroup = null; refresh(); scene.setTool('select'); });
+    group.appendChild(back);
+
+    group.appendChild(el('div', { class: 'toolbar-sep' }));
+
+    for (const toolName of g.tools) {
+      const entry = CONSTRUCTION_CATALOG[toolName];
+      if (!entry) continue;
+      group.appendChild(makeToolBtn(entry));
+    }
+  }
+
+  function refresh(): void {
+    if (activeGroup === null) renderGroupedView();
+    else renderFilteredView(activeGroup);
+    updateActive();
   }
 
   // ---------- spacer ----------
@@ -265,15 +316,20 @@ export function createToolbar(
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     }
-    // Show the first slot's instruction the moment the user switches tool.
-    // Guard against re-firing on every emit (setSlotHint itself calls emit).
+
+    for (const [groupId, btn] of groupBtns) {
+      const g = TOOL_GROUPS.find((grp) => grp.id === groupId);
+      const containsActive = g ? g.tools.includes(scene.tool) : false;
+      btn.classList.toggle('has-active', containsActive);
+    }
+
     if (scene.tool !== lastToolSeen) {
       lastToolSeen = scene.tool;
       const entry = CONSTRUCTION_CATALOG[scene.tool];
       scene.setSlotHint(entry?.slots[0]?.label ?? null);
     }
   };
-  updateActive();
+  refresh();
   const unsubscribeScene = scene.subscribe(updateActive);
   const unsubscribeStore = appStore ? appStore.subscribe(syncPanelState) : undefined;
 
