@@ -46,8 +46,7 @@ export interface SerializedScene {
 
 export class Scene {
   readonly objects = new Map<ObjectId, GeoObject>();
-  // Start in the point tool so a fresh page is immediately useful.
-  tool: ToolName = 'point';
+  tool: ToolName = 'select';
   toolState: ToolState = null;
   /**
   Transient previews from the active tool's onMove. Not part of emit()
