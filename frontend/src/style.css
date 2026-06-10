@@ -370,13 +370,12 @@ body.is-resizing {
 }
 
 .proofs-list-item {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: 4px;
+  padding: 2px 4px 2px 10px;
   border-radius: 6px;
-  text-align: left;
   transition: background 120ms ease;
 }
 
@@ -384,7 +383,23 @@ body.is-resizing {
   background: rgba(26, 24, 22, 0.04);
 }
 
-.proofs-list-problem {
+.proofs-list-item-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  cursor: pointer;
+  padding: 6px 0;
+  outline: none;
+  border-radius: 4px;
+}
+
+.proofs-list-item-main:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.proofs-list-name {
   flex: 1;
   font-family: var(--font-mono);
   font-size: 11.5px;
@@ -392,6 +407,108 @@ body.is-resizing {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.proofs-list-menu-btn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--ink-soft);
+  border-radius: 4px;
+  transition: background 120ms ease, color 120ms ease;
+  opacity: 0;
+}
+
+.proofs-list-item:hover .proofs-list-menu-btn,
+.proofs-list-item:focus-within .proofs-list-menu-btn {
+  opacity: 1;
+}
+
+.proofs-list-menu-btn:hover {
+  background: rgba(26, 24, 22, 0.08);
+  color: var(--ink-strong);
+}
+
+.proofs-list-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  z-index: 200;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-mid);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(26, 24, 22, 0.12);
+  padding: 4px;
+  min-width: 130px;
+}
+
+.proofs-list-dropdown.is-open {
+  display: flex;
+  flex-direction: column;
+}
+
+.proofs-list-dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: var(--ink-strong);
+  border-radius: 5px;
+  transition: background 100ms ease;
+}
+
+.proofs-list-dropdown-item:hover {
+  background: rgba(26, 24, 22, 0.06);
+}
+
+.proofs-list-dropdown-item-danger {
+  color: #8B2828;
+}
+
+.proofs-list-dropdown-item-danger:hover {
+  background: rgba(139, 40, 40, 0.07);
+}
+
+.proofs-list-rename-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-strong);
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  min-width: 0;
+  outline: none;
+}
+
+/* Narrow mode: replace status badge text with a coloured circle */
+.proofs-list.is-narrow .proof-status-badge {
+  font-size: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink-faint);
+}
+
+.proofs-list.is-narrow .proof-status-badge[data-status="queued"],
+.proofs-list.is-narrow .proof-status-badge[data-status="running"] {
+  background: var(--accent);
+}
+
+.proofs-list.is-narrow .proof-status-badge[data-status="succeeded"] {
+  background: #1A6B1A;
+}
+
+.proofs-list.is-narrow .proof-status-badge[data-status="failed"],
+.proofs-list.is-narrow .proof-status-badge[data-status="timed_out"] {
+  background: #8B2828;
 }
 
 /* ---------- Solve-new-problem choice modal ---------- */
@@ -574,6 +691,25 @@ body.is-resizing {
 .jgex-btn-accent:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.jgex-btn-danger {
+  background: #8B2828;
+  color: #FFFFFF;
+}
+
+.jgex-btn-danger:hover {
+  background: #6E1F1F;
+}
+
+.remove-confirm-dialog {
+  width: min(360px, 90vw);
+}
+
+.remove-confirm-body {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-mid);
 }
 
 .jgex-error {

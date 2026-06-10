@@ -7,6 +7,8 @@ export interface JobRecord {
    * `problem`) so the proofs history can label each row even after newer runs.
    */
   problem: string;
+  /** Optional human-friendly name assigned by the user. */
+  name?: string;
   status: JobStatus;
   message: string | null;
   result: JobResultPayload | null;
@@ -24,7 +26,7 @@ export class AppStore {
   problem: string | null = null;
   //All jobs submitted this session, keyed by job_id.
   readonly jobs = new Map<string, JobRecord>();
-  //Job currently being tracked (submitted or polling). 
+  //Job currently being tracked (submitted or polling).
   activeJobId: string | null = null;
   // True while the proof panel is shown; disables canvas editing.
   proofMode = false;
@@ -38,6 +40,9 @@ export class AppStore {
   theoremManagerMode = false;
   // Which section of the side panel is currently shown.
   panelTab: PanelTab = 'toolbar';
+  // Last tool group the user had open before entering proof mode, so the
+  // Toolbar tab can restore it when they come back.
+  lastToolGroup: string | null = null;
   // Callback registered by proofByPointsPanel so canvas clicks route to the goal picker.
   goalPickCallback: ((worldX: number, worldY: number, scale: number) => void) | null = null;
 
@@ -77,7 +82,13 @@ export class AppStore {
     this.proofMode = false;
     this.activeProofStepIndex = null;
     this.activeProofSubStepIndex = null;
+    this.panelTab = 'proofs';
     this.emit();
+  }
+
+  setLastToolGroup(groupId: string | null): void {
+    this.lastToolGroup = groupId;
+    // No emit — this is a hint for the toolbar, not reactive UI state.
   }
 
   setActiveProofStep(index: number | null): void {
@@ -130,6 +141,25 @@ export class AppStore {
     const existing = this.jobs.get(jobId);
     if (!existing) return;
     this.jobs.set(jobId, { ...existing, ...patch });
+    this.emit();
+  }
+
+  renameJob(jobId: string, name: string): void {
+    const existing = this.jobs.get(jobId);
+    if (!existing) return;
+    this.jobs.set(jobId, { ...existing, name: name || undefined });
+    this.emit();
+  }
+
+  removeJob(jobId: string): void {
+    if (!this.jobs.has(jobId)) return;
+    this.jobs.delete(jobId);
+    if (this.activeJobId === jobId) {
+      this.activeJobId = null;
+      this.proofMode = false;
+      this.activeProofStepIndex = null;
+      this.activeProofSubStepIndex = null;
+    }
     this.emit();
   }
 
