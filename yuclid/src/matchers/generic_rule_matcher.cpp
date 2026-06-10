@@ -138,7 +138,27 @@ namespace Yuclid {
         const MappingState &state,
         LazyGeometryCache &cache
     ) const {
+        const PlannedPredicate* cheapest_predicate = nullptr;
+        std::size_t least_extensions = std::numeric_limits<std::size_t>::max();
 
+        for(const PlannedPredicate &candidate: predicates){
+            if(are_pattern_variables_assigned(candidate, state)) continue;
+
+            const PredicateProvider* candidate_provider = m_provider_registry.get_provider(candidate.pattern.name);
+
+            std::size_t expected_extensions = candidate_provider->estimate_extensions(
+                candidate,
+                state,
+                cache
+            );
+
+            if(least_extensions > expected_extensions){
+                least_extensions = expected_extensions;
+                cheapest_predicate = &candidate;
+            }
+        }
+
+        return cheapest_predicate;
     }
 
     std::vector<Theorem> GenericRuleMatcher::build_valid_theorems_from_mappings(const RuleSchema &schema, const std::vector<RuleMapping> &mappings) const {
@@ -164,5 +184,62 @@ namespace Yuclid {
         LazyGeometryCache &geometry_cache,
         std::vector<RuleMapping> &results
     ) const {
+        FilterStateSnapshot filter_snapshot = filter_state.snapshot();
+
+        // FILTER STAGE
+        for(std::size_t i = 0; i < plan.candidate_filters.size(); ++i){
+            if(filter_state.is_used(i)) continue;
+
+            const PlannedPredicate &candidate_filter = plan.candidate_filters[i];
+
+            if(!are_pattern_variables_assigned(candidate_filter, mapping_state)) continue;
+
+            const PredicateProvider* candidate_provider = m_provider_registry.get_provider(candidate_filter.pattern.name);
+
+            if(!candidate_provider->is_satisfied(candidate_filter, mapping_state, geometry_cache)){
+                filter_state.rollback(filter_snapshot);
+                return;
+            }
+
+            filter_state.mark_used(i);
+        }
+
+        // BASE CASE
+        if(mapping_state.is_complete()) {
+            results.push_back(std::move(mapping_state.to_rule_mapping().value()));
+            filter_state.rollback(filter_snapshot);
+            return;
+        }
+
+        const PlannedPredicate* cheapest_predicate = get_cheapest_predicate(plan.candidate_generators, mapping_state, geometry_cache);
+
+        if(cheapest_predicate == nullptr) {
+            cheapest_predicate = get_cheapest_predicate(plan.candidate_filters, mapping_state, geometry_cache);
+        }
+
+
+        // RECURSIVE STEP
+        if(cheapest_predicate != nullptr){
+            const PredicateProvider* generator_provider = m_provider_registry.get_provider(cheapest_predicate->pattern.name);
+
+            MappingStateSnapshot variable_snapshot = mapping_state.snapshot();
+
+            auto extensions = generator_provider->generate_extensions(*cheapest_predicate, mapping_state, geometry_cache);
+            for(const MappingExtension &extension: extensions){
+
+                if(mapping_state.try_apply_extension(extension)){
+                    search(plan, mapping_state, filter_state, geometry_cache, results);     // Recurse (go deeper in the tree)
+                    mapping_state.rollback(variable_snapshot);                              // Backtrack
+                }
+            }
+        }
+        else {
+            throw std::runtime_error(
+                "Dead end reached: All predicates evaluated, but the mapping is incomplete. "
+                "This indicates unbound variables in the rule schema that are not constrained by any predicate."
+            );
+        }
+
+        filter_state.rollback(filter_snapshot);
     }
 }
