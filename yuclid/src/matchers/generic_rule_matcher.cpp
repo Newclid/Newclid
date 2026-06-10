@@ -5,6 +5,11 @@
 #include "rules/rule_mapping.hpp"
 #include "theorem.hpp"
 #include "rules/theorem_builder.hpp"
+#include "rule_plan.hpp"
+#include "predicate_provider.hpp"
+#include "base_provider.hpp"
+#include "lazy_geometry_cache.hpp"
+#include "filter_state.hpp"
 
 #include <boost/log/trivial.hpp>
 #include <span>
@@ -42,10 +47,18 @@ namespace Yuclid {
                 used_points[i] = false;
             }
         }
+
+        bool are_pattern_variables_assigned(const PlannedPredicate &predicate, const MappingState &state){
+            for(RuleVariableIndex idx: predicate.variable_indices){
+                if(!state.is_assigned(idx)) return false;
+            }
+            return true;
+        }
     }
 
     GenericRuleMatcher::GenericRuleMatcher(const Problem *prob, std::span<const RuleSchema> rules) :
-    m_problem(prob), m_rules(rules) {
+    m_problem(prob), m_rules(rules), m_provider_registry(make_unique<BaseProvider>()) {
+        add_providers_to_registry();{
     }
 
     std::vector<Theorem> GenericRuleMatcher::match() const{
@@ -88,5 +101,54 @@ namespace Yuclid {
     
         generate_distinct_mappings(schema.variables, 0, all_problem_points, used_points, current_mapping, results);
         return results;
+    }
+
+    void GenericRuleMatcher::add_providers_to_registry() {
+        // add all providers that are implemented
+        // m_provider_registry.register_provider(pred_name, provider);
+    }
+
+    std::vector<Theorem> GenericRuleMatcher::optimized_match() const {
+        std::vector<Theorem> all_correct_generated_theorems;
+        LazyGeometryCache geometry_cache(*m_problem);
+
+        for(const RuleSchema &schema: m_rules){
+            // plan stage
+            RulePlan current_plan = build_rule_plan(schema);
+            MappingState mapping_state(schema, *m_problem);
+            std::vector<RuleMapping> mapping_results;
+            FilterState filter_state(current_plan.candidate_filters.size());
+
+            // search stage
+            search(current_plan, mapping_state, filter_state, geometry_cache, mapping_results);
+
+            // build stage
+            std::vector<Theorem> valid_theorems = build_valid_theorems_from_mappings(schema, mapping_results);
+
+            for(auto &candidate : valid_theorems) {
+                all_correct_generated_theorems.push_back(std::move(candidate));
+            }
+        }
+
+        return all_correct_generated_theorems;
+    }
+
+    const PlannedPredicate* GenericRuleMatcher::get_cheapest_predicate(
+        const std::vector<PlannedPredicate> &predicates,
+        const MappingState &state,
+        LazyGeometryCache &cache
+    ) const {}
+
+    std::vector<Theorem> GenericRuleMatcher::build_valid_theorems_from_mappings(const RuleSchema &schema, const std::vector<RuleMapping> &mappings) const {
+
+    }
+
+    void GenericRuleMatcher::search(
+        const RulePlan &plan,
+        MappingState &mapping_state,
+        FilterState &filter_state,
+        LazyGeometryCache &geometry_cache,
+        std::vector<RuleMapping> &results
+    ) const {
     }
 }
