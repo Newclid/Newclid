@@ -48,6 +48,20 @@ export function attachShortcuts(scene: Scene, appStore?: AppStore): ShortcutsHan
       return;
     }
 
+    // ESC cancels any in-progress construction and removes points placed so far.
+    if (e.key === 'Escape') {
+      if (appStore?.proofMode) return;
+      const escapeTool = getTool(scene.tool);
+      const slotsFilledSoFar = escapeTool?.captureState?.()?.currentSlotIndex ?? 0;
+      for (let i = 0; i < slotsFilledSoFar; i++) {
+        scene.undo();
+      }
+      scene.setSlotError(null);
+      scene.setSlotHint(null);
+      e.preventDefault();
+      return;
+    }
+
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (appStore?.proofMode) return;
     const tool = SHORTCUTS[e.key.toLowerCase()];
