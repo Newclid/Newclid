@@ -58,7 +58,7 @@ namespace Yuclid {
 
     GenericRuleMatcher::GenericRuleMatcher(const Problem *prob, std::span<const RuleSchema> rules) :
     m_problem(prob), m_rules(rules), m_provider_registry(make_unique<BaseProvider>()) {
-        add_providers_to_registry();{
+        add_providers_to_registry();
     }
 
     std::vector<Theorem> GenericRuleMatcher::match() const{
@@ -117,7 +117,7 @@ namespace Yuclid {
             RulePlan current_plan = build_rule_plan(schema);
             MappingState mapping_state(schema, *m_problem);
             std::vector<RuleMapping> mapping_results;
-            FilterState filter_state(current_plan.candidate_filters.size());
+            FilterState filter_state(current_plan.validators.size());
 
             // search stage
             search(current_plan, mapping_state, filter_state, geometry_cache, mapping_results);
@@ -192,10 +192,10 @@ namespace Yuclid {
         FilterStateSnapshot filter_snapshot = filter_state.snapshot();
 
         // FILTER STAGE
-        for(std::size_t i = 0; i < plan.candidate_filters.size(); ++i){
+        for(std::size_t i = 0; i < plan.validators.size(); ++i){
             if(filter_state.is_used(i)) continue;
 
-            const PlannedPredicate &candidate_filter = plan.candidate_filters[i];
+            const PlannedPredicate &candidate_filter = plan.validators[i];
 
             // Skip filters that require variables not yet assigned in the current mapping state.
             if(!are_pattern_variables_assigned(candidate_filter, mapping_state)) continue;
@@ -227,7 +227,7 @@ namespace Yuclid {
 
         // If no suitable generators were found, choose from the remaining list of filters
         if(cheapest_predicate == nullptr) {
-            cheapest_predicate = get_cheapest_predicate(plan.candidate_filters, mapping_state, geometry_cache);
+            cheapest_predicate = get_cheapest_predicate(plan.validators, mapping_state, geometry_cache);
         }
 
 

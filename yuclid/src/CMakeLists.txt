@@ -17,6 +17,7 @@ add_library(yuclid
   matchers/generic_rule_matcher.cpp
   matchers/lazy_geometry_cache.cpp
   matchers/predicate_provider.cpp
+  matchers/predicate_matching_metadata.cpp
   matchers/base_provider.cpp
   numbers/add_circle.cpp
   numbers/posreal.cpp
