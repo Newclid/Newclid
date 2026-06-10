@@ -142,16 +142,20 @@ namespace Yuclid {
         std::size_t least_extensions = std::numeric_limits<std::size_t>::max();
 
         for(const PlannedPredicate &candidate: predicates){
+            // if everything in the generator is assigned skip it
             if(are_pattern_variables_assigned(candidate, state)) continue;
 
+            // get provider and metadata
             const PredicateProvider* candidate_provider = m_provider_registry.get_provider(candidate.pattern.name);
 
+            // estimate cost for candidate
             std::size_t expected_extensions = candidate_provider->estimate_extensions(
                 candidate,
                 state,
                 cache
             );
 
+            // choose cheapest
             if(least_extensions > expected_extensions){
                 least_extensions = expected_extensions;
                 cheapest_predicate = &candidate;
@@ -184,6 +188,7 @@ namespace Yuclid {
         LazyGeometryCache &geometry_cache,
         std::vector<RuleMapping> &results
     ) const {
+        // Save the state of filters on this level
         FilterStateSnapshot filter_snapshot = filter_state.snapshot();
 
         // FILTER STAGE
@@ -192,27 +197,35 @@ namespace Yuclid {
 
             const PlannedPredicate &candidate_filter = plan.candidate_filters[i];
 
+            // Skip filters that require variables not yet assigned in the current mapping state.
             if(!are_pattern_variables_assigned(candidate_filter, mapping_state)) continue;
 
             const PredicateProvider* candidate_provider = m_provider_registry.get_provider(candidate_filter.pattern.name);
 
+            // If a fully-assigned filter fails, the current partial mapping is invalid.
+            // Prune this branch, revert state, and backtrack
             if(!candidate_provider->is_satisfied(candidate_filter, mapping_state, geometry_cache)){
+                // Revert any filters that may have passed on this node
                 filter_state.rollback(filter_snapshot);
                 return;
             }
 
+            // If the filter was satisfied, mark it as used
             filter_state.mark_used(i);
         }
 
         // BASE CASE
+        // If all variables are mapped, this is a valid leaf node. Yield the mapping.
         if(mapping_state.is_complete()) {
             results.push_back(std::move(mapping_state.to_rule_mapping().value()));
             filter_state.rollback(filter_snapshot);
             return;
         }
 
+        // Select the optimal (lowest cost) predicate to generate the next set of assignments.
         const PlannedPredicate* cheapest_predicate = get_cheapest_predicate(plan.candidate_generators, mapping_state, geometry_cache);
 
+        // If no suitable generators were found, choose from the remaining list of filters
         if(cheapest_predicate == nullptr) {
             cheapest_predicate = get_cheapest_predicate(plan.candidate_filters, mapping_state, geometry_cache);
         }
@@ -222,11 +235,13 @@ namespace Yuclid {
         if(cheapest_predicate != nullptr){
             const PredicateProvider* generator_provider = m_provider_registry.get_provider(cheapest_predicate->pattern.name);
 
+            // Preserve the current variable assignments before descending deeper into the tree
             MappingStateSnapshot variable_snapshot = mapping_state.snapshot();
 
             auto extensions = generator_provider->generate_extensions(*cheapest_predicate, mapping_state, geometry_cache);
             for(const MappingExtension &extension: extensions){
 
+                // Attempt to apply the generated permutations
                 if(mapping_state.try_apply_extension(extension)){
                     search(plan, mapping_state, filter_state, geometry_cache, results);     // Recurse (go deeper in the tree)
                     mapping_state.rollback(variable_snapshot);                              // Backtrack
@@ -240,6 +255,7 @@ namespace Yuclid {
             );
         }
 
+        // Reset the filters from this level before returning to the parent
         filter_state.rollback(filter_snapshot);
     }
 }
