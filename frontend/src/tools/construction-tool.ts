@@ -1,8 +1,29 @@
 import { Tool, ToolContext, ToolPreview, ToolSnapshot } from './tool';
-import type { CatalogEntry } from '../construction/catalog-types';
+import type { Bindings, CatalogEntry } from '../construction/catalog-types';
 import { getOrCreatePoint, pickExistingPoint, snapHighlight } from './sharedHelpers';
 import type { ObjectId, ToolName } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
+
+function isDuplicateConstruction(entry: CatalogEntry, bindings: Bindings, scene: Scene): boolean {
+  const inputSlotNames = entry.slots
+    .filter(s => s.kind === 'pick' || s.kind === 'pick-existing' || s.kind === 'scalar')
+    .map(s => s.name);
+
+  const [sa, sb] = entry.symmetricInputSlots ?? [];
+
+  for (const o of scene.objects.values()) {
+    if (o.kind === 'construction' && o.name === entry.name) {
+      if (inputSlotNames.every(k => o.bindings[k] === bindings[k])) return true;
+      if (sa && sb && inputSlotNames.every(k => {
+        const mapped = k === sa ? sb : k === sb ? sa : k;
+        return o.bindings[k] === bindings[mapped];
+      })) return true;
+    } else if (o.kind === 'circle' && o.mode === 'center-through' && entry.name === 'circle') {
+      if (o.center === bindings.a && o.through === bindings.b) return true;
+    }
+  }
+  return false;
+}
 
 export class ConstructionTool implements Tool {
   name: ToolName;
@@ -63,6 +84,11 @@ export class ConstructionTool implements Tool {
     this.catalogEntry.onSlotFilled?.(slot.name, this.bindings, ctx.scene);
 
     if (this.currentSlotIndex >= this.catalogEntry.slots.length) {
+      if (isDuplicateConstruction(this.catalogEntry, this.bindings, ctx.scene)) {
+        ctx.scene.setSlotError('This construction already exists');
+        this.reset();
+        return;
+      }
       // Done: sketch may emit a final object, or null when the slots already
       // created everything (e.g. a bare point).
       const obj = this.catalogEntry.sketch(this.bindings, ctx.scene);
