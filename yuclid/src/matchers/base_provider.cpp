@@ -130,7 +130,10 @@ namespace Yuclid {
         }
 
         if(unassigned_vars.size() > free_points.size()) {
-            throw std::runtime_error("The custom theorem requires more unique points than the problem contains.");
+            // TODO: Temporal fix to just return nothing.
+            // If a rule has more variables than points,
+            // we need to skip it because it is impossible to match on it 
+            co_return;
         }
 
         // Defines the boundary split for next_partial_permutation.
