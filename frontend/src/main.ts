@@ -255,6 +255,7 @@ function buildTextPremiseSigs(
 
 let savedSceneSnapshot: SceneSnapshot | null = null;
 let wasInProofMode = false;
+let sceneCleared = false; // true once we clear the canvas for the current proof session
 let lastJobResult: JobResultPayload | null | undefined;
 // Use sentinels so the first run always builds the sketch.
 let lastStepIndex: number | null = -1 as unknown as null;
@@ -265,12 +266,15 @@ appStore.subscribe(() => {
 
   if (proofMode && !wasInProofMode) {
     savedSceneSnapshot = scene.snapshot();
-    scene.clear();
+    sceneCleared = false;
+    // Don't clear the canvas yet — keep the user's constructions visible
+    // while the proof is queued or running.
   } else if (!proofMode && wasInProofMode) {
     if (savedSceneSnapshot) {
       scene.restore(savedSceneSnapshot);
       savedSceneSnapshot = null;
     }
+    sceneCleared = false;
   }
   wasInProofMode = proofMode;
 
@@ -279,6 +283,13 @@ appStore.subscribe(() => {
     const result = job?.result;
     const stepIndex = appStore.activeProofStepIndex;
     const subStepIndex = appStore.activeProofSubStepIndex;
+
+    // Clear the user's construction only when the proof result first arrives
+    // so their drawing stays visible while the proof is queued or running.
+    if (result && !sceneCleared) {
+      scene.clear();
+      sceneCleared = true;
+    }
 
     // Auto-initialise to step 0 when result first arrives.
     if (result && result !== lastJobResult && (result.proof_sections?.proof_steps.length ?? 0) > 0 && stepIndex === null) {
