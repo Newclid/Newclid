@@ -238,10 +238,13 @@ namespace Yuclid {
             // Preserve the current variable assignments before descending deeper into the tree
             MappingStateSnapshot variable_snapshot = mapping_state.snapshot();
 
+            // generate_extensions returns a generator
             auto extensions = generator_provider->generate_extensions(*cheapest_predicate, mapping_state, geometry_cache);
+            
+            // Lazily evaluate and consume the mapping extensions yielded by the coroutine generator
             for(const MappingExtension &extension: extensions){
 
-                // Attempt to apply the generated permutations
+                // Attempt to apply the generated extension
                 if(mapping_state.try_apply_extension(extension)){
                     search(plan, mapping_state, filter_state, geometry_cache, results);     // Recurse (go deeper in the tree)
                     mapping_state.rollback(variable_snapshot);                              // Backtrack
