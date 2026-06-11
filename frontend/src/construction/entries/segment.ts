@@ -25,6 +25,7 @@ export const segment: CatalogEntry = {
   ],
   edges: [{ pointIds: ['a', 'b'] }],
   circles: [],
+  symmetricInputSlots: ['a', 'b'],
   sketch: (binds) => {
     const aId = binds.a as ObjectId;
     const bId = binds.b as ObjectId;

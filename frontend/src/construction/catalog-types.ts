@@ -57,6 +57,9 @@ export interface CatalogEntry {
   slots: SlotSpec[];
   edges: EdgeSpec[];
   circles: CircleSpec[];
+  // When set, the duplicate check treats these two input slots as interchangeable
+  // (e.g. midpoint(a,b) = midpoint(b,a)).
+  symmetricInputSlots?: [string, string];
   // Final emit: caller passes the shape minus `id`, scene.addObject assigns it.
   // Returns null when the slots already created the geometry (e.g. a free point)
   // or the entry produces nothing on completion (e.g. select).
