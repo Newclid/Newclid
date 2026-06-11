@@ -1,37 +1,90 @@
 import { Tool, ToolContext, ToolPreview, ToolSnapshot } from './tool';
-import type { Bindings, CatalogEntry } from '../construction/catalog-types';
+import type { CatalogEntry, SketchResult } from '../construction/catalog-types';
 import { getOrCreatePoint, pickExistingPoint, snapHighlight } from './sharedHelpers';
-import type { ObjectId, ToolName } from '../geometry/types-object';
+import type { ObjectId, PointObject, ToolName } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
 
-function isDuplicateConstruction(entry: CatalogEntry, bindings: Bindings, scene: Scene): boolean {
-  const [sa, sb] = entry.symmetricInputSlots ?? [];
+type Coord = { x: number; y: number };
 
-  const matches = (existing: Record<string, ObjectId | number>, candidate: Bindings): boolean =>
-    entry.slots.every(slot => {
-      const k = slot.name;
-      if (slot.kind === 'derive') {
-        // Derive slots always produce a fresh ObjectId; compare by coordinates instead.
-        const ep = scene.objects.get(existing[k] as ObjectId);
-        const cp = scene.objects.get(candidate[k] as ObjectId);
-        if (!ep || !cp || ep.kind !== 'point' || cp.kind !== 'point') return false;
-        return Math.abs(ep.x - cp.x) < 1e-9 && Math.abs(ep.y - cp.y) < 1e-9;
-      }
-      return existing[k] === candidate[k];
+function coordinateMultisetsMatch(a: Coord[], b: Coord[]): boolean {
+  if (a.length !== b.length) return false;
+  const used = new Array(b.length).fill(false);
+  for (const pa of a) {
+    const i = b.findIndex((pb, j) => !used[j] && Math.abs(pa.x - pb.x) < 1e-9 && Math.abs(pa.y - pb.y) < 1e-9);
+    if (i === -1) return false;
+    used[i] = true;
+  }
+  return true;
+}
+
+function bindingCoords(bindings: Record<string, ObjectId | number>, scene: Scene): Coord[] {
+  return Object.values(bindings)
+    .map(id => scene.objects.get(id as ObjectId))
+    .filter((o): o is PointObject => o?.kind === 'point')
+    .map(p => ({ x: p.x, y: p.y }));
+}
+
+// Returns true if point pt lies on the infinite line through p and q (within 1e-9).
+function onLine(p: Coord, q: Coord, pt: Coord): boolean {
+  const cross = (pt.x - p.x) * (q.y - p.y) - (pt.y - p.y) * (q.x - p.x);
+  return Math.abs(cross) < 1e-9;
+}
+
+// Returns true if every line in newLines matches a geometrically equal line in existingLines.
+function linesAllMatch(
+  newLines: [ObjectId, ObjectId][],
+  existingLines: [ObjectId, ObjectId][],
+  scene: Scene,
+): boolean {
+  for (const [p1id, q1id] of newLines) {
+    const p1 = scene.objects.get(p1id);
+    const q1 = scene.objects.get(q1id);
+    if (!p1 || !q1 || p1.kind !== 'point' || q1.kind !== 'point') return false;
+    const found = existingLines.some(([p2id, q2id]) => {
+      const p2 = scene.objects.get(p2id);
+      const q2 = scene.objects.get(q2id);
+      if (!p2 || !q2 || p2.kind !== 'point' || q2.kind !== 'point') return false;
+      return onLine(p1, q1, p2) && onLine(p1, q1, q2);
     });
+    if (!found) return false;
+  }
+  return true;
+}
 
-  const swapped = (sa && sb)
-    ? { ...bindings, [sa]: bindings[sb], [sb]: bindings[sa] }
-    : null;
+function isDuplicateConstruction(obj: SketchResult, scene: Scene): boolean {
+  if (!obj) return false;
 
-  for (const o of scene.objects.values()) {
-    if (o.kind === 'construction' && o.name === entry.name) {
-      if (matches(o.bindings, bindings)) return true;
-      if (swapped && matches(o.bindings, swapped)) return true;
-    } else if (o.kind === 'circle' && o.mode === 'center-through' && entry.name === 'circle') {
-      if (o.center === bindings.a && o.through === bindings.b) return true;
+  if (obj.kind === 'circle' && obj.mode === 'center-through') {
+    const center = scene.objects.get(obj.center);
+    const through = scene.objects.get(obj.through);
+    if (!center || !through || center.kind !== 'point' || through.kind !== 'point') return false;
+    const r = Math.hypot(through.x - center.x, through.y - center.y);
+    for (const o of scene.objects.values()) {
+      if (o.kind !== 'circle' || o.mode !== 'center-through') continue;
+      const oc = scene.objects.get(o.center);
+      const ot = scene.objects.get(o.through);
+      if (!oc || !ot || oc.kind !== 'point' || ot.kind !== 'point') continue;
+      if (
+        Math.abs(oc.x - center.x) < 1e-9 &&
+        Math.abs(oc.y - center.y) < 1e-9 &&
+        Math.abs(Math.hypot(ot.x - oc.x, ot.y - oc.y) - r) < 1e-9
+      ) return true;
+    }
+    return false;
+  }
+
+  if (obj.kind === 'construction') {
+    const newCoords = bindingCoords(obj.bindings, scene);
+    for (const o of scene.objects.values()) {
+      if (o.kind !== 'construction' || o.name !== obj.name) continue;
+      if (coordinateMultisetsMatch(newCoords, bindingCoords(o.bindings, scene))) return true;
+      // Secondary check for line-emitting constructions: catch reversed reference direction.
+      if (obj.lines?.length && o.lines?.length) {
+        if (linesAllMatch(obj.lines as [ObjectId, ObjectId][], o.lines as [ObjectId, ObjectId][], scene)) return true;
+      }
     }
   }
+
   return false;
 }
 
@@ -94,17 +147,20 @@ export class ConstructionTool implements Tool {
     this.catalogEntry.onSlotFilled?.(slot.name, this.bindings, ctx.scene);
 
     if (this.currentSlotIndex >= this.catalogEntry.slots.length) {
-      if (isDuplicateConstruction(this.catalogEntry, this.bindings, ctx.scene)) {
+      // Snapshot before sketch so we can identify — and remove — any points it creates.
+      const beforeSketch = new Set(ctx.scene.objects.keys());
+      const obj = this.catalogEntry.sketch(this.bindings, ctx.scene);
+      const sketchCreated = [...ctx.scene.objects.keys()].filter(id => !beforeSketch.has(id));
+
+      if (isDuplicateConstruction(obj, ctx.scene)) {
         ctx.scene.setSlotError('This construction already exists');
+        for (const id of sketchCreated) ctx.scene.removeObject(id as ObjectId);
         for (const s of this.catalogEntry.slots) {
           if (s.kind === 'derive') ctx.scene.removeObject(this.bindings[s.name] as ObjectId);
         }
         this.reset();
         return;
       }
-      // Done: sketch may emit a final object, or null when the slots already
-      // created everything (e.g. a bare point).
-      const obj = this.catalogEntry.sketch(this.bindings, ctx.scene);
       if (obj) ctx.scene.addObject(obj);
       this.reset();
     }
