@@ -209,7 +209,7 @@ export function createTheoremManager(
         if (section === 'premises') premises.push(newPred);
         else conclusions.push(newPred);
         addingTo = null;
-        render();
+        renderKeepingScroll();
       });
       grid.appendChild(btn);
     }
@@ -287,7 +287,7 @@ export function createTheoremManager(
     delBtn.addEventListener('click', () => {
       const list = section === 'premises' ? premises : conclusions;
       list.splice(idx, 1);
-      render();
+      renderKeepingScroll();
     });
     header.appendChild(delBtn);
     row.appendChild(header);
@@ -374,7 +374,7 @@ export function createTheoremManager(
         type: 'button',
         class: 'goal-var-btn theorem-add-pred-btn',
       }, [`+ Add ${section === 'premises' ? 'Premise' : 'Conclusion'}`]);
-      addBtn.addEventListener('click', () => { addingTo = section; render(); });
+      addBtn.addEventListener('click', () => { addingTo = section; renderKeepingScroll(); });
       wrap.appendChild(addBtn);
     }
 
