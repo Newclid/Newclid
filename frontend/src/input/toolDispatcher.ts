@@ -47,7 +47,9 @@ export function attachToolDispatcher(
       appStore.goalPickCallback?.(ctx.world.x, ctx.world.y, ctx.scale);
       return;
     }
-    if (!appStore?.activeToolGroup) return;
+    // Allow canvas interaction when a tool group is open OR when a non-select
+    // tool is active (e.g. activated via keyboard shortcut without opening a group).
+    if (!appStore?.activeToolGroup && scene.tool === 'select') return;
     const tool = getTool(scene.tool);
     if (!tool) return;
     // Capture state before the click so we can record one undo step and update
@@ -59,7 +61,10 @@ export function attachToolDispatcher(
     tool.onClick(buildCtx(e));
     const toolAfter = tool.captureState?.();
     const slotChanged = toolAfter?.currentSlotIndex !== toolBefore?.currentSlotIndex;
-    const clickAccepted = scene.revision !== rev || slotChanged;
+    // Construction tools (captureState defined): accept only when slot advanced so
+    // validation rejections don't clear the error or push a spurious undo entry.
+    // Other tools: accept when the scene actually changed.
+    const clickAccepted = slotChanged || (!toolBefore && scene.revision !== rev);
     if (clickAccepted) {
       scene.pushUndo(before, toolBefore ? () => tool.restoreState?.(toolBefore) : undefined);
       scene.setSlotError(null);

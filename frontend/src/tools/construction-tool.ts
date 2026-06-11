@@ -105,23 +105,31 @@ export class ConstructionTool implements Tool {
     if (!slot) return;
 
     let pointId: ObjectId;
+    let wasCreated = false; // tracks whether this click created a new point
     if (slot.kind === 'pick') {
+      const preSize = ctx.scene.objects.size;
       pointId = getOrCreatePoint(ctx);
+      wasCreated = ctx.scene.objects.size > preSize;
     } else if (slot.kind === 'pick-existing') {
-      // Only reference points already in the scene; ignore clicks on empty space
+      // Only reference points already in the scene; reject clicks on empty space
       // so this slot can never spawn a stray, unconnected point.
       const existing = pickExistingPoint(ctx);
-      if (!existing) return;
+      if (!existing) {
+        ctx.scene.setSlotError('Click on an existing point');
+        return;
+      }
       pointId = existing;
     } else if (slot.kind === 'place-free') {
       // Always drop a fresh point at the cursor, never snapping to an existing
       // one — this is the plain point-placement step.
       pointId = ctx.scene.addPoint(ctx.world.x, ctx.world.y);
+      wasCreated = true;
     } else if (slot.kind === 'derive') {
       // Project the cursor onto the constrained locus, then materialise a
       // fresh point at the projected position.
       const projected = slot.project(this.bindings, ctx.scene, ctx.world);
       pointId = ctx.scene.addPoint(projected.x, projected.y);
+      wasCreated = true;
     } else {
       console.warn(`ConstructionTool: slot kind '${(slot as { kind: string }).kind}' not implemented`);
       return;
@@ -132,8 +140,8 @@ export class ConstructionTool implements Tool {
     const err = this.catalogEntry.validate?.(tentative, ctx.scene);
     if (err) {
       ctx.scene.setSlotError(err);
-      // Roll back the auto-created point so a rejected derive doesn't leak.
-      if (slot.kind === 'derive') ctx.scene.removeObject(pointId);
+      // Roll back any auto-created point so a rejected click doesn't leak.
+      if (wasCreated) ctx.scene.removeObject(pointId);
       return;
     }
 
