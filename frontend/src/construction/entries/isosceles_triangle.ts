@@ -87,6 +87,7 @@ export const isoscelesTriangle: CatalogEntry = {
   ],
   edges: [{ pointIds: ['a', 'b'] }],
   circles: [],
+  symmetricInputSlots: ['a', 'b'],
   // Preview the two equal legs to the apex the cursor currently selects.
   preview: (binds, scene, cursor) => {
     const a = scene.objects.get(binds.a as ObjectId) as PointObject | undefined;
