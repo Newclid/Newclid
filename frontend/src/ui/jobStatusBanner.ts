@@ -4,6 +4,7 @@ export interface JobStatusBanner {
   root: HTMLElement;
   showSuccess(message: string): void;
   showError(message: string): void;
+  showInfo(message: string): void;
   clear(): void;
 }
 
@@ -24,7 +25,7 @@ export function createJobStatusBanner(): JobStatusBanner {
     text.textContent = '';
   };
 
-  const show = (variant: 'success' | 'error', message: string) => {
+  const show = (variant: 'success' | 'error' | 'info', message: string) => {
     text.textContent = message;
     root.setAttribute('data-variant', variant);
     root.classList.add('is-visible');
@@ -36,6 +37,7 @@ export function createJobStatusBanner(): JobStatusBanner {
     root,
     showSuccess: (msg) => show('success', msg),
     showError: (msg) => show('error', msg),
+    showInfo: (msg) => show('info', msg),
     clear,
   };
 }

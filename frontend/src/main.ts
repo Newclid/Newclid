@@ -8,7 +8,7 @@ import { createToolbar } from './ui/toolbar';
 import { AppStore } from './store/appStore';
 import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
-import { createJobStatusBanner } from './ui/jobStatusBanner';
+import { initNotifications, notify } from './ui/notifications';
 import { attachToolbarResizer } from './ui/toolbarResizer';
 import { expandJgexPredicates, geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
 import type { ConstructionMarker } from './emit/jgexParser';
@@ -70,8 +70,7 @@ const toolbar = createToolbar(scene, onCanvasProofSubmit, appStore, onJgexTextSu
 root.appendChild(toolbar.root);
 attachToolbarResizer({ app: root, toolbar: toolbar.root });
 
-const banner = createJobStatusBanner();
-document.body.appendChild(banner.root);
+initNotifications();
 
 // Track the last notified job result so we fire at most once per result.
 let lastNotifiedKey = '';
@@ -87,13 +86,13 @@ appStore.subscribe(() => {
   if (job.result) {
     lastNotifiedKey = key;
     if (job.result.status === 'succeeded') {
-      banner.showSuccess('Proof complete');
+      notify('success', 'Proof complete');
     } else {
-      banner.showError(job.result.message);
+      notify('error', job.result.message);
     }
   } else if (job.error) {
     lastNotifiedKey = key;
-    banner.showError(job.error);
+    notify('error', job.error);
   }
 });
 

@@ -1224,6 +1224,12 @@ body.is-resizing {
   border: 1px solid rgba(107, 26, 26, 0.18);
 }
 
+.job-status-banner[data-variant="info"] {
+  background: #EAF0FA;
+  color: #1A3A5C;
+  border: 1px solid rgba(26, 58, 92, 0.18);
+}
+
 .job-banner-text {
   flex: 1;
 }
