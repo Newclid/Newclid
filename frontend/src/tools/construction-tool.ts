@@ -5,19 +5,29 @@ import type { ObjectId, ToolName } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
 
 function isDuplicateConstruction(entry: CatalogEntry, bindings: Bindings, scene: Scene): boolean {
-  const inputSlotNames = entry.slots
-    .filter(s => s.kind === 'pick' || s.kind === 'pick-existing' || s.kind === 'scalar')
-    .map(s => s.name);
-
   const [sa, sb] = entry.symmetricInputSlots ?? [];
+
+  const matches = (existing: Record<string, ObjectId | number>, candidate: Bindings): boolean =>
+    entry.slots.every(slot => {
+      const k = slot.name;
+      if (slot.kind === 'derive') {
+        // Derive slots always produce a fresh ObjectId; compare by coordinates instead.
+        const ep = scene.objects.get(existing[k] as ObjectId);
+        const cp = scene.objects.get(candidate[k] as ObjectId);
+        if (!ep || !cp || ep.kind !== 'point' || cp.kind !== 'point') return false;
+        return Math.abs(ep.x - cp.x) < 1e-9 && Math.abs(ep.y - cp.y) < 1e-9;
+      }
+      return existing[k] === candidate[k];
+    });
+
+  const swapped = (sa && sb)
+    ? { ...bindings, [sa]: bindings[sb], [sb]: bindings[sa] }
+    : null;
 
   for (const o of scene.objects.values()) {
     if (o.kind === 'construction' && o.name === entry.name) {
-      if (inputSlotNames.every(k => o.bindings[k] === bindings[k])) return true;
-      if (sa && sb && inputSlotNames.every(k => {
-        const mapped = k === sa ? sb : k === sb ? sa : k;
-        return o.bindings[k] === bindings[mapped];
-      })) return true;
+      if (matches(o.bindings, bindings)) return true;
+      if (swapped && matches(o.bindings, swapped)) return true;
     } else if (o.kind === 'circle' && o.mode === 'center-through' && entry.name === 'circle') {
       if (o.center === bindings.a && o.through === bindings.b) return true;
     }
@@ -86,6 +96,9 @@ export class ConstructionTool implements Tool {
     if (this.currentSlotIndex >= this.catalogEntry.slots.length) {
       if (isDuplicateConstruction(this.catalogEntry, this.bindings, ctx.scene)) {
         ctx.scene.setSlotError('This construction already exists');
+        for (const s of this.catalogEntry.slots) {
+          if (s.kind === 'derive') ctx.scene.removeObject(this.bindings[s.name] as ObjectId);
+        }
         this.reset();
         return;
       }
