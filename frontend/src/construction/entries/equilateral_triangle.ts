@@ -71,7 +71,6 @@ export const equilateralTriangle: CatalogEntry = {
   ],
   edges: [{ pointIds: ['a', 'b'] }],
   circles: [],
-  symmetricInputSlots: ['a', 'b'],
   // While placing the apex, preview both possible triangles so the user sees
   // the apex can land above or below the base. The cursor-side apex is the one
   // the derive slot highlights as the point to be placed.

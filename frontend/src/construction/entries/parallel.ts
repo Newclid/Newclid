@@ -33,7 +33,6 @@ export const parallel: CatalogEntry = {
   ],
   edges: [],
   circles: [],
-  symmetricInputSlots: ['a', 'b'],
   sketch: (binds, scene) => {
     const aId = binds.a as ObjectId;
     const bId = binds.b as ObjectId;

@@ -30,7 +30,6 @@ export const rectangle: CatalogEntry = {
   ],
   edges: [],
   circles: [],
-  symmetricInputSlots: ['a', 'c'],
   // While placing the opposite corner, treat the cursor as c and preview the
   // four sides so the user sees the full rectangle (corners b and d computed)
   // before clicking.

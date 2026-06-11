@@ -65,7 +65,6 @@ export const eqdistance: CatalogEntry = {
   ],
   edges: [],
   circles: [],
-  symmetricInputSlots: ['b', 'c'],
   sketch: (binds) => {
     const aId = binds.a as ObjectId;
     const bId = binds.b as ObjectId;

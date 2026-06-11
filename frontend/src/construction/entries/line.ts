@@ -27,7 +27,6 @@ export const line: CatalogEntry = {
   ],
   edges: [],
   circles: [],
-  symmetricInputSlots: ['a', 'b'],
   sketch: (binds) => {
     const aId = binds.a as ObjectId;
     const bId = binds.b as ObjectId;

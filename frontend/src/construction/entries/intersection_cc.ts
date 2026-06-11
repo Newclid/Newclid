@@ -91,7 +91,6 @@ export const intersectionCC: CatalogEntry = {
   ],
   edges: [],
   circles: [],
-  symmetricInputSlots: ['o', 'w'],
   sketch: (binds, scene) => {
     const oId = binds.o as ObjectId;
     const wId = binds.w as ObjectId;

@@ -46,7 +46,6 @@ export const onLine: CatalogEntry = {
   ],
   edges: [],
   circles: [],
-  symmetricInputSlots: ['a', 'b'],
   // Tell the engine the point lies on the line: on_line defines p collinear
   // with a and b (clause: coll p a b).
   jgex: [

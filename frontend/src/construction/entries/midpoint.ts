@@ -22,7 +22,6 @@ export const midpoint: CatalogEntry = {
   ],
   edges: [{ pointIds: ['a', 'b'] }],
   circles: [],
-  symmetricInputSlots: ['a', 'b'],
   sketch: (b, scene) => {
     const aId = b.a as ObjectId;
     const bId = b.b as ObjectId;

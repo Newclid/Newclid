@@ -32,7 +32,6 @@ export const parallelogram: CatalogEntry = {
   ],
   edges: [{ pointIds: ['a', 'b'] }, { pointIds: ['b', 'c'] }],
   circles: [],
-  symmetricInputSlots: ['a', 'c'],
   sketch: (binds, scene) => {
     const aId = binds.a as ObjectId;
     const bId = binds.b as ObjectId;
