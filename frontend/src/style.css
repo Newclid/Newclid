@@ -1196,16 +1196,16 @@ body.is-resizing {
 .job-status-banner {
   display: none;
   position: fixed;
-  bottom: 24px;
+  top: 24px;
   right: 24px;
   z-index: 200;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 14px 20px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 15px;
   box-shadow: 0 4px 16px rgba(26, 24, 22, 0.16);
-  max-width: 420px;
+  max-width: 480px;
 }
 
 .job-status-banner.is-visible {
@@ -1222,6 +1222,12 @@ body.is-resizing {
   background: #F5EAEA;
   color: #6B1A1A;
   border: 1px solid rgba(107, 26, 26, 0.18);
+}
+
+.job-status-banner[data-variant="info"] {
+  background: #EAF0FA;
+  color: #1A3A5C;
+  border: 1px solid rgba(26, 58, 92, 0.18);
 }
 
 .job-banner-text {
