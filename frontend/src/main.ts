@@ -59,11 +59,16 @@ const onCanvasProofSubmit = async (jgex: string) => {
   jobPoller.start(resp.job_id);
 };
 
-// For the raw JGEX text dialog: clear any existing canvas drawing first so
-// the proof sketch uses the backend's coordinates rather than the old drawing.
+// For the raw JGEX text dialog: don't capture canvas coords — the JGEX may
+// describe a completely different construction, so the proof visualization
+// always uses the backend's returned coordinates.  The canvas is preserved
+// while queued/running (same as the visual flow) and restored on exit.
 const onJgexTextSubmit = async (jgex: string) => {
-  scene.clear();
-  return onCanvasProofSubmit(jgex);
+  const expanded = expandJgexPredicates(jgex);
+  appStore.setProblem(expanded);
+  const resp = await backendClient.submitJob(expanded, buildCustomTheoremPayloads());
+  appStore.addJob(resp.job_id, expanded);
+  jobPoller.start(resp.job_id);
 };
 
 const toolbar = createToolbar(scene, onCanvasProofSubmit, appStore, onJgexTextSubmit);
