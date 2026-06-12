@@ -26,6 +26,7 @@ export function attachToolDispatcher(
   scene: Scene,
   requestRedraw: () => void,
   appStore?: AppStore,
+  opts?: { selectMenuCallback?: (pointId: string, x: number, y: number) => void },
 ): ToolDispatcherHandle {
   const toLocal = (e: { clientX: number; clientY: number }) => {
     const r = target.getBoundingClientRect();
@@ -61,9 +62,15 @@ export function attachToolDispatcher(
       appStore.goalPickCallback?.(ctx.world.x, ctx.world.y, ctx.scale);
       return;
     }
-    // Allow canvas interaction when a tool group is open OR when a non-select
-    // tool is active (e.g. activated via keyboard shortcut without opening a group).
-    if (!appStore?.activeToolGroup && scene.tool === 'select') return;
+    if (scene.tool === 'select' && !appStore?.activeToolGroup) {
+      const hovered = scene.previews.find(p => p.kind === 'selectHoverPoint') as
+        ({ kind: 'selectHoverPoint'; pos: { x: number; y: number }; pointId: string } | undefined);
+      if (hovered) {
+        const local = toLocal(e);
+        opts?.selectMenuCallback?.(hovered.pointId, local.x, local.y);
+      }
+      return;
+    }
     const tool = getTool(scene.tool);
     if (!tool) return;
     // Capture state before the click so we can record one undo step and update
