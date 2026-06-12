@@ -20,6 +20,7 @@ export interface SceneSnapshot {
   objects: Map<ObjectId, GeoObject>;
   nextId: number;
   nextLabelCode: number;
+  undoStack?: UndoEntry[];
 }
 
 /**
@@ -228,6 +229,7 @@ export class Scene {
       objects: new Map(this.objects),
       nextId: this.nextId,
       nextLabelCode: this.nextLabelCode,
+      undoStack: [...this.undoStack],
     };
   }
 
@@ -238,9 +240,7 @@ export class Scene {
     this.nextLabelCode = snap.nextLabelCode;
     this.toolState = null;
     this.previews = [];
-    // Wholesale state replacement (e.g. proof-mode enter/exit): drop canvas
-    // undo history so Ctrl+Z can't walk back across the boundary.
-    this.undoStack = [];
+    this.undoStack = snap.undoStack ? [...snap.undoStack] : [];
     this.emit();
   }
 
