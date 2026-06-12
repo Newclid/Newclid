@@ -9,6 +9,7 @@ import { screen } from '../geometry/coords';
 import { Scene } from '../scene/scene';
 import { getTool } from '../tools/registry';
 import { pickNearestPoint } from '../geometry/hitTest';
+import { applyGridSnap } from '../tools/sharedHelpers';
 import type { AppStore } from '../store/appStore';
 
 export interface ToolDispatcherHandle {
@@ -30,7 +31,7 @@ export function attachToolDispatcher(
   const buildCtx = (e: MouseEvent) => {
     const local = toLocal(e);
     const sp = screen(local.x, local.y);
-    const wp = viewport.screenToWorld(sp);
+    const wp = applyGridSnap(viewport.screenToWorld(sp), viewport.scale);
     return {
       scene,
       world: wp,
