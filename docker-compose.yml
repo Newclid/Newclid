@@ -1,3 +1,9 @@
+x-backend-image: &backend-image
+  image: newclid-backend:demo
+  build:
+    context: .
+    dockerfile: Dockerfile.backend
+
 services:
   web:
     image: newclid-web:demo
@@ -14,10 +20,7 @@ services:
         max-file: "3"
 
   api:
-    image: newclid-backend:demo
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
+    <<: *backend-image
     restart: unless-stopped
     environment:
       REDIS_URL: redis://redis:6379/0
@@ -35,7 +38,7 @@ services:
         max-file: "3"
 
   worker:
-    image: newclid-backend:demo
+    <<: *backend-image
     restart: unless-stopped
     environment:
       REDIS_URL: redis://redis:6379/0
