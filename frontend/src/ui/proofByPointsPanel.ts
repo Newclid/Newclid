@@ -65,6 +65,29 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     slotGroups: [{ label: 'Angle 1', count: 4 }, { label: 'Angle 2', count: 4 }],
     buildJgex: (ns) => `eqangle ${ns.join(' ')}`,
   },
+  {
+    id: 'eqratio', label: 'Equal Ratios', shorthand: 'AB/CD = EF/GH', icon: '∝',
+    slotLabels: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+    slotGroups: [{ label: 'Ratio 1', count: 4 }, { label: 'Ratio 2', count: 4 }],
+    buildJgex: (ns) => `eqratio ${ns.join(' ')}`,
+  },
+  {
+    id: 'simtri', label: 'Similar Triangles', shorthand: '△ABC ~ △DEF', icon: '~△',
+    slotLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
+    slotGroups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
+    buildJgex: (ns) => `simtri ${ns.join(' ')}`,
+  },
+  {
+    id: 'contri', label: 'Congruent Triangles', shorthand: '△ABC ≅ △DEF', icon: '≅△',
+    slotLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
+    slotGroups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
+    buildJgex: (ns) => `contri ${ns.join(' ')}`,
+  },
+  {
+    id: 'obtuse_angle', label: 'Obtuse Angle', shorthand: '∠ABC obtuse', icon: '↖↗',
+    slotLabels: ['A', 'B', 'C'],
+    buildJgex: (ns) => `obtuse_angle ${ns.join(' ')}`,
+  },
 ];
 
 export interface ProofByPointsPanelHandle {
