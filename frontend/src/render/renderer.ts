@@ -312,6 +312,17 @@ export class Renderer {
         el.setAttribute('stroke-width', String(STYLE.previewStrokeWidth));
         el.setAttribute('stroke-dasharray', STYLE.previewDash);
         this.svg.appendChild(el);
+      } else if (p.kind === 'selectHoverPoint') {
+        const s = this.viewport.worldToScreen(world(p.pos.x, p.pos.y));
+        const ring = document.createElementNS(SVG_NS, 'circle');
+        ring.setAttribute('cx', String(s.x));
+        ring.setAttribute('cy', String(s.y));
+        ring.setAttribute('r', '9');
+        ring.setAttribute('fill', 'none');
+        ring.setAttribute('stroke', '#2A4A7F');
+        ring.setAttribute('stroke-width', '2');
+        ring.setAttribute('stroke-dasharray', '3 2');
+        this.svg.appendChild(ring);
       } else if (p.kind === 'partialEdge') {
         const a = this.viewport.worldToScreen(world(p.from.x, p.from.y));
         const b = this.viewport.worldToScreen(world(p.to.x, p.to.y));
