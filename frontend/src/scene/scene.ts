@@ -140,7 +140,9 @@ export class Scene {
         return label;
       }
     }
-    // All 52 letters in use — reuse the start position rather than emitting a symbol.
+    // All 52 letters in use — still advance so repeated calls cycle through A, B, C…
+    // rather than returning the same letter every time.
+    this.nextLabelCode = LETTERS.charCodeAt((pos + 1) % LETTERS.length);
     return LETTERS[pos];
   }
 
