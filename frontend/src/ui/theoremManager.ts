@@ -42,7 +42,7 @@ export function createTheoremManager(
   // ---- Validation ----
 
   const THEOREM_NAME_RE = /^[A-Za-z_][A-Za-z0-9_-]*$/;
-  const POINT_NAME_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+  const POINT_NAME_RE = /^[A-Za-z]$/;
   // Accepts plain rationals (1/2, 3) and angle constants as fractions of π (pi/4, 11pi/36).
   const FRACTION_RE = /^-?[0-9]+(\/-?[0-9]+)?$|^-?[0-9]*pi\/-?[0-9]+$/;
 
@@ -66,7 +66,7 @@ export function createTheoremManager(
           const type = i < def.argTypes.length ? def.argTypes[i] : 'point';
           if (!val) return `${sectionLabel} "${def.label}": all arguments must be filled.`;
           if (type === 'point' && !POINT_NAME_RE.test(val)) {
-            return `${sectionLabel} "${def.label}": point name "${val}" is invalid (letters, digits, underscore; must start with a letter/underscore).`;
+            return `${sectionLabel} "${def.label}": point "${val}" must be a single letter (A–Z or a–z).`;
           }
           if (type === 'fraction' && !FRACTION_RE.test(val)) {
             return `${sectionLabel} "${def.label}": constant "${val}" must be an integer or fraction like 1/2.`;
@@ -252,25 +252,32 @@ export function createTheoremManager(
   function renderArgInput(ep: EditablePredicate, def: PredicateDef, argIdx: number): HTMLElement {
     const argType = argIdx < def.argTypes.length ? def.argTypes[argIdx] : 'point';
     const isFraction = argType === 'fraction';
-    // Fraction args keep their semantic label (k); point args use global position (P1, P2, …).
+    // Fraction args keep their semantic label (k); point args use the def's semantic name (A, B, …).
     const label = isFraction
       ? (argIdx < def.argLabels.length ? def.argLabels[argIdx] : 'k')
-      : `P${argIdx + 1}`;
+      : (argIdx < def.argLabels.length ? def.argLabels[argIdx] : `P${argIdx + 1}`);
 
     const row = el('div', { class: 'theorem-arg-row' });
     row.appendChild(el('span', { class: 'theorem-arg-label' }, [label]));
 
     const isAngle = isFraction && def.id === 'aconst';
-    const input = el('input', {
+    const inputAttrs: Partial<Record<string, string>> = {
       type: 'text',
-      class: `theorem-arg-input${isFraction ? ' theorem-arg-input-fraction' : ''}`,
+      class: `theorem-arg-input${isFraction ? ' theorem-arg-input-fraction' : ' theorem-arg-input-point'}`,
       value: ep.args[argIdx] ?? '',
       placeholder: isAngle ? 'pi/4' : (isFraction ? 'e.g. 1/2' : label),
       title: isAngle
         ? 'Angle as a fraction of π: pi/4 = 45°, pi/2 = 90°, pi/3 = 60°, pi/6 = 30°'
-        : (isFraction ? 'Rational constant, e.g. 1/2 or 3' : 'Variable name, e.g. A or P1'),
-    }) as HTMLInputElement;
+        : (isFraction ? 'Rational constant, e.g. 1/2 or 3' : 'Single letter (A–Z or a–z)'),
+    };
+    if (!isFraction) inputAttrs.maxlength = '1';
+    const input = el('input', inputAttrs) as HTMLInputElement;
     input.addEventListener('input', () => {
+      if (!isFraction) {
+        // Enforce single A–Z / a–z character; strip everything else.
+        const filtered = input.value.replace(/[^A-Za-z]/g, '').slice(0, 1);
+        if (filtered !== input.value) input.value = filtered;
+      }
       ep.args[argIdx] = input.value;
       // Update the header shorthand live so the user sees their variable names reflected.
       const predEl = row.closest('.theorem-editable-pred');
@@ -278,6 +285,9 @@ export function createTheoremManager(
       if (nameSpan) nameSpan.textContent = `${def.label} — ${def.shorthand(ep.args)}`;
     });
     row.appendChild(input);
+    if (!isFraction) {
+      row.appendChild(el('span', { class: 'theorem-arg-hint' }, ['1 letter']));
+    }
     if (isAngle) {
       row.appendChild(el('span', { class: 'theorem-arg-unit' }, ['× π rad']));
     }
