@@ -202,6 +202,14 @@ export class Scene {
     this.emit();
   }
 
+  renamePoint(id: ObjectId, label: string): void {
+    const o = this.objects.get(id);
+    if (!o || o.kind !== 'point') return;
+    this.objects.set(id, { ...o, label });
+    this._revision++;
+    this.emit();
+  }
+
   clear(): void {
     if (this.objects.size === 0 && this.toolState === null && this.previews.length === 0) return;
     this.objects.clear();
