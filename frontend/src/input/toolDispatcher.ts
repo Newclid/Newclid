@@ -101,6 +101,19 @@ export function attachToolDispatcher(
       requestRedraw();
       return;
     }
+    if (scene.tool === 'select' && !appStore?.activeToolGroup) {
+      const ctx = buildCtx(e);
+      const nearest = pickNearestPoint(scene.objects, ctx.world, { tolerancePx: 12, scale: ctx.scale });
+      if (nearest) {
+        scene.setPreviews([{ kind: 'selectHoverPoint', pos: { x: nearest.x, y: nearest.y }, pointId: nearest.id }]);
+        target.style.cursor = 'pointer';
+      } else {
+        scene.setPreviews([]);
+        target.style.cursor = '';
+      }
+      requestRedraw();
+      return;
+    }
     if (!appStore?.activeToolGroup) {
       if (scene.previews.length > 0) { scene.setPreviews([]); requestRedraw(); }
       return;
