@@ -36,6 +36,8 @@ export function createTheoremManager(
   let conclusions: EditablePredicate[] = [];
   let addingTo: SectionKind | null = null;
   let saveError = '';
+  // Tracks which saved-theorem cards currently have their JGEX expanded.
+  const jgexExpandedCards = new Set<string>();
 
   // ---- Validation ----
 
@@ -167,8 +169,20 @@ export function createTheoremManager(
       card.appendChild(el('p', { class: 'theorem-card-desc' }, [theorem.description]));
     }
 
-    card.appendChild(renderCardPredicateGroup('Premises:', theorem.premises));
-    card.appendChild(renderCardPredicateGroup('Conclusions:', theorem.conclusions));
+    const showJgex = jgexExpandedCards.has(theorem.id);
+    card.appendChild(renderCardPredicateGroup('Premises:', theorem.premises, showJgex));
+    card.appendChild(renderCardPredicateGroup('Conclusions:', theorem.conclusions, showJgex));
+
+    const jgexToggle = el('button', {
+      type: 'button',
+      class: 'theorem-card-jgex-toggle',
+    }, [showJgex ? 'Hide JGEX ▲' : 'Show JGEX ▼']);
+    jgexToggle.addEventListener('click', () => {
+      if (jgexExpandedCards.has(theorem.id)) jgexExpandedCards.delete(theorem.id);
+      else jgexExpandedCards.add(theorem.id);
+      renderList();
+    });
+    card.appendChild(jgexToggle);
 
     return card;
   }
@@ -176,11 +190,19 @@ export function createTheoremManager(
   function renderCardPredicateGroup(
     sectionLabel: string,
     predicates: TheoremPredicate[],
+    showJgex: boolean,
   ): HTMLElement {
     const wrap = el('div', { class: 'theorem-card-predicates' });
     wrap.appendChild(el('div', { class: 'theorem-card-pred-label' }, [sectionLabel]));
-    for (const p of predicates) {
-      wrap.appendChild(el('code', { class: 'theorem-card-pred' }, [predicateToJgex(p)]));
+    for (const pred of predicates) {
+      const def = PREDICATE_BY_ID.get(pred.predicateId);
+      const humanText = def ? def.shorthand(pred.args) : predicateToJgex(pred);
+      const predItem = el('div', { class: 'theorem-card-pred-item' });
+      predItem.appendChild(el('span', { class: 'theorem-card-pred-human' }, [humanText]));
+      if (showJgex) {
+        predItem.appendChild(el('code', { class: 'theorem-card-pred-jgex' }, [predicateToJgex(pred)]));
+      }
+      wrap.appendChild(predItem);
     }
     return wrap;
   }
