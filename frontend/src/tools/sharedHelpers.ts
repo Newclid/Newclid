@@ -17,17 +17,20 @@ function niceStep(raw: number): number {
   return 10 * base;
 }
 
-// Snaps x and y independently to the nearest grid multiple when the cursor is within SNAP_PX of one.
+/**
+ * Snaps to the nearest grid intersection when the cursor is within SNAP_PX of it.
+ * Both axes must be close — snap only triggers at corners of grid squares, not along lines.
+ * Spacing matches the visible grid so zooming in/out changes what you can snap to.
+ */
 export function applyGridSnap(pt: WorldPoint, scale: number): WorldPoint {
   const spacing = niceStep(50 / scale);
   const tol = SNAP_PX / scale;
   const snapX = Math.round(pt.x / spacing) * spacing;
   const snapY = Math.round(pt.y / spacing) * spacing;
-  return {
-    ...pt,
-    x: Math.abs(pt.x - snapX) <= tol ? snapX : pt.x,
-    y: Math.abs(pt.y - snapY) <= tol ? snapY : pt.y,
-  };
+  if (Math.abs(pt.x - snapX) <= tol && Math.abs(pt.y - snapY) <= tol) {
+    return { ...pt, x: snapX, y: snapY };
+  }
+  return pt;
 }
 
 // Snaps to an existing point if one is within range, otherwise drops a new one at the cursor.
@@ -55,10 +58,10 @@ export function pickExistingPoint(ctx: ToolContext): ObjectId | null {
 
 /**
  * Returns a highlight ring for onMove previews.
- * Existing point snap takes priority; if nothing is nearby, falls back to a
- * ring at the nearest grid intersection when the cursor is within SNAP_PX of one.
- * Works because buildCtx pre-snaps ctx.world, so the delta to the nearest grid
- * multiple is ~0 when snapping is active and > tol when the cursor is far from any line.
+ * Existing point snap takes priority; falls back to a ring at the nearest grid
+ * intersection when the cursor is within SNAP_PX of it on both axes.
+ * buildCtx pre-snaps ctx.world, so the delta to the intersection is ~0 when
+ * snapping is active and > tol otherwise.
  */
 export function snapHighlight(ctx: ToolContext): ToolPreview[] {
   const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
@@ -71,13 +74,8 @@ export function snapHighlight(ctx: ToolContext): ToolPreview[] {
   const tol = SNAP_PX / ctx.scale;
   const snapX = Math.round(ctx.world.x / spacing) * spacing;
   const snapY = Math.round(ctx.world.y / spacing) * spacing;
-  const nearX = Math.abs(ctx.world.x - snapX) <= tol;
-  const nearY = Math.abs(ctx.world.y - snapY) <= tol;
-  if (nearX || nearY) {
-    return [{ kind: 'highlightPoint', pos: {
-      x: nearX ? snapX : ctx.world.x,
-      y: nearY ? snapY : ctx.world.y,
-    }}];
+  if (Math.abs(ctx.world.x - snapX) <= tol && Math.abs(ctx.world.y - snapY) <= tol) {
+    return [{ kind: 'highlightPoint', pos: { x: snapX, y: snapY } }];
   }
   return [];
 }
