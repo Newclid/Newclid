@@ -20,6 +20,8 @@ interface GoalPredicate {
   slotLabels: string[];          // base labels (also the minimum set)
   slotGroups?: SlotGroup[];      // if present, renders labeled sub-sections
   variableSlots?: boolean;       // if true, user can add/remove slots beyond the base set
+  hidden?: boolean;
+  description?: string;
   buildJgex(jgexNames: string[]): string;
 }
 
@@ -64,6 +66,38 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     slotLabels: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
     slotGroups: [{ label: 'Angle 1', count: 4 }, { label: 'Angle 2', count: 4 }],
     buildJgex: (ns) => `eqangle ${ns.join(' ')}`,
+  },
+  {
+    id: 'eqratio', label: 'Equal Ratios', shorthand: 'AB/CD = EF/GH', icon: '∝',
+    slotLabels: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+    slotGroups: [{ label: 'Ratio 1', count: 4 }, { label: 'Ratio 2', count: 4 }],
+    buildJgex: (ns) => `eqratio ${ns.join(' ')}`,
+  },
+  {
+    id: 'simtri', label: 'Similar Triangles', shorthand: '△ABC ~ △DEF', icon: '~△',
+    slotLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
+    slotGroups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
+    buildJgex: (ns) => `simtri ${ns.join(' ')}`,
+  },
+  {
+    id: 'contri', label: 'Congruent Triangles', shorthand: '△ABC ≅ △DEF', icon: '≅△',
+    slotLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
+    slotGroups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
+    description: 'Vertex order matters: A↔D, B↔E, C↔F. Use when both triangles share the same cyclic orientation (both clockwise or both counter-clockwise). Valid orderings: ABC↔BCA↔CAB.',
+    buildJgex: (ns) => `contri ${ns.join(' ')}`,
+  },
+  {
+    id: 'contrir', label: 'Congruent Triangles (reflected)', shorthand: '△ABC ≅ᵣ △DEF', icon: '≅△ᵣ',
+    slotLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
+    slotGroups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
+    description: 'Vertex order matters: A↔D, B↔E, C↔F. Use when the triangles have opposite cyclic orientation — one is a mirror image of the other. Valid orderings: ABC↔ACB↔BAC↔CBA.',
+    buildJgex: (ns) => `contrir ${ns.join(' ')}`,
+  },
+  {
+    id: 'obtuse_angle', label: 'Obtuse Angle', shorthand: '∠ABC obtuse', icon: '↖↗',
+    slotLabels: ['A', 'B', 'C'],
+    hidden: true,
+    buildJgex: (ns) => `obtuse_angle ${ns.join(' ')}`,
   },
 ];
 
@@ -272,7 +306,7 @@ export function createProofByPointsPanel(
     const chooserSection = el('div', { class: 'goal-chooser-section' });
     chooserSection.appendChild(el('div', { class: 'proof-section-title' }, ['Choose what to prove:']));
     const grid = el('div', { class: 'goal-pred-grid' });
-    for (const pred of GOAL_PREDICATES) {
+    for (const pred of GOAL_PREDICATES.filter(p => !p.hidden)) {
       const isActive = selectedPredicate?.id === pred.id;
       const btn = el('button', {
         type: 'button',
@@ -359,6 +393,12 @@ export function createProofByPointsPanel(
     }
 
     slotSection.appendChild(slotList);
+
+    if (selectedPredicate.description) {
+      slotSection.appendChild(
+        el('p', { class: 'goal-pred-description' }, [selectedPredicate.description]),
+      );
+    }
 
     if (activeSlot < labels.length) {
       slotSection.appendChild(
