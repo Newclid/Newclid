@@ -230,7 +230,6 @@ backend-integration-tests-linux:
   interruptible: true
 
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - exists:
       - backend/tests/integration/**/*
       changes:
