@@ -24,6 +24,7 @@ import { intersectionCC } from "./entries/intersection_cc";
 import { intersectionLC } from "./entries/intersection_lc";
 import { onCircle } from "./entries/on_circle";
 import { onLine } from "./entries/on_line";
+import { triangle } from "./entries/triangle";
 
 export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [select.name]: select,
@@ -51,4 +52,5 @@ export const CONSTRUCTION_CATALOG: Record<string, CatalogEntry> = {
   [intersectionLC.name]: intersectionLC,
   [onCircle.name]: onCircle,
   [onLine.name]: onLine,
+  [triangle.name]: triangle,
 };

@@ -30,7 +30,7 @@ export const TOOL_GROUPS: ToolGroup[] = [
   {
     id: 'triangles',
     label: 'Triangles',
-    tools: ['eq_triangle', 'iso_triangle'],
+    tools: ['triangle', 'eq_triangle', 'iso_triangle'],
   },
   {
     id: 'quads',
