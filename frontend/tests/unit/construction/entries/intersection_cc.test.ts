@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Scene } from '../../../../src/scene/scene';
-import { addCircle } from '../../../helpers/scene';
+import { addCircle, addPoints } from '../../../helpers/scene';
 import { intersectionCC } from '../../../../src/construction/entries/intersection_cc';
 
 describe('intersection_cc entry slots', () => {
@@ -51,6 +51,32 @@ describe('intersection_cc entry sketch', () => {
     const bindings = (result as { bindings: Record<string, string> }).bindings;
     expect(bindings.x).toBeDefined();
     expect(bindings.y).toBeUndefined();
+  });
+});
+
+describe('intersection_cc sketch with circumcircle center', () => {
+  it('recognises a circumcircle construction center as a circle', () => {
+    const scene = new Scene();
+    // Build a circumcircle manually so intersectionCC can find it via bindings.x
+    const { a, b, c } = addPoints(scene, { a: [0, 4], b: [-4, 0], c: [4, 0] });
+    const xId = scene.addPoint(0, 0); // circumcenter of equilateral-ish triangle above
+    scene.addObject({
+      kind: 'construction',
+      name: 'circumcircle',
+      bindings: { a, b, c, x: xId },
+      edges: [],
+      circles: [],
+      circumcircles: [[a, b, c]],
+    });
+
+    // A normal circle to intersect with
+    const { center: w } = addPoints(scene, { center: [-3, 0] });
+    const { through: wThrough } = { through: scene.addPoint(-6, 0) };
+    scene.addObject({ kind: 'circle', mode: 'center-through', center: w, through: wThrough });
+
+    // The circumcircle center is xId; validate should recognise it and return null (circles intersect)
+    const err = intersectionCC.validate!({ o: xId, w }, scene);
+    expect(err).toBeNull();
   });
 });
 

@@ -70,6 +70,16 @@ describe('equilateral_triangle entry preview', () => {
   });
 });
 
+describe('equilateral_triangle derive slot inner preview', () => {
+  it('returns empty — triangle sides are previewed at the entry level', () => {
+    const scene = new Scene();
+    const { a, b } = addPoints(scene, { a: [0, 0], b: [2, 0] });
+    const deriveSlot = equilateralTriangle.slots.find(s => s.kind === 'derive')!;
+    if (deriveSlot.kind !== 'derive') throw new Error('expected derive slot');
+    expect(deriveSlot.preview({ a, b }, scene)).toEqual([]);
+  });
+});
+
 describe('equilateral_triangle entry validate', () => {
   it('rejects a === b', () => {
     const scene = new Scene();

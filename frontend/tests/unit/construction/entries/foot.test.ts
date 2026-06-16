@@ -73,6 +73,13 @@ describe('foot entry preview', () => {
     const cursor = { x: 3, y: 4, _kind: 'world' as const };
     expect(foot.preview!({}, scene, cursor)).toEqual([]);
   });
+
+  it('shows nothing when a and b are the same point (degenerate reference line)', () => {
+    const scene = new Scene();
+    const { a } = addPoints(scene, { a: [0, 0] });
+    const cursor = { x: 3, y: 4, _kind: 'world' as const };
+    expect(foot.preview!({ a, b: a }, scene, cursor)).toEqual([]);
+  });
 });
 
 describe('foot entry validate', () => {
