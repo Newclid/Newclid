@@ -107,12 +107,21 @@ export function attachToolDispatcher(
     requestRedraw();
   };
 
+  let prevToolName = scene.tool;
+  const unsubscribe = scene.subscribe(() => {
+    if (scene.tool !== prevToolName) {
+      getTool(prevToolName)?.onDeactivate?.({ scene });
+      prevToolName = scene.tool;
+    }
+  });
+
   target.addEventListener('click', onClick);
   target.addEventListener('pointermove', onPointerMove);
   target.addEventListener('pointerleave', onPointerLeave);
 
   return {
     destroy() {
+      unsubscribe();
       target.removeEventListener('click', onClick);
       target.removeEventListener('pointermove', onPointerMove);
       target.removeEventListener('pointerleave', onPointerLeave);
