@@ -20,6 +20,8 @@ interface GoalPredicate {
   slotLabels: string[];          // base labels (also the minimum set)
   slotGroups?: SlotGroup[];      // if present, renders labeled sub-sections
   variableSlots?: boolean;       // if true, user can add/remove slots beyond the base set
+  hidden?: boolean;
+  description?: string;
   buildJgex(jgexNames: string[]): string;
 }
 
@@ -86,6 +88,7 @@ const GOAL_PREDICATES: GoalPredicate[] = [
   {
     id: 'obtuse_angle', label: 'Obtuse Angle', shorthand: '∠ABC obtuse', icon: '↖↗',
     slotLabels: ['A', 'B', 'C'],
+    hidden: true,
     buildJgex: (ns) => `obtuse_angle ${ns.join(' ')}`,
   },
 ];
@@ -295,7 +298,7 @@ export function createProofByPointsPanel(
     const chooserSection = el('div', { class: 'goal-chooser-section' });
     chooserSection.appendChild(el('div', { class: 'proof-section-title' }, ['Choose what to prove:']));
     const grid = el('div', { class: 'goal-pred-grid' });
-    for (const pred of GOAL_PREDICATES) {
+    for (const pred of GOAL_PREDICATES.filter(p => !p.hidden)) {
       const isActive = selectedPredicate?.id === pred.id;
       const btn = el('button', {
         type: 'button',
