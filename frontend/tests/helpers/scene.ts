@@ -14,3 +14,15 @@ export function addPoints<const T extends Record<string, [number, number]>>(
   }
   return ids;
 }
+
+// Adds a center-through circle to the scene and returns the center and through point ids.
+export function addCircle(
+  scene: Scene,
+  center: [number, number],
+  through: [number, number],
+): { center: ObjectId; through: ObjectId } {
+  const centerId = scene.addPoint(center[0], center[1]);
+  const throughId = scene.addPoint(through[0], through[1]);
+  scene.addObject({ kind: 'circle', mode: 'center-through', center: centerId, through: throughId });
+  return { center: centerId, through: throughId };
+}

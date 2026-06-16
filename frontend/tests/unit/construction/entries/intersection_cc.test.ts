@@ -1,0 +1,97 @@
+import { describe, it, expect } from 'vitest';
+import { Scene } from '../../../../src/scene/scene';
+import { addCircle } from '../../../helpers/scene';
+import { intersectionCC } from '../../../../src/construction/entries/intersection_cc';
+
+describe('intersection_cc entry slots', () => {
+  it('has two pick-existing slots and no edges or circles', () => {
+    expect(intersectionCC.slots.map(s => s.kind)).toEqual(['pick-existing', 'pick-existing']);
+    expect(intersectionCC.edges).toEqual([]);
+    expect(intersectionCC.circles).toEqual([]);
+  });
+});
+
+describe('intersection_cc entry sketch', () => {
+  it('places two intersection points of two overlapping circles', () => {
+    const scene = new Scene();
+    // Circle 1: center (-2, 0), radius 3 → through (1, 0)
+    const { center: o, through: ra } = addCircle(scene, [-2, 0], [1, 0]);
+    // Circle 2: center (2, 0), radius 3 → through (-1, 0)
+    const { center: w, through: rb } = addCircle(scene, [2, 0], [-1, 0]);
+
+    const result = intersectionCC.sketch({ o, w }, scene);
+
+    expect(result).toMatchObject({
+      kind: 'construction',
+      name: 'intersection_cc',
+      bindings: { o, w, ra, rb },
+      edges: [],
+      circles: [],
+    });
+
+    const bindings = (result as { bindings: Record<string, string> }).bindings;
+    const x = scene.objects.get(bindings.x)!;
+    const y = scene.objects.get(bindings.y)!;
+    expect(x.kind).toBe('point');
+    expect(y.kind).toBe('point');
+    // Both intersection points lie on both circles: |x - o| ≈ 3 and |x - w| ≈ 3
+    if (x.kind === 'point') {
+      expect(Math.hypot(x.x - (-2), x.y)).toBeCloseTo(3);
+      expect(Math.hypot(x.x - 2, x.y)).toBeCloseTo(3);
+    }
+  });
+
+  it('places a single tangent point when circles are externally tangent', () => {
+    const scene = new Scene();
+    // Circle 1: center (0,0) radius 2, Circle 2: center (4,0) radius 2 → tangent at (2,0)
+    const { center: o } = addCircle(scene, [0, 0], [2, 0]);
+    const { center: w } = addCircle(scene, [4, 0], [2, 0]);
+
+    const result = intersectionCC.sketch({ o, w }, scene);
+    const bindings = (result as { bindings: Record<string, string> }).bindings;
+    expect(bindings.x).toBeDefined();
+    expect(bindings.y).toBeUndefined();
+  });
+});
+
+describe('intersection_cc entry validate', () => {
+  it('rejects o that is not a circle center', () => {
+    const scene = new Scene();
+    const { center: w } = addCircle(scene, [4, 0], [7, 0]);
+    // Use a point id that doesn't have a circle
+    const fakeId = 'p999';
+    expect(intersectionCC.validate!({ o: fakeId, w }, scene)).toMatch(/centre of an existing circle/i);
+  });
+
+  it('rejects w that is not a circle center', () => {
+    const scene = new Scene();
+    const { center: o } = addCircle(scene, [0, 0], [3, 0]);
+    const fakeId = 'p999';
+    expect(intersectionCC.validate!({ o, w: fakeId }, scene)).toMatch(/centre of an existing circle/i);
+  });
+
+  it('rejects o === w', () => {
+    const scene = new Scene();
+    const { center: o } = addCircle(scene, [0, 0], [3, 0]);
+    expect(intersectionCC.validate!({ o, w: o }, scene)).toMatch(/different circles/i);
+  });
+
+  it('rejects circles that do not intersect', () => {
+    const scene = new Scene();
+    const { center: o } = addCircle(scene, [0, 0], [1, 0]);  // radius 1
+    const { center: w } = addCircle(scene, [10, 0], [11, 0]); // radius 1, far away
+    expect(intersectionCC.validate!({ o, w }, scene)).toMatch(/do not intersect/i);
+  });
+
+  it('accepts two intersecting circles', () => {
+    const scene = new Scene();
+    const { center: o } = addCircle(scene, [0, 0], [3, 0]);
+    const { center: w } = addCircle(scene, [4, 0], [1, 0]);
+    expect(intersectionCC.validate!({ o, w }, scene)).toBeNull();
+  });
+
+  it('accepts partial binding', () => {
+    const scene = new Scene();
+    expect(intersectionCC.validate!({}, scene)).toBeNull();
+  });
+});
