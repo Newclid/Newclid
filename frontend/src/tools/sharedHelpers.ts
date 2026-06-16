@@ -53,27 +53,33 @@ export function applyGridSnap(pt: WorldPoint, scale: number): WorldPoint {
   return pt;
 }
 
-// Snaps to an existing point if one is within range, otherwise drops a new one at the cursor.
-export function getOrCreatePoint(ctx: ToolContext): ObjectId {
-  const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
+function nearestExistingPoint(ctx: ToolContext) {
+  return pickNearestPoint(ctx.scene.objects, ctx.world, {
     tolerancePx: SNAP_PX,
     scale: ctx.scale,
   });
-  if (hit) return hit.id;
+}
+
+// Snaps to an existing point if one is within range, otherwise drops a new one
+// at the cursor. Shift disables the snap so the user can place a point exactly
+// where they clicked, even right next to another point.
+export function getOrCreatePoint(ctx: ToolContext): ObjectId {
+  if (!ctx.shiftKey) {
+    const hit = nearestExistingPoint(ctx);
+    if (hit) return hit.id;
+  }
   return ctx.scene.addPoint(ctx.world.x, ctx.world.y);
 }
 
 /**
  * Like getOrCreatePoint but read-only — only returns an existing point's id.
  * Returns null when the cursor isn't near anything, so pick-existing slots
- * can reject the click without creating a stray point.
+ * can reject the click without creating a stray point. Not shift-gated: this
+ * slot's whole job is referencing a point that's already there, not creating
+ * one, so there's no "snap" to disable.
  */
 export function pickExistingPoint(ctx: ToolContext): ObjectId | null {
-  const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
-    tolerancePx: SNAP_PX,
-    scale: ctx.scale,
-  });
-  return hit?.id ?? null;
+  return nearestExistingPoint(ctx)?.id ?? null;
 }
 
 /**
@@ -82,8 +88,12 @@ export function pickExistingPoint(ctx: ToolContext): ObjectId | null {
  * ctx.world is already grid-snapped by buildCtx, so the delta to the nearest
  * intersection is ~0 when snapping is active and > tol otherwise — that's
  * what lets this tell "snapped" from "not snapped" without a separate flag.
+ * Shift disables grid snap upstream in buildCtx, so this just needs to bail
+ * out early to match (ctx.world would otherwise coincidentally still pass
+ * the check if the raw cursor happens to land near an intersection).
  */
 export function gridSnapHighlight(ctx: ToolContext): ToolPreview[] {
+  if (ctx.shiftKey) return [];
   const { snapX, snapY, tol } = gridSnapTarget(ctx.world, ctx.scale);
   if (Math.abs(ctx.world.x - snapX) <= tol && Math.abs(ctx.world.y - snapY) <= tol) {
     return [{ kind: 'highlightPoint', pos: { x: snapX, y: snapY } }];
@@ -92,14 +102,23 @@ export function gridSnapHighlight(ctx: ToolContext): ToolPreview[] {
 }
 
 /**
- * Returns a highlight ring for onMove previews.
- * Existing point snap takes priority; falls back to the grid intersection ring.
+ * Preview for 'pick' slots — mirrors getOrCreatePoint's shift-aware behavior:
+ * existing-point ring takes priority, falls back to the grid ring, both
+ * disabled while shift is held.
  */
 export function snapHighlight(ctx: ToolContext): ToolPreview[] {
-  const hit = pickNearestPoint(ctx.scene.objects, ctx.world, {
-    tolerancePx: SNAP_PX,
-    scale: ctx.scale,
-  });
-  if (hit) return [{ kind: 'highlightPoint', pos: { x: hit.x, y: hit.y } }];
+  if (!ctx.shiftKey) {
+    const hit = nearestExistingPoint(ctx);
+    if (hit) return [{ kind: 'highlightPoint', pos: { x: hit.x, y: hit.y } }];
+  }
   return gridSnapHighlight(ctx);
+}
+
+/**
+ * Preview for 'pick-existing' slots — always shows what the click will snap
+ * to, since that slot's snap is never disabled by shift (see pickExistingPoint).
+ */
+export function existingPointHighlight(ctx: ToolContext): ToolPreview[] {
+  const hit = nearestExistingPoint(ctx);
+  return hit ? [{ kind: 'highlightPoint', pos: { x: hit.x, y: hit.y } }] : [];
 }

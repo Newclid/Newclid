@@ -1,6 +1,6 @@
 import { Tool, ToolContext, ToolPreview, ToolSnapshot } from './tool';
 import type { CatalogEntry, SketchResult } from '../construction/catalog-types';
-import { getOrCreatePoint, pickExistingPoint, snapHighlight, gridSnapHighlight } from './sharedHelpers';
+import { getOrCreatePoint, pickExistingPoint, snapHighlight, gridSnapHighlight, existingPointHighlight } from './sharedHelpers';
 import type { ObjectId, PointObject, ToolName } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
 
@@ -210,8 +210,11 @@ export class ConstructionTool implements Tool {
       }
       const projected = slot.project(this.bindings, ctx.scene, ctx.world);
       previews.push({ kind: 'highlightPoint', pos: { x: projected.x, y: projected.y } });
-    } else if (slot.kind === 'pick' || slot.kind === 'pick-existing') {
+    } else if (slot.kind === 'pick') {
       previews.push(...snapHighlight(ctx));
+    } else if (slot.kind === 'pick-existing') {
+      // Never shift-gated — this slot's snap is the only way to select a point, not optional magnetism.
+      previews.push(...existingPointHighlight(ctx));
     } else if (slot.kind === 'place-free') {
       // Never snaps to an existing point, but does land on a grid intersection.
       previews.push(...gridSnapHighlight(ctx));

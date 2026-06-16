@@ -35,7 +35,10 @@ export function attachToolDispatcher(
   const buildCtx = (e: { clientX: number; clientY: number; shiftKey: boolean }) => {
     const local = toLocal(e);
     const sp = screen(local.x, local.y);
-    const wp = applyGridSnap(viewport.screenToWorld(sp), viewport.scale);
+    const raw = viewport.screenToWorld(sp);
+    // Shift is the escape hatch for precise placement — skip grid snap so
+    // ctx.world is the exact cursor position.
+    const wp = e.shiftKey ? raw : applyGridSnap(raw, viewport.scale);
     return {
       scene,
       world: wp,
