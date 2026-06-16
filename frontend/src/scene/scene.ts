@@ -3,7 +3,8 @@ In-memory store for scene objects, active tool, and transient tool state.
 Notifies subscribers synchronously.
 **/
 
-import type { GeoObject, ObjectId, PointObject, ToolName } from '../geometry/types-object';
+import type { ConstructionObject, GeoObject, ObjectId, PointObject, ToolName } from '../geometry/types-object';
+import { CONSTRUCTION_CATALOG } from '../construction/catalog';
 import type { ToolPreview } from '../tools/tool'
 import { distance } from '../geometry/primitives';
 import type { WorldPoint } from '../geometry/coords';
@@ -183,12 +184,39 @@ export class Scene {
     return [];
   }
 
+  private outputSlotNames(name: string): Set<string> {
+    const entry = CONSTRUCTION_CATALOG[name];
+    const result = new Set<string>();
+    for (const block of entry?.jgex ?? []) {
+      if ('combine' in block) block.clauses.forEach(c => c.produces.forEach(s => result.add(s)));
+      else block.produces.forEach(s => result.add(s));
+    }
+    return result;
+  }
+
+  private outputPointIds(c: ConstructionObject): ObjectId[] {
+    const slots = this.outputSlotNames(c.name);
+    return [...slots].map(s => c.bindings[s]).filter((v): v is ObjectId => typeof v === 'string');
+  }
+
+  // Removes a specific output point from a construction's bindings and visual elements.
+  // Returns true if the construction still has content to display.
+  private partialRemoveOutput(c: ConstructionObject, pointId: ObjectId): boolean {
+    for (const [k, v] of Object.entries(c.bindings)) {
+      if (v === pointId) delete c.bindings[k];
+    }
+    c.edges = c.edges.filter(([a, b]) => a !== pointId && b !== pointId);
+    if (c.lines) c.lines = c.lines.filter(([a, b]) => a !== pointId && b !== pointId);
+    c.circles = c.circles.filter(circ => circ.center !== pointId);
+    if (c.circumcircles) c.circumcircles = c.circumcircles.filter(t => !t.includes(pointId));
+    return c.edges.length > 0 || (c.lines?.length ?? 0) > 0 ||
+           c.circles.length > 0 || (c.circumcircles?.length ?? 0) > 0;
+  }
+
   removeObject(id: ObjectId): void {
     if (!this.objects.has(id)) return;
     this._revision++;
 
-    // BFS: cascade deletions to constructions that lose a referenced point,
-    // then collect points that become orphaned (no surviving construction references them).
     const toDelete = new Set<ObjectId>([id]);
     const queue: ObjectId[] = [id];
 
@@ -196,24 +224,36 @@ export class Scene {
       const current = queue.shift()!;
       this.objects.delete(current);
 
-      // Cascade to any non-point that references anything in toDelete
       for (const [k, v] of this.objects) {
         if (v.kind === 'point' || toDelete.has(k)) continue;
-        if (this.referencedPointIds(v).some(ref => toDelete.has(ref))) {
-          toDelete.add(k);
-          queue.push(k);
-        }
-      }
+        if (!this.referencedPointIds(v).includes(current)) continue;
 
-      // Collect points that are no longer referenced by any surviving non-point
-      for (const [k, v] of this.objects) {
-        if (v.kind !== 'point' || toDelete.has(k)) continue;
-        const stillReferenced = [...this.objects.values()].some(
-          o => o.kind !== 'point' && !toDelete.has(o.id) && this.referencedPointIds(o).includes(k as ObjectId)
-        );
-        if (!stillReferenced) {
+        if (v.kind === 'circle') {
           toDelete.add(k);
           queue.push(k);
+        } else if (v.kind === 'construction') {
+          const outputSlots = this.outputSlotNames(v.name);
+          const deletedSlot = Object.entries(v.bindings).find(([, val]) => val === current)?.[0];
+          const isOutput = deletedSlot !== undefined && outputSlots.has(deletedSlot);
+
+          if (isOutput) {
+            // Partial delete: remove just this output point and connected edges
+            const hasContent = this.partialRemoveOutput(v, current);
+            if (!hasContent) {
+              toDelete.add(k);
+              queue.push(k);
+            }
+          } else {
+            // Full delete: input point gone → whole construction gone + cascade outputs
+            toDelete.add(k);
+            queue.push(k);
+            for (const outputId of this.outputPointIds(v)) {
+              if (!toDelete.has(outputId)) {
+                toDelete.add(outputId);
+                queue.push(outputId);
+              }
+            }
+          }
         }
       }
     }
