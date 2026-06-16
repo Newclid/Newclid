@@ -63,8 +63,8 @@ export const onAline: CatalogEntry = {
     { name: 'c', kind: 'pick-existing', label: 'Pick the first arm point of the angle to copy' },
     { name: 'd', kind: 'pick-existing', label: 'Pick the vertex of the angle to copy' },
     { name: 'e', kind: 'pick-existing', label: 'Pick the second arm point of the angle to copy' },
-    { name: 'a', kind: 'pick-existing', label: 'Pick the new vertex to copy the angle onto' },
-    { name: 'b', kind: 'pick-existing', label: 'Pick a point on the reference direction from the new vertex' },
+    { name: 'b', kind: 'pick-existing', label: 'Pick a point on the reference arm for the new angle' },
+    { name: 'a', kind: 'pick-existing', label: 'Pick the vertex where the angle will be placed' },
     {
       name: 'x',
       kind: 'derive',
@@ -87,7 +87,7 @@ export const onAline: CatalogEntry = {
       preview: () => [],
     },
   ],
-  edges: [],
+  edges: [{ pointIds: ['a', 'b'] }],
   circles: [],
   // Preview the reference ray a-b and both copied-angle lines, so the user sees
   // the angle can land on either side.
@@ -101,15 +101,15 @@ export const onAline: CatalogEntry = {
     const { ang1, ang2 } = alineAngles(a, b, c, d, e);
     const reach = Math.hypot(cursor.x - a.x, cursor.y - a.y);
     const len = Math.max(reach, Math.hypot(b.x - a.x, b.y - a.y)) * 1.1;
-    const lineAt = (ang: number) => ({
+    const rayAt = (ang: number) => ({
       kind: 'auxLine' as const,
-      from: world(a.x - Math.cos(ang) * len, a.y - Math.sin(ang) * len),
+      from: world(a.x, a.y),
       to: world(a.x + Math.cos(ang) * len, a.y + Math.sin(ang) * len),
     });
     return [
       { kind: 'auxLine', from: world(a.x, a.y), to: world(b.x, b.y) },
-      lineAt(ang1),
-      lineAt(ang2),
+      rayAt(ang1),
+      rayAt(ang2),
     ];
   },
   sketch: (binds, scene) => {
@@ -145,8 +145,7 @@ export const onAline: CatalogEntry = {
         x: xId,
       },
       edges: [],
-      // The copied-angle line through a and x.
-      lines: [[aId, xId]],
+      lines: [[aId, bId], [aId, xId]],
       circles: [],
     };
   },
