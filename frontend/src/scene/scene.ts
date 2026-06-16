@@ -113,11 +113,37 @@ export class Scene {
 
   addPoint(x: number, y: number): ObjectId {
     const id = `p${this.nextId++}`;
-    const label = String.fromCharCode(this.nextLabelCode++);
+    const label = this.allocateLabel();
     this.objects.set(id, { id, kind: 'point', x, y, label });
     this._revision++;
     this.emit();
     return id;
+  }
+
+  // Cycle through A–Z then a–z (52 letters), skipping labels already in use so
+  // wrap-around after many placements/deletions still produces valid single letters.
+  // nextLabelCode stays a char code so SceneSnapshot round-trips unchanged.
+  private allocateLabel(): string {
+    const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const usedLabels = new Set<string>();
+    for (const o of this.objects.values()) {
+      if (o.kind === 'point') usedLabels.add((o as PointObject).label);
+    }
+    // Map the stored char code to a position in LETTERS (handles legacy values safely).
+    let pos = LETTERS.indexOf(String.fromCharCode(this.nextLabelCode));
+    if (pos === -1) pos = 0;
+    for (let i = 0; i < LETTERS.length; i++) {
+      const idx = (pos + i) % LETTERS.length;
+      const label = LETTERS[idx];
+      if (!usedLabels.has(label)) {
+        this.nextLabelCode = LETTERS.charCodeAt((idx + 1) % LETTERS.length);
+        return label;
+      }
+    }
+    // All 52 letters in use — still advance so repeated calls cycle through A, B, C…
+    // rather than returning the same letter every time.
+    this.nextLabelCode = LETTERS.charCodeAt((pos + 1) % LETTERS.length);
+    return LETTERS[pos];
   }
 
   /**

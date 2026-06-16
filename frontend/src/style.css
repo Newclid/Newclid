@@ -1350,6 +1350,45 @@ body.is-resizing {
   word-break: break-all;
 }
 
+.theorem-card-pred-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.theorem-card-pred-human {
+  font-size: 12px;
+  color: var(--ink-strong);
+  line-height: 1.4;
+}
+
+.theorem-card-pred-jgex {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+  background: rgba(26, 24, 22, 0.04);
+  border-radius: 3px;
+  padding: 2px 5px;
+  word-break: break-all;
+}
+
+.theorem-card-jgex-toggle {
+  align-self: flex-start;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  border: none;
+  background: none;
+  padding: 2px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-top: 2px;
+}
+
+.theorem-card-jgex-toggle:hover {
+  color: var(--ink-strong);
+}
+
 /* ---------- Theorem manager — builder: name/description form fields ---------- */
 
 .theorem-field {
@@ -1516,6 +1555,22 @@ body.is-resizing {
   font-family: var(--font-mono);
   color: var(--accent);
   max-width: 80px;
+}
+
+.theorem-arg-input-point {
+  flex: 0 0 auto;
+  width: 36px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+}
+
+.theorem-arg-hint {
+  font-size: 10px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .theorem-arg-unit {
