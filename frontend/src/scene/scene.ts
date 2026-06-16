@@ -174,29 +174,24 @@ export class Scene {
     this.emit();
   }
 
+  private referencedPointIds(obj: GeoObject): ObjectId[] {
+    if (obj.kind === 'circle') {
+      if (obj.mode === 'center-through') return [obj.center, obj.through];
+      return [obj.p1, obj.p2, obj.p3];
+    }
+    if (obj.kind === 'construction') return Object.values(obj.bindings) as ObjectId[];
+    return [];
+  }
+
   removeObject(id: ObjectId): void {
     if (!this.objects.has(id)) return;
     this.objects.delete(id);
     this._revision++;
-    /**
-    Cascade: any shape referencing this id loses its definition.
-    Adding line/segment/triangle later is one more `else if` arm.
-    **/
-    for (const [k, v] of this.objects) {
-      if (v.kind === 'circle') {
-        if (v.mode === 'center-through') {
-          if (v.center === id || v.through === id) this.objects.delete(k);
-        } else {
-          if (v.p1 === id || v.p2 === id || v.p3 === id) this.objects.delete(k);
-        }
-      }
-    }
 
-    // Cascade: if a ConstructionObject references a deleted point, delete the construction
+    // Cascade: delete any non-point that referenced the deleted point
     for (const [k, v] of this.objects) {
-      if (v.kind === 'construction') {
-        const allBoundIds = Object.values(v.bindings);
-        if (allBoundIds.includes(id)) this.objects.delete(k);
+      if (v.kind !== 'point' && this.referencedPointIds(v).includes(id)) {
+        this.objects.delete(k);
       }
     }
     this.emit();
