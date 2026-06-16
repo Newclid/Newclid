@@ -128,18 +128,23 @@ backend-tests-linux:
       junit:
         - reports/pytest-backend.xml
 
-frontend-build-linux:
+frontend-unit-tests-linux:
   stage: test
   timeout: 10m
   image: node:22-bookworm-slim
-
   interruptible: true
 
   rules:
     - exists:
-        - frontend/package.json
+        - frontend/tests/unit/**/*.test.ts
       changes:
-        - frontend/**/*
+        - frontend/src/**/*
+        - frontend/tests/**/*
+        - frontend/package.json
+        - frontend/package-lock.json
+        - frontend/tsconfig.json
+        - frontend/vite.config.ts
+        - frontend/vitest.config.ts
         - .gitlab-ci.yml
     - when: never
 
@@ -149,15 +154,37 @@ frontend-build-linux:
   script:
     - echo "Install frontend dependencies"
     - npm ci
+    - echo "Run frontend unit tests"
+    - npm run test:unit:run
 
-    - echo "Build frontend"
-    - npm run build
+frontend-integration-tests-linux:
+  stage: integration
+  timeout: 10m
+  image: node:22-bookworm-slim
+  interruptible: true
 
-  artifacts:
-    when: always
-    expire_in: 1 week
-    paths:
-      - frontend/dist/
+  rules:
+    - exists:
+        - frontend/tests/integration/**/*.test.ts
+      changes:
+        - frontend/src/**/*
+        - frontend/tests/**/*
+        - frontend/package.json
+        - frontend/package-lock.json
+        - frontend/tsconfig.json
+        - frontend/vite.config.ts
+        - frontend/vitest.config.ts
+        - .gitlab-ci.yml
+    - when: never
+
+  before_script:
+    - cd frontend
+
+  script:
+    - echo "Install frontend dependencies"
+    - npm ci
+    - echo "Run frontend integration tests"
+    - npm run test:integration:run
 
 #############################
 #                           #
