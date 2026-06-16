@@ -14,6 +14,10 @@ import type { AppStore } from '../store/appStore';
 
 export interface ToolDispatcherHandle {
   destroy(): void;
+  // Redo the last onMove preview computation. Pan/zoom don't fire pointermove,
+  // so panZoom.ts calls this after moving the viewport to keep the preview
+  // (and the grid-snap ring in particular) tracking the cursor's world position.
+  refreshPreview(): void;
 }
 
 export function attachToolDispatcher(
@@ -28,7 +32,7 @@ export function attachToolDispatcher(
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
 
-  const buildCtx = (e: MouseEvent) => {
+  const buildCtx = (e: { clientX: number; clientY: number; shiftKey: boolean }) => {
     const local = toLocal(e);
     const sp = screen(local.x, local.y);
     const wp = applyGridSnap(viewport.screenToWorld(sp), viewport.scale);
@@ -40,6 +44,12 @@ export function attachToolDispatcher(
       shiftKey: e.shiftKey,
     };
   };
+
+  // Last pointer position seen by onPointerMove. Pan/zoom mutate the viewport
+  // without firing pointermove, so they call refreshPreview() (below) to redo
+  // this computation against the new viewport — otherwise the preview ring
+  // drifts away from the cursor as the canvas moves under it.
+  let lastMove: { clientX: number; clientY: number; shiftKey: boolean } | null = null;
 
   const onClick = (e: MouseEvent) => {
     if (e.button !== 0 || appStore?.proofMode) return;
@@ -78,7 +88,8 @@ export function attachToolDispatcher(
     }
   };
 
-  const onPointerMove = (e: PointerEvent) => {
+  // Shared by onPointerMove and refreshPreview — same logic, different trigger.
+  const updatePreview = (e: { clientX: number; clientY: number; shiftKey: boolean }) => {
     if (appStore?.proofMode) return;
     if (appStore?.proofByPointsMode) {
       const ctx = buildCtx(e);
@@ -102,10 +113,21 @@ export function attachToolDispatcher(
     requestRedraw();
   };
 
+  const onPointerMove = (e: PointerEvent) => {
+    lastMove = e;
+    updatePreview(e);
+  };
+
   const onPointerLeave = () => {
+    lastMove = null;
+    target.style.cursor = '';
     if (scene.previews.length === 0) return;
     scene.setPreviews([]);
     requestRedraw();
+  };
+
+  const refreshPreview = () => {
+    if (lastMove) updatePreview(lastMove);
   };
 
   target.addEventListener('click', onClick);
@@ -118,5 +140,6 @@ export function attachToolDispatcher(
       target.removeEventListener('pointermove', onPointerMove);
       target.removeEventListener('pointerleave', onPointerLeave);
     },
+    refreshPreview,
   };
 }

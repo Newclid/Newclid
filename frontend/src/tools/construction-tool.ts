@@ -1,6 +1,6 @@
 import { Tool, ToolContext, ToolPreview, ToolSnapshot } from './tool';
 import type { CatalogEntry, SketchResult } from '../construction/catalog-types';
-import { getOrCreatePoint, pickExistingPoint, snapHighlight } from './sharedHelpers';
+import { getOrCreatePoint, pickExistingPoint, snapHighlight, gridSnapHighlight } from './sharedHelpers';
 import type { ObjectId, PointObject, ToolName } from '../geometry/types-object';
 import type { Scene } from '../scene/scene';
 
@@ -210,9 +210,11 @@ export class ConstructionTool implements Tool {
       previews.push({ kind: 'highlightPoint', pos: { x: projected.x, y: projected.y } });
     } else if (slot.kind === 'pick' || slot.kind === 'pick-existing') {
       previews.push(...snapHighlight(ctx));
+    } else if (slot.kind === 'place-free') {
+      // Never snaps to an existing point, but does land on a grid intersection.
+      previews.push(...gridSnapHighlight(ctx));
     }
-    // place-free always drops a new point (no snapping), scalar has no cursor
-    // geometry — both fall through with nothing to preview.
+    // scalar has no cursor geometry — falls through with nothing to preview.
 
     // Layer 3: entry-level live preview (e.g. the circle a final point forms).
     for (const p of this.catalogEntry.preview?.(this.bindings, ctx.scene, ctx.world) ?? []) {

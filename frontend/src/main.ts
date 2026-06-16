@@ -2,7 +2,7 @@ import { Viewport } from './geometry/viewport';
 import { Renderer } from './render/renderer';
 import { Scene } from './scene/scene';
 import { attachPanZoom } from './input/panZoom';
-import { attachToolDispatcher } from './input/toolDispatcher';
+import { attachToolDispatcher, type ToolDispatcherHandle } from './input/toolDispatcher';
 import { attachShortcuts } from './input/shortcuts';
 import { createToolbar } from './ui/toolbar';
 import { AppStore } from './store/appStore';
@@ -126,8 +126,14 @@ const requestRedraw = () => {
 };
 renderer.draw();
 
-attachPanZoom(renderer.svg, viewport, requestRedraw);
-attachToolDispatcher(renderer.svg, viewport, scene, requestRedraw, appStore);
+// dispatcherHandle is assigned below; the closure only runs once pan/zoom
+// actually fires, by which point it's set.
+let dispatcherHandle: ToolDispatcherHandle | undefined;
+attachPanZoom(renderer.svg, viewport, () => {
+  requestRedraw();
+  dispatcherHandle?.refreshPreview();
+});
+dispatcherHandle = attachToolDispatcher(renderer.svg, viewport, scene, requestRedraw, appStore);
 attachShortcuts(scene, appStore);
 
 scene.subscribe(requestRedraw);
