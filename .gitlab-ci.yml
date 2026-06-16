@@ -159,6 +159,64 @@ frontend-build-linux:
     paths:
       - frontend/dist/
 
+frontend-unit-tests-linux:
+  stage: test
+  timeout: 10m
+  image: node:22-bookworm-slim
+  interruptible: true
+
+  rules:
+    - exists:
+        - frontend/tests/unit/**/*.test.ts
+      changes:
+        - frontend/src/**/*
+        - frontend/tests/**/*
+        - frontend/package.json
+        - frontend/package-lock.json
+        - frontend/tsconfig.json
+        - frontend/vite.config.ts
+        - frontend/vitest.config.ts
+        - .gitlab-ci.yml
+    - when: never
+
+  before_script:
+    - cd frontend
+
+  script:
+    - echo "Install frontend dependencies"
+    - npm ci
+    - echo "Run frontend unit tests"
+    - npm run test:unit:run
+
+frontend-integration-tests-linux:
+  stage: integration
+  timeout: 10m
+  image: node:22-bookworm-slim
+  interruptible: true
+
+  rules:
+    - exists:
+        - frontend/tests/integration/**/*.test.ts
+      changes:
+        - frontend/src/**/*
+        - frontend/tests/**/*
+        - frontend/package.json
+        - frontend/package-lock.json
+        - frontend/tsconfig.json
+        - frontend/vite.config.ts
+        - frontend/vitest.config.ts
+        - .gitlab-ci.yml
+    - when: never
+
+  before_script:
+    - cd frontend
+
+  script:
+    - echo "Install frontend dependencies"
+    - npm ci
+    - echo "Run frontend integration tests"
+    - npm run test:integration:run
+
 #############################
 #                           #
 #     Integration jobs      #
