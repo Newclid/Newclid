@@ -20,3 +20,7 @@ extras/
 # TypeScript incremental build cache
 *.tsbuildinfo
 tsconfig.tsbuildinfo
+
+coverage/
+reports/
+*.tsbuildinfo
