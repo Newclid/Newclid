@@ -185,15 +185,39 @@ export class Scene {
 
   removeObject(id: ObjectId): void {
     if (!this.objects.has(id)) return;
-    this.objects.delete(id);
     this._revision++;
 
-    // Cascade: delete any non-point that referenced the deleted point
-    for (const [k, v] of this.objects) {
-      if (v.kind !== 'point' && this.referencedPointIds(v).includes(id)) {
-        this.objects.delete(k);
+    // BFS: cascade deletions to constructions that lose a referenced point,
+    // then collect points that become orphaned (no surviving construction references them).
+    const toDelete = new Set<ObjectId>([id]);
+    const queue: ObjectId[] = [id];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      this.objects.delete(current);
+
+      // Cascade to any non-point that references anything in toDelete
+      for (const [k, v] of this.objects) {
+        if (v.kind === 'point' || toDelete.has(k)) continue;
+        if (this.referencedPointIds(v).some(ref => toDelete.has(ref))) {
+          toDelete.add(k);
+          queue.push(k);
+        }
+      }
+
+      // Collect points that are no longer referenced by any surviving non-point
+      for (const [k, v] of this.objects) {
+        if (v.kind !== 'point' || toDelete.has(k)) continue;
+        const stillReferenced = [...this.objects.values()].some(
+          o => o.kind !== 'point' && !toDelete.has(o.id) && this.referencedPointIds(o).includes(k as ObjectId)
+        );
+        if (!stillReferenced) {
+          toDelete.add(k);
+          queue.push(k);
+        }
       }
     }
+
     this.emit();
   }
 
