@@ -83,7 +83,15 @@ const GOAL_PREDICATES: GoalPredicate[] = [
     id: 'contri', label: 'Congruent Triangles', shorthand: '△ABC ≅ △DEF', icon: '≅△',
     slotLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
     slotGroups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
+    description: 'Vertex order matters: A↔D, B↔E, C↔F. Use when both triangles share the same cyclic orientation (both clockwise or both counter-clockwise). Valid orderings: ABC↔BCA↔CAB.',
     buildJgex: (ns) => `contri ${ns.join(' ')}`,
+  },
+  {
+    id: 'contrir', label: 'Congruent Triangles (reflected)', shorthand: '△ABC ≅ᵣ △DEF', icon: '≅△ᵣ',
+    slotLabels: ['A', 'B', 'C', 'D', 'E', 'F'],
+    slotGroups: [{ label: 'Triangle 1', count: 3 }, { label: 'Triangle 2', count: 3 }],
+    description: 'Vertex order matters: A↔D, B↔E, C↔F. Use when the triangles have opposite cyclic orientation — one is a mirror image of the other. Valid orderings: ABC↔ACB↔BAC↔CBA.',
+    buildJgex: (ns) => `contrir ${ns.join(' ')}`,
   },
   {
     id: 'obtuse_angle', label: 'Obtuse Angle', shorthand: '∠ABC obtuse', icon: '↖↗',
@@ -385,6 +393,12 @@ export function createProofByPointsPanel(
     }
 
     slotSection.appendChild(slotList);
+
+    if (selectedPredicate.description) {
+      slotSection.appendChild(
+        el('p', { class: 'goal-pred-description' }, [selectedPredicate.description]),
+      );
+    }
 
     if (activeSlot < labels.length) {
       slotSection.appendChild(

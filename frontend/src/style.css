@@ -1138,6 +1138,7 @@ body.is-resizing {
 
 .goal-hint { margin: 0; font-size: 11.5px; color: var(--accent); font-style: italic; }
 .goal-hint-warn { color: var(--ink-soft); font-style: normal; }
+.goal-pred-description { margin: 6px 0 0; font-size: 0.78rem; color: var(--ink-soft); line-height: 1.4; }
 
 /* + Add point / − Remove last controls for variable-length predicates. */
 .goal-var-controls {
