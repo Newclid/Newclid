@@ -294,4 +294,67 @@ BOOST_AUTO_TEST_CASE(generic_match_mixed_schemas){
     }
 }
 
+
+
+/**
+ * @brief Test case for schemas with more variables than points in the problem
+ * Verifies that the optimized generic matcher skips schemas that it cannot fully map because of insufficient points in the problem
+ */
+BOOST_AUTO_TEST_CASE(generic_match_optimized_skip_when_insufficient_points){
+    Problem prob;
+    (void)prob.add_point("P1", 0.0, 0.0);
+    (void)prob.add_point("P2", 1.0, 0.0);
+    (void)prob.add_point("P3", 2.0, 0.0);
+    
+    // Create a schema for the custom rule
+    RuleSchema schema_false = build_simple_schema(
+        "long_schema",
+        {"X", "Y", "Z", "W"},
+        "coll",
+        {"X", "Y", "Z"},
+        "coll",
+        {"W", "Y", "X"}
+    );
+
+    std::vector<RuleSchema> rules = { schema_false };
+    
+    // Build the matcher and call it
+    GenericRuleMatcher matcher(&prob, rules);
+    std::vector<Theorem> results = matcher.optimized_match();
+    
+    // Assert that there are no results
+    BOOST_REQUIRE_EQUAL(results.size(), 0);
+}
+
+/**
+ * @brief Test case for schemas with unsupported predicates
+ * Verifies that the optimized generic matcher skips schemas with unsupported predicates in them
+ */
+BOOST_AUTO_TEST_CASE(generic_match_optimized_skip_unsupported){
+    Problem prob;
+    (void)prob.add_point("P1", 0.0, 0.0);
+    (void)prob.add_point("P2", 1.0, 0.0);
+    (void)prob.add_point("P3", 2.0, 0.0);
+    
+    // Create a schema for the custom rule
+    RuleSchema schema_norm = build_simple_schema(
+        "normal_schema",
+        {"X", "Y", "Z"},
+        "unsupported_predicate_1",
+        {"X", "Y", "Z"},
+        "unsupported_predicate_2",
+        {"Z", "Y", "X"}
+    );
+
+    std::vector<RuleSchema> rules = { schema_norm };
+    
+    // Build the matcher and call it
+    GenericRuleMatcher matcher(&prob, rules);
+    std::vector<Theorem> results = matcher.optimized_match();
+    
+    // Assert number of results
+    BOOST_REQUIRE_EQUAL(results.size(), 0);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
