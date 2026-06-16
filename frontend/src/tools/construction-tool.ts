@@ -93,6 +93,7 @@ export class ConstructionTool implements Tool {
   private catalogEntry: CatalogEntry; // the blueprint (e.g. trapezoid)
   private bindings: Record<string, ObjectId> = {}; // slots filled so far
   private currentSlotIndex = 0; // which step the user is on
+  private createdInSlots = new Set<ObjectId>(); // points created (not snapped) during this construction
 
   constructor(catalogEntry: CatalogEntry) {
     this.catalogEntry = catalogEntry;
@@ -146,6 +147,7 @@ export class ConstructionTool implements Tool {
     }
 
     this.bindings = tentative;
+    if (wasCreated) this.createdInSlots.add(pointId);
     this.currentSlotIndex++;
 
     /**
@@ -230,7 +232,8 @@ export class ConstructionTool implements Tool {
     return previews;
   }
 
-  onDeactivate(_ctx: { scene: Scene }): void {
+  onDeactivate(ctx: { scene: Scene }): void {
+    for (const id of this.createdInSlots) ctx.scene.removeObject(id);
     this.reset();
   }
 
@@ -242,17 +245,23 @@ export class ConstructionTool implements Tool {
 
   // Snapshot the in-progress slots so undo can rewind exactly one step.
   captureState(): ToolSnapshot {
-    return { bindings: { ...this.bindings }, currentSlotIndex: this.currentSlotIndex };
+    return {
+      bindings: { ...this.bindings },
+      currentSlotIndex: this.currentSlotIndex,
+      createdInSlots: [...this.createdInSlots],
+    };
   }
 
   // Replay a captured state, e.g. after an undo rewinds the scene one click.
   restoreState(state: ToolSnapshot): void {
     this.bindings = { ...state.bindings };
     this.currentSlotIndex = state.currentSlotIndex;
+    this.createdInSlots = new Set(state.createdInSlots ?? []);
   }
 
   private reset(): void {
     this.bindings = {};
     this.currentSlotIndex = 0;
+    this.createdInSlots.clear();
   }
 }

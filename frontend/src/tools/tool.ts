@@ -10,6 +10,7 @@ construction rewinds one slot in step with the scene.
 export interface ToolSnapshot {
   bindings: Record<string, ObjectId>;
   currentSlotIndex: number;
+  createdInSlots: ObjectId[];
 }
 
 /**
