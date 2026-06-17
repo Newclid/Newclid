@@ -78,6 +78,38 @@ describe('Renderer', () => {
     });
   });
 
+  describe('resize()', () => {
+    // SVG attributes must always reflect the current viewport so layout changes take effect
+    it('updates SVG width and height attributes when viewport changes', () => {
+      viewport.width = 1024;
+      viewport.height = 768;
+      renderer.resize();
+      expect(renderer.svg.getAttribute('width')).toBe('1024');
+      expect(renderer.svg.getAttribute('height')).toBe('768');
+    });
+
+    // the canvas pixel buffer must be DPR-scaled so it stays sharp on high-DPI screens
+    it('sets canvas pixel dimensions as round(viewport times dpr)', () => {
+      vi.stubGlobal('devicePixelRatio', 2);
+      viewport.width = 400;
+      viewport.height = 300;
+      renderer.resize();
+      const canvas = container.querySelector('canvas') as HTMLCanvasElement;
+      expect(canvas.width).toBe(800);
+      expect(canvas.height).toBe(600);
+    });
+
+    // the CSS size must match the logical viewport so the canvas does not appear stretched
+    it('sets canvas style width and height in px matching viewport logical size', () => {
+      viewport.width = 500;
+      viewport.height = 400;
+      renderer.resize();
+      const canvas = container.querySelector('canvas') as HTMLCanvasElement;
+      expect(canvas.style.width).toBe('500px');
+      expect(canvas.style.height).toBe('400px');
+    });
+  });
+
   it.skip('placeholder', () => {
     // Tests will be added in subsequent tasks
   });
