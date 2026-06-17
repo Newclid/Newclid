@@ -50,6 +50,25 @@ namespace Yuclid {
             
             return assignments;
         }
+
+        const std::vector<PointPairId>* get_bucket_for_key(
+            const double key,
+            const LazyGeometryCache &cache
+        ) {
+            const auto &all_point_pairs = cache.point_pairs();
+
+            for (const auto &bucket : cache.segment_length_buckets().buckets) {
+                // buckets are guaranteed to contain at least 2 elements
+                double min_len = static_cast<double>(SquaredDist(cache.point(all_point_pairs[bucket.front()].first), cache.point(all_point_pairs[bucket.front()].second)));
+                double max_len = static_cast<double>(SquaredDist(cache.point(all_point_pairs[bucket.back()].first), cache.point(all_point_pairs[bucket.back()].second)));
+                
+                if (key >= (min_len - EPS) && key <= (max_len + EPS)) {
+                    return &bucket;
+                }
+            }
+
+            return nullptr;
+        }
     }
 
     // If one of the two segments is fully assigned, we can give the length of the bucket corresponding to its length
@@ -63,7 +82,7 @@ namespace Yuclid {
         std::size_t estimate = 0;
         std::array<std::optional<ProblemPointIndex>, 4> assignments = get_cong_assignments(predicate, mapping);
 
-        // Generate the bitmask (A = bit 3, B = bit 2, C = bit 1, D = bit 0)
+        // Bitmask (A = bit 3, B = bit 2, C = bit 1, D = bit 0)
         uint8_t state_mask = 0;
         if (assignments[0].has_value()) state_mask |= 0b1000; // Variable A
         if (assignments[1].has_value()) state_mask |= 0b0100; // Variable B
@@ -77,7 +96,7 @@ namespace Yuclid {
         std::size_t avg_bucket_size = (num_buckets == 0) ? 0 : (total_pairs / num_buckets);
 
         // When set to true, the estimate will be divided by cache.num_points() 
-        bool intrsect_estimates_with_point = false;
+        bool intersect_estimates_with_point = false;
 
         switch (state_mask) {
             case 0b1111:
@@ -89,10 +108,11 @@ namespace Yuclid {
             case 0b1101: // AB and D assigned, C free
             case 0b1011: // B free, A and CD assigned
             case 0b0111: // A free, B and CD assigned
-                intrsect_estimates_with_point = true;
+                intersect_estimates_with_point = true;
                 [[fallthrough]];
             case 0b1100: // AB assigned, CD free
             case 0b0011: // AB free, CD assigned
+            {
                 // The length is known! 
                 double assigned_length = 0;
                 if((state_mask & 0b1100) == 0b1100) {
@@ -102,38 +122,32 @@ namespace Yuclid {
                     assigned_length = static_cast<double>(SquaredDist(cache.point(*assignments[2]), cache.point(*assignments[3]))); 
                 }
                 
-                const auto &all_point_pairs = cache.point_pairs();
+                const auto bucket_ptr = get_bucket_for_key(assigned_length, cache);
+                if(bucket_ptr != nullptr) {
+                    // Extract one to exclude the already assigned segment
+                    // Multiply by 2 because a segment XY can be mapped as XY or YX!
+                    estimate = (bucket_ptr->size() - 1) * 2; 
 
-                for (const auto &bucket : cache.segment_length_buckets().buckets) {
-                    // buckets are guaranteed to contain at least 2 elements
-                    double min_len = static_cast<double>(SquaredDist(cache.point(all_point_pairs[bucket.front()].first), cache.point(all_point_pairs[bucket.front()].second)));
-                    double max_len = static_cast<double>(SquaredDist(cache.point(all_point_pairs[bucket.back()].first), cache.point(all_point_pairs[bucket.back()].second)));
-                    
-                    if (assigned_length >= (min_len - EPS) && assigned_length <= (max_len + EPS)) {
-                        // Extract one to exclude the already assigned segment
-                        // Multiply by 2 because a segment XY can be mapped as XY or YX!
-                        estimate = (bucket.size() - 1) * 2; 
-                        break;
+                    if(intersect_estimates_with_point && cache.num_points() > 0) {
+                        estimate = estimate / cache.num_points();
+                        estimate = estimate > 0 ? estimate : 1;
                     }
                 }
-                if(intrsect_estimates_with_point) {
-                    estimate = estimate / cache.num_points();
-                    estimate = estimate > 0 ? estimate : 1;
-                }
+
                 break;
-            
+            }
             case 0b1010: case 0b1001: case 0b0110: case 0b0101:
                 // Two points are known, but length is unknown.
-                intrsect_estimates_with_point = true;
+                intersect_estimates_with_point = true;
                 [[fallthrough]];
             case 0b1000: case 0b0100: case 0b0010: case 0b0001:
                 // One point is known.
                 // Assuming all segments that contain the point are in different buckets, than it appears in at most cache.num_points() - 1 buckets
-                // The estimated extensions are therefore, the number of buckets multiplied by the average length of a bucket 
+                // The estimated extensions are therefore the number of buckets multiplied by the average length of a bucket 
                 // Multiplied by 2 becase a segment can be mapped bidirectionally
                 estimate = (cache.num_points() - 1) * avg_bucket_size * 2;
 
-                if(intrsect_estimates_with_point) {
+                if(intersect_estimates_with_point) {
                     estimate = estimate / cache.num_points();
                     estimate = estimate > 0 ? estimate : 1;
                 }
@@ -158,7 +172,9 @@ namespace Yuclid {
         const MappingState &mapping,
         const LazyGeometryCache &cache
     ) const {
-        // Generate the bitmask (A = bit 3, B = bit 2, C = bit 1, D = bit 0)
+        std::array<std::optional<ProblemPointIndex>, 4> assignments = get_cong_assignments(predicate, mapping);
+
+        // Bitmask (A = bit 3, B = bit 2, C = bit 1, D = bit 0)
         uint8_t state_mask = 0;
         if (assignments[0].has_value()) state_mask |= 0b1000; // Variable A
         if (assignments[1].has_value()) state_mask |= 0b0100; // Variable B
@@ -168,7 +184,7 @@ namespace Yuclid {
         switch (state_mask) {
             case 0b1111:
                 // All 4 points assigned. No extensions to generate.
-                return 0;
+                return;
 
             case 0b1100: // AB assigned, CD free
             case 0b0011: // AB free, CD assigned
