@@ -117,8 +117,8 @@ export function attachToolDispatcher(
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    lastMove = e;
-    updatePreview(e);
+    lastMove = { clientX: e.clientX, clientY: e.clientY, shiftKey: e.shiftKey };
+    updatePreview(lastMove);
   };
 
   const onPointerLeave = () => {
@@ -127,6 +127,22 @@ export function attachToolDispatcher(
     if (scene.previews.length === 0) return;
     scene.setPreviews([]);
     requestRedraw();
+  };
+
+  // Shift press/release doesn't fire pointermove, so the preview ring would
+  // stay stale until the next mouse move. Re-run updatePreview immediately
+  // with the new shiftKey state so it appears/disappears in real time.
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Shift' && lastMove) {
+      lastMove = { ...lastMove, shiftKey: true };
+      updatePreview(lastMove);
+    }
+  };
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.key === 'Shift' && lastMove) {
+      lastMove = { ...lastMove, shiftKey: false };
+      updatePreview(lastMove);
+    }
   };
 
   const refreshPreview = () => {
@@ -144,6 +160,8 @@ export function attachToolDispatcher(
   target.addEventListener('click', onClick);
   target.addEventListener('pointermove', onPointerMove);
   target.addEventListener('pointerleave', onPointerLeave);
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
 
   return {
     destroy() {
@@ -151,6 +169,8 @@ export function attachToolDispatcher(
       target.removeEventListener('click', onClick);
       target.removeEventListener('pointermove', onPointerMove);
       target.removeEventListener('pointerleave', onPointerLeave);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
     },
     refreshPreview,
   };
