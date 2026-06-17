@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createProofChoice } from '../../../src/ui/proofChoice';
 
 describe('createProofChoice', () => {
-  let onJgex: ReturnType<typeof vi.fn>;
-  let onPoints: ReturnType<typeof vi.fn>;
+  let onJgex: () => void;
+  let onPoints: () => void;
   let handle: ReturnType<typeof createProofChoice>;
 
   beforeEach(() => {
