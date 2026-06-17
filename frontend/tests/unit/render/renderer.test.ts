@@ -406,6 +406,22 @@ describe('Renderer', () => {
     });
   });
 
+  describe('draw() proof sketch canvas', () => {
+    // without a sketch the canvas has nothing to paint so clearRect should never be called
+    it('does not call ctx.clearRect when proofSketch is null', () => {
+      renderer.proofSketch = null;
+      renderer.draw();
+      expect(fakeCtx.clearRect).not.toHaveBeenCalled();
+    });
+
+    // with a sketch set, draw must clear and repaint the canvas overlay every frame
+    it('calls ctx.clearRect when proofSketch is set and draw is called', () => {
+      renderer.proofSketch = { points: [], geometry: [] };
+      renderer.draw();
+      expect(fakeCtx.clearRect).toHaveBeenCalledOnce();
+    });
+  });
+
   it.skip('placeholder', () => {
     // Tests will be added in subsequent tasks
   });
