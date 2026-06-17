@@ -66,6 +66,7 @@ export function attachShortcuts(scene: Scene, appStore?: AppStore): ShortcutsHan
     if (appStore?.proofMode || appStore?.theoremManagerMode || appStore?.panelTab !== 'toolbar') return;
     const tool = SHORTCUTS[e.key.toLowerCase()];
     if (!tool) return;
+    getTool(scene.tool)?.onDeactivate?.({ scene });
     scene.setTool(tool);
     e.preventDefault();
   };
