@@ -171,6 +171,50 @@ describe('Renderer', () => {
     });
   });
 
+  describe('draw() SVG management', () => {
+    // stale elements from a prior draw must be cleared or they accumulate with every redraw
+    it('clears all SVG children before redrawing', () => {
+      renderer.draw();
+      const countAfterFirst = renderer.svg.childNodes.length;
+      renderer.draw();
+      expect(renderer.svg.childNodes.length).toBe(countAfterFirst);
+    });
+
+    // grid lines are the background scaffolding that always exists regardless of scene content
+    it('adds SVG line elements for the grid on draw', () => {
+      renderer.draw();
+      expect(renderer.svg.querySelectorAll('line').length).toBeGreaterThan(0);
+    });
+
+    // the vertical axis must appear at the world origin x when that column is on screen
+    it('draws a vertical axis line when the origin is horizontally within the viewport', () => {
+      renderer.draw();
+      const originX = viewport.worldToScreen(world(0, 0)).x;
+      const lines = Array.from(renderer.svg.querySelectorAll('line'));
+      const axisLine = lines.find(
+        (l) =>
+          l.getAttribute('x1') === String(originX) &&
+          l.getAttribute('x2') === String(originX) &&
+          l.getAttribute('stroke') === '#333',
+      );
+      expect(axisLine).toBeTruthy();
+    });
+
+    // the horizontal axis must appear at the world origin y when that row is on screen
+    it('draws a horizontal axis line when the origin is vertically within the viewport', () => {
+      renderer.draw();
+      const originY = viewport.worldToScreen(world(0, 0)).y;
+      const lines = Array.from(renderer.svg.querySelectorAll('line'));
+      const axisLine = lines.find(
+        (l) =>
+          l.getAttribute('y1') === String(originY) &&
+          l.getAttribute('y2') === String(originY) &&
+          l.getAttribute('stroke') === '#333',
+      );
+      expect(axisLine).toBeTruthy();
+    });
+  });
+
   it.skip('placeholder', () => {
     // Tests will be added in subsequent tasks
   });
