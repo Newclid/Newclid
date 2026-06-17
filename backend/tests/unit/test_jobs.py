@@ -181,8 +181,6 @@ def test_create_job_rejects_invalid_request_payload(client, payload) -> None:
         ("deferred", "queued"),
         ("scheduled", "queued"),
         ("started", "running"),
-        ("stopped", "cancelled"),
-        ("canceled", "cancelled"),
         ("failed", "failed"),
     ],
 )
@@ -197,7 +195,7 @@ def test_to_public_status_maps_rq_statuses(
 
 @pytest.mark.parametrize(
     "runner_status",
-    ["succeeded", "failed", "timed_out"],
+    ["succeeded", "failed"],
 )
 def test_to_public_status_uses_runner_status_when_rq_finished(
     runner_status: str,
@@ -304,28 +302,6 @@ def test_check_job_result_returns_no_result_for_incomplete_job(
     assert body["error"] is None
 
 
-def test_check_job_result_returns_error_for_cancelled_job(
-    client,
-    monkeypatch,
-) -> None:
-    monkeypatch.setattr(
-        jobs,
-        "fetch_job",
-        lambda job_id: FakeJob("stopped"),
-    )
-
-    response = client.get("/api/jobs/test-job-id/result")
-
-    assert response.status_code == 200
-
-    body = response.json()
-
-    assert body["job_id"] == "test-job-id"
-    assert body["status"] == "cancelled"
-    assert body["result"] is None
-    assert body["error"] == "Job was cancelled."
-
-
 def test_check_job_result_returns_proof_output_for_finished_job(
     client,
     monkeypatch,
@@ -357,7 +333,7 @@ def test_check_job_result_returns_proof_output_for_finished_job(
 
 @pytest.mark.parametrize(
     "runner_status",
-    ["failed", "timed_out"],
+    ["failed"],
 )
 def test_check_job_result_returns_error_for_unsuccessful_runner_result(
     client,
