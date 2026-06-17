@@ -52,6 +52,32 @@ describe('Renderer', () => {
     vi.unstubAllGlobals();
   });
 
+  describe('constructor', () => {
+    // the SVG element is the vector layer where all scene geometry gets painted
+    it('appends an SVG element to the container', () => {
+      expect(container.querySelector('svg')).toBeTruthy();
+    });
+
+    // the SVG must be visible so the geometry is actually seen on screen
+    it('sets the SVG to display block', () => {
+      const svg = container.querySelector('svg') as SVGSVGElement;
+      expect(svg.style.display).toBe('block');
+    });
+
+    // the canvas overlay is for proof sketches and must start hidden so it does not block the SVG
+    it('appends a canvas element to the container with display none', () => {
+      const canvas = container.querySelector('canvas');
+      expect(canvas).toBeTruthy();
+      expect(canvas!.style.display).toBe('none');
+    });
+
+    // resize() is called during construction so the SVG dimensions match the viewport immediately
+    it('sets SVG width and height attributes on construction via resize', () => {
+      expect(renderer.svg.getAttribute('width')).toBe('800');
+      expect(renderer.svg.getAttribute('height')).toBe('600');
+    });
+  });
+
   it.skip('placeholder', () => {
     // Tests will be added in subsequent tasks
   });
