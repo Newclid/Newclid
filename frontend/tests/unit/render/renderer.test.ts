@@ -175,9 +175,10 @@ describe('Renderer', () => {
     // stale elements from a prior draw must be cleared or they accumulate with every redraw
     it('clears all SVG children before redrawing', () => {
       renderer.draw();
-      const countAfterFirst = renderer.svg.childNodes.length;
+      const sentinel = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      renderer.svg.appendChild(sentinel);
       renderer.draw();
-      expect(renderer.svg.childNodes.length).toBe(countAfterFirst);
+      expect(renderer.svg.contains(sentinel)).toBe(false);
     });
 
     // grid lines are the background scaffolding that always exists regardless of scene content
@@ -422,7 +423,7 @@ describe('Renderer', () => {
     });
   });
 
-  it.skip('placeholder', () => {
-    // Tests will be added in subsequent tasks
+  it.skip('placeholder for canvas marker rendering coverage', () => {
+    // canvas marker tests (eqangle, aconst, para, perp) require a fuller proof sketch fixture
   });
 });
