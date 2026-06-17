@@ -351,6 +351,61 @@ describe('Renderer', () => {
     });
   });
 
+  describe('draw() previews', () => {
+    // the snap ring shows which existing point the cursor would snap to on the next click
+    it('renders a highlightPoint preview as a circle with the snap stroke color', () => {
+      scene.setPreviews([{ kind: 'highlightPoint', pos: { x: 1, y: 1 } }]);
+      renderer.draw();
+      const expected = viewport.worldToScreen(world(1, 1));
+      const ring = Array.from(renderer.svg.querySelectorAll('circle')).find(
+        (c) =>
+          c.getAttribute('cx') === String(expected.x) &&
+          c.getAttribute('r') === '9' &&
+          c.getAttribute('stroke') === '#2A4A7F',
+      );
+      expect(ring).toBeTruthy();
+    });
+
+    // the rubber circle shows the circle being sized before the user releases the pointer
+    it('renders a rubberCircle preview as a dashed SVG circle with the preview stroke color', () => {
+      scene.setPreviews([{ kind: 'rubberCircle', center: { x: 0, y: 0 }, radiusVec: { x: 2, y: 0 } }]);
+      renderer.draw();
+      // distance from center to radiusVec is 2 world units, 2 * 50 = 100px
+      const dashed = Array.from(renderer.svg.querySelectorAll('circle')).find(
+        (c) => c.getAttribute('r') === '100' && c.getAttribute('stroke-dasharray') === '5 4',
+      );
+      expect(dashed).toBeTruthy();
+    });
+
+    // an aux line is a helper guide drawn while the tool is computing its next anchor point
+    it('renders an auxLine preview as a dashed SVG line element', () => {
+      scene.setPreviews([{ kind: 'auxLine', from: { x: 0, y: 0 }, to: { x: 1, y: 0 } }]);
+      renderer.draw();
+      const dashed = Array.from(renderer.svg.querySelectorAll('line')).find(
+        (l) => l.getAttribute('stroke-dasharray') === '5 4',
+      );
+      expect(dashed).toBeTruthy();
+    });
+
+    // a partial edge shows the first confirmed segment of a multi-click construction in progress
+    it('renders a partialEdge preview as a solid SVG line at the correct screen coordinates', () => {
+      scene.setPreviews([{ kind: 'partialEdge', from: { x: 0, y: 0 }, to: { x: 1, y: 0 } }]);
+      renderer.draw();
+      const s1 = viewport.worldToScreen(world(0, 0));
+      const s2 = viewport.worldToScreen(world(1, 0));
+      const solidLine = Array.from(renderer.svg.querySelectorAll('line')).find(
+        (l) =>
+          l.getAttribute('x1') === String(s1.x) &&
+          l.getAttribute('y1') === String(s1.y) &&
+          l.getAttribute('x2') === String(s2.x) &&
+          l.getAttribute('y2') === String(s2.y) &&
+          l.getAttribute('stroke') === '#888' &&
+          !l.hasAttribute('stroke-dasharray'),
+      );
+      expect(solidLine).toBeTruthy();
+    });
+  });
+
   it.skip('placeholder', () => {
     // Tests will be added in subsequent tasks
   });
