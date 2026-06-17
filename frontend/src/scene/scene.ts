@@ -199,20 +199,6 @@ export class Scene {
     return [...slots].map(s => c.bindings[s]).filter((v): v is ObjectId => typeof v === 'string');
   }
 
-  // Removes a specific output point from a construction's bindings and visual elements.
-  // Returns true if the construction still has content to display.
-  private partialRemoveOutput(c: ConstructionObject, pointId: ObjectId): boolean {
-    for (const [k, v] of Object.entries(c.bindings)) {
-      if (v === pointId) delete c.bindings[k];
-    }
-    c.edges = c.edges.filter(([a, b]) => a !== pointId && b !== pointId);
-    if (c.lines) c.lines = c.lines.filter(([a, b]) => a !== pointId && b !== pointId);
-    c.circles = c.circles.filter(circ => circ.center !== pointId);
-    if (c.circumcircles) c.circumcircles = c.circumcircles.filter(t => !t.includes(pointId));
-    return c.edges.length > 0 || (c.lines?.length ?? 0) > 0 ||
-           c.circles.length > 0 || (c.circumcircles?.length ?? 0) > 0;
-  }
-
   removeObject(id: ObjectId): void {
     if (!this.objects.has(id)) return;
     this._revision++;
@@ -232,26 +218,12 @@ export class Scene {
           toDelete.add(k);
           queue.push(k);
         } else if (v.kind === 'construction') {
-          const outputSlots = this.outputSlotNames(v.name);
-          const deletedSlot = Object.entries(v.bindings).find(([, val]) => val === current)?.[0];
-          const isOutput = deletedSlot !== undefined && outputSlots.has(deletedSlot);
-
-          if (isOutput) {
-            // Partial delete: remove just this output point and connected edges
-            const hasContent = this.partialRemoveOutput(v, current);
-            if (!hasContent) {
-              toDelete.add(k);
-              queue.push(k);
-            }
-          } else {
-            // Full delete: input point gone → whole construction gone + cascade outputs
-            toDelete.add(k);
-            queue.push(k);
-            for (const outputId of this.outputPointIds(v)) {
-              if (!toDelete.has(outputId)) {
-                toDelete.add(outputId);
-                queue.push(outputId);
-              }
+          toDelete.add(k);
+          queue.push(k);
+          for (const outputId of this.outputPointIds(v)) {
+            if (!toDelete.has(outputId)) {
+              toDelete.add(outputId);
+              queue.push(outputId);
             }
           }
         }
