@@ -113,8 +113,22 @@ namespace Yuclid {
         LazyGeometryCache geometry_cache(*m_problem);
 
         for(const RuleSchema &schema: m_rules){
+            // TODO: decide what to do if we let different varables map to the same point
+            if(schema.variables.size() > m_problem->num_points()) {
+                BOOST_LOG_TRIVIAL(warning) << "Generic rule matcher skipped rule " << schema.id << ". Reason: Insufficient number of points in problem.";
+                continue;
+            }
+
             // plan stage
             RulePlan current_plan = build_rule_plan(schema);
+            if(current_plan.unsupported_predicates.size() > 0) {
+                BOOST_LOG_TRIVIAL(warning) << "Generic rule matcher skipped rule " 
+                                            << schema.id << ". Reason: The schema contains " 
+                                            << current_plan.unsupported_predicates.size() << " unsupported predicates.";
+                continue;
+            }
+
+            // setup for search stage
             MappingState mapping_state(schema, *m_problem);
             std::vector<RuleMapping> mapping_results;
             FilterState filter_state(current_plan.validators.size());
