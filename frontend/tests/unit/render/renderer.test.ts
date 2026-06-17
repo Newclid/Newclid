@@ -265,6 +265,92 @@ describe('Renderer', () => {
     });
   });
 
+  describe('draw() circle objects', () => {
+    // a center-through circle is the primary user-placed circle and must show with the correct stroke
+    it('renders a center-through circle as an SVG circle with the correct stroke color', () => {
+      const centerId = scene.addPoint(0, 0);
+      const throughId = scene.addPoint(3, 0);
+      scene.addObject({ kind: 'circle', mode: 'center-through', center: centerId, through: throughId });
+      renderer.draw();
+      // 3 world units at scale 50 gives 150px radius
+      const circleEl = Array.from(renderer.svg.querySelectorAll('circle')).find(
+        (c) => c.getAttribute('r') === '150' && c.getAttribute('fill') === 'none',
+      );
+      expect(circleEl).toBeTruthy();
+      expect(circleEl!.getAttribute('stroke')).toBe('#1A1816');
+    });
+
+    // a circle referencing deleted or nonexistent points must not crash draw
+    it('skips center-through circles when the center or through point is missing', () => {
+      scene.addObject({ kind: 'circle', mode: 'center-through', center: 'gone1', through: 'gone2' });
+      expect(() => renderer.draw()).not.toThrow();
+    });
+  });
+
+  describe('draw() construction objects', () => {
+    // construction edges are the finite segments that visually define the built shape
+    it('renders each construction edge as an SVG line between the two endpoint screen positions', () => {
+      const p1 = scene.addPoint(0, 0);
+      const p2 = scene.addPoint(1, 0);
+      scene.addObject({
+        kind: 'construction',
+        name: 'test',
+        bindings: { a: p1, b: p2 },
+        edges: [[p1, p2]],
+        circles: [],
+      });
+      renderer.draw();
+      const s1 = viewport.worldToScreen(world(0, 0));
+      const s2 = viewport.worldToScreen(world(1, 0));
+      const edgeLine = Array.from(renderer.svg.querySelectorAll('line')).find(
+        (l) =>
+          l.getAttribute('x1') === String(s1.x) &&
+          l.getAttribute('y1') === String(s1.y) &&
+          l.getAttribute('x2') === String(s2.x) &&
+          l.getAttribute('y2') === String(s2.y),
+      );
+      expect(edgeLine).toBeTruthy();
+    });
+
+    // construction circles are drawn with the center point and a precomputed world-space radius
+    it('renders construction circles as SVG circle elements with the correct pixel radius', () => {
+      const centerId = scene.addPoint(0, 0);
+      scene.addObject({
+        kind: 'construction',
+        name: 'test',
+        bindings: { c: centerId },
+        edges: [],
+        circles: [{ center: centerId, radius: 2 }],
+      });
+      renderer.draw();
+      // 2 world units at scale 50 gives 100px radius
+      const circleEl = Array.from(renderer.svg.querySelectorAll('circle')).find(
+        (c) => c.getAttribute('r') === '100' && c.getAttribute('fill') === 'none',
+      );
+      expect(circleEl).toBeTruthy();
+    });
+
+    // circumcircles pass through three named points and the renderer must derive the center and radius
+    it('renders circumcircles derived from three points as SVG circle elements', () => {
+      const p1 = scene.addPoint(0, 1);
+      const p2 = scene.addPoint(-1, 0);
+      const p3 = scene.addPoint(1, 0);
+      scene.addObject({
+        kind: 'construction',
+        name: 'test',
+        bindings: {},
+        edges: [],
+        circles: [],
+        circumcircles: [[p1, p2, p3]],
+      });
+      renderer.draw();
+      const circleEl = Array.from(renderer.svg.querySelectorAll('circle')).find(
+        (c) => c.getAttribute('fill') === 'none' && c.getAttribute('stroke') === '#888',
+      );
+      expect(circleEl).toBeTruthy();
+    });
+  });
+
   it.skip('placeholder', () => {
     // Tests will be added in subsequent tasks
   });
