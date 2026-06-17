@@ -110,6 +110,67 @@ describe('Renderer', () => {
     });
   });
 
+  describe('proofSketch setter', () => {
+    // hiding the canvas when there is no sketch keeps it from blocking pointer events on the SVG
+    it('hides the canvas when set to null', () => {
+      const canvas = container.querySelector('canvas') as HTMLCanvasElement;
+      renderer.proofSketch = null;
+      expect(canvas.style.display).toBe('none');
+    });
+
+    // the canvas must become visible so the proof sketch overlay is actually rendered
+    it('shows the canvas when a sketch is assigned', () => {
+      const canvas = container.querySelector('canvas') as HTMLCanvasElement;
+      renderer.proofSketch = { points: [], geometry: [] };
+      expect(canvas.style.display).toBe('block');
+    });
+
+    // drawing the same segment twice would render it twice on top of itself, wasting work
+    it('deduplicates duplicate entries in sketch.geometry', () => {
+      const seg = { kind: 'segment' as const, p1: 'A', p2: 'B' };
+      renderer.proofSketch = { points: [], geometry: [seg, seg] };
+      expect(renderer.proofSketch!.geometry).toHaveLength(1);
+    });
+
+    // canvasGeometry and canvasMarkers look up point coords by name so ptMap must be built
+    it('builds ptMap keyed by point name from sketch.points', () => {
+      const pt = { name: 'A', x: 1, y: 2 };
+      renderer.proofSketch = { points: [pt], geometry: [] };
+      expect(renderer.proofSketch!.ptMap!.get('A')).toBe(pt);
+    });
+
+    // perp markers precompute their world intersection so draw does not recompute it every frame
+    it('caches the intersection point for perp markers when all four named points exist', () => {
+      const sketch: ProofSketch = {
+        points: [
+          { name: 'A', x: 0, y: 1 },
+          { name: 'B', x: 0, y: -1 },
+          { name: 'C', x: -1, y: 0 },
+          { name: 'D', x: 1, y: 0 },
+        ],
+        geometry: [],
+        markers: [{ kind: 'perp', args: ['A', 'B', 'C', 'D'] }],
+      };
+      renderer.proofSketch = sketch;
+      const marker = sketch.markers![0] as any;
+      expect(marker._worldPos).not.toBeNull();
+      expect(marker._worldPos.x).toBeCloseTo(0);
+      expect(marker._worldPos.y).toBeCloseTo(0);
+    });
+
+    // missing points mean no intersection can be computed and the marker should be safely skipped
+    it('sets _worldPos to null for perp markers with missing point references', () => {
+      const sketch: ProofSketch = {
+        points: [{ name: 'A', x: 0, y: 1 }],
+        geometry: [],
+        markers: [{ kind: 'perp', args: ['A', 'B', 'C', 'D'] }],
+      };
+      renderer.proofSketch = sketch;
+      const marker = sketch.markers![0] as any;
+      expect(marker._worldPos).toBeNull();
+    });
+  });
+
   it.skip('placeholder', () => {
     // Tests will be added in subsequent tasks
   });
