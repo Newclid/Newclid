@@ -215,6 +215,56 @@ describe('Renderer', () => {
     });
   });
 
+  describe('draw() points', () => {
+    // scene points must appear as dots at their world coordinates so users see where they placed them
+    it('renders a point as an SVG circle at the correct screen position', () => {
+      scene.addPoint(2, 3);
+      renderer.draw();
+      const expected = viewport.worldToScreen(world(2, 3));
+      const circles = Array.from(renderer.svg.querySelectorAll('circle'));
+      const dot = circles.find(
+        (c) =>
+          c.getAttribute('cx') === String(expected.x) &&
+          c.getAttribute('cy') === String(expected.y) &&
+          c.getAttribute('r') === '4.25',
+      );
+      expect(dot).toBeTruthy();
+    });
+
+    // point labels are how the user identifies geometry during a proof, so they must render
+    it('renders a text label for each scene point', () => {
+      scene.addPoint(0, 0);
+      renderer.draw();
+      const labelEl = Array.from(renderer.svg.querySelectorAll('text')).find(
+        (t) => t.textContent === 'A',
+      );
+      expect(labelEl).toBeTruthy();
+    });
+
+    // the color prop lets tools highlight individual points so it must flow through to SVG fill
+    it('uses point.color for the dot fill when the color is set', () => {
+      const id = scene.addPoint(1, 1);
+      scene.setPointColor(id, '#ff0000');
+      renderer.draw();
+      const expected = viewport.worldToScreen(world(1, 1));
+      const dot = Array.from(renderer.svg.querySelectorAll('circle')).find(
+        (c) => c.getAttribute('cx') === String(expected.x) && c.getAttribute('fill') === '#ff0000',
+      );
+      expect(dot).toBeTruthy();
+    });
+
+    // without an explicit color the dot should fall back to the renderer default dark ink
+    it('uses the default dark fill when point.color is not set', () => {
+      scene.addPoint(1, 1);
+      renderer.draw();
+      const expected = viewport.worldToScreen(world(1, 1));
+      const dot = Array.from(renderer.svg.querySelectorAll('circle')).find(
+        (c) => c.getAttribute('cx') === String(expected.x) && c.getAttribute('fill') === '#1a1a1a',
+      );
+      expect(dot).toBeTruthy();
+    });
+  });
+
   it.skip('placeholder', () => {
     // Tests will be added in subsequent tasks
   });
