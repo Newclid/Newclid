@@ -87,7 +87,10 @@ export function attachToolDispatcher(
     // Other tools: accept when the scene actually changed.
     const clickAccepted = slotChanged || (!toolBefore && scene.revision !== rev);
     if (clickAccepted) {
-      scene.pushUndo(before, toolBefore ? () => tool.restoreState?.(toolBefore) : undefined);
+      const toolName = scene.tool;
+      scene.pushUndo(before, toolBefore ? () => {
+        if (scene.tool === toolName) tool.restoreState?.(toolBefore);
+      } : undefined);
       scene.setSlotError(null);
     }
     if (toolBefore && toolAfter) {
