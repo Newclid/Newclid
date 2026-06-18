@@ -183,7 +183,7 @@ export function createToolbar(
     title: 'Solve a new problem',
   }) as HTMLButtonElement;
   createProofBtn.appendChild(jgexIcon());
-  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Solve new problem']));
+  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Solve New Problem']));
   createProofBtn.addEventListener('click', () => proofChoice.open());
 
   // ---------- theorems ----------
@@ -267,7 +267,7 @@ export function createToolbar(
     class: 'panel-tab-btn',
     role: 'tab',
     'aria-selected': 'false',
-  }, ['Proofs']) as HTMLButtonElement;
+  }, ['My Solutions']) as HTMLButtonElement;
   panelTabSwitch.appendChild(toolbarTabBtn);
   panelTabSwitch.appendChild(proofsTabBtn);
   toolbarTabBtn.addEventListener('click', () => {
