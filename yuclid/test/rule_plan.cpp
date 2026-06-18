@@ -158,4 +158,35 @@ BOOST_AUTO_TEST_CASE(variable_indices_exclude_constants) {
     BOOST_CHECK_EQUAL(p->pattern.args.back(), "1/2");
 }
 
+/**
+ * @brief Every hypothesis and conclusion is classified into exactly one bucket.
+ */
+BOOST_AUTO_TEST_CASE(every_predicate_classified_once) {
+    RuleSchema s = schema({"A", "B", "C", "D"},
+            { pat("coll", {"A", "B", "C"}),
+            pat("ncoll", {"A", "B", "D"}) },
+            { pat("cong", {"A", "B", "C", "D"}) });
+    RulePlan plan = build_rule_plan(s);
+
+    const size_t total = plan.candidate_generators.size()
+        + plan.validators.size()
+        + plan.candidate_filters.size()
+        + plan.unsupported_predicates.size();
+    BOOST_CHECK_EQUAL(total, s.hypotheses.size() + s.conclusions.size());
+}
+
+/**
+ * @brief Planned predicates carry a positive base cost from the metadata table.
+ */
+BOOST_AUTO_TEST_CASE(generator_has_positive_base_cost) {
+    RulePlan plan = build_rule_plan(
+            schema({"A", "B", "C"},
+                { pat("coll", {"A", "B", "C"}) },
+                { pat("coll", {"A", "B", "C"}) }));
+
+    const PlannedPredicate* p = find_pred(plan.candidate_generators, "coll");
+    BOOST_REQUIRE(p != nullptr);
+    BOOST_CHECK_GT(p->metadata.base_cost, 0u);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
