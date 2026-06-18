@@ -1,192 +1,534 @@
 #define BOOST_TEST_MODULE rule_plan_test
+
 #include <boost/test/unit_test.hpp>
 
+#include <cstddef>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "matchers/rule_plan.hpp"
-#include "matchers/rule_schema.hpp"
+#include "rules/rule_schema.hpp"
 
-using namespace std;
 using namespace Yuclid;
 
-// ---- helpers -----------------------------------------------------------------
 namespace {
 
-    RulePredicatePattern pat(string name, vector<string> args) {
-        return RulePredicatePattern{ .name = std::move(name), .args = std::move(args) };
-    }
-
-    RuleSchema schema(vector<string> vars,
-            vector<RulePredicatePattern> hyps,
-            vector<RulePredicatePattern> concls) {
-        return RuleSchema{
-            .id = "test_rule",
-            .variables = std::move(vars),
-            .hypotheses = std::move(hyps),
-            .conclusions = std::move(concls)
+    RulePredicatePattern pattern(
+        std::string name,
+        std::vector<std::string> arguments
+    ) {
+        return RulePredicatePattern{
+            .name = std::move(name),
+            .args = std::move(arguments),
         };
     }
 
-    const PlannedPredicate* find_pred(const vector<PlannedPredicate>& v,
-            const string& name) {
-        for (const auto& p : v) {
-            if (p.pattern.name == name) {
-                return &p;
+    RuleSchema make_schema(
+        std::vector<std::string> variables,
+        std::vector<RulePredicatePattern> hypotheses,
+        std::vector<RulePredicatePattern> conclusions
+    ) {
+        return RuleSchema{
+            .id = "test_rule",
+            .variables = std::move(variables),
+            .hypotheses = std::move(hypotheses),
+            .conclusions = std::move(conclusions),
+        };
+    }
+
+    const PlannedPredicate* find_predicate(
+        const std::vector<PlannedPredicate>& predicates,
+        const std::string& name
+    ) {
+        for (const PlannedPredicate& predicate : predicates) {
+            if (predicate.pattern.name == name) {
+                return &predicate;
             }
         }
+
         return nullptr;
     }
 
-    bool contains_pred(const vector<PlannedPredicate>& v, const string& name) {
-        return find_pred(v, name) != nullptr;
+    bool contains_predicate(
+        const std::vector<PlannedPredicate>& predicates,
+        const std::string& name
+    ) {
+        return find_predicate(predicates, name) != nullptr;
     }
 
 }  // namespace
 
 BOOST_AUTO_TEST_SUITE(rule_plan_suite)
 
-    /**
-     * @brief coll/cong predicates are classified as candidate generators.
-     */
-    BOOST_AUTO_TEST_CASE(generator_predicates_classified) {
-        RulePlan plan = build_rule_plan(
-                schema({"A", "B", "C"},
-                    { pat("coll", {"A", "B", "C"}) },
-                    { pat("cong", {"A", "B", "A", "C"}) }));
-
-        BOOST_CHECK(contains_pred(plan.candidate_generators, "coll"));
-        BOOST_CHECK(contains_pred(plan.candidate_generators, "cong"));
-        BOOST_CHECK(!contains_pred(plan.unsupported_predicates, "coll"));
-    }
-
 /**
- * @brief Predicates absent from the metadata table land in unsupported_predicates.
+ * The generated plan keeps a pointer to the source schema.
  */
-BOOST_AUTO_TEST_CASE(unsupported_predicate_flagged) {
-    RulePlan plan = build_rule_plan(
-            schema({"A", "B", "C"},
-                { pat("ncoll", {"A", "B", "C"}) },
-                { pat("coll", {"A", "B", "C"}) }));
+BOOST_AUTO_TEST_CASE(plan_references_source_schema) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C"},
+        {
+            pattern("coll", {"A", "B", "C"}),
+        },
+        {
+            pattern("cong", {"A", "B", "A", "C"}),
+        }
+    );
 
-    BOOST_CHECK(contains_pred(plan.unsupported_predicates, "ncoll"));
-    BOOST_CHECK(!contains_pred(plan.candidate_generators, "ncoll"));
-    BOOST_CHECK(!contains_pred(plan.validators, "ncoll"));
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    BOOST_CHECK_EQUAL(plan.schema, &rule_schema);
+    BOOST_CHECK_EQUAL(plan.schema->id, "test_rule");
 }
 
 /**
- * @brief A supported non-generator predicate is planned, not dropped.
+ * Candidate-generator predicates are placed in the generator collection.
  */
-BOOST_AUTO_TEST_CASE(supported_non_generator_is_planned) {
-    RulePlan plan = build_rule_plan(
-            schema({"A", "B", "C", "D"},
-                { pat("midp", {"A", "B", "C"}) },
-                { pat("coll", {"A", "B", "D"}) }));
+BOOST_AUTO_TEST_CASE(generator_predicates_are_classified) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C"},
+        {
+            pattern("coll", {"A", "B", "C"}),
+        },
+        {
+            pattern("cong", {"A", "B", "A", "C"}),
+        }
+    );
 
-    // midp is supported by the statement builder, so it must not be unsupported.
-    BOOST_CHECK(!contains_pred(plan.unsupported_predicates, "midp"));
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    BOOST_CHECK(
+        contains_predicate(
+            plan.candidate_generators,
+            "coll"
+        )
+    );
+    BOOST_CHECK(
+        contains_predicate(
+            plan.candidate_generators,
+            "cong"
+        )
+    );
+
+    BOOST_CHECK(
+        !contains_predicate(
+            plan.validators,
+            "coll"
+        )
+    );
+    BOOST_CHECK(
+        !contains_predicate(
+            plan.unsupported_predicates,
+            "coll"
+        )
+    );
 }
 
 /**
- * @brief variable_indices are the declared-variable indices in declared order.
+ * Predicates absent from the metadata table are marked unsupported.
  */
-BOOST_AUTO_TEST_CASE(variable_indices_basic) {
-    RulePlan plan = build_rule_plan(
-            schema({"A", "B", "C"},
-                { pat("coll", {"A", "B", "C"}) },
-                { pat("coll", {"A", "B", "C"}) }));
+BOOST_AUTO_TEST_CASE(unknown_predicate_is_marked_unsupported) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C"},
+        {
+            pattern("ncoll", {"A", "B", "C"}),
+        },
+        {
+            pattern("coll", {"A", "B", "C"}),
+        }
+    );
 
-    const PlannedPredicate* p = find_pred(plan.candidate_generators, "coll");
-    BOOST_REQUIRE(p != nullptr);
-    BOOST_REQUIRE_EQUAL(p->variable_indices.size(), 3u);
-    BOOST_CHECK_EQUAL(p->variable_indices[0], 0u);
-    BOOST_CHECK_EQUAL(p->variable_indices[1], 1u);
-    BOOST_CHECK_EQUAL(p->variable_indices[2], 2u);
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    BOOST_CHECK(
+        contains_predicate(
+            plan.unsupported_predicates,
+            "ncoll"
+        )
+    );
+    BOOST_CHECK(
+        !contains_predicate(
+            plan.candidate_generators,
+            "ncoll"
+        )
+    );
+    BOOST_CHECK(
+        !contains_predicate(
+            plan.candidate_filters,
+            "ncoll"
+        )
+    );
+    BOOST_CHECK(
+        !contains_predicate(
+            plan.validators,
+            "ncoll"
+        )
+    );
 }
 
 /**
- * @brief Indices follow first appearance in the pattern, not declared order.
+ * Supported predicates without a generator are planned as validators.
  */
-BOOST_AUTO_TEST_CASE(variable_indices_follow_pattern_order) {
-    RulePlan plan = build_rule_plan(
-            schema({"A", "B", "C"},
-                { pat("coll", {"C", "A", "B"}) },      // pattern order: C, A, B
-                { pat("coll", {"A", "B", "C"}) }));
+BOOST_AUTO_TEST_CASE(
+    supported_non_generator_is_planned_as_validator
+) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C", "D"},
+        {
+            pattern("midp", {"A", "B", "C"}),
+        },
+        {
+            pattern("coll", {"A", "B", "D"}),
+        }
+    );
 
-    const PlannedPredicate* p = find_pred(plan.candidate_generators, "coll");
-    BOOST_REQUIRE(p != nullptr);
-    BOOST_REQUIRE_EQUAL(p->variable_indices.size(), 3u);
-    BOOST_CHECK_EQUAL(p->variable_indices[0], 2u);  // C
-    BOOST_CHECK_EQUAL(p->variable_indices[1], 0u);  // A
-    BOOST_CHECK_EQUAL(p->variable_indices[2], 1u);  // B
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    BOOST_CHECK(
+        contains_predicate(
+            plan.validators,
+            "midp"
+        )
+    );
+    BOOST_CHECK(
+        !contains_predicate(
+            plan.candidate_generators,
+            "midp"
+        )
+    );
+    BOOST_CHECK(
+        !contains_predicate(
+            plan.unsupported_predicates,
+            "midp"
+        )
+    );
 }
 
 /**
- * @brief A variable repeated within a pattern appears once, at first appearance.
+ * Variable indices use the positions from the schema declaration.
  */
-BOOST_AUTO_TEST_CASE(variable_indices_dedup_repeated_variable) {
-    RulePlan plan = build_rule_plan(
-            schema({"A", "B", "C"},
-                { pat("cong", {"A", "B", "A", "C"}) },  // A repeated
-                { pat("coll", {"A", "B", "C"}) }));
+BOOST_AUTO_TEST_CASE(variable_indices_match_schema_indices) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C"},
+        {
+            pattern("coll", {"A", "B", "C"}),
+        },
+        {}
+    );
 
-    const PlannedPredicate* p = find_pred(plan.candidate_generators, "cong");
-    BOOST_REQUIRE(p != nullptr);
-    BOOST_REQUIRE_EQUAL(p->variable_indices.size(), 3u);  // A, B, C (not 4)
-    BOOST_CHECK_EQUAL(p->variable_indices[0], 0u);  // A
-    BOOST_CHECK_EQUAL(p->variable_indices[1], 1u);  // B
-    BOOST_CHECK_EQUAL(p->variable_indices[2], 2u);  // C
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    const PlannedPredicate* predicate =
+        find_predicate(
+            plan.candidate_generators,
+            "coll"
+        );
+
+    BOOST_REQUIRE(predicate != nullptr);
+    BOOST_REQUIRE_EQUAL(
+        predicate->variable_indices.size(),
+        3U
+    );
+
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[0],
+        0U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[1],
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[2],
+        2U
+    );
 }
 
 /**
- * @brief Constant arguments are excluded from variable_indices but kept in args.
+ * Indices are stored in the order in which variables first occur in the
+ * predicate pattern.
  */
-BOOST_AUTO_TEST_CASE(variable_indices_exclude_constants) {
-    RulePlan plan = build_rule_plan(
-            schema({"A", "B", "C", "D"},
-                { pat("rconst", {"A", "B", "C", "D", "1/2"}) },  // 1/2 is a constant
-                { pat("coll", {"A", "B", "C"}) }));
+BOOST_AUTO_TEST_CASE(
+    variable_indices_follow_pattern_order
+) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C"},
+        {
+            pattern("coll", {"C", "A", "B"}),
+        },
+        {}
+    );
 
-    const PlannedPredicate* p = find_pred(plan.validators, "rconst");
-    if (p == nullptr) {  // depending on metadata, rconst may be a filter
-        p = find_pred(plan.candidate_filters, "rconst");
-    }
-    BOOST_REQUIRE(p != nullptr);
-    BOOST_REQUIRE_EQUAL(p->variable_indices.size(), 4u);  // A,B,C,D only
-    BOOST_CHECK_EQUAL(p->variable_indices[3], 3u);
-    // The constant survives in the pattern itself.
-    BOOST_CHECK_EQUAL(p->pattern.args.back(), "1/2");
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    const PlannedPredicate* predicate =
+        find_predicate(
+            plan.candidate_generators,
+            "coll"
+        );
+
+    BOOST_REQUIRE(predicate != nullptr);
+    BOOST_REQUIRE_EQUAL(
+        predicate->variable_indices.size(),
+        3U
+    );
+
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[0],
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[1],
+        0U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[2],
+        1U
+    );
 }
 
 /**
- * @brief Every hypothesis and conclusion is classified into exactly one bucket.
+ * A repeated variable is included only once, at its first occurrence.
  */
-BOOST_AUTO_TEST_CASE(every_predicate_classified_once) {
-    RuleSchema s = schema({"A", "B", "C", "D"},
-            { pat("coll", {"A", "B", "C"}),
-            pat("ncoll", {"A", "B", "D"}) },
-            { pat("cong", {"A", "B", "C", "D"}) });
-    RulePlan plan = build_rule_plan(s);
+BOOST_AUTO_TEST_CASE(
+    repeated_variable_index_is_deduplicated
+) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C"},
+        {
+            pattern(
+                "cong",
+                {"A", "B", "A", "C"}
+            ),
+        },
+        {}
+    );
 
-    const size_t total = plan.candidate_generators.size()
-        + plan.validators.size()
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    const PlannedPredicate* predicate =
+        find_predicate(
+            plan.candidate_generators,
+            "cong"
+        );
+
+    BOOST_REQUIRE(predicate != nullptr);
+    BOOST_REQUIRE_EQUAL(
+        predicate->variable_indices.size(),
+        3U
+    );
+
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[0],
+        0U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[1],
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[2],
+        2U
+    );
+}
+
+/**
+ * Constant arguments remain in the predicate pattern but are excluded from
+ * its variable-index list.
+ */
+BOOST_AUTO_TEST_CASE(
+    constant_arguments_are_excluded_from_variable_indices
+) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C", "D"},
+        {
+            pattern(
+                "rconst",
+                {"A", "B", "C", "D", "1/2"}
+            ),
+        },
+        {}
+    );
+
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    const PlannedPredicate* predicate =
+        find_predicate(
+            plan.validators,
+            "rconst"
+        );
+
+    BOOST_REQUIRE(predicate != nullptr);
+    BOOST_REQUIRE_EQUAL(
+        predicate->variable_indices.size(),
+        4U
+    );
+
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[0],
+        0U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[1],
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[2],
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->variable_indices[3],
+        3U
+    );
+
+    BOOST_REQUIRE_EQUAL(
+        predicate->pattern.args.size(),
+        5U
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->pattern.args.back(),
+        "1/2"
+    );
+}
+
+/**
+ * Every hypothesis and conclusion is classified into one plan collection.
+ */
+BOOST_AUTO_TEST_CASE(every_predicate_is_classified_once) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C", "D"},
+        {
+            pattern("coll", {"A", "B", "C"}),
+            pattern("ncoll", {"A", "B", "D"}),
+            pattern("midp", {"A", "C", "D"}),
+        },
+        {
+            pattern("cong", {"A", "B", "C", "D"}),
+        }
+    );
+
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    const std::size_t classified_count =
+        plan.candidate_generators.size()
         + plan.candidate_filters.size()
+        + plan.validators.size()
         + plan.unsupported_predicates.size();
-    BOOST_CHECK_EQUAL(total, s.hypotheses.size() + s.conclusions.size());
+
+    const std::size_t predicate_count =
+        rule_schema.hypotheses.size()
+        + rule_schema.conclusions.size();
+
+    BOOST_CHECK_EQUAL(
+        classified_count,
+        predicate_count
+    );
+
+    BOOST_CHECK_EQUAL(
+        plan.candidate_generators.size(),
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        plan.validators.size(),
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        plan.unsupported_predicates.size(),
+        1U
+    );
 }
 
 /**
- * @brief Planned predicates carry a positive base cost from the metadata table.
+ * Metadata is copied into the planned predicate.
  */
-BOOST_AUTO_TEST_CASE(generator_has_positive_base_cost) {
-    RulePlan plan = build_rule_plan(
-            schema({"A", "B", "C"},
-                { pat("coll", {"A", "B", "C"}) },
-                { pat("coll", {"A", "B", "C"}) }));
+BOOST_AUTO_TEST_CASE(
+    planned_predicate_contains_matching_metadata
+) {
+    RuleSchema rule_schema = make_schema(
+        {"A", "B", "C"},
+        {
+            pattern("coll", {"A", "B", "C"}),
+        },
+        {}
+    );
 
-    const PlannedPredicate* p = find_pred(plan.candidate_generators, "coll");
-    BOOST_REQUIRE(p != nullptr);
-    BOOST_CHECK_GT(p->metadata.base_cost, 0u);
+    RulePlan plan = build_rule_plan(rule_schema);
+
+    const PlannedPredicate* predicate =
+        find_predicate(
+            plan.candidate_generators,
+            "coll"
+        );
+
+    BOOST_REQUIRE(predicate != nullptr);
+
+    BOOST_CHECK(
+        predicate->metadata.role
+        == PredicateMatchingRole::CandidateGenerator
+    );
+    BOOST_CHECK_EQUAL(
+        predicate->metadata.base_cost,
+        10
+    );
+    BOOST_CHECK_GT(
+        predicate->metadata.base_cost,
+        0
+    );
+}
+
+/**
+ * Multiple schemas produce plans in the same order and retain references to
+ * their respective source schemas.
+ */
+BOOST_AUTO_TEST_CASE(build_rule_plans_preserves_schema_order) {
+    std::vector<RuleSchema> schemas;
+
+    schemas.push_back(
+        make_schema(
+            {"A", "B", "C"},
+            {
+                pattern("coll", {"A", "B", "C"}),
+            },
+            {}
+        )
+    );
+
+    schemas.push_back(
+        make_schema(
+            {"P", "Q", "R", "S"},
+            {
+                pattern("cong", {"P", "Q", "R", "S"}),
+            },
+            {}
+        )
+    );
+
+    const std::vector<RulePlan> plans =
+        build_rule_plans(schemas);
+
+    BOOST_REQUIRE_EQUAL(plans.size(), 2U);
+
+    BOOST_CHECK_EQUAL(
+        plans[0].schema,
+        &schemas[0]
+    );
+    BOOST_CHECK_EQUAL(
+        plans[1].schema,
+        &schemas[1]
+    );
+
+    BOOST_CHECK(
+        contains_predicate(
+            plans[0].candidate_generators,
+            "coll"
+        )
+    );
+    BOOST_CHECK(
+        contains_predicate(
+            plans[1].candidate_generators,
+            "cong"
+        )
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
