@@ -198,7 +198,7 @@ export class Renderer {
       if (p1?.kind !== 'point' || p2?.kind !== 'point') continue;
       const s1 = this.viewport.worldToScreen(world(p1.x, p1.y));
       const s2 = this.viewport.worldToScreen(world(p2.x, p2.y));
-      this.line(s1.x, s1.y, s2.x, s2.y, '#888', 1.5);  // construction color
+      this.line(s1.x, s1.y, s2.x, s2.y, STYLE.circleStroke, 2);
     }
     // Draw lines: through both points, extended in both directions.
     for (const [p1Id, p2Id] of o.lines ?? []) {
@@ -212,7 +212,7 @@ export class Renderer {
       if (len < 1e-6) continue;
       const ext = 10000;
       const nx = (dx / len) * ext, ny = (dy / len) * ext;
-      this.line(s1.x - nx, s1.y - ny, s1.x + nx, s1.y + ny, '#888', 1.5);
+      this.line(s1.x - nx, s1.y - ny, s1.x + nx, s1.y + ny, STYLE.circleStroke, 2);
     }
     // Draw circles
     for (const circ of o.circles) {
@@ -225,8 +225,8 @@ export class Renderer {
       el.setAttribute('cy', String(sc.y));
       el.setAttribute('r', String(r));
       el.setAttribute('fill', 'none');
-      el.setAttribute('stroke', '#888');
-      el.setAttribute('stroke-width', '1.5');
+      el.setAttribute('stroke', STYLE.circleStroke);
+      el.setAttribute('stroke-width', '2');
       this.svg.appendChild(el);
     }
     // Draw circumcircles: the circle through three points.
@@ -244,8 +244,8 @@ export class Renderer {
       el.setAttribute('cy', String(sc.y));
       el.setAttribute('r', String(r));
       el.setAttribute('fill', 'none');
-      el.setAttribute('stroke', '#888');
-      el.setAttribute('stroke-width', '1.5');
+      el.setAttribute('stroke', STYLE.circleStroke);
+      el.setAttribute('stroke-width', '2');
       this.svg.appendChild(el);
     }
   }
