@@ -87,4 +87,75 @@ BOOST_AUTO_TEST_CASE(supported_non_generator_is_planned) {
     BOOST_CHECK(!contains_pred(plan.unsupported_predicates, "midp"));
 }
 
+/**
+ * @brief variable_indices are the declared-variable indices in declared order.
+ */
+BOOST_AUTO_TEST_CASE(variable_indices_basic) {
+    RulePlan plan = build_rule_plan(
+            schema({"A", "B", "C"},
+                { pat("coll", {"A", "B", "C"}) },
+                { pat("coll", {"A", "B", "C"}) }));
+
+    const PlannedPredicate* p = find_pred(plan.candidate_generators, "coll");
+    BOOST_REQUIRE(p != nullptr);
+    BOOST_REQUIRE_EQUAL(p->variable_indices.size(), 3u);
+    BOOST_CHECK_EQUAL(p->variable_indices[0], 0u);
+    BOOST_CHECK_EQUAL(p->variable_indices[1], 1u);
+    BOOST_CHECK_EQUAL(p->variable_indices[2], 2u);
+}
+
+/**
+ * @brief Indices follow first appearance in the pattern, not declared order.
+ */
+BOOST_AUTO_TEST_CASE(variable_indices_follow_pattern_order) {
+    RulePlan plan = build_rule_plan(
+            schema({"A", "B", "C"},
+                { pat("coll", {"C", "A", "B"}) },      // pattern order: C, A, B
+                { pat("coll", {"A", "B", "C"}) }));
+
+    const PlannedPredicate* p = find_pred(plan.candidate_generators, "coll");
+    BOOST_REQUIRE(p != nullptr);
+    BOOST_REQUIRE_EQUAL(p->variable_indices.size(), 3u);
+    BOOST_CHECK_EQUAL(p->variable_indices[0], 2u);  // C
+    BOOST_CHECK_EQUAL(p->variable_indices[1], 0u);  // A
+    BOOST_CHECK_EQUAL(p->variable_indices[2], 1u);  // B
+}
+
+/**
+ * @brief A variable repeated within a pattern appears once, at first appearance.
+ */
+BOOST_AUTO_TEST_CASE(variable_indices_dedup_repeated_variable) {
+    RulePlan plan = build_rule_plan(
+            schema({"A", "B", "C"},
+                { pat("cong", {"A", "B", "A", "C"}) },  // A repeated
+                { pat("coll", {"A", "B", "C"}) }));
+
+    const PlannedPredicate* p = find_pred(plan.candidate_generators, "cong");
+    BOOST_REQUIRE(p != nullptr);
+    BOOST_REQUIRE_EQUAL(p->variable_indices.size(), 3u);  // A, B, C (not 4)
+    BOOST_CHECK_EQUAL(p->variable_indices[0], 0u);  // A
+    BOOST_CHECK_EQUAL(p->variable_indices[1], 1u);  // B
+    BOOST_CHECK_EQUAL(p->variable_indices[2], 2u);  // C
+}
+
+/**
+ * @brief Constant arguments are excluded from variable_indices but kept in args.
+ */
+BOOST_AUTO_TEST_CASE(variable_indices_exclude_constants) {
+    RulePlan plan = build_rule_plan(
+            schema({"A", "B", "C", "D"},
+                { pat("rconst", {"A", "B", "C", "D", "1/2"}) },  // 1/2 is a constant
+                { pat("coll", {"A", "B", "C"}) }));
+
+    const PlannedPredicate* p = find_pred(plan.validators, "rconst");
+    if (p == nullptr) {  // depending on metadata, rconst may be a filter
+        p = find_pred(plan.candidate_filters, "rconst");
+    }
+    BOOST_REQUIRE(p != nullptr);
+    BOOST_REQUIRE_EQUAL(p->variable_indices.size(), 4u);  // A,B,C,D only
+    BOOST_CHECK_EQUAL(p->variable_indices[3], 3u);
+    // The constant survives in the pattern itself.
+    BOOST_CHECK_EQUAL(p->pattern.args.back(), "1/2");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
