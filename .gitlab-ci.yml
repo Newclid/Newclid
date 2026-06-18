@@ -240,6 +240,10 @@ backend-integration-tests-linux:
         - .gitlab-ci.yml
     - when: never
 
+  services:
+  - name: redis:7-alpine
+    alias: redis
+
   variables:
     DEBIAN_FRONTEND: noninteractive
 
@@ -252,6 +256,8 @@ backend-integration-tests-linux:
       -DUSE_STATIC_LINK=OFF
       -DBUILD_DOC=OFF
       -DCMAKE_BUILD_TYPE=Release
+
+    REDIS_URL: "redis://redis:6379/15"
 
   before_script:
     - apt-get update -qq
