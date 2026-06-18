@@ -390,4 +390,214 @@ BOOST_AUTO_TEST_CASE(repeated_access_reuses_cached_views) {
     );
 }
 
+/**
+ * @brief Equal side lengths and equal diagonal lengths of a square are grouped
+ * into separate buckets.
+ */
+BOOST_AUTO_TEST_CASE(equal_segment_lengths_are_grouped) {
+    Problem problem;
+
+    add_point(problem, "A", 0.0, 0.0);
+    add_point(problem, "B", 1.0, 0.0);
+    add_point(problem, "C", 1.0, 1.0);
+    add_point(problem, "D", 0.0, 1.0);
+
+    LazyGeometryCache cache(problem);
+
+    const std::vector<PointPair>& point_pairs =
+        cache.point_pairs();
+
+    const SegmentBuckets& segment_buckets =
+        cache.segment_length_buckets();
+
+    BOOST_REQUIRE_EQUAL(
+        segment_buckets.buckets.size(),
+        2U
+    );
+
+    const std::vector<PointPairId>& side_bucket =
+        segment_buckets.buckets.at(0);
+
+    const std::vector<PointPairId>& diagonal_bucket =
+        segment_buckets.buckets.at(1);
+
+    BOOST_CHECK_EQUAL(side_bucket.size(), 4U);
+    BOOST_CHECK_EQUAL(diagonal_bucket.size(), 2U);
+
+    const double side_length =
+        segment_bucket_length(
+            problem,
+            point_pairs,
+            side_bucket
+        );
+
+    const double diagonal_length =
+        segment_bucket_length(
+            problem,
+            point_pairs,
+            diagonal_bucket
+        );
+
+    BOOST_CHECK_EQUAL(side_length, 1.0);
+    BOOST_CHECK_EQUAL(diagonal_length, 2.0);
+    BOOST_CHECK_LT(side_length, diagonal_length);
+
+    for (PointPairId point_pair_id : side_bucket) {
+        BOOST_CHECK_EQUAL(
+            squared_length(
+                problem,
+                point_pairs.at(point_pair_id)
+            ),
+            side_length
+        );
+    }
+
+    for (
+        PointPairId point_pair_id :
+        diagonal_bucket
+    ) {
+        BOOST_CHECK_EQUAL(
+            squared_length(
+                problem,
+                point_pairs.at(point_pair_id)
+            ),
+            diagonal_length
+        );
+    }
+}
+
+/**
+ * @brief Segment buckets are ordered by increasing squared segment length.
+ */
+BOOST_AUTO_TEST_CASE(
+    segment_length_buckets_are_in_ascending_order
+) {
+    Problem problem;
+
+    add_point(problem, "A", 0.0, 0.0);
+    add_point(problem, "B", 1.0, 0.0);
+    add_point(problem, "C", 2.0, 0.0);
+    add_point(problem, "D", 3.0, 0.0);
+
+    LazyGeometryCache cache(problem);
+
+    const std::vector<PointPair>& point_pairs =
+        cache.point_pairs();
+
+    const SegmentBuckets& segment_buckets =
+        cache.segment_length_buckets();
+
+    BOOST_REQUIRE_EQUAL(
+        segment_buckets.buckets.size(),
+        2U
+    );
+
+    const double first_length =
+        segment_bucket_length(
+            problem,
+            point_pairs,
+            segment_buckets.buckets.at(0)
+        );
+
+    const double second_length =
+        segment_bucket_length(
+            problem,
+            point_pairs,
+            segment_buckets.buckets.at(1)
+        );
+
+    BOOST_CHECK_EQUAL(first_length, 1.0);
+    BOOST_CHECK_EQUAL(second_length, 4.0);
+    BOOST_CHECK_LT(first_length, second_length);
+}
+
+/**
+ * @brief A segment length occurring only once is not stored as a bucket.
+ */
+BOOST_AUTO_TEST_CASE(singleton_segment_lengths_are_skipped) {
+    Problem problem;
+
+    add_point(problem, "A", 0.0, 0.0);
+    add_point(problem, "B", 1.0, 0.0);
+    add_point(problem, "C", 0.0, 1.0);
+
+    LazyGeometryCache cache(problem);
+
+    const std::vector<PointPair>& point_pairs =
+        cache.point_pairs();
+
+    const SegmentBuckets& segment_buckets =
+        cache.segment_length_buckets();
+
+    const PointPairId ab =
+        find_point_pair_id(
+            point_pairs,
+            0,
+            1
+        );
+
+    const PointPairId ac =
+        find_point_pair_id(
+            point_pairs,
+            0,
+            2
+        );
+
+    const PointPairId bc =
+        find_point_pair_id(
+            point_pairs,
+            1,
+            2
+        );
+
+    BOOST_REQUIRE_EQUAL(
+        segment_buckets.buckets.size(),
+        1U
+    );
+
+    const std::vector<PointPairId>& equal_sides =
+        segment_buckets.buckets.at(0);
+
+    BOOST_REQUIRE_EQUAL(equal_sides.size(), 2U);
+
+    BOOST_CHECK(
+        contains_point_pair(equal_sides, ab)
+    );
+
+    BOOST_CHECK(
+        contains_point_pair(equal_sides, ac)
+    );
+
+    BOOST_CHECK(
+        !contains_point_pair(equal_sides, bc)
+    );
+}
+
+/**
+ * @brief Every stored segment bucket contains at least two point pairs.
+ */
+BOOST_AUTO_TEST_CASE(
+    segment_buckets_never_contain_singletons
+) {
+    Problem problem;
+
+    add_point(problem, "A", 0.0, 0.0);
+    add_point(problem, "B", 1.0, 0.0);
+    add_point(problem, "C", 0.0, 1.0);
+    add_point(problem, "D", 2.0, 0.0);
+    add_point(problem, "E", 0.0, 2.0);
+
+    LazyGeometryCache cache(problem);
+
+    const SegmentBuckets& segment_buckets =
+        cache.segment_length_buckets();
+
+    for (
+        const std::vector<PointPairId>& bucket :
+        segment_buckets.buckets
+    ) {
+        BOOST_CHECK_GE(bucket.size(), 2U);
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
