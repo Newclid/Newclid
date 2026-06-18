@@ -1,58 +1,97 @@
 #define BOOST_TEST_MODULE filter_state_test
+
 #include <boost/test/unit_test.hpp>
 
+#include <cstddef>
 #include <stdexcept>
 
 #include "matchers/filter_state.hpp"
 
-using namespace std;
 using namespace Yuclid;
 
 BOOST_AUTO_TEST_SUITE(filter_state_suite)
 
 /**
- * @brief A freshly constructed FilterState has no filter marked as passed.
+ * A freshly constructed FilterState has no filter marked as used.
  */
-BOOST_AUTO_TEST_CASE(fresh_state_all_unused) {
+BOOST_AUTO_TEST_CASE(fresh_state_has_no_used_filters) {
     FilterState state(3);
-    for (size_t i = 0; i < 3; ++i) {
-        BOOST_CHECK(!state.is_used(i));
+
+    for (
+        std::size_t filter_index = 0;
+        filter_index < 3;
+        ++filter_index
+    ) {
+        BOOST_CHECK(
+            !state.is_used(filter_index)
+        );
     }
 }
 
 /**
- * @brief A plan with zero validators yields a valid, empty FilterState.
+ * A state with no filters is valid, and every index remains unused.
  */
-BOOST_AUTO_TEST_CASE(zero_validators_ok) {
-    BOOST_CHECK_NO_THROW(FilterState(0));
+BOOST_AUTO_TEST_CASE(zero_filter_state_is_valid) {
+    FilterState state(0);
+
+    BOOST_CHECK(!state.is_used(0));
+
+    state.mark_used(0);
+
+    BOOST_CHECK(!state.is_used(0));
 }
 
 /**
- * @brief The bitset-backed state rejects more than 64 validators.
+ * Exactly 64 filters are supported.
  */
-BOOST_AUTO_TEST_CASE(validator_count_ceiling_throws) {
-    BOOST_CHECK_NO_THROW(FilterState(64));               // at the limit
-    BOOST_CHECK_THROW(FilterState(65), std::invalid_argument);  // one over
+BOOST_AUTO_TEST_CASE(filter_count_at_limit_is_accepted) {
+    BOOST_CHECK_NO_THROW(
+        (void)FilterState(64)
+    );
 }
 
 /**
- * @brief Marking a filter flips only that index to "used".
+ * More than 64 filters are rejected because the state uses a 64-bit mask.
  */
-BOOST_AUTO_TEST_CASE(mark_sets_only_target) {
+BOOST_AUTO_TEST_CASE(filter_count_above_limit_throws) {
+    BOOST_CHECK_THROW(
+        (void)FilterState(65),
+        std::invalid_argument
+    );
+}
+
+/**
+ * The final valid filter index can be marked safely.
+ */
+BOOST_AUTO_TEST_CASE(highest_valid_filter_index_can_be_marked) {
+    FilterState state(64);
+
+    state.mark_used(63);
+
+    BOOST_CHECK(state.is_used(63));
+    BOOST_CHECK(!state.is_used(62));
+}
+
+/**
+ * Marking one filter changes only that filter.
+ */
+BOOST_AUTO_TEST_CASE(mark_used_changes_only_target_filter) {
     FilterState state(4);
+
     state.mark_used(2);
 
-    BOOST_CHECK(state.is_used(2));
     BOOST_CHECK(!state.is_used(0));
     BOOST_CHECK(!state.is_used(1));
+    BOOST_CHECK(state.is_used(2));
     BOOST_CHECK(!state.is_used(3));
 }
 
 /**
- * @brief Several independent filters can be marked.
+ * Several independent filters can be marked as used.
  */
-BOOST_AUTO_TEST_CASE(mark_multiple) {
+BOOST_AUTO_TEST_CASE(multiple_filters_can_be_marked) {
     FilterState state(4);
+
     state.mark_used(0);
     state.mark_used(3);
 
@@ -63,51 +102,135 @@ BOOST_AUTO_TEST_CASE(mark_multiple) {
 }
 
 /**
- * @brief Marking the same filter twice is idempotent.
+ * Marking the same filter repeatedly is idempotent.
  */
-BOOST_AUTO_TEST_CASE(mark_is_idempotent) {
+BOOST_AUTO_TEST_CASE(mark_used_is_idempotent) {
     FilterState state(2);
+
     state.mark_used(1);
     state.mark_used(1);
+
+    BOOST_CHECK(!state.is_used(0));
     BOOST_CHECK(state.is_used(1));
 }
 
 /**
- * @brief Rollback unmarks exactly the filters marked since the snapshot.
- *
- * Mirrors search(): a filter passed at a shallow level stays marked across the
- * child call, and marks made inside the child are undone on backtrack.
+ * Reading an out-of-range filter index returns false.
  */
-BOOST_AUTO_TEST_CASE(rollback_unmarks_filters_since_snapshot) {
+BOOST_AUTO_TEST_CASE(out_of_range_filter_is_not_used) {
     FilterState state(3);
-    state.mark_used(0);  // "parent" level
 
-    const auto snapshot = state.snapshot();
+    BOOST_CHECK(!state.is_used(3));
+    BOOST_CHECK(!state.is_used(100));
+}
 
-    state.mark_used(1);  // "child" level
+/**
+ * Marking an out-of-range filter index has no effect.
+ */
+BOOST_AUTO_TEST_CASE(marking_out_of_range_filter_has_no_effect) {
+    FilterState state(3);
+
+    state.mark_used(3);
+    state.mark_used(100);
+
+    for (
+        std::size_t filter_index = 0;
+        filter_index < 3;
+        ++filter_index
+    ) {
+        BOOST_CHECK(
+            !state.is_used(filter_index)
+        );
+    }
+}
+
+/**
+ * An invalid mark does not disturb existing valid marks.
+ */
+BOOST_AUTO_TEST_CASE(
+    marking_out_of_range_filter_preserves_existing_state
+) {
+    FilterState state(3);
+
+    state.mark_used(1);
+    state.mark_used(3);
+
+    BOOST_CHECK(!state.is_used(0));
     BOOST_CHECK(state.is_used(1));
-
-    state.rollback(snapshot);
-
-    BOOST_CHECK(state.is_used(0));   // parent mark survives
-    BOOST_CHECK(!state.is_used(1));  // child mark undone
     BOOST_CHECK(!state.is_used(2));
 }
 
 /**
- * @brief Rolling back to a pristine snapshot clears every mark.
+ * Rollback restores the filter marks stored in the snapshot.
+ *
+ * Marks made before the snapshot remain, while marks made afterwards are
+ * removed.
  */
-BOOST_AUTO_TEST_CASE(rollback_to_pristine) {
+BOOST_AUTO_TEST_CASE(
+    rollback_restores_filters_from_snapshot
+) {
     FilterState state(3);
-    const auto pristine = state.snapshot();
+
+    state.mark_used(0);
+
+    const FilterStateSnapshot snapshot =
+        state.snapshot();
+
+    state.mark_used(1);
+
+    BOOST_CHECK(state.is_used(0));
+    BOOST_CHECK(state.is_used(1));
+
+    state.rollback(snapshot);
+
+    BOOST_CHECK(state.is_used(0));
+    BOOST_CHECK(!state.is_used(1));
+    BOOST_CHECK(!state.is_used(2));
+}
+
+/**
+ * Rolling back to an empty snapshot removes every later mark.
+ */
+BOOST_AUTO_TEST_CASE(rollback_to_empty_snapshot) {
+    FilterState state(3);
+
+    const FilterStateSnapshot empty_snapshot =
+        state.snapshot();
 
     state.mark_used(0);
     state.mark_used(2);
-    state.rollback(pristine);
 
-    for (size_t i = 0; i < 3; ++i) {
-        BOOST_CHECK(!state.is_used(i));
+    state.rollback(empty_snapshot);
+
+    for (
+        std::size_t filter_index = 0;
+        filter_index < 3;
+        ++filter_index
+    ) {
+        BOOST_CHECK(
+            !state.is_used(filter_index)
+        );
     }
+}
+
+/**
+ * A state can be reused after rollback.
+ */
+BOOST_AUTO_TEST_CASE(state_can_be_marked_again_after_rollback) {
+    FilterState state(3);
+
+    const FilterStateSnapshot empty_snapshot =
+        state.snapshot();
+
+    state.mark_used(0);
+    state.mark_used(1);
+
+    state.rollback(empty_snapshot);
+    state.mark_used(2);
+
+    BOOST_CHECK(!state.is_used(0));
+    BOOST_CHECK(!state.is_used(1));
+    BOOST_CHECK(state.is_used(2));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
