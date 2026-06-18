@@ -13,6 +13,7 @@
 
 namespace Yuclid {
     namespace {
+        // TODO: Planned predicate: Save the indeces of all variables in order
         std::array<std::size_t, 4> get_predicate_local_var_indexes(const PlannedPredicate &predicate) {
             std::array<std::size_t, 4> predicate_var_indexes;
             int next_unique_id = 0;
@@ -54,6 +55,7 @@ namespace Yuclid {
             return assignments;
         }
 
+        // TODO: Cache This is a temporary replacement, once a key is added to the segment buckets, remove this
         const std::vector<PointPairId>* get_bucket_for_key(
             const double key,
             const LazyGeometryCache &cache
@@ -86,6 +88,7 @@ namespace Yuclid {
         std::array<std::optional<ProblemPointIndex>, 4> assignments = get_cong_assignments(predicate, mapping);
 
         // Bitmask (A = bit 3, B = bit 2, C = bit 1, D = bit 0)
+        // This mask determines exactly which geometric state we are evaluating.
         uint8_t state_mask = 0;
         if (assignments[0].has_value()) state_mask |= 0b1000; // Variable A
         if (assignments[1].has_value()) state_mask |= 0b0100; // Variable B
@@ -93,12 +96,23 @@ namespace Yuclid {
         if (assignments[3].has_value()) state_mask |= 0b0001; // Variable D
 
 
+        // TODO: Cache: Add average number of elements in buckets
         std::size_t total_pairs = cache.point_pairs().size();
         std::size_t num_buckets = cache.segment_length_buckets().buckets.size();
         // TODO: Decide on wether total_pairs is a good enough approximation for the sum of items in all buckets.
         std::size_t avg_bucket_size = (num_buckets == 0) ? 0 : (total_pairs / num_buckets);
 
-        // When set to true, the estimate will be divided by cache.num_points() 
+        // Flag to apply the "Intersection Reduction". If we know an independent point, 
+        // When we know at least one specific point (e.g., A is already bound to Point #5), 
+        // the number of valid geometric combinations is reduced significantly. 
+        //
+        // Take a problem with 100 points and 500 segments inside the buckets. If we pick a segment completely 
+        // at random, the odds that it specifically touches Point #5 are roughly 2 / 100.
+        // 
+        // If 'intersect_estimates_with_point' is true, it means our search state is strictly 
+        // anchored to a known point. Thats why we divide the raw combinations by the total number of points in 
+        // the problem (later would be changed to the total number of points inside the buckets). 
+        // This simulates the probability of a random segment actually intersecting our known anchor point.
         bool intersect_estimates_with_point = false;
 
         switch (state_mask) {
@@ -127,12 +141,23 @@ namespace Yuclid {
                 
                 const auto bucket_ptr = get_bucket_for_key(assigned_length, cache);
                 if(bucket_ptr != nullptr) {
-                    // Extract one to exclude the already assigned segment
+                    // Subtract 1 to exclude the segment we already know
                     // Multiply by 2 because a segment XY can be mapped as XY or YX!
                     estimate = (bucket_ptr->size() - 1) * 2; 
 
                     if(intersect_estimates_with_point && cache.num_points() > 0) {
-                        estimate = estimate / cache.num_points();
+                        // We apply the intersection reduction described above
+                        // We enforce a minimum estimate of 1 (estimate > 0 ? estimate : 1)
+                        // We use Ceiling Division: (estimate + N - 1) / N.
+                        // This reduces the margin of error in our estimation.
+                        // An example of how the error is reduced - Take a problem wtih 20 points. 
+                        // The estimate computed up to this point is the estimate for branches before intersecting with a concrete point.
+                        // If we dont use ceiling division, a case with 1 branch and a case with 39 branches, will both result in an estimate of 1.
+                        // With ceiling division, cases from 1 - 20 branches result in an estimate of 1, and those with 21 - 40 branches result in an estimate of 2
+                        std::size_t N = cache.num_points();
+                        estimate = (estimate + N - 1) / N;
+                        
+                        // Failsafe: Ensure we never return 0 cost for cases that can map a value
                         estimate = estimate > 0 ? estimate : 1;
                     }
                 }
@@ -140,26 +165,41 @@ namespace Yuclid {
                 break;
             }
             case 0b1010: case 0b1001: case 0b0110: case 0b0101:
-                // Two points are known, but length is unknown.
+                // Two disconnected points known (e.g., A and C). Apply heavy intersection reduction.
                 intersect_estimates_with_point = true;
                 [[fallthrough]];
             case 0b1000: case 0b0100: case 0b0010: case 0b0001:
                 // One point is known.
-                // Assuming all segments that contain the point are in different buckets, than it appears in at most cache.num_points() - 1 buckets
-                // The estimated extensions are therefore the number of buckets multiplied by the average length of a bucket 
-                // Multiplied by 2 becase a segment can be mapped bidirectionally
+                // Heuristics guess: One point is known, length is unknown.
+                // We assume the known point connects to (Total Points - 1) other points.
+                // We assume each of those segments belongs to a distinct bucket of average size.
+                // We multiply by 2 because each segment can be mapped bidirectionally
                 estimate = (cache.num_points() - 1) * avg_bucket_size * 2;
 
-                if(intersect_estimates_with_point) {
-                    estimate = estimate / cache.num_points();
+                if(intersect_estimates_with_point && cache.num_points() > 0) {
+                    // We apply the intersection reduction described above
+                    // The logic is similar to the one desribed in the previous cases.
+                    std::size_t N = cache.num_points();
+                    estimate = (estimate + N - 1) / N;
+                    
+                    // Failsafe: Ensure we never return 0 cost for cases that can map a value
                     estimate = estimate > 0 ? estimate : 1;
                 }
 
                 break;
         
             case 0b0000:
-                // Every pair can be mapped in both directions
-                estimate = cache.point_pairs().size() * 2;
+                // Brute force combinations: No points known.
+                // Combinatorics: For each bucket of size S, we pick 2 segments.
+                // Any segment for the first pair (S choices).
+                // Any segment for the second pair (S choices).
+                // Note: We allow picking the same segment twice (S * S) because the rule 
+                // might be an identity alias like `cong A B A B`. If it's not an identity rule, 
+                // the generator's variable check will filter it out, but S * S is the upper bound.
+                // 
+                // For each pair, we yield 4 directional permutations (XY->ZW, XY->WZ, YX->ZW, YX->WZ).
+                // Total yield per bucket = 4 * S * S.
+                estimate = num_buckets * (avg_bucket_size * avg_bucket_size * 4);
                 break;
         
             default:
@@ -177,6 +217,15 @@ namespace Yuclid {
     ) const {
         std::array<std::optional<ProblemPointIndex>, 4> assignments = get_cong_assignments(predicate, mapping);
         std::array<std::size_t, 4> local_var_indexes = get_predicate_local_var_indexes(predicate);
+
+        // ----------------------------------------------------------------------
+        // Pairwise Check
+        // Checks wether the following condition is satisfied:
+        // if variables are the same, points must be the same. If different, points must be different.
+        // ----------------------------------------------------------------------
+        auto check_var_equality = [](std::size_t var_idx1, std::size_t var_idx2, ProblemPointIndex pt1, ProblemPointIndex pt2) {
+            return (var_idx1 == var_idx2) == (pt1 == pt2);
+        };
 
         MappingExtension next_extension;
         const auto &all_point_pairs = cache.point_pairs();
@@ -232,29 +281,40 @@ namespace Yuclid {
             case 0b1110: case 0b1101: case 0b1011: case 0b0111:
             {
                 // Find which variable is missing
+                // state_mask represents what we know (e.g., 0b1110 means A,B,C known, D missing).
+                // By inverting the mask (~state_mask), the missing '0' becomes a '1'.
                 std::size_t missing_bit = (~state_mask) & 0b1111;
                 std::size_t target_idx;
                 double length;
                 ProblemPointIndex anchor_point;
                 
                 if (missing_bit == 0b0001) { // D missing
+                    // D is missing. We know A, B, and C.
                     target_idx = local_var_indexes[3];
+                    // We know the length because A and B are fully bound.
                     length = static_cast<double>(SquaredDist(cache.point(*assignments[0]), cache.point(*assignments[1])));
+                    // Since C is known, the new segment must connect to C. C is our anchor.
                     anchor_point = *assignments[2];
                 } 
                 else if (missing_bit == 0b0010) { // C missing
                     target_idx = local_var_indexes[2];
+                    // We know the length because A and B are fully bound.
                     length = static_cast<double>(SquaredDist(cache.point(*assignments[0]), cache.point(*assignments[1])));
+                    // Since D is known, the new segment must connect to D. D is our anchor.
                     anchor_point = *assignments[3];
                 } 
                 else if (missing_bit == 0b0100) { // B missing
                     target_idx = local_var_indexes[1];
+                    // We know the length because C and D are fully bound.
                     length = static_cast<double>(SquaredDist(cache.point(*assignments[2]), cache.point(*assignments[3])));
+                    // Since A is known, the new segment must connect to A. A is our anchor.
                     anchor_point = *assignments[0];
                 } 
                 else { // A missing
                     target_idx = local_var_indexes[0];
+                    // We know the length because C and D are fully bound.
                     length = static_cast<double>(SquaredDist(cache.point(*assignments[2]), cache.point(*assignments[3])));
+                    // Since B is known, the new segment must connect to B. B is our anchor.
                     anchor_point = *assignments[1];
                 }
 
@@ -285,7 +345,19 @@ namespace Yuclid {
                 ProblemPointIndex anchor_point;
                 std::size_t other_seg1_idx, seg2_idx_a, seg2_idx_b;
 
-                // Pre-map the variable indices based on which point is known
+                // ---------------------------------------------------------------------------------
+                // Variable pre-mapping (Extracting the "Anchor")
+                // ---------------------------------------------------------------------------------
+                // In this state, exactly ONE point is known out of the four variables (A, B, C, D).
+                // We identify:
+                //   1. anchor_point: The index of the geometric point that is already bound.
+                //   2. other_seg1_idx: The local variable index for the OTHER half of the anchor's segment.
+                //   3. seg2_idx_a / seg2_idx_b: The local variable indices for the entirely free second segment.
+                //
+                // Example: If 0b1000 (A is known), the anchor segment is AB.
+                // Therefore, 'other_seg1_idx' must map to B (local_var_indexes[1]).
+                // The free segment is CD, so its variables map to C [2] and D [3].
+                // ---------------------------------------------------------------------------------
                 if (state_mask == 0b1000)      { anchor_point = *assignments[0]; other_seg1_idx = local_var_indexes[1]; seg2_idx_a = local_var_indexes[2]; seg2_idx_b = local_var_indexes[3]; }
                 else if (state_mask == 0b0100) { anchor_point = *assignments[1]; other_seg1_idx = local_var_indexes[0]; seg2_idx_a = local_var_indexes[2]; seg2_idx_b = local_var_indexes[3]; }
                 else if (state_mask == 0b0010) { anchor_point = *assignments[2]; other_seg1_idx = local_var_indexes[3]; seg2_idx_a = local_var_indexes[0]; seg2_idx_b = local_var_indexes[1]; }
@@ -336,7 +408,8 @@ namespace Yuclid {
                 ProblemPointIndex anchor_seg1, anchor_seg2;
                 std::size_t other_seg1_idx, other_seg2_idx;
 
-                // Pre-map the variable indices based on which point is known
+                // Variable pre-mapping
+                // Extract the anchors and the other ends of the segments. For more clarification, check the case above (for 1 point known).
                 if (state_mask == 0b1010)      { anchor_seg1 = *assignments[0]; other_seg1_idx = local_var_indexes[1]; anchor_seg2 = *assignments[2]; other_seg2_idx = local_var_indexes[3]; }
                 else if (state_mask == 0b1001) { anchor_seg1 = *assignments[0]; other_seg1_idx = local_var_indexes[1]; anchor_seg2 = *assignments[3]; other_seg2_idx = local_var_indexes[2]; }
                 else if (state_mask == 0b0110) { anchor_seg1 = *assignments[1]; other_seg1_idx = local_var_indexes[0]; anchor_seg2 = *assignments[2]; other_seg2_idx = local_var_indexes[3]; }
@@ -363,32 +436,28 @@ namespace Yuclid {
                             if (pair2.first == anchor_seg2) matching_other_end_seg_2 = pair2.second;
                             else if (pair2.second == anchor_seg2) matching_other_end_seg_2 = pair2.first;
                             else continue; // Doesn't touch our anchor, skip
-                            
+
                             // Skip if point is already used
                             if (mapping.is_point_used(matching_other_end_seg_2)) continue;
 
-                            // --- THE ALIAS CONTRACT ---
+                            // --- Check if the relationship between the two variables is the same as that of between the 2 points ---
+                            if (!check_var_equality(other_seg1_idx, other_seg2_idx, matching_other_end_seg_1, matching_other_end_seg_2)) continue;
+
+                            // Safe to assign!
+                            next_extension.clear_assignments();
+
+                            // Avoid adding assignment twice if the variable is the same (and maps to the same point)
+                            // This prevents us from doing excess memory allocations
                             if (other_seg1_idx == other_seg2_idx) {
                                 // These have the same variable index, so they are the same vairable(e.g., cong A B A C). 
-                                // Therefore, the discovered points must be the same as well!
-                                if (matching_other_end_seg_1 != matching_other_end_seg_2) continue;
-                            
-                                // Avoid assigning the same variable twice
-                                next_extension.clear_assignments();
                                 next_extension.add_assignment(predicate.variable_indices[other_seg1_idx], matching_other_end_seg_1);
-                                co_yield next_extension;
-                            } 
-                            else {
+                            } else {
                                 // The two variables have different indexes (e.g., cong A B C D).
-                                // Therefore, the points must be different as well.
-                                if (matching_other_end_seg_1 == matching_other_end_seg_2) continue;
-                            
-                                // Assign both
-                                next_extension.clear_assignments();
                                 next_extension.add_assignment(predicate.variable_indices[other_seg1_idx], matching_other_end_seg_1);
                                 next_extension.add_assignment(predicate.variable_indices[other_seg2_idx], matching_other_end_seg_2);
-                                co_yield next_extension;
                             }
+
+                            co_yield next_extension;
                         }
                     }
                 }
@@ -398,54 +467,52 @@ namespace Yuclid {
             // Case: 0 Points Known (Brute Force Combinations)
             case 0b0000:
             {
+                // Yield every valid matching length pair in the geometry.
                 for (const auto &bucket : cache.segment_length_buckets().buckets) {
-                    if (bucket.size() < 2) continue;
-
                     for (size_t i = 0; i < bucket.size(); ++i) {
-                        for (size_t j = i + 1; j < bucket.size(); ++j) {
+                        for (size_t j = 0; j < bucket.size(); ++j) {
                             const PointPair &p1 = all_point_pairs[bucket[i]];
                             const PointPair &p2 = all_point_pairs[bucket[j]];
 
                             if (mapping.is_point_used(p1.first) || mapping.is_point_used(p1.second) ||
                                 mapping.is_point_used(p2.first) || mapping.is_point_used(p2.second)) continue;
 
-                            // Yield 4 directional permutations (AB->CD, AB->DC, BA->CD, BA->DC)
+                            // The 4 combinations (swap_state)
+                            // We have two segments: p1(first, second) and p2(first, second).
+                            // A segment has no ordering, but it matters for variable assignment.
+                            // Mapping A->first, B->second is different to A->second, B->first.
+                            //
+                            // We use a 0 to 3 loop (binary 00, 01, 10, 11) as a truth table.
+                            // - The 1st bit (swap_state & 1) controls if we flip segment p1.
+                            // - The 2nd bit (swap_state & 2) controls if we flip segment p2.
+                            // 
+                            // 0 (00): p1 normal, p2 normal
+                            // 1 (01): p1 flipped, p2 normal
+                            // 2 (10): p1 normal, p2 flipped
+                            // 3 (11): p1 flipped, p2 flipped
                             for (int swap_state = 0; swap_state < 4; ++swap_state) {
                                 ProblemPointIndex pt_a = (swap_state & 1) ? p1.second : p1.first;
                                 ProblemPointIndex pt_b = (swap_state & 1) ? p1.first : p1.second;
                                 ProblemPointIndex pt_c = (swap_state & 2) ? p2.second : p2.first;
                                 ProblemPointIndex pt_d = (swap_state & 2) ? p2.first : p2.second;
 
-                                // --- Variable repetition check ---
-                                // If the variable indices are equal, the points must be equal.
-                                // If the variable indices are NOT equal, the points mut NOT be equal.
-                                bool valid = true;
-                                if ((local_var_indexes[0] == local_var_indexes[1]) != (pt_a == pt_b)) valid = false;
-                                if ((local_var_indexes[0] == local_var_indexes[2]) != (pt_a == pt_c)) valid = false;
-                                if ((local_var_indexes[0] == local_var_indexes[3]) != (pt_a == pt_d)) valid = false;
-                                if ((local_var_indexes[1] == local_var_indexes[2]) != (pt_b == pt_c)) valid = false;
-                                if ((local_var_indexes[1] == local_var_indexes[3]) != (pt_b == pt_d)) valid = false;
-                                if ((local_var_indexes[2] == local_var_indexes[3]) != (pt_c == pt_d)) valid = false;
-
-                                if (!valid) continue;
+                                // --- Variable equality check ---
+                                // If the variables are the same, then the mapped points have to be the same as well
+                                // Otherwise, if the variables are different, then the mapped points have to be different too
+                                if (!check_var_equality(local_var_indexes[0], local_var_indexes[1], pt_a, pt_b) ||
+                                    !check_var_equality(local_var_indexes[0], local_var_indexes[2], pt_a, pt_c) ||
+                                    !check_var_equality(local_var_indexes[0], local_var_indexes[3], pt_a, pt_d) ||
+                                    !check_var_equality(local_var_indexes[1], local_var_indexes[2], pt_b, pt_c) ||
+                                    !check_var_equality(local_var_indexes[1], local_var_indexes[3], pt_b, pt_d) ||
+                                    !check_var_equality(local_var_indexes[2], local_var_indexes[3], pt_c, pt_d)) {
+                                    continue;
+                                }
 
                                 next_extension.clear_assignments();
-
-                                // We keep track of what we've added to avoid double-assigning aliases
-                                uint8_t added_mask = 0; 
-
-                                // Helper lambda to avoid assigning the same variable more than once
-                                auto safe_add = [&](std::size_t idx, ProblemPointIndex pt) {
-                                    if ((added_mask & (1 << idx)) == 0) {
-                                        next_extension.add_assignment(predicate.variable_indices[idx], pt);
-                                        added_mask |= (1 << idx);
-                                    }
-                                };
-                            
-                                safe_add(local_var_indexes[0], pt_a);
-                                safe_add(local_var_indexes[1], pt_b);
-                                safe_add(local_var_indexes[2], pt_c);
-                                safe_add(local_var_indexes[3], pt_d);
+                                next_extension.add_assignment(predicate.variable_indices[local_var_indexes[0]], pt_a);
+                                next_extension.add_assignment(predicate.variable_indices[local_var_indexes[1]], pt_b);
+                                next_extension.add_assignment(predicate.variable_indices[local_var_indexes[2]], pt_c);
+                                next_extension.add_assignment(predicate.variable_indices[local_var_indexes[3]], pt_d);
                             
                                 co_yield next_extension;
                             }
