@@ -1,224 +1,622 @@
 #define BOOST_TEST_MODULE mapping_state_test
+
 #include <boost/test/unit_test.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "matchers/mapping_state.hpp"
-#include "matchers/rule_schema.hpp"
 #include "problem.hpp"
-#include "type/point.hpp"
+#include "rules/rule_schema.hpp"
 
-using namespace std;
 using namespace Yuclid;
 
-// ---- helpers -----------------------------------------------------------------
 namespace {
 
-    RulePredicatePattern pat(string name, vector<string> args) {
-        return RulePredicatePattern{ .name = std::move(name), .args = std::move(args) };
-    }
-
-    // Build a schema with the given variables. MappingState only consumes
-    // schema.variables (for sizing), so the predicate bodies are incidental.
-    RuleSchema schema_with(vector<string> vars, vector<RulePredicatePattern> hyps) {
-        vector<string> concl_args(vars.begin(),
-                vars.begin() + std::min<size_t>(3, vars.size()));
-        return RuleSchema{
-            .id = "test_rule",
-                .variables = vars,
-                .hypotheses = std::move(hyps),
-                .conclusions = { RulePredicatePattern{ .name = "coll", .args = concl_args } }
+    RulePredicatePattern pattern(
+        std::string name,
+        std::vector<std::string> arguments
+    ) {
+        return RulePredicatePattern{
+            .name = std::move(name),
+            .args = std::move(arguments),
         };
     }
 
-    // Canonical 4-variable schema (A,B,C,D) used by the assignment tests.
-    RuleSchema abcd() {
-        return schema_with({"A", "B", "C", "D"}, { pat("coll", {"A", "B", "C"}) });
+    /**
+     * Build a schema with the given variables.
+     *
+     * MappingState uses the variables for its indexed assignment storage.
+     * The hypothesis and conclusion are incidental for these tests.
+     */
+    RuleSchema schema_with(
+        std::vector<std::string> variables,
+        std::vector<RulePredicatePattern> hypotheses
+    ) {
+        std::vector<std::string> conclusion_arguments(
+            variables.begin(),
+            variables.begin()
+                + std::min<std::size_t>(3, variables.size())
+        );
+
+        return RuleSchema{
+            .id = "test_rule",
+            .variables = std::move(variables),
+            .hypotheses = std::move(hypotheses),
+            .conclusions = {
+                RulePredicatePattern{
+                    .name = "coll",
+                    .args = std::move(conclusion_arguments),
+                },
+            },
+        };
+    }
+
+    RuleSchema abcd_schema() {
+        return schema_with(
+            {"A", "B", "C", "D"},
+            {
+                pattern(
+                    "coll",
+                    {"A", "B", "C"}
+                ),
+            }
+        );
     }
 
 }  // namespace
 
-// The problem must hold enough points for the indices the tests assign.
-struct ProblemPointsFixture {
-    ProblemPointsFixture() {
-        problem::reset();
-        for (int i = 0; i < 8; ++i) {
-            problem::add_point("P" + to_string(i), static_cast<double>(i),
-                    static_cast<double>(i * 2));
+struct MappingStateFixture {
+    Problem problem;
+    RuleSchema schema;
+
+    MappingStateFixture()
+        : schema(abcd_schema())
+    {
+        for (int index = 0; index < 8; ++index) {
+            static_cast<void>(
+                problem.add_point(
+                    "P" + std::to_string(index),
+                    static_cast<double>(index),
+                    static_cast<double>(index * 2)
+                )
+            );
         }
     }
-    ~ProblemPointsFixture() { problem::reset(); }
 };
 
-BOOST_FIXTURE_TEST_SUITE(mapping_state_suite, ProblemPointsFixture)
-
-    // ===== commit 1: scaffolding, construction, 64-variable guard =================
-
-    /**
-     * @brief A freshly constructed state has nothing assigned and is not complete.
-     */
-    BOOST_AUTO_TEST_CASE(fresh_state_is_empty) {
-        MappingState state(abcd(), problem::get_instance());
-
-        BOOST_CHECK_EQUAL(state.assigned_count(), 0u);
-        BOOST_CHECK(!state.is_complete());
-        for (size_t v = 0; v < 4; ++v) {
-            BOOST_CHECK(!state.is_assigned(v));
-            BOOST_CHECK(!state.assigned_point_index(v).has_value());
-        }
-        for (size_t p = 0; p < 8; ++p) {
-            BOOST_CHECK(!state.is_point_used(p));
-        }
-    }
+BOOST_FIXTURE_TEST_SUITE(
+    mapping_state_suite,
+    MappingStateFixture
+)
 
 /**
- * @brief The bitset-backed state rejects schemas with more than 64 variables.
+ * A new extension contains no assignments and can be cleared for reuse.
+ */
+BOOST_AUTO_TEST_CASE(mapping_extension_tracks_and_clears_assignments) {
+    MappingExtension extension;
+
+    BOOST_CHECK(extension.empty());
+    BOOST_CHECK(extension.assignments().empty());
+
+    extension.add_assignment(0, 2);
+    extension.add_assignment(1, 4);
+
+    BOOST_CHECK(!extension.empty());
+    BOOST_REQUIRE_EQUAL(
+        extension.assignments().size(),
+        2U
+    );
+
+    BOOST_CHECK_EQUAL(
+        extension.assignments()[0].variable_idx,
+        0U
+    );
+    BOOST_CHECK_EQUAL(
+        extension.assignments()[0].point_idx,
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        extension.assignments()[1].variable_idx,
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        extension.assignments()[1].point_idx,
+        4U
+    );
+
+    extension.clear_assignments();
+
+    BOOST_CHECK(extension.empty());
+    BOOST_CHECK(extension.assignments().empty());
+}
+
+/**
+ * A freshly constructed state has nothing assigned and is incomplete.
+ */
+BOOST_AUTO_TEST_CASE(fresh_state_is_empty) {
+    MappingState state(schema, problem);
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 0U);
+    BOOST_CHECK(!state.is_complete());
+
+    for (
+        std::size_t variable_index = 0;
+        variable_index < schema.variables.size();
+        ++variable_index
+    ) {
+        BOOST_CHECK(
+            state.is_rule_variable(variable_index)
+        );
+        BOOST_CHECK(
+            !state.is_assigned(variable_index)
+        );
+        BOOST_CHECK(
+            !state.assigned_point_index(
+                variable_index
+            ).has_value()
+        );
+    }
+
+    BOOST_CHECK(
+        !state.is_rule_variable(
+            schema.variables.size()
+        )
+    );
+
+    for (
+        std::size_t point_index = 0;
+        point_index < problem.num_points();
+        ++point_index
+    ) {
+        BOOST_CHECK(
+            !state.is_point_used(point_index)
+        );
+    }
+
+    const std::vector<RuleVariableIndex> unassigned =
+        state.unassigned_variables();
+
+    BOOST_REQUIRE_EQUAL(unassigned.size(), 4U);
+    BOOST_CHECK_EQUAL(unassigned[0], 0U);
+    BOOST_CHECK_EQUAL(unassigned[1], 1U);
+    BOOST_CHECK_EQUAL(unassigned[2], 2U);
+    BOOST_CHECK_EQUAL(unassigned[3], 3U);
+}
+
+/**
+ * MappingState uses a 64-bit variable mask and rejects larger schemas.
  */
 BOOST_AUTO_TEST_CASE(variable_count_ceiling_throws) {
-    vector<string> many;
-    for (int i = 0; i <= 64; ++i) {  // 65 variables, one over the limit
-        many.push_back("V" + to_string(i));
+    std::vector<std::string> variables;
+
+    for (int index = 0; index < 65; ++index) {
+        variables.push_back(
+            "V" + std::to_string(index)
+        );
     }
-    RuleSchema big = schema_with(many, { pat("coll", {"V0", "V1", "V2"}) });
 
-    BOOST_CHECK_THROW(MappingState(big, problem::get_instance()),
-            std::invalid_argument);
+    RuleSchema large_schema = schema_with(
+        std::move(variables),
+        {
+            pattern(
+                "coll",
+                {"V0", "V1", "V2"}
+            ),
+        }
+    );
+
+    BOOST_CHECK_THROW(
+        (void)MappingState(
+            large_schema,
+            problem
+        ),
+        std::invalid_argument
+    );
 }
 
 /**
- * @brief Exactly 64 variables is still accepted.
+ * Exactly 64 variables is still supported.
  */
-BOOST_AUTO_TEST_CASE(variable_count_at_limit_ok) {
-    vector<string> sixtyfour;
-    for (int i = 0; i < 64; ++i) {
-        sixtyfour.push_back("V" + to_string(i));
+BOOST_AUTO_TEST_CASE(variable_count_at_limit_is_accepted) {
+    std::vector<std::string> variables;
+
+    for (int index = 0; index < 64; ++index) {
+        variables.push_back(
+            "V" + std::to_string(index)
+        );
     }
-    RuleSchema schema = schema_with(sixtyfour, { pat("coll", {"V0", "V1", "V2"}) });
 
-    BOOST_CHECK_NO_THROW(MappingState(schema, problem::get_instance()));
+    RuleSchema limit_schema = schema_with(
+        std::move(variables),
+        {
+            pattern(
+                "coll",
+                {"V0", "V1", "V2"}
+            ),
+        }
+    );
+
+    BOOST_CHECK_NO_THROW(
+        (void)MappingState(
+            limit_schema,
+            problem
+        )
+    );
 }
 
 /**
- * @brief Applying a single assignment binds the variable and marks the point.
+ * Applying one assignment binds the variable and marks the point as used.
  */
-BOOST_AUTO_TEST_CASE(apply_single_assignment) {
-  MappingState state(abcd(), problem::get_instance());
+BOOST_AUTO_TEST_CASE(try_apply_single_assignment) {
+    MappingState state(schema, problem);
 
-  MappingExtension ext;
-  ext.add_assignment(0, 3);  // A -> point 3
-  BOOST_REQUIRE(state.apply_extension(ext));
+    MappingExtension extension;
+    extension.add_assignment(0, 3);
 
-  BOOST_CHECK(state.is_assigned(0));
-  BOOST_REQUIRE(state.assigned_point_index(0).has_value());
-  BOOST_CHECK_EQUAL(state.assigned_point_index(0).value(), 3u);
-  BOOST_CHECK(state.is_point_used(3));
-  BOOST_CHECK_EQUAL(state.assigned_count(), 1u);
-  BOOST_CHECK(!state.is_assigned(1));
+    BOOST_REQUIRE(
+        state.try_apply_extension(extension)
+    );
+
+    BOOST_CHECK(state.is_assigned(0));
+
+    const std::optional<ProblemPointIndex> assigned_point =
+        state.assigned_point_index(0);
+
+    BOOST_REQUIRE(assigned_point.has_value());
+    BOOST_CHECK_EQUAL(*assigned_point, 3U);
+
+    BOOST_CHECK(state.is_point_used(3));
+    BOOST_CHECK_EQUAL(state.assigned_count(), 1U);
+    BOOST_CHECK(!state.is_complete());
+    BOOST_CHECK(!state.is_assigned(1));
 }
 
 /**
- * @brief An extension binding several variables at once is applied atomically.
+ * The Point overload converts the point to its problem index.
  */
-BOOST_AUTO_TEST_CASE(apply_multiple_assignments) {
-  MappingState state(abcd(), problem::get_instance());
+BOOST_AUTO_TEST_CASE(try_apply_point_assignment) {
+    MappingState state(schema, problem);
 
-  MappingExtension ext;
-  ext.add_assignment(0, 1);  // A -> 1
-  ext.add_assignment(1, 4);  // B -> 4
-  BOOST_REQUIRE(state.apply_extension(ext));
+    const Point point = problem.point_at(5);
 
-  BOOST_CHECK_EQUAL(state.assigned_count(), 2u);
-  BOOST_CHECK_EQUAL(state.assigned_point_index(0).value(), 1u);
-  BOOST_CHECK_EQUAL(state.assigned_point_index(1).value(), 4u);
-  BOOST_CHECK(state.is_point_used(1));
-  BOOST_CHECK(state.is_point_used(4));
+    BOOST_REQUIRE(
+        state.try_apply_assignment(0, point)
+    );
+
+    BOOST_REQUIRE(
+        state.assigned_point_index(0).has_value()
+    );
+
+    BOOST_CHECK_EQUAL(
+        *state.assigned_point_index(0),
+        5U
+    );
+    BOOST_CHECK(state.is_point_used(point));
 }
 
 /**
- * @brief Injectivity: a point already used by one variable cannot be reused.
+ * Several compatible assignments can be applied in one extension.
+ */
+BOOST_AUTO_TEST_CASE(try_apply_multiple_assignments) {
+    MappingState state(schema, problem);
+
+    MappingExtension extension;
+    extension.add_assignment(0, 1);
+    extension.add_assignment(1, 4);
+
+    BOOST_REQUIRE(
+        state.try_apply_extension(extension)
+    );
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 2U);
+
+    BOOST_REQUIRE(
+        state.assigned_point_index(0).has_value()
+    );
+    BOOST_REQUIRE(
+        state.assigned_point_index(1).has_value()
+    );
+
+    BOOST_CHECK_EQUAL(
+        *state.assigned_point_index(0),
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        *state.assigned_point_index(1),
+        4U
+    );
+
+    BOOST_CHECK(state.is_point_used(1));
+    BOOST_CHECK(state.is_point_used(4));
+
+    const std::vector<RuleVariableIndex> unassigned =
+        state.unassigned_variables();
+
+    BOOST_REQUIRE_EQUAL(unassigned.size(), 2U);
+    BOOST_CHECK_EQUAL(unassigned[0], 2U);
+    BOOST_CHECK_EQUAL(unassigned[1], 3U);
+}
+
+/**
+ * Different variables cannot use the same problem point.
  */
 BOOST_AUTO_TEST_CASE(injectivity_rejects_point_reuse) {
-  MappingState state(abcd(), problem::get_instance());
+    MappingState state(schema, problem);
 
-  MappingExtension first;
-  first.add_assignment(0, 3);  // A -> 3
-  BOOST_REQUIRE(state.apply_extension(first));
+    MappingExtension first_extension;
+    first_extension.add_assignment(0, 3);
 
-  MappingExtension clash;
-  clash.add_assignment(1, 3);  // B -> 3 (already taken)
-  BOOST_CHECK(!state.apply_extension(clash));
+    BOOST_REQUIRE(
+        state.try_apply_extension(first_extension)
+    );
 
-  // State is unchanged by the rejected extension.
-  BOOST_CHECK_EQUAL(state.assigned_count(), 1u);
-  BOOST_CHECK(!state.is_assigned(1));
+    MappingExtension conflicting_extension;
+    conflicting_extension.add_assignment(1, 3);
+
+    BOOST_CHECK(
+        !state.try_apply_extension(
+            conflicting_extension
+        )
+    );
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 1U);
+    BOOST_CHECK(state.is_assigned(0));
+    BOOST_CHECK(!state.is_assigned(1));
+    BOOST_CHECK(state.is_point_used(3));
 }
 
 /**
- * @brief A repeated identical (var -> point) pair within one extension is fine.
- *
- * Providers for repeated-variable predicates (e.g. `cong A B A C`) emit the
- * shared variable twice; binding it to the same point must not be a conflict.
+ * If one assignment in an extension fails, earlier assignments from that same
+ * extension are rolled back.
  */
-BOOST_AUTO_TEST_CASE(repeated_identical_assignment_tolerated) {
-  MappingState state(abcd(), problem::get_instance());
+BOOST_AUTO_TEST_CASE(
+    failed_extension_rolls_back_partial_assignments
+) {
+    MappingState state(schema, problem);
 
-  MappingExtension ext;
-  ext.add_assignment(0, 2);  // A -> 2
-  ext.add_assignment(0, 2);  // A -> 2 again (same binding)
-  BOOST_REQUIRE(state.apply_extension(ext));
+    MappingExtension extension;
+    extension.add_assignment(0, 2);
+    extension.add_assignment(1, 2);
 
-  BOOST_CHECK_EQUAL(state.assigned_count(), 1u);
-  BOOST_CHECK_EQUAL(state.assigned_point_index(0).value(), 2u);
+    BOOST_CHECK(
+        !state.try_apply_extension(extension)
+    );
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 0U);
+    BOOST_CHECK(!state.is_assigned(0));
+    BOOST_CHECK(!state.is_assigned(1));
+    BOOST_CHECK(!state.is_point_used(2));
 }
 
 /**
- * @brief Rollback after a partial extension restores the exact prior state.
+ * Applying the same variable-to-point assignment more than once is valid.
+ *
+ * This may occur when a provider handles a predicate containing a repeated
+ * variable, such as `cong A B A C`.
+ */
+BOOST_AUTO_TEST_CASE(
+    repeated_identical_assignment_is_accepted
+) {
+    MappingState state(schema, problem);
+
+    MappingExtension extension;
+    extension.add_assignment(0, 2);
+    extension.add_assignment(0, 2);
+
+    BOOST_REQUIRE(
+        state.try_apply_extension(extension)
+    );
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 1U);
+
+    BOOST_REQUIRE(
+        state.assigned_point_index(0).has_value()
+    );
+
+    BOOST_CHECK_EQUAL(
+        *state.assigned_point_index(0),
+        2U
+    );
+}
+
+/**
+ * The same variable cannot be assigned to two different points.
+ */
+BOOST_AUTO_TEST_CASE(
+    repeated_conflicting_assignment_is_rejected
+) {
+    MappingState state(schema, problem);
+
+    MappingExtension extension;
+    extension.add_assignment(0, 2);
+    extension.add_assignment(0, 3);
+
+    BOOST_CHECK(
+        !state.try_apply_extension(extension)
+    );
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 0U);
+    BOOST_CHECK(!state.is_assigned(0));
+    BOOST_CHECK(!state.is_point_used(2));
+    BOOST_CHECK(!state.is_point_used(3));
+}
+
+/**
+ * Out-of-range variable and point indices are rejected without mutation.
+ */
+BOOST_AUTO_TEST_CASE(
+    invalid_assignment_indices_are_rejected
+) {
+    MappingState state(schema, problem);
+
+    BOOST_CHECK(
+        !state.try_apply_assignment(
+            schema.variables.size(),
+            0
+        )
+    );
+
+    BOOST_CHECK(
+        !state.try_apply_assignment(
+            0,
+            problem.num_points()
+        )
+    );
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 0U);
+    BOOST_CHECK(!state.is_complete());
+    BOOST_CHECK(!state.is_assigned(0));
+}
+
+/**
+ * Rolling back restores the state captured before deeper assignments.
  */
 BOOST_AUTO_TEST_CASE(rollback_restores_partial_state) {
-  MappingState state(abcd(), problem::get_instance());
+    MappingState state(schema, problem);
 
-  MappingExtension base;
-  base.add_assignment(0, 3);  // A -> 3
-  BOOST_REQUIRE(state.apply_extension(base));
+    MappingExtension base_extension;
+    base_extension.add_assignment(0, 3);
 
-  const auto snapshot = state.snapshot();
+    BOOST_REQUIRE(
+        state.try_apply_extension(base_extension)
+    );
 
-  MappingExtension deeper;
-  deeper.add_assignment(1, 4);  // B -> 4
-  BOOST_REQUIRE(state.apply_extension(deeper));
-  BOOST_CHECK_EQUAL(state.assigned_count(), 2u);
+    const MappingStateSnapshot snapshot =
+        state.snapshot();
 
-  state.rollback(snapshot);
+    MappingExtension deeper_extension;
+    deeper_extension.add_assignment(1, 4);
 
-  BOOST_CHECK_EQUAL(state.assigned_count(), 1u);
-  BOOST_CHECK(state.is_assigned(0));
-  BOOST_CHECK(!state.is_assigned(1));
-  BOOST_CHECK(!state.is_point_used(4));
-  BOOST_CHECK(state.is_point_used(3));
+    BOOST_REQUIRE(
+        state.try_apply_extension(deeper_extension)
+    );
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 2U);
+
+    state.rollback(snapshot);
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 1U);
+    BOOST_CHECK(state.is_assigned(0));
+    BOOST_CHECK(!state.is_assigned(1));
+    BOOST_CHECK(state.is_point_used(3));
+    BOOST_CHECK(!state.is_point_used(4));
 }
 
 /**
- * @brief Rollback to an empty snapshot clears every binding.
+ * Rolling back to an empty snapshot removes every assignment.
  */
-BOOST_AUTO_TEST_CASE(rollback_to_empty) {
-  MappingState state(abcd(), problem::get_instance());
+BOOST_AUTO_TEST_CASE(rollback_to_empty_state) {
+    MappingState state(schema, problem);
 
-  const auto empty_snapshot = state.snapshot();
+    const MappingStateSnapshot empty_snapshot =
+        state.snapshot();
 
-  MappingExtension ext;
-  ext.add_assignment(0, 1);
-  ext.add_assignment(1, 2);
-  BOOST_REQUIRE(state.apply_extension(ext));
+    MappingExtension extension;
+    extension.add_assignment(0, 1);
+    extension.add_assignment(1, 2);
 
-  state.rollback(empty_snapshot);
+    BOOST_REQUIRE(
+        state.try_apply_extension(extension)
+    );
 
-  BOOST_CHECK_EQUAL(state.assigned_count(), 0u);
-  BOOST_CHECK(!state.is_point_used(1));
-  BOOST_CHECK(!state.is_point_used(2));
+    state.rollback(empty_snapshot);
+
+    BOOST_CHECK_EQUAL(state.assigned_count(), 0U);
+    BOOST_CHECK(!state.is_assigned(0));
+    BOOST_CHECK(!state.is_assigned(1));
+    BOOST_CHECK(!state.is_point_used(1));
+    BOOST_CHECK(!state.is_point_used(2));
+}
+
+/**
+ * An incomplete state cannot be converted to a complete RuleMapping.
+ */
+BOOST_AUTO_TEST_CASE(
+    incomplete_state_returns_no_complete_mapping
+) {
+    MappingState state(schema, problem);
+
+    BOOST_CHECK(
+        !state.to_rule_mapping().has_value()
+    );
+
+    BOOST_REQUIRE(
+        state.try_apply_assignment(0, 3)
+    );
+
+    BOOST_CHECK(
+        !state.to_rule_mapping().has_value()
+    );
+
+    const RuleMapping partial_mapping =
+        state.to_partial_rule_mapping();
+
+    BOOST_CHECK_EQUAL(partial_mapping.size(), 1U);
+    BOOST_CHECK_EQUAL(
+        partial_mapping.at("A").get(),
+        3U
+    );
+    BOOST_CHECK(
+        partial_mapping.find("B")
+            == partial_mapping.end()
+    );
+}
+
+/**
+ * A complete state converts every schema variable to the expected point.
+ */
+BOOST_AUTO_TEST_CASE(
+    complete_state_converts_to_rule_mapping
+) {
+    MappingState state(schema, problem);
+
+    MappingExtension extension;
+    extension.add_assignment(0, 0);
+    extension.add_assignment(1, 1);
+    extension.add_assignment(2, 2);
+    extension.add_assignment(3, 3);
+
+    BOOST_REQUIRE(
+        state.try_apply_extension(extension)
+    );
+
+    BOOST_CHECK(state.is_complete());
+    BOOST_CHECK_EQUAL(state.assigned_count(), 4U);
+    BOOST_CHECK(state.unassigned_variables().empty());
+
+    const std::optional<RuleMapping> complete_mapping =
+        state.to_rule_mapping();
+
+    BOOST_REQUIRE(complete_mapping.has_value());
+    BOOST_CHECK_EQUAL(complete_mapping->size(), 4U);
+
+    BOOST_CHECK_EQUAL(
+        complete_mapping->at("A").get(),
+        0U
+    );
+    BOOST_CHECK_EQUAL(
+        complete_mapping->at("B").get(),
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        complete_mapping->at("C").get(),
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        complete_mapping->at("D").get(),
+        3U
+    );
+
+    const RuleMapping partial_mapping =
+        state.to_partial_rule_mapping();
+
+    BOOST_CHECK_EQUAL(partial_mapping.size(), 4U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
