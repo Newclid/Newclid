@@ -175,4 +175,50 @@ BOOST_AUTO_TEST_CASE(repeated_identical_assignment_tolerated) {
   BOOST_CHECK_EQUAL(state.assigned_point_index(0).value(), 2u);
 }
 
+/**
+ * @brief Rollback after a partial extension restores the exact prior state.
+ */
+BOOST_AUTO_TEST_CASE(rollback_restores_partial_state) {
+  MappingState state(abcd(), problem::get_instance());
+
+  MappingExtension base;
+  base.add_assignment(0, 3);  // A -> 3
+  BOOST_REQUIRE(state.apply_extension(base));
+
+  const auto snapshot = state.snapshot();
+
+  MappingExtension deeper;
+  deeper.add_assignment(1, 4);  // B -> 4
+  BOOST_REQUIRE(state.apply_extension(deeper));
+  BOOST_CHECK_EQUAL(state.assigned_count(), 2u);
+
+  state.rollback(snapshot);
+
+  BOOST_CHECK_EQUAL(state.assigned_count(), 1u);
+  BOOST_CHECK(state.is_assigned(0));
+  BOOST_CHECK(!state.is_assigned(1));
+  BOOST_CHECK(!state.is_point_used(4));
+  BOOST_CHECK(state.is_point_used(3));
+}
+
+/**
+ * @brief Rollback to an empty snapshot clears every binding.
+ */
+BOOST_AUTO_TEST_CASE(rollback_to_empty) {
+  MappingState state(abcd(), problem::get_instance());
+
+  const auto empty_snapshot = state.snapshot();
+
+  MappingExtension ext;
+  ext.add_assignment(0, 1);
+  ext.add_assignment(1, 2);
+  BOOST_REQUIRE(state.apply_extension(ext));
+
+  state.rollback(empty_snapshot);
+
+  BOOST_CHECK_EQUAL(state.assigned_count(), 0u);
+  BOOST_CHECK(!state.is_point_used(1));
+  BOOST_CHECK(!state.is_point_used(2));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
