@@ -19,6 +19,7 @@ add_library(yuclid
   matchers/predicate_provider.cpp
   matchers/predicate_matching_metadata.cpp
   matchers/base_provider.cpp
+  matchers/cong_provider.cpp
   numbers/add_circle.cpp
   numbers/posreal.cpp
   numbers/root_rat.cpp
