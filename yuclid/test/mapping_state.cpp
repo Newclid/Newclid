@@ -102,4 +102,77 @@ BOOST_AUTO_TEST_CASE(variable_count_at_limit_ok) {
     BOOST_CHECK_NO_THROW(MappingState(schema, problem::get_instance()));
 }
 
+/**
+ * @brief Applying a single assignment binds the variable and marks the point.
+ */
+BOOST_AUTO_TEST_CASE(apply_single_assignment) {
+  MappingState state(abcd(), problem::get_instance());
+
+  MappingExtension ext;
+  ext.add_assignment(0, 3);  // A -> point 3
+  BOOST_REQUIRE(state.apply_extension(ext));
+
+  BOOST_CHECK(state.is_assigned(0));
+  BOOST_REQUIRE(state.assigned_point_index(0).has_value());
+  BOOST_CHECK_EQUAL(state.assigned_point_index(0).value(), 3u);
+  BOOST_CHECK(state.is_point_used(3));
+  BOOST_CHECK_EQUAL(state.assigned_count(), 1u);
+  BOOST_CHECK(!state.is_assigned(1));
+}
+
+/**
+ * @brief An extension binding several variables at once is applied atomically.
+ */
+BOOST_AUTO_TEST_CASE(apply_multiple_assignments) {
+  MappingState state(abcd(), problem::get_instance());
+
+  MappingExtension ext;
+  ext.add_assignment(0, 1);  // A -> 1
+  ext.add_assignment(1, 4);  // B -> 4
+  BOOST_REQUIRE(state.apply_extension(ext));
+
+  BOOST_CHECK_EQUAL(state.assigned_count(), 2u);
+  BOOST_CHECK_EQUAL(state.assigned_point_index(0).value(), 1u);
+  BOOST_CHECK_EQUAL(state.assigned_point_index(1).value(), 4u);
+  BOOST_CHECK(state.is_point_used(1));
+  BOOST_CHECK(state.is_point_used(4));
+}
+
+/**
+ * @brief Injectivity: a point already used by one variable cannot be reused.
+ */
+BOOST_AUTO_TEST_CASE(injectivity_rejects_point_reuse) {
+  MappingState state(abcd(), problem::get_instance());
+
+  MappingExtension first;
+  first.add_assignment(0, 3);  // A -> 3
+  BOOST_REQUIRE(state.apply_extension(first));
+
+  MappingExtension clash;
+  clash.add_assignment(1, 3);  // B -> 3 (already taken)
+  BOOST_CHECK(!state.apply_extension(clash));
+
+  // State is unchanged by the rejected extension.
+  BOOST_CHECK_EQUAL(state.assigned_count(), 1u);
+  BOOST_CHECK(!state.is_assigned(1));
+}
+
+/**
+ * @brief A repeated identical (var -> point) pair within one extension is fine.
+ *
+ * Providers for repeated-variable predicates (e.g. `cong A B A C`) emit the
+ * shared variable twice; binding it to the same point must not be a conflict.
+ */
+BOOST_AUTO_TEST_CASE(repeated_identical_assignment_tolerated) {
+  MappingState state(abcd(), problem::get_instance());
+
+  MappingExtension ext;
+  ext.add_assignment(0, 2);  // A -> 2
+  ext.add_assignment(0, 2);  // A -> 2 again (same binding)
+  BOOST_REQUIRE(state.apply_extension(ext));
+
+  BOOST_CHECK_EQUAL(state.assigned_count(), 1u);
+  BOOST_CHECK_EQUAL(state.assigned_point_index(0).value(), 2u);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
