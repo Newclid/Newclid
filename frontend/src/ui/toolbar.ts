@@ -5,6 +5,7 @@ import { el } from './dom';
 import { createJgexInput } from './jgexInput';
 import { CONSTRUCTION_CATALOG } from '../construction/catalog';
 import { TOOL_GROUPS } from '../tools/groups';
+import { getTool } from '../tools/registry';
 import type { CatalogEntry } from '../construction/catalog-types';
 import { AppStore } from '../store/appStore';
 import { createProofPanel } from './proofPanel';
@@ -103,7 +104,7 @@ export function createToolbar(
     }) as HTMLButtonElement;
     btn.appendChild(entry.icon());
     btn.appendChild(el('span', { class: 'tool-btn-label' }, [entry.label]));
-    btn.addEventListener('click', () => scene.setTool(entry.name));
+    btn.addEventListener('click', () => { getTool(scene.tool)?.onDeactivate?.({ scene }); scene.setTool(entry.name); });
     buttons.set(entry.name, btn);
     return btn;
   }
@@ -148,7 +149,7 @@ export function createToolbar(
       title: 'Back to all tools',
     }) as HTMLButtonElement;
     back.appendChild(el('span', { class: 'tool-btn-label' }, ['← All tools']));
-    back.addEventListener('click', () => { activeGroup = null; appStore?.setLastToolGroup(null); appStore?.setActiveToolGroup(null); refresh(); scene.setTool('select'); });
+    back.addEventListener('click', () => { activeGroup = null; appStore?.setLastToolGroup(null); appStore?.setActiveToolGroup(null); refresh(); getTool(scene.tool)?.onDeactivate?.({ scene }); scene.setTool('select'); });
     group.appendChild(back);
 
     group.appendChild(el('div', { class: 'toolbar-sep' }));

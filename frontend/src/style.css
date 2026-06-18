@@ -1651,3 +1651,35 @@ body.is-resizing {
   white-space: nowrap;
   user-select: none;
 }
+.point-context-menu {
+  position: absolute;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  padding: 4px 0;
+  min-width: 140px;
+}
+.point-context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 14px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1a1a1a;
+}
+.point-context-menu button:hover { background: #f0f0f0; }
+
+.point-rename-input {
+  position: absolute;
+  z-index: 101;
+  font-size: 13px;
+  padding: 2px 6px;
+  border: 1px solid #2A4A7F;
+  border-radius: 3px;
+  width: 70px;
+}

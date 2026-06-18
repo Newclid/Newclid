@@ -3,7 +3,8 @@ In-memory store for scene objects, active tool, and transient tool state.
 Notifies subscribers synchronously.
 **/
 
-import type { GeoObject, ObjectId, PointObject, ToolName } from '../geometry/types-object';
+import type { ConstructionObject, GeoObject, ObjectId, PointObject, ToolName } from '../geometry/types-object';
+import { CONSTRUCTION_CATALOG } from '../construction/catalog';
 import type { ToolPreview } from '../tools/tool'
 import { distance } from '../geometry/primitives';
 import type { WorldPoint } from '../geometry/coords';
@@ -174,31 +175,69 @@ export class Scene {
     this.emit();
   }
 
+  private referencedPointIds(obj: GeoObject): ObjectId[] {
+    if (obj.kind === 'circle') {
+      if (obj.mode === 'center-through') return [obj.center, obj.through];
+      return [obj.p1, obj.p2, obj.p3];
+    }
+    if (obj.kind === 'construction') return Object.values(obj.bindings) as ObjectId[];
+    return [];
+  }
+
+  private outputSlotNames(name: string): Set<string> {
+    const entry = CONSTRUCTION_CATALOG[name];
+    const result = new Set<string>();
+    for (const block of entry?.jgex ?? []) {
+      if ('combine' in block) block.clauses.forEach(c => c.produces.forEach(s => result.add(s)));
+      else block.produces.forEach(s => result.add(s));
+    }
+    return result;
+  }
+
+  private outputPointIds(c: ConstructionObject): ObjectId[] {
+    const slots = this.outputSlotNames(c.name);
+    return [...slots].map(s => c.bindings[s]).filter((v): v is ObjectId => typeof v === 'string');
+  }
+
   removeObject(id: ObjectId): void {
     if (!this.objects.has(id)) return;
-    this.objects.delete(id);
     this._revision++;
-    /**
-    Cascade: any shape referencing this id loses its definition.
-    Adding line/segment/triangle later is one more `else if` arm.
-    **/
-    for (const [k, v] of this.objects) {
-      if (v.kind === 'circle') {
-        if (v.mode === 'center-through') {
-          if (v.center === id || v.through === id) this.objects.delete(k);
-        } else {
-          if (v.p1 === id || v.p2 === id || v.p3 === id) this.objects.delete(k);
+
+    const toDelete = new Set<ObjectId>([id]);
+    const queue: ObjectId[] = [id];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      this.objects.delete(current);
+
+      for (const [k, v] of this.objects) {
+        if (v.kind === 'point' || toDelete.has(k)) continue;
+        if (!this.referencedPointIds(v).includes(current)) continue;
+
+        if (v.kind === 'circle') {
+          toDelete.add(k);
+          queue.push(k);
+        } else if (v.kind === 'construction') {
+          toDelete.add(k);
+          queue.push(k);
+          for (const outputId of this.outputPointIds(v)) {
+            if (!toDelete.has(outputId)) {
+              toDelete.add(outputId);
+              queue.push(outputId);
+            }
+          }
         }
       }
     }
 
-    // Cascade: if a ConstructionObject references a deleted point, delete the construction
-    for (const [k, v] of this.objects) {
-      if (v.kind === 'construction') {
-        const allBoundIds = Object.values(v.bindings);
-        if (allBoundIds.includes(id)) this.objects.delete(k);
-      }
-    }
+    this.emit();
+  }
+
+  renamePoint(id: ObjectId, label: string): void {
+    const o = this.objects.get(id);
+    if (!o || o.kind !== 'point') return;
+    this.objects.set(id, { ...o, label });
+    this._revision++;
     this.emit();
   }
 

@@ -42,7 +42,8 @@ export type ToolPreview =
   // This shows where the last point can land to make it valid
   | { kind: 'auxLine'; from: { x: number; y: number }; to: { x: number; y: number } }
   // This is to let the viewer see the edges they already have created by the points they placed
-  | { kind: 'partialEdge'; from: { x: number; y: number }; to: { x: number; y: number } };
+  | { kind: 'partialEdge'; from: { x: number; y: number }; to: { x: number; y: number } }
+  | { kind: 'selectHoverPoint'; pos: { x: number; y: number }; pointId: string };
 
 export interface Tool {
   readonly name: ToolName;

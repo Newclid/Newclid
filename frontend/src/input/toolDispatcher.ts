@@ -26,6 +26,7 @@ export function attachToolDispatcher(
   scene: Scene,
   requestRedraw: () => void,
   appStore?: AppStore,
+  opts?: { selectMenuCallback?: (pointId: string, x: number, y: number) => void },
 ): ToolDispatcherHandle {
   const toLocal = (e: { clientX: number; clientY: number }) => {
     const r = target.getBoundingClientRect();
@@ -61,9 +62,15 @@ export function attachToolDispatcher(
       appStore.goalPickCallback?.(ctx.world.x, ctx.world.y, ctx.scale);
       return;
     }
-    // Allow canvas interaction when a tool group is open OR when a non-select
-    // tool is active (e.g. activated via keyboard shortcut without opening a group).
-    if (!appStore?.activeToolGroup && scene.tool === 'select') return;
+    if (scene.tool === 'select' && !appStore?.activeToolGroup) {
+      const hovered = scene.previews.find(p => p.kind === 'selectHoverPoint') as
+        ({ kind: 'selectHoverPoint'; pos: { x: number; y: number }; pointId: string } | undefined);
+      if (hovered) {
+        const local = toLocal(e);
+        opts?.selectMenuCallback?.(hovered.pointId, local.x, local.y);
+      }
+      return;
+    }
     const tool = getTool(scene.tool);
     if (!tool) return;
     // Capture state before the click so we can record one undo step and update
@@ -80,7 +87,10 @@ export function attachToolDispatcher(
     // Other tools: accept when the scene actually changed.
     const clickAccepted = slotChanged || (!toolBefore && scene.revision !== rev);
     if (clickAccepted) {
-      scene.pushUndo(before, toolBefore ? () => tool.restoreState?.(toolBefore) : undefined);
+      const toolName = scene.tool;
+      scene.pushUndo(before, toolBefore ? () => {
+        if (scene.tool === toolName) tool.restoreState?.(toolBefore);
+      } : undefined);
       scene.setSlotError(null);
     }
     if (toolBefore && toolAfter) {
@@ -98,6 +108,19 @@ export function attachToolDispatcher(
       const ctx = buildCtx(e);
       const nearest = pickNearestPoint(scene.objects, ctx.world, { tolerancePx: 12, scale: ctx.scale });
       scene.setPreviews(nearest ? [{ kind: 'highlightPoint', pos: { x: nearest.x, y: nearest.y } }] : []);
+      requestRedraw();
+      return;
+    }
+    if (scene.tool === 'select' && !appStore?.activeToolGroup) {
+      const ctx = buildCtx(e);
+      const nearest = pickNearestPoint(scene.objects, ctx.world, { tolerancePx: 12, scale: ctx.scale });
+      if (nearest) {
+        scene.setPreviews([{ kind: 'selectHoverPoint', pos: { x: nearest.x, y: nearest.y }, pointId: nearest.id }]);
+        target.style.cursor = 'pointer';
+      } else {
+        scene.setPreviews([]);
+        target.style.cursor = '';
+      }
       requestRedraw();
       return;
     }

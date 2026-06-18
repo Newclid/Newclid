@@ -10,6 +10,7 @@ import { BackendClient } from './api/backendClient';
 import { JobPoller } from './api/jobPoller';
 import { initNotifications, notify } from './ui/notifications';
 import { attachToolbarResizer } from './ui/toolbarResizer';
+import { createPointContextMenu } from './ui/pointContextMenu';
 import { expandJgexPredicates, geomFromSignatures, parseConstructionSignature, parseJgexGeometry } from './emit/jgexParser';
 import type { ConstructionMarker } from './emit/jgexParser';
 import { buildNameTable } from './emit/names';
@@ -133,7 +134,12 @@ attachPanZoom(renderer.svg, viewport, () => {
   requestRedraw();
   dispatcherHandle?.refreshPreview();
 });
-dispatcherHandle = attachToolDispatcher(renderer.svg, viewport, scene, requestRedraw, appStore);
+
+const pointMenu = createPointContextMenu(scene, canvasHost, requestRedraw);
+dispatcherHandle = attachToolDispatcher(renderer.svg, viewport, scene, requestRedraw, appStore, {
+  selectMenuCallback: (pointId, x, y) => pointMenu.show(pointId, x, y),
+});
+scene.subscribe(() => { if (scene.tool !== 'select') pointMenu.dismiss(); });
 attachShortcuts(scene, appStore);
 
 scene.subscribe(requestRedraw);
