@@ -363,7 +363,26 @@ namespace Yuclid {
                             else if (pair2.second == anchor_seg2) matching_other_end_seg_2 = pair2.first;
                             else continue; // Doesn't touch our anchor, skip
                             
-                            if (!mapping.is_point_used(matching_other_end_seg_2) && matching_other_end_seg_1 != matching_other_end_seg_2) {
+                            // Skip if point is already used
+                            if (mapping.is_point_used(matching_other_end_seg_2)) continue;
+
+                            // --- THE ALIAS CONTRACT ---
+                            if (other_seg1_idx == other_seg2_idx) {
+                                // These have the same variable index, so they are the same vairable(e.g., cong A B A C). 
+                                // Therefore, the discovered points must be the same as well!
+                                if (matching_other_end_seg_1 != matching_other_end_seg_2) continue;
+                            
+                                // Avoid assigning the same variable twice
+                                next_extension.clear_assignments();
+                                next_extension.add_assignment(predicate.variable_indices[other_seg1_idx], matching_other_end_seg_1);
+                                co_yield next_extension;
+                            } 
+                            else {
+                                // The two variables have different indexes (e.g., cong A B C D).
+                                // Therefore, the points must be different as well.
+                                if (matching_other_end_seg_1 == matching_other_end_seg_2) continue;
+                            
+                                // Assign both
                                 next_extension.clear_assignments();
                                 next_extension.add_assignment(predicate.variable_indices[other_seg1_idx], matching_other_end_seg_1);
                                 next_extension.add_assignment(predicate.variable_indices[other_seg2_idx], matching_other_end_seg_2);
@@ -391,11 +410,42 @@ namespace Yuclid {
 
                             // Yield 4 directional permutations (AB->CD, AB->DC, BA->CD, BA->DC)
                             for (int swap_state = 0; swap_state < 4; ++swap_state) {
+                                ProblemPointIndex pt_a = (swap_state & 1) ? p1.second : p1.first;
+                                ProblemPointIndex pt_b = (swap_state & 1) ? p1.first : p1.second;
+                                ProblemPointIndex pt_c = (swap_state & 2) ? p2.second : p2.first;
+                                ProblemPointIndex pt_d = (swap_state & 2) ? p2.first : p2.second;
+
+                                // --- Variable repetition check ---
+                                // If the variable indices are equal, the points must be equal.
+                                // If the variable indices are NOT equal, the points mut NOT be equal.
+                                bool valid = true;
+                                if ((local_var_indexes[0] == local_var_indexes[1]) != (pt_a == pt_b)) valid = false;
+                                if ((local_var_indexes[0] == local_var_indexes[2]) != (pt_a == pt_c)) valid = false;
+                                if ((local_var_indexes[0] == local_var_indexes[3]) != (pt_a == pt_d)) valid = false;
+                                if ((local_var_indexes[1] == local_var_indexes[2]) != (pt_b == pt_c)) valid = false;
+                                if ((local_var_indexes[1] == local_var_indexes[3]) != (pt_b == pt_d)) valid = false;
+                                if ((local_var_indexes[2] == local_var_indexes[3]) != (pt_c == pt_d)) valid = false;
+
+                                if (!valid) continue;
+
                                 next_extension.clear_assignments();
-                                next_extension.add_assignment(predicate.variable_indices[local_var_indexes[0]], (swap_state & 1) ? p1.second : p1.first);
-                                next_extension.add_assignment(predicate.variable_indices[local_var_indexes[1]], (swap_state & 1) ? p1.first : p1.second);
-                                next_extension.add_assignment(predicate.variable_indices[local_var_indexes[2]], (swap_state & 2) ? p2.second : p2.first);
-                                next_extension.add_assignment(predicate.variable_indices[local_var_indexes[3]], (swap_state & 2) ? p2.first : p2.second);
+
+                                // We keep track of what we've added to avoid double-assigning aliases
+                                uint8_t added_mask = 0; 
+
+                                // Helper lambda to avoid assigning the same variable more than once
+                                auto safe_add = [&](std::size_t idx, ProblemPointIndex pt) {
+                                    if ((added_mask & (1 << idx)) == 0) {
+                                        next_extension.add_assignment(predicate.variable_indices[idx], pt);
+                                        added_mask |= (1 << idx);
+                                    }
+                                };
+                            
+                                safe_add(local_var_indexes[0], pt_a);
+                                safe_add(local_var_indexes[1], pt_b);
+                                safe_add(local_var_indexes[2], pt_c);
+                                safe_add(local_var_indexes[3], pt_d);
+                            
                                 co_yield next_extension;
                             }
                         }
