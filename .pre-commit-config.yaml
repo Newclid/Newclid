@@ -30,6 +30,7 @@ repos:
       - id: pytest
         name: pytest
         entry: uv run pytest -n auto -vv
+        args: ["-m", "not redis"]
         language: system
         pass_filenames: false
         always_run: true
