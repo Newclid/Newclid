@@ -409,4 +409,149 @@ BOOST_AUTO_TEST_CASE(predicate_constants_are_preserved) {
     );
 }
 
+/**
+ * @brief A rule declaration must contain an identifier.
+ */
+BOOST_AUTO_TEST_CASE(rule_without_id_is_error) {
+    std::istringstream input(R"(
+        rule
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A rule declaration must contain at least one variable.
+ */
+BOOST_AUTO_TEST_CASE(rule_without_variables_is_error) {
+    std::istringstream input(R"(
+        rule no_variables
+        require diff A B
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A require action must contain a predicate name.
+ */
+BOOST_AUTO_TEST_CASE(require_without_predicate_name_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A conclude action must contain a predicate name.
+ */
+BOOST_AUTO_TEST_CASE(conclude_without_predicate_name_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff A B
+        conclude
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A required predicate must contain at least one argument.
+ */
+BOOST_AUTO_TEST_CASE(require_predicate_without_arguments_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A concluded predicate must contain at least one argument.
+ */
+BOOST_AUTO_TEST_CASE(conclude_predicate_without_arguments_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff A B
+        conclude diff
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief Unknown parser actions are rejected.
+ */
+BOOST_AUTO_TEST_CASE(unknown_action_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff A B
+        invalid_action diff B A
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
 BOOST_AUTO_TEST_SUITE_END()
