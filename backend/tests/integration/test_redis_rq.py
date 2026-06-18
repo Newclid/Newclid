@@ -6,6 +6,8 @@ from newclid_backend.queue import enqueue_job, fetch_job
 from newclid_backend.runner_models import NewclidRunResult
 from newclid_backend.tasks import run_newclid_job
 
+pytestmark = pytest.mark.redis
+
 
 def _mock_runner(monkeypatch: pytest.MonkeyPatch, **mock_kwargs: Any) -> Mock:
     runner_mock = Mock(**mock_kwargs)

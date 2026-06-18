@@ -85,6 +85,7 @@ filterwarnings = [
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "redis: tests that require a live Redis service",
 ]
 
 [tool.coverage.run]
