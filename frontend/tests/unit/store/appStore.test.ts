@@ -3,12 +3,9 @@ import { AppStore } from '../../../src/store/appStore';
 
 describe('AppStore', () => {
   let store: AppStore;
-  let listener: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     store = new AppStore();
-    listener = vi.fn();
-    store.subscribe(listener);
   });
 
   describe('initial state', () => {
@@ -31,6 +28,8 @@ describe('AppStore', () => {
 
   describe('setProblem()', () => {
     it('sets the problem and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.setProblem('jgex string');
       expect(store.problem).toBe('jgex string');
       expect(listener).toHaveBeenCalledTimes(1);
@@ -63,6 +62,8 @@ describe('AppStore', () => {
     });
 
     it('emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.addJob('j1', 'problem');
       expect(listener).toHaveBeenCalledTimes(1);
     });
@@ -70,6 +71,8 @@ describe('AppStore', () => {
 
   describe('enterProofMode()', () => {
     it('sets proofMode=true, proofByPointsMode=false, activeToolGroup=null and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.proofByPointsMode = true;
       store.activeToolGroup = 'circle';
       store.enterProofMode();
@@ -82,6 +85,8 @@ describe('AppStore', () => {
 
   describe('exitProofMode()', () => {
     it('sets proofMode=false, clears step indices, sets panelTab=proofs and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.proofMode = true;
       store.activeProofStepIndex = 3;
       store.activeProofSubStepIndex = 1;
@@ -96,6 +101,8 @@ describe('AppStore', () => {
 
   describe('setLastToolGroup()', () => {
     it('sets lastToolGroup without emitting', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.setLastToolGroup('angle');
       expect(store.lastToolGroup).toBe('angle');
       expect(listener).not.toHaveBeenCalled();
@@ -104,6 +111,8 @@ describe('AppStore', () => {
 
   describe('setActiveToolGroup()', () => {
     it('sets activeToolGroup without emitting', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.setActiveToolGroup('circle');
       expect(store.activeToolGroup).toBe('circle');
       expect(listener).not.toHaveBeenCalled();
@@ -112,6 +121,8 @@ describe('AppStore', () => {
 
   describe('setActiveProofStep()', () => {
     it('sets activeProofStepIndex, resets activeProofSubStepIndex to 0, and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.activeProofSubStepIndex = 5;
       store.setActiveProofStep(2);
       expect(store.activeProofStepIndex).toBe(2);
@@ -122,6 +133,8 @@ describe('AppStore', () => {
 
   describe('setActiveProofSubStep()', () => {
     it('sets activeProofSubStepIndex and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.setActiveProofSubStep(3);
       expect(store.activeProofSubStepIndex).toBe(3);
       expect(listener).toHaveBeenCalledTimes(1);
@@ -130,6 +143,8 @@ describe('AppStore', () => {
 
   describe('enterProofByPoints()', () => {
     it('sets proofByPointsMode=true, proofMode=false, activeToolGroup=null and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.proofMode = true;
       store.activeToolGroup = 'line';
       store.enterProofByPoints();
@@ -142,6 +157,8 @@ describe('AppStore', () => {
 
   describe('exitProofByPoints()', () => {
     it('sets proofByPointsMode=false, clears goalPickCallback and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.proofByPointsMode = true;
       store.goalPickCallback = vi.fn();
       store.exitProofByPoints();
@@ -153,6 +170,8 @@ describe('AppStore', () => {
 
   describe('enterTheoremManager()', () => {
     it('sets theoremManagerMode=true, clears proofMode/proofByPointsMode/activeToolGroup and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.proofMode = true;
       store.proofByPointsMode = true;
       store.activeToolGroup = 'point';
@@ -167,6 +186,8 @@ describe('AppStore', () => {
 
   describe('exitTheoremManager()', () => {
     it('sets theoremManagerMode=false and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.theoremManagerMode = true;
       store.exitTheoremManager();
       expect(store.theoremManagerMode).toBe(false);
@@ -176,6 +197,8 @@ describe('AppStore', () => {
 
   describe('setGoalPickCallback()', () => {
     it('sets goalPickCallback without emitting', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       const cb = vi.fn();
       store.setGoalPickCallback(cb);
       expect(store.goalPickCallback).toBe(cb);
@@ -185,12 +208,16 @@ describe('AppStore', () => {
 
   describe('setPanelTab()', () => {
     it('changes tab and emits when tab differs', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.setPanelTab('proofs');
       expect(store.panelTab).toBe('proofs');
       expect(listener).toHaveBeenCalledTimes(1);
     });
 
     it('does not emit when the same tab is set again', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.setPanelTab('toolbar');
       expect(listener).not.toHaveBeenCalled();
     });
@@ -199,7 +226,8 @@ describe('AppStore', () => {
   describe('updateJob()', () => {
     it('merges patch onto existing record and emits', () => {
       store.addJob('j1', 'problem');
-      listener.mockClear();
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.updateJob('j1', { status: 'running', message: 'Working' });
       const record = store.jobs.get('j1')!;
       expect(record.status).toBe('running');
@@ -208,48 +236,50 @@ describe('AppStore', () => {
     });
 
     it('is a no-op when jobId does not exist', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.updateJob('unknown', { status: 'running' });
       expect(listener).not.toHaveBeenCalled();
     });
   });
 
   describe('renameJob()', () => {
-    beforeEach(() => {
-      store.addJob('j1', 'problem');
-      listener.mockClear();
-    });
-
     it('sets name when a non-empty string is provided', () => {
+      store.addJob('j1', 'problem');
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.renameJob('j1', 'My proof');
       expect(store.jobs.get('j1')!.name).toBe('My proof');
       expect(listener).toHaveBeenCalledTimes(1);
     });
 
     it('sets name to undefined when an empty string is provided', () => {
+      store.addJob('j1', 'problem');
       store.renameJob('j1', 'Some name');
       store.renameJob('j1', '');
       expect(store.jobs.get('j1')!.name).toBeUndefined();
     });
 
     it('is a no-op when jobId does not exist', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.renameJob('unknown', 'name');
       expect(listener).not.toHaveBeenCalled();
     });
   });
 
   describe('removeJob()', () => {
-    beforeEach(() => {
-      store.addJob('j1', 'problem');
-      listener.mockClear();
-    });
-
     it('deletes the job and emits', () => {
+      store.addJob('j1', 'problem');
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.removeJob('j1');
       expect(store.jobs.has('j1')).toBe(false);
       expect(listener).toHaveBeenCalledTimes(1);
     });
 
     it('clears activeJobId and resets proof state when the removed job was active', () => {
+      store.addJob('j1', 'problem');
       store.activeProofStepIndex = 2;
       store.activeProofSubStepIndex = 1;
       store.proofMode = true;
@@ -261,14 +291,16 @@ describe('AppStore', () => {
     });
 
     it('does not clear activeJobId when a different job is removed', () => {
+      store.addJob('j1', 'problem 1');
       store.addJob('j2', 'problem 2');
       store.activeJobId = 'j2';
-      listener.mockClear();
       store.removeJob('j1');
       expect(store.activeJobId).toBe('j2');
     });
 
     it('is a no-op when jobId does not exist', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.removeJob('unknown');
       expect(listener).not.toHaveBeenCalled();
     });
@@ -276,6 +308,8 @@ describe('AppStore', () => {
 
   describe('setActiveJob()', () => {
     it('sets activeJobId and emits', () => {
+      const listener = vi.fn();
+      store.subscribe(listener);
       store.setActiveJob('j1');
       expect(store.activeJobId).toBe('j1');
       expect(listener).toHaveBeenCalledTimes(1);
@@ -284,13 +318,13 @@ describe('AppStore', () => {
 
   describe('subscribe()', () => {
     it('returns an unsubscribe function that stops notifications', () => {
-      const extra = vi.fn();
-      const unsub = store.subscribe(extra);
+      const listener = vi.fn();
+      const unsub = store.subscribe(listener);
       store.setProblem('test');
-      expect(extra).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledTimes(1);
       unsub();
       store.setProblem('test2');
-      expect(extra).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledTimes(1);
     });
   });
 });
