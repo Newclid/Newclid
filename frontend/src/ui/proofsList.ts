@@ -70,7 +70,7 @@ export function createProofsList(appStore: AppStore): ProofsListHandle {
     );
 
     if (jobsNewestFirst.length === 0) {
-      root.appendChild(el('p', { class: 'proofs-list-empty' }, ['No proofs yet.']));
+      root.appendChild(el('p', { class: 'proofs-list-empty' }, ['No solutions yet.']));
       return;
     }
 
