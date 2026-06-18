@@ -435,6 +435,36 @@ const syncCanvasSize = () => {
 const canvasResizeObserver = new ResizeObserver(() => syncCanvasSize());
 canvasResizeObserver.observe(canvasHost);
 
+// --- Zoom controls ---
+const zoomControls = document.createElement('div');
+zoomControls.className = 'zoom-controls';
+
+const zoomInBtn = document.createElement('button');
+zoomInBtn.className = 'zoom-btn';
+zoomInBtn.textContent = '+';
+zoomInBtn.title = 'Zoom in';
+zoomInBtn.addEventListener('click', () => {
+  const cx = viewport.width / 2;
+  const cy = viewport.height / 2;
+  viewport.zoomAt({ x: cx, y: cy, _kind: 'screen' } as any, 1.25);
+  requestRedraw();
+});
+
+const zoomOutBtn = document.createElement('button');
+zoomOutBtn.className = 'zoom-btn';
+zoomOutBtn.textContent = '−';
+zoomOutBtn.title = 'Zoom out';
+zoomOutBtn.addEventListener('click', () => {
+  const cx = viewport.width / 2;
+  const cy = viewport.height / 2;
+  viewport.zoomAt({ x: cx, y: cy, _kind: 'screen' } as any, 1 / 1.25);
+  requestRedraw();
+});
+
+zoomControls.appendChild(zoomInBtn);
+zoomControls.appendChild(zoomOutBtn);
+canvasHost.appendChild(zoomControls);
+
 // --- Redraw button ---
 const redrawBtn = document.createElement('button');
 redrawBtn.className = 'redraw-btn';

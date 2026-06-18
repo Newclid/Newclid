@@ -95,9 +95,49 @@ body.is-resizing {
   height: 100%;
 }
 
-.redraw-btn {
+.zoom-controls {
   position: absolute;
   bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+.zoom-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  background: var(--bg-elevated);
+  color: var(--ink-strong);
+  border: 1px solid var(--rule-mid);
+  border-bottom: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-btn:last-child {
+  border-bottom: 1px solid var(--rule-mid);
+}
+
+.zoom-btn:hover {
+  background: rgba(26, 24, 22, 0.06);
+}
+
+.zoom-btn:active {
+  background: rgba(26, 24, 22, 0.12);
+}
+
+.redraw-btn {
+  position: absolute;
+  bottom: calc(1.25rem + 80px);
   right: 1.25rem;
   padding: 8px 16px;
   border-radius: 6px;
