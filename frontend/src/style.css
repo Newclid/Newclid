@@ -304,6 +304,21 @@ body.is-resizing {
   color: #8B2828;
 }
 
+.tool-btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-radius: 6px;
+}
+
+.tool-btn-primary:hover {
+  background: #20396A;
+  color: #FFFFFF;
+}
+
+.tool-btn-primary .tool-btn-label {
+  color: #FFFFFF;
+}
+
 /* ---------- Toolbar group buttons ---------- */
 
 /* Thin rule separating select from the group list */

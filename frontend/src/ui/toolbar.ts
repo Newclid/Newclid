@@ -179,7 +179,7 @@ export function createToolbar(
   });
   const createProofBtn = el('button', {
     type: 'button',
-    class: 'tool-btn',
+    class: 'tool-btn tool-btn-primary',
     title: 'Solve a new problem',
   }) as HTMLButtonElement;
   createProofBtn.appendChild(jgexIcon());
@@ -290,9 +290,12 @@ export function createToolbar(
     proofsContent.appendChild(proofsList.root);
   }
 
+  // Separator between primary action and the tool navigation tabs.
+  const primarySep = el('div', { class: 'toolbar-sep' });
+
   const toolElements = [
-    group, proofsContent, spacer, panelTabSwitch,
-    createProofBtn, manageTheoremsBtn, clearBtn,
+    createProofBtn, primarySep, panelTabSwitch,
+    group, proofsContent, spacer, manageTheoremsBtn, clearBtn,
   ];
 
   const syncPanelState = () => {
@@ -331,11 +334,12 @@ export function createToolbar(
 
   // ---------- assemble ----------
   aside.appendChild(brand);
+  aside.appendChild(createProofBtn);
+  aside.appendChild(primarySep);
+  aside.appendChild(panelTabSwitch);
   aside.appendChild(group);
   aside.appendChild(proofsContent);
   aside.appendChild(spacer);
-  aside.appendChild(panelTabSwitch);
-  aside.appendChild(createProofBtn);
   aside.appendChild(manageTheoremsBtn);
   aside.appendChild(clearBtn);
   if (proofPanel) {
