@@ -702,6 +702,13 @@ body.is-resizing {
   background: #6E1F1F;
 }
 
+.clear-confirm-msg {
+  margin: 0 0 20px;
+  font-size: 13.5px;
+  color: var(--ink-mid);
+  line-height: 1.55;
+}
+
 .remove-confirm-dialog {
   width: min(360px, 90vw);
 }

@@ -196,7 +196,39 @@ export function createToolbar(
   manageTheoremsBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['User-Defined Theorems']));
   manageTheoremsBtn.addEventListener('click', () => appStore?.enterTheoremManager());
 
-  // ---------- clear ----------
+  // ---------- clear (with confirmation dialog) ----------
+  const clearConfirmBackdrop = el('div', { class: 'jgex-backdrop' });
+  const clearConfirmDialog = el('div', {
+    class: 'jgex-dialog',
+    role: 'dialog',
+    'aria-modal': 'true',
+  }, [
+    el('div', { class: 'jgex-title' }, ['Clear canvas?']),
+    el('p', { class: 'clear-confirm-msg' }, [
+      'This will remove all points, lines, and shapes from the canvas. This action cannot be undone.',
+    ]),
+    el('div', { class: 'jgex-actions' }, [
+      (() => {
+        const cancelClear = el('button', { type: 'button', class: 'jgex-btn jgex-btn-quiet' }, ['Cancel']) as HTMLButtonElement;
+        cancelClear.addEventListener('click', () => clearConfirmBackdrop.classList.remove('is-open'));
+        return cancelClear;
+      })(),
+      (() => {
+        const confirmClear = el('button', { type: 'button', class: 'jgex-btn jgex-btn-danger' }, ['Clear everything']) as HTMLButtonElement;
+        confirmClear.addEventListener('click', () => {
+          clearConfirmBackdrop.classList.remove('is-open');
+          scene.clear();
+        });
+        return confirmClear;
+      })(),
+    ]),
+  ]);
+  clearConfirmBackdrop.appendChild(clearConfirmDialog);
+  clearConfirmBackdrop.addEventListener('mousedown', (e) => {
+    if (e.target === clearConfirmBackdrop) clearConfirmBackdrop.classList.remove('is-open');
+  });
+  document.body.appendChild(clearConfirmBackdrop);
+
   const clearBtn = el('button', {
     type: 'button',
     class: 'tool-btn tool-btn-danger',
@@ -204,7 +236,7 @@ export function createToolbar(
   }) as HTMLButtonElement;
   clearBtn.appendChild(trashIcon());
   clearBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Clear']));
-  clearBtn.addEventListener('click', () => scene.clear());
+  clearBtn.addEventListener('click', () => clearConfirmBackdrop.classList.add('is-open'));
 
   // ---------- proof panel ----------
   const proofPanel = appStore ? createProofPanel(appStore) : null;
@@ -357,6 +389,7 @@ export function createToolbar(
       proofsList?.destroy();
       proofChoice.destroy();
       jgex.destroy();
+      clearConfirmBackdrop.remove();
     },
   };
 }
