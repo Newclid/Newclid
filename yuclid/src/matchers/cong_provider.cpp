@@ -4,6 +4,8 @@
 #include "rule_plan.hpp"
 #include "geometry_cache_types.hpp"
 #include "numbers/util.hpp"
+#include "type/dist.hpp"
+#include "statement/cong.hpp"
 
 #include <unordered_map>
 #include <cassert>
@@ -413,7 +415,20 @@ namespace Yuclid {
         const MappingState &mapping,
         const LazyGeometryCache &cache
     ) const {
-        
+        std::array<std::optional<ProblemPointIndex>, 4> assignments = get_cong_assignments(predicate, mapping);
+
+        // Failsafe
+        if (!assignments[0].has_value() || !assignments[1].has_value() || 
+            !assignments[2].has_value() || !assignments[3].has_value()) {
+            return false;
+        }
+
+        DistEqDist cong_statement(
+            Dist(cache.point(*assignments[0]), cache.point(*assignments[1])),
+            Dist(cache.point(*assignments[2]), cache.point(*assignments[3]))
+        );
+
+        return cong_statement.check_nondegen() && cong_statement.check_equations();
     }
 
 }
