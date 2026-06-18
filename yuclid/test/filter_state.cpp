@@ -35,4 +35,41 @@ BOOST_AUTO_TEST_CASE(validator_count_ceiling_throws) {
   BOOST_CHECK_THROW(FilterState(65), std::invalid_argument);  // one over
 }
 
+/**
+ * @brief Marking a filter flips only that index to "used".
+ */
+BOOST_AUTO_TEST_CASE(mark_sets_only_target) {
+  FilterState state(4);
+  state.mark_used(2);
+
+  BOOST_CHECK(state.is_used(2));
+  BOOST_CHECK(!state.is_used(0));
+  BOOST_CHECK(!state.is_used(1));
+  BOOST_CHECK(!state.is_used(3));
+}
+
+/**
+ * @brief Several independent filters can be marked.
+ */
+BOOST_AUTO_TEST_CASE(mark_multiple) {
+  FilterState state(4);
+  state.mark_used(0);
+  state.mark_used(3);
+
+  BOOST_CHECK(state.is_used(0));
+  BOOST_CHECK(!state.is_used(1));
+  BOOST_CHECK(!state.is_used(2));
+  BOOST_CHECK(state.is_used(3));
+}
+
+/**
+ * @brief Marking the same filter twice is idempotent.
+ */
+BOOST_AUTO_TEST_CASE(mark_is_idempotent) {
+  FilterState state(2);
+  state.mark_used(1);
+  state.mark_used(1);
+  BOOST_CHECK(state.is_used(1));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
