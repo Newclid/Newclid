@@ -18,6 +18,7 @@ foreach(name
     generic_rule_matcher
     statement_builder
     filter_state
+    mapping_state
     problem_parser
     custom_rule_integration_test
   )
