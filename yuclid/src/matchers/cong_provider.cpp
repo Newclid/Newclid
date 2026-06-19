@@ -8,7 +8,6 @@
 #include "type/dist.hpp"
 #include "statement/cong.hpp"
 
-#include <unordered_map>
 #include <cassert>
 
 namespace Yuclid {
@@ -67,12 +66,20 @@ namespace Yuclid {
                 double min_len = static_cast<double>(SquaredDist(cache.point(all_point_pairs[bucket.front()].first), cache.point(all_point_pairs[bucket.front()].second)));
                 double max_len = static_cast<double>(SquaredDist(cache.point(all_point_pairs[bucket.back()].first), cache.point(all_point_pairs[bucket.back()].second)));
                 
-                if (key >= (min_len - EPS) && key <= (max_len + EPS)) {
+                // Inclusive lower and exclusive upper boundary, shouldn't be a concern generally, but still, it should resolve the potential bucket overlap issue.
+                if (key >= (min_len - EPS) && key < (max_len + EPS)) {
                     return &bucket;
                 }
             }
 
             return nullptr;
+        }
+        
+        // Pairwise variable check
+        // If variables are the same, points must be the same. 
+        // If variables are different, points must be different.
+        inline bool check_var_equality(std::size_t var1, std::size_t var2, ProblemPointIndex pt1, ProblemPointIndex pt2) {
+            return (var1 == var2) == (pt1 == pt2);
         }
     }
 
@@ -84,6 +91,7 @@ namespace Yuclid {
         const MappingState &mapping,
         const LazyGeometryCache &cache
     ) const {
+        assert(predicate.pattern.args.size() == 4);
         std::size_t estimate = 0;
         std::array<std::optional<ProblemPointIndex>, 4> assignments = get_cong_assignments(predicate, mapping);
 
@@ -169,12 +177,14 @@ namespace Yuclid {
                 intersect_estimates_with_point = true;
                 [[fallthrough]];
             case 0b1000: case 0b0100: case 0b0010: case 0b0001:
+            {
                 // One point is known.
                 // Heuristics guess: One point is known, length is unknown.
                 // We assume the known point connects to (Total Points - 1) other points.
                 // We assume each of those segments belongs to a distinct bucket of average size.
                 // We multiply by 2 because each segment can be mapped bidirectionally
-                estimate = (cache.num_points() - 1) * avg_bucket_size * 2;
+                std::size_t connections = cache.num_points() > 0 ? cache.num_points() - 1 : 0;
+                estimate = connections * avg_bucket_size * 2;
 
                 if(intersect_estimates_with_point && cache.num_points() > 0) {
                     // We apply the intersection reduction described above
@@ -187,7 +197,7 @@ namespace Yuclid {
                 }
 
                 break;
-        
+            }
             case 0b0000:
                 // Brute force combinations: No points known.
                 // Combinatorics: For each bucket of size S, we pick 2 segments.
@@ -215,17 +225,9 @@ namespace Yuclid {
         const MappingState &mapping,
         const LazyGeometryCache &cache
     ) const {
+        assert(predicate.pattern.args.size() == 4);
         std::array<std::optional<ProblemPointIndex>, 4> assignments = get_cong_assignments(predicate, mapping);
         std::array<std::size_t, 4> local_var_indexes = get_predicate_local_var_indexes(predicate);
-
-        // ----------------------------------------------------------------------
-        // Pairwise Check
-        // Checks wether the following condition is satisfied:
-        // if variables are the same, points must be the same. If different, points must be different.
-        // ----------------------------------------------------------------------
-        auto check_var_equality = [](std::size_t var_idx1, std::size_t var_idx2, ProblemPointIndex pt1, ProblemPointIndex pt2) {
-            return (var_idx1 == var_idx2) == (pt1 == pt2);
-        };
 
         MappingExtension next_extension;
         const auto &all_point_pairs = cache.point_pairs();
@@ -236,6 +238,57 @@ namespace Yuclid {
         if (assignments[1].has_value()) state_mask |= 0b0100; // Variable B
         if (assignments[2].has_value()) state_mask |= 0b0010; // Variable C
         if (assignments[3].has_value()) state_mask |= 0b0001; // Variable D
+
+
+        // ----------------------------------------------------------------------
+        // THE TAUTOLOGY FAST-PATH (Identity Maps)
+        // ----------------------------------------------------------------------
+        // If the rule is `cong A B A B` or `cong A B B A`, it is mathematically 
+        // true for ALL segments. Because the cache buckets skip "singleton" segments,
+        // relying on the bucket loops would cause us to silently drop valid singletons.
+        // To fix this, if we detect an identity map, we bypass the buckets entirely.
+        // ----------------------------------------------------------------------
+        bool is_identity = 
+            (local_var_indexes[0] == local_var_indexes[2] && local_var_indexes[1] == local_var_indexes[3]) ||
+            (local_var_indexes[0] == local_var_indexes[3] && local_var_indexes[1] == local_var_indexes[2]);
+
+        if (is_identity) {
+            // If it's an identity, and we have 0 points bound (0b0000), just yield ALL point pairs.
+            if (state_mask == 0b0000) {
+                for (const PointPair &pair : all_point_pairs) {
+                    if (mapping.is_point_used(pair.first) || mapping.is_point_used(pair.second)) continue;
+
+                    next_extension.clear_assignments();
+                    // No need to map 2 and 3, they are the exact same variables
+                    next_extension.add_assignment(predicate.variable_indices[local_var_indexes[0]], pair.first);
+                    next_extension.add_assignment(predicate.variable_indices[local_var_indexes[1]], pair.second);
+                    co_yield next_extension;
+
+                    next_extension.clear_assignments();
+                    next_extension.add_assignment(predicate.variable_indices[local_var_indexes[0]], pair.second);
+                    next_extension.add_assignment(predicate.variable_indices[local_var_indexes[1]], pair.first);
+                    co_yield next_extension;
+                }
+                co_return;
+            }
+            
+            // If it's an identity and 1 point is bound (e.g., A is known, state 0b1010),
+            // just loop all points and yield the remaining free variable!
+            if (state_mask == 0b1010 || state_mask == 0b1001 || state_mask == 0b0110 || state_mask == 0b0101) {
+                ProblemPointIndex known_pt = assignments[0].has_value() ? *assignments[0] : *assignments[1];
+                std::size_t missing_var_idx = assignments[0].has_value() ? local_var_indexes[1] : local_var_indexes[0];
+
+                for (ProblemPointIndex p = 0; p < cache.num_points(); ++p) {
+                    if (p != known_pt && !mapping.is_point_used(p)) {
+                        next_extension.clear_assignments();
+                        next_extension.add_assignment(predicate.variable_indices[missing_var_idx], p);
+                        co_yield next_extension;
+                    }
+                }
+                co_return;
+            }
+            co_return;
+        }
 
         switch (state_mask) {
             // Case: All 4 points assigned. No extensions to generate.
@@ -261,6 +314,8 @@ namespace Yuclid {
                         const PointPair &pair = all_point_pairs[point_pair_id];
 
                         if(!mapping.is_point_used(pair.first) && !mapping.is_point_used(pair.second)) {
+                            if (!check_var_equality(var1_idx, var2_idx, pair.first, pair.second)) continue;
+
                             next_extension.clear_assignments();
                             next_extension.add_assignment(predicate.variable_indices[var1_idx], pair.first);
                             next_extension.add_assignment(predicate.variable_indices[var2_idx], pair.second);
@@ -381,17 +436,29 @@ namespace Yuclid {
                             const PointPair &pair2 = all_point_pairs[id2];
                             
                             if (!mapping.is_point_used(pair2.first) && !mapping.is_point_used(pair2.second)) {
-                                next_extension.clear_assignments();
-                                next_extension.add_assignment(predicate.variable_indices[other_seg1_idx], matching_other_end);
-                                next_extension.add_assignment(predicate.variable_indices[seg2_idx_a], pair2.first);
-                                next_extension.add_assignment(predicate.variable_indices[seg2_idx_b], pair2.second);
-                                co_yield next_extension;
-
-                                next_extension.clear_assignments();
-                                next_extension.add_assignment(predicate.variable_indices[other_seg1_idx], matching_other_end);
-                                next_extension.add_assignment(predicate.variable_indices[seg2_idx_a], pair2.second);
-                                next_extension.add_assignment(predicate.variable_indices[seg2_idx_b], pair2.first);
-                                co_yield next_extension;
+                                // Permutation 1
+                                if (check_var_equality(other_seg1_idx, seg2_idx_a, matching_other_end, pair2.first) &&
+                                    check_var_equality(other_seg1_idx, seg2_idx_b, matching_other_end, pair2.second) &&
+                                    check_var_equality(seg2_idx_a, seg2_idx_b, pair2.first, pair2.second)) {
+                                    
+                                    next_extension.clear_assignments();
+                                    next_extension.add_assignment(predicate.variable_indices[other_seg1_idx], matching_other_end);
+                                    next_extension.add_assignment(predicate.variable_indices[seg2_idx_a], pair2.first);
+                                    next_extension.add_assignment(predicate.variable_indices[seg2_idx_b], pair2.second);
+                                    co_yield next_extension;
+                                }
+                            
+                                // Permutation 2
+                                if (check_var_equality(other_seg1_idx, seg2_idx_a, matching_other_end, pair2.second) &&
+                                    check_var_equality(other_seg1_idx, seg2_idx_b, matching_other_end, pair2.first) &&
+                                    check_var_equality(seg2_idx_a, seg2_idx_b, pair2.second, pair2.first)) {
+                                    
+                                    next_extension.clear_assignments();
+                                    next_extension.add_assignment(predicate.variable_indices[other_seg1_idx], matching_other_end);
+                                    next_extension.add_assignment(predicate.variable_indices[seg2_idx_a], pair2.second);
+                                    next_extension.add_assignment(predicate.variable_indices[seg2_idx_b], pair2.first);
+                                    co_yield next_extension;
+                                }
                             }
                         }
                     }
@@ -533,6 +600,7 @@ namespace Yuclid {
         const MappingState &mapping,
         const LazyGeometryCache &cache
     ) const {
+        assert(predicate.pattern.args.size() == 4);
         std::array<std::optional<ProblemPointIndex>, 4> assignments = get_cong_assignments(predicate, mapping);
 
         // Failsafe
