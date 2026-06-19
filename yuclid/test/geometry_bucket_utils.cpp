@@ -189,4 +189,247 @@ BOOST_AUTO_TEST_CASE(
     BOOST_CHECK_EQUAL(keyed_ids.at(3).key, 3.0);
 }
 
+/**
+ * @brief Empty input produces no bucket callbacks.
+ */
+BOOST_AUTO_TEST_CASE(
+    empty_keyed_ids_produce_no_buckets
+) {
+    const std::vector<CapturedBucket> buckets =
+        collect_buckets(
+            {},
+            0.1
+        );
+
+    BOOST_CHECK(buckets.empty());
+}
+
+/**
+ * @brief Consecutive keys closer than the tolerance are grouped together.
+ */
+BOOST_AUTO_TEST_CASE(
+    nearby_keys_are_grouped
+) {
+    const std::vector<KeyedId<TestId>> sorted_ids{
+        {.key = 1.00, .id = 10},
+        {.key = 1.05, .id = 11},
+        {.key = 1.30, .id = 12},
+        {.key = 1.35, .id = 13},
+    };
+
+    const std::vector<CapturedBucket> buckets =
+        collect_buckets(
+            sorted_ids,
+            0.1
+        );
+
+    BOOST_REQUIRE_EQUAL(buckets.size(), 2U);
+
+    BOOST_CHECK_EQUAL(buckets.at(0).key, 1.00);
+    BOOST_REQUIRE_EQUAL(
+        buckets.at(0).ids.size(),
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(0),
+        10U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(1),
+        11U
+    );
+
+    BOOST_CHECK_EQUAL(buckets.at(1).key, 1.30);
+    BOOST_REQUIRE_EQUAL(
+        buckets.at(1).ids.size(),
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(1).ids.at(0),
+        12U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(1).ids.at(1),
+        13U
+    );
+}
+
+/**
+ * @brief A difference exactly equal to the tolerance begins a new bucket.
+ *
+ * The implementation uses a strict comparison:
+ *     key < last_key + tolerance
+ */
+BOOST_AUTO_TEST_CASE(
+    exact_tolerance_boundary_starts_new_bucket
+) {
+    const std::vector<KeyedId<TestId>> sorted_ids{
+        {.key = 0.0, .id = 0},
+        {.key = 0.1, .id = 1},
+    };
+
+    const std::vector<CapturedBucket> buckets =
+        collect_buckets(
+            sorted_ids,
+            0.1
+        );
+
+    BOOST_REQUIRE_EQUAL(buckets.size(), 2U);
+
+    BOOST_REQUIRE_EQUAL(
+        buckets.at(0).ids.size(),
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(0),
+        0U
+    );
+
+    BOOST_REQUIRE_EQUAL(
+        buckets.at(1).ids.size(),
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(1).ids.at(0),
+        1U
+    );
+}
+
+/**
+ * @brief The representative key is taken from the first element in the bucket.
+ */
+BOOST_AUTO_TEST_CASE(
+    bucket_uses_first_key_as_representative
+) {
+    const std::vector<KeyedId<TestId>> sorted_ids{
+        {.key = 5.00, .id = 0},
+        {.key = 5.04, .id = 1},
+        {.key = 5.08, .id = 2},
+    };
+
+    const std::vector<CapturedBucket> buckets =
+        collect_buckets(
+            sorted_ids,
+            0.1
+        );
+
+    BOOST_REQUIRE_EQUAL(buckets.size(), 1U);
+    BOOST_CHECK_EQUAL(buckets.at(0).key, 5.00);
+}
+
+/**
+ * @brief Buckets smaller than the configured minimum size are omitted.
+ */
+BOOST_AUTO_TEST_CASE(
+    minimum_bucket_size_filters_small_buckets
+) {
+    const std::vector<KeyedId<TestId>> sorted_ids{
+        {.key = 1.00, .id = 0},
+        {.key = 1.05, .id = 1},
+        {.key = 2.00, .id = 2},
+    };
+
+    const std::vector<CapturedBucket> buckets =
+        collect_buckets(
+            sorted_ids,
+            0.1,
+            2
+        );
+
+    BOOST_REQUIRE_EQUAL(buckets.size(), 1U);
+
+    BOOST_REQUIRE_EQUAL(
+        buckets.at(0).ids.size(),
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(0),
+        0U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(1),
+        1U
+    );
+}
+
+/**
+ * @brief A final qualifying bucket is emitted when iteration ends.
+ */
+BOOST_AUTO_TEST_CASE(
+    final_bucket_is_emitted
+) {
+    const std::vector<KeyedId<TestId>> sorted_ids{
+        {.key = 0.0, .id = 0},
+        {.key = 1.0, .id = 1},
+        {.key = 1.05, .id = 2},
+    };
+
+    const std::vector<CapturedBucket> buckets =
+        collect_buckets(
+            sorted_ids,
+            0.1,
+            2
+        );
+
+    BOOST_REQUIRE_EQUAL(buckets.size(), 1U);
+
+    BOOST_CHECK_EQUAL(buckets.at(0).key, 1.0);
+    BOOST_REQUIRE_EQUAL(
+        buckets.at(0).ids.size(),
+        2U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(0),
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(1),
+        2U
+    );
+}
+
+/**
+ * @brief Bucketing compares each value to the previous value, allowing a
+ * chain of close values to remain in one bucket.
+ *
+ * This also executes the drift-warning path. The warning does not split or
+ * discard the bucket.
+ */
+BOOST_AUTO_TEST_CASE(
+    chained_nearby_keys_remain_in_one_bucket
+) {
+    const std::vector<KeyedId<TestId>> sorted_ids{
+        {.key = 0.00, .id = 0},
+        {.key = 0.09, .id = 1},
+        {.key = 0.18, .id = 2},
+    };
+
+    const std::vector<CapturedBucket> buckets =
+        collect_buckets(
+            sorted_ids,
+            0.1,
+            1,
+            1.5
+        );
+
+    BOOST_REQUIRE_EQUAL(buckets.size(), 1U);
+
+    BOOST_REQUIRE_EQUAL(
+        buckets.at(0).ids.size(),
+        3U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(0),
+        0U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(1),
+        1U
+    );
+    BOOST_CHECK_EQUAL(
+        buckets.at(0).ids.at(2),
+        2U
+    );
+}
+
 BOOST_AUTO_TEST_SUITE_END()
