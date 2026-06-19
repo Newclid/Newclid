@@ -432,4 +432,137 @@ BOOST_AUTO_TEST_CASE(
     );
 }
 
+/**
+ * @brief Empty and single-element collections contain no unordered pairs.
+ */
+BOOST_AUTO_TEST_CASE(
+    fewer_than_two_values_produce_no_pairs
+) {
+    std::size_t callback_count = 0;
+
+    for_each_unordered_pair(
+        std::vector<int>{},
+        [&](int, int) {
+            ++callback_count;
+        }
+    );
+
+    for_each_unordered_pair(
+        std::vector<int>{42},
+        [&](int, int) {
+            ++callback_count;
+        }
+    );
+
+    BOOST_CHECK_EQUAL(callback_count, 0U);
+}
+
+/**
+ * @brief Three values produce all three unique unordered pairs.
+ */
+BOOST_AUTO_TEST_CASE(
+    three_values_produce_all_unordered_pairs
+) {
+    const std::vector<int> values{
+        10,
+        20,
+        30,
+    };
+
+    std::vector<std::pair<int, int>> pairs;
+
+    for_each_unordered_pair(
+        values,
+        [&](int first, int second) {
+            pairs.emplace_back(first, second);
+        }
+    );
+
+    BOOST_REQUIRE_EQUAL(pairs.size(), 3U);
+
+    BOOST_CHECK_EQUAL(pairs.at(0).first, 10);
+    BOOST_CHECK_EQUAL(pairs.at(0).second, 20);
+
+    BOOST_CHECK_EQUAL(pairs.at(1).first, 10);
+    BOOST_CHECK_EQUAL(pairs.at(1).second, 30);
+
+    BOOST_CHECK_EQUAL(pairs.at(2).first, 20);
+    BOOST_CHECK_EQUAL(pairs.at(2).second, 30);
+}
+
+/**
+ * @brief Four values produce n(n-1)/2 pairs without reversed duplicates.
+ */
+BOOST_AUTO_TEST_CASE(
+    pair_count_matches_combination_count
+) {
+    const std::vector<int> values{
+        1,
+        2,
+        3,
+        4,
+    };
+
+    std::vector<std::pair<int, int>> pairs;
+
+    for_each_unordered_pair(
+        values,
+        [&](int first, int second) {
+            pairs.emplace_back(first, second);
+        }
+    );
+
+    constexpr std::size_t expected_pair_count =
+        4U * 3U / 2U;
+
+    BOOST_REQUIRE_EQUAL(
+        pairs.size(),
+        expected_pair_count
+    );
+
+    BOOST_CHECK_EQUAL(pairs.at(0).first, 1);
+    BOOST_CHECK_EQUAL(pairs.at(0).second, 2);
+
+    BOOST_CHECK_EQUAL(pairs.at(1).first, 1);
+    BOOST_CHECK_EQUAL(pairs.at(1).second, 3);
+
+    BOOST_CHECK_EQUAL(pairs.at(2).first, 1);
+    BOOST_CHECK_EQUAL(pairs.at(2).second, 4);
+
+    BOOST_CHECK_EQUAL(pairs.at(3).first, 2);
+    BOOST_CHECK_EQUAL(pairs.at(3).second, 3);
+
+    BOOST_CHECK_EQUAL(pairs.at(4).first, 2);
+    BOOST_CHECK_EQUAL(pairs.at(4).second, 4);
+
+    BOOST_CHECK_EQUAL(pairs.at(5).first, 3);
+    BOOST_CHECK_EQUAL(pairs.at(5).second, 4);
+}
+
+/**
+ * @brief Pairing is based on distinct positions, even when values are equal.
+ */
+BOOST_AUTO_TEST_CASE(
+    duplicate_values_still_produce_positional_pairs
+) {
+    const std::vector<int> values{
+        5,
+        5,
+        5,
+    };
+
+    std::size_t callback_count = 0;
+
+    for_each_unordered_pair(
+        values,
+        [&](int first, int second) {
+            BOOST_CHECK_EQUAL(first, 5);
+            BOOST_CHECK_EQUAL(second, 5);
+            ++callback_count;
+        }
+    );
+
+    BOOST_CHECK_EQUAL(callback_count, 3U);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
