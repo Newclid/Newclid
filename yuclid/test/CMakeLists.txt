@@ -20,6 +20,7 @@ foreach(name
     filter_state
     mapping_state
     problem_parser
+    lazy_geometry_cache
     rule_plan
     custom_rule_integration_test
   )
