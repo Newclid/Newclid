@@ -18,6 +18,7 @@ foreach(name
     generic_rule_matcher
     statement_builder
     problem_parser
+    geometry_bucket_utils
     custom_rule_integration_test
   )
   add_executable(test_${name} ${name}.cpp)
