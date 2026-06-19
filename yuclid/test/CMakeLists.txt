@@ -20,6 +20,7 @@ foreach(name
     filter_state
     mapping_state
     problem_parser
+    rule_plan
     custom_rule_integration_test
   )
   add_executable(test_${name} ${name}.cpp)
