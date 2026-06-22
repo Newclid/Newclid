@@ -1,0 +1,2 @@
+Display new proof data
+======================
