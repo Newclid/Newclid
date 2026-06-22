@@ -290,16 +290,14 @@ backend-integration-tests-linux:
 
 docs-build-linux:
   stage: test
-  timeout: 20m
+  timeout: 30m
   image: ghcr.io/astral-sh/uv:0.11.11-python3.12-trixie-slim
+
   interruptible: true
 
   rules:
     - changes:
         - docs/**/*
-        - newclid/**/*
-        - ncdgen/**/*
-        - yuclid/python/**/*
         - README.rst
         - pyproject.toml
         - uv.lock
@@ -309,6 +307,16 @@ docs-build-linux:
   variables:
     DEBIAN_FRONTEND: noninteractive
 
+    CC: gcc-14
+    CXX: g++-14
+
+    CMAKE_GENERATOR: Ninja
+    CMAKE_BUILD_PARALLEL_LEVEL: "2"
+    CMAKE_ARGS: >-
+      -DUSE_STATIC_LINK=OFF
+      -DBUILD_DOC=OFF
+      -DCMAKE_BUILD_TYPE=Release
+
   before_script:
     - apt-get update -qq
     - >
@@ -317,12 +325,14 @@ docs-build-linux:
       cmake
       ninja-build
       libboost-all-dev
+      gcc-14
+      g++-14
       ca-certificates
     - rm -rf /var/lib/apt/lists/*
 
   script:
     - echo "Install project and documentation dependencies"
-    - uv sync --frozen --extra doc
+    - uv sync --frozen --extra doc -v
 
     - echo "Generate API documentation pages"
     - uv run python docs/reformat.py
