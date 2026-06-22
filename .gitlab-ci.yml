@@ -334,11 +334,8 @@ docs-build-linux:
     - echo "Install project and documentation dependencies"
     - uv sync --frozen --extra doc -v
 
-    - echo "Generate API documentation pages"
+    - echo "Generate API documentation and build Sphinx docs"
     - uv run python docs/reformat.py
-
-    - echo "Build Sphinx documentation and fail on warnings"
-    - uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 
   artifacts:
     when: always
