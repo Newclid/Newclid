@@ -10,6 +10,7 @@
 #include "base_provider.hpp"
 #include "lazy_geometry_cache.hpp"
 #include "filter_state.hpp"
+#include "rules/schema_validator.hpp"
 
 #include <boost/log/trivial.hpp>
 #include <span>
@@ -114,6 +115,14 @@ namespace Yuclid {
 
         for(const RuleSchema &schema: m_rules){
             try {
+                // Schema validation
+                // Catch typos, bad arity, and missing variables.
+                std::optional<std::string> validation_error = validate_schema(schema);
+                if (validation_error.has_value()) {
+                    BOOST_LOG_TRIVIAL(warning) << validation_error.value();
+                    continue; 
+                }
+
                 // TODO: decide what to do if we let different varables map to the same point
                 if(schema.variables.size() > m_problem->num_points()) {
                     BOOST_LOG_TRIVIAL(warning) << "Generic rule matcher skipped rule " << schema.id << ". Reason: Insufficient number of points in problem.";
