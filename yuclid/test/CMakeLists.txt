@@ -23,6 +23,7 @@ foreach(name
     geometry_bucket_utils
     lazy_geometry_cache
     rule_plan
+    base_provider_and_registry
     custom_rule_integration_test
   )
   add_executable(test_${name} ${name}.cpp)
