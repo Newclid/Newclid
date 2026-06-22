@@ -124,11 +124,11 @@ export function attachToolDispatcher(
       requestRedraw();
       return;
     }
-    if (!appStore?.activeToolGroup) {
+    const tool = getTool(scene.tool);
+    if (!appStore?.activeToolGroup && tool?.currentSlotLabel?.() == null) {
       if (scene.previews.length > 0) { scene.setPreviews([]); requestRedraw(); }
       return;
     }
-    const tool = getTool(scene.tool);
     if (!tool) return;
     const previews = tool.onMove(buildCtx(e));
     scene.setPreviews(previews);
