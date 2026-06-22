@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE base_provider_and_registry_test
+#define BOOST_TEST_MODULE provider_registry_test
 
 #include <boost/test/unit_test.hpp>
 
@@ -42,6 +42,32 @@ BOOST_AUTO_TEST_CASE(registry_routes_to_fallback) {
     const DummyProvider* dummy = dynamic_cast<const DummyProvider*>(provider);
     BOOST_REQUIRE(dummy != nullptr);
     BOOST_CHECK_EQUAL(dummy->id, 999);
+}
+
+BOOST_AUTO_TEST_CASE(registry_routes_to_specific_provider) {
+    PredicateProviderRegistry registry(std::make_unique<DummyProvider>(999)); // Fallback
+    
+    registry.register_provider("cong", std::make_unique<DummyProvider>(1));
+    registry.register_provider("para", std::make_unique<DummyProvider>(2));
+
+    const DummyProvider* cong_prov = dynamic_cast<const DummyProvider*>(registry.get_provider("cong"));
+    const DummyProvider* para_prov = dynamic_cast<const DummyProvider*>(registry.get_provider("para"));
+
+    BOOST_REQUIRE(cong_prov != nullptr);
+    BOOST_REQUIRE(para_prov != nullptr);
+    BOOST_CHECK_EQUAL(cong_prov->id, 1);
+    BOOST_CHECK_EQUAL(para_prov->id, 2);
+}
+
+BOOST_AUTO_TEST_CASE(registry_overwrites_existing_provider) {
+    PredicateProviderRegistry registry(std::make_unique<DummyProvider>(999));
+    
+    registry.register_provider("coll", std::make_unique<DummyProvider>(10));
+    registry.register_provider("coll", std::make_unique<DummyProvider>(20)); // Overwrite
+
+    const DummyProvider* coll_prov = dynamic_cast<const DummyProvider*>(registry.get_provider("coll"));
+    BOOST_REQUIRE(coll_prov != nullptr);
+    BOOST_CHECK_EQUAL(coll_prov->id, 20);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
