@@ -50,4 +50,61 @@ struct SchemaValidatorFixture {
 
 BOOST_FIXTURE_TEST_SUITE(schema_validator_suite, SchemaValidatorFixture)
 
+/**
+ * @brief Test exact arity success (4 arguments)
+ */
+BOOST_AUTO_TEST_CASE(validator_valid_exact_arity_4) {
+    auto schema = build_schema("test_cong", {"A", "B", "C", "D"}, {
+        {"cong", {"A", "B", "C", "D"}},
+        {"para", {"A", "B", "C", "D"}},
+        {"perp", {"A", "B", "C", "D"}}
+    });
+    require_valid(schema);
+}
+
+/**
+ * @brief Test sliding window predicates (At least N arguments)
+ */
+BOOST_AUTO_TEST_CASE(validator_valid_sliding_window_coll_cyclic) {
+    auto schema = build_schema("test_sliding", {"A", "B", "C", "D", "E"}, {
+        {"coll", {"A", "B", "C", "D", "E"}},
+        {"cyclic", {"A", "B", "C", "D", "E"}}
+    });
+    require_valid(schema);
+}
+
+/**
+ * @brief Test overloaded arity (eqangle accepts exactly 6 or exactly 8)
+ */
+BOOST_AUTO_TEST_CASE(validator_valid_eqangle_overloads) {
+    auto schema = build_schema("test_eqangle", {"A", "B", "C", "D", "E", "F", "G", "H"}, {
+        {"eqangle", {"A", "B", "C", "D", "E", "F"}},             // 6 args
+        {"equal_angles", {"A", "B", "C", "D", "E", "F", "G", "H"}} // 8 args
+    });
+    require_valid(schema);
+}
+
+/**
+ * @brief Test strict exact arity success (6 and 8 arguments)
+ */
+BOOST_AUTO_TEST_CASE(validator_valid_exact_arity_large) {
+    auto schema = build_schema("test_large_arity", {"A", "B", "C", "D", "E", "F", "G", "H"}, {
+        {"simtri", {"A", "B", "C", "D", "E", "F"}},
+        {"eqratio", {"A", "B", "C", "D", "E", "F", "G", "H"}}
+    });
+    require_valid(schema);
+}
+
+/**
+ * @brief Test Legacy Constant Bypass
+ * Verifies that the validator ignores the undeclared "1/2" string in the constant slot
+ */
+BOOST_AUTO_TEST_CASE(validator_valid_legacy_constant_bypass) {
+    auto schema = build_schema("test_constants", {"A", "B", "C", "D"}, {
+        {"rconst", {"A", "B", "C", "D", "1/2"}}, // "1/2" is not in vars, should pass
+        {"lconst", {"A", "B", "3"}}              // "3" is not in vars, should pass
+    });
+    require_valid(schema);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
