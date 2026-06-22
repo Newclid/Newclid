@@ -29,14 +29,14 @@ struct SchemaValidatorFixture {
 
     // Helper to assert a schema is perfectly valid
     void require_valid(const RuleSchema& schema) {
-        auto result = SchemaValidator::validate(schema);
+        auto result = validate_schema(schema);
         BOOST_REQUIRE_MESSAGE(!result.has_value(), 
             "Schema was expected to be valid, but failed with: " << result.value_or(""));
     }
 
     // Helper to assert a schema fails, and optionally check the error message
     void require_invalid(const RuleSchema& schema, const std::string& expected_error_substring = "") {
-        auto result = SchemaValidator::validate(schema);
+        auto result = validate_schema(schema);
         BOOST_REQUIRE_MESSAGE(result.has_value(), 
             "Schema was expected to be invalid, but passed validation!");
         

@@ -27,6 +27,7 @@ foreach(name
     provider_registry
     base_provider
     custom_rule_integration_test
+    schema_validator
   )
   add_executable(test_${name} ${name}.cpp)
 
