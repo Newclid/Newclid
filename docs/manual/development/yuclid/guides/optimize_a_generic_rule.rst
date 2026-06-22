@@ -1,0 +1,2 @@
+Optimize a generic rule
+=======================
