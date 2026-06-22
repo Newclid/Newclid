@@ -286,3 +286,59 @@ backend-integration-tests-linux:
     reports:
       junit:
         - reports/pytest-backend-integration.xml
+
+
+docs-build-linux:
+  stage: test
+  timeout: 30m
+  image: ghcr.io/astral-sh/uv:0.11.11-python3.12-trixie-slim
+
+  interruptible: true
+
+  rules:
+    - changes:
+        - docs/**/*
+        - README.rst
+        - pyproject.toml
+        - uv.lock
+        - .gitlab-ci.yml
+    - when: never
+
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+
+    CC: gcc-14
+    CXX: g++-14
+
+    CMAKE_GENERATOR: Ninja
+    CMAKE_BUILD_PARALLEL_LEVEL: "2"
+    CMAKE_ARGS: >-
+      -DUSE_STATIC_LINK=OFF
+      -DBUILD_DOC=OFF
+      -DCMAKE_BUILD_TYPE=Release
+
+  before_script:
+    - apt-get update -qq
+    - >
+      apt-get install -y --no-install-recommends
+      build-essential
+      cmake
+      ninja-build
+      libboost-all-dev
+      gcc-14
+      g++-14
+      ca-certificates
+    - rm -rf /var/lib/apt/lists/*
+
+  script:
+    - echo "Install project and documentation dependencies"
+    - uv sync --frozen --extra doc -v
+
+    - echo "Generate API documentation and build Sphinx docs"
+    - uv run python docs/reformat.py
+
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - docs/_build/html/
