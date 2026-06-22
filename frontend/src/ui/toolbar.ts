@@ -204,7 +204,7 @@ export function createToolbar(
   }) as HTMLButtonElement;
   clearBtn.appendChild(trashIcon());
   clearBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Clear']));
-  clearBtn.addEventListener('click', () => scene.clear());
+  clearBtn.addEventListener('click', () => { getTool(scene.tool)?.onDeactivate?.({ scene }); scene.clear(); });
 
   // ---------- proof panel ----------
   const proofPanel = appStore ? createProofPanel(appStore) : null;
