@@ -107,4 +107,75 @@ BOOST_AUTO_TEST_CASE(validator_valid_legacy_constant_bypass) {
     require_valid(schema);
 }
 
+/**
+ * @brief Test unknown predicate rejection
+ */
+BOOST_AUTO_TEST_CASE(validator_invalid_unknown_predicate) {
+    auto schema = build_schema("test_unknown", {"A", "B"}, {
+        {"magic_geometry_rule", {"A", "B"}}
+    });
+    require_invalid(schema, "Unknown rule predicate");
+}
+
+/**
+ * @brief Test too few arguments
+ */
+BOOST_AUTO_TEST_CASE(validator_invalid_arity_underflow) {
+    auto schema_cong = build_schema("err", {"A", "B", "C"}, { {"cong", {"A", "B", "C"}} });
+    require_invalid(schema_cong, "expects exactly 4");
+
+    auto schema_coll = build_schema("err", {"A", "B"}, { {"coll", {"A", "B"}} });
+    require_invalid(schema_coll, "expects at least 3");
+
+    auto schema_eqangle = build_schema("err", {"A", "B", "C", "D", "E"}, { {"eqangle", {"A", "B", "C", "D", "E"}} });
+    require_invalid(schema_eqangle, "expects either 6 or 8");
+}
+
+/**
+ * @brief Test too many arguments for a strict predicate
+ */
+BOOST_AUTO_TEST_CASE(validator_invalid_arity_overflow) {
+    // midp takes exactly 3, giving it 4 should fail
+    auto schema_midp = build_schema("err", {"A", "B", "C", "D"}, { {"midp", {"A", "B", "C", "D"}} });
+    require_invalid(schema_midp, "expects exactly 3");
+
+    // eqangle takes 6 or 8. Giving it 7 should fail.
+    auto schema_eqangle = build_schema("err", {"A", "B", "C", "D", "E", "F", "G"}, { {"eqangle", {"A", "B", "C", "D", "E", "F", "G"}} });
+    require_invalid(schema_eqangle, "expects either 6 or 8");
+}
+
+/**
+ * @brief Test Undeclared Variable in Hypothesis
+ */
+BOOST_AUTO_TEST_CASE(validator_invalid_undeclared_variable_hyp) {
+    auto schema = build_schema("test_scope", {"A", "B", "C", "D"}, {
+        {"cong", {"A", "B", "C", "X"}} 
+    });
+    require_invalid(schema, "is not declared");
+}
+
+/**
+ * @brief Test Undeclared Variable in Conclusion
+ */
+BOOST_AUTO_TEST_CASE(validator_invalid_undeclared_variable_conc) {
+    auto schema = build_schema("test_scope_conc", {"A", "B", "C"}, 
+        { {"coll", {"A", "B", "C"}} },
+        { {"midp", {"A", "Z", "C"}} }
+    );
+    require_invalid(schema, "is not declared");
+}
+
+/**
+ * @brief Test Legacy Constant Bypass Failure
+ * Verifies that if they put an undeclared variable in a NON-constant slot of rconst, it fails.
+ */
+BOOST_AUTO_TEST_CASE(validator_invalid_constant_wrong_slot) {
+    // rconst expects (var, var, var, var, const). 
+    // Here we put "1/2" in index 3 (a variable slot), and "D" in the const slot.
+    auto schema = build_schema("test_bad_const", {"A", "B", "C", "D"}, {
+        {"rconst", {"A", "B", "C", "1/2", "D"}} 
+    });
+    require_invalid(schema, "is not declared");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
