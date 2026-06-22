@@ -157,6 +157,9 @@ namespace Yuclid {
 
         for(const PlannedPredicate &candidate: predicates){
             // if everything in the generator is assigned skip it
+            // TODO: Decide wether to run is_satisfied? 
+            // But then there has to be an indication of wether were evaluating generators or filters (filters are already checked, no need to do it twice)
+            // Predicates that already have their own provider will probably not cost to check, but the ones from the base provider will slow things down
             if(are_pattern_variables_assigned(candidate, state)) continue;
 
             // get provider and metadata
