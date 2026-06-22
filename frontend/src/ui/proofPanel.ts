@@ -103,7 +103,7 @@ function buildDerivedFactsSection(steps: string[], upToIdx: number): HTMLElement
     count++;
     const item = el('li', { class: 'proof-step-item proof-labeled-item' });
     item.appendChild(el('span', { class: 'proof-ref-label proof-ref-derived' }, [`F${count}`]));
-    item.appendChild(document.createTextNode(parsed.conclusion));
+    item.appendChild(document.createTextNode(remapRef(parsed.conclusion)));
     list.appendChild(item);
   }
   if (count === 0) {
@@ -294,16 +294,19 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
           content.appendChild(buildNumericalChecksSection(numerical_checks));
         }
 
+        const stepIndex = appStore.activeProofStepIndex;
+        const atLastStep = proof_steps.length === 0
+          || (stepIndex !== null && stepIndex === proof_steps.length - 1);
+
         if (proof_steps.length > 0) {
-          const stepIndex = appStore.activeProofStepIndex;
           content.appendChild(buildStepNavigator(job.result.proof_sections, appStore));
           if (stepIndex !== null) {
             content.appendChild(buildDerivedFactsSection(proof_steps, stepIndex));
           }
         }
 
-        if (proven_goals.length > 0) {
-          content.appendChild(buildSimpleSection('Proven Goals', proven_goals));
+        if (proven_goals.length > 0 && atLastStep) {
+          content.appendChild(buildSimpleSection('Proven Goals', proven_goals.map(remapRef)));
         }
         if (unproven_goals.length > 0) {
           content.appendChild(buildSimpleSection('Unproven Goals', unproven_goals));
@@ -328,11 +331,14 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
           if (numerical_checks && numerical_checks.length > 0) {
             content.appendChild(buildNumericalChecksSection(numerical_checks));
           }
-          if (proven_goals.length > 0) {
-            content.appendChild(buildSimpleSection('Proved So Far', proven_goals));
+          const stepIndex = appStore.activeProofStepIndex;
+          const atLastStep = proof_steps.length === 0
+            || (stepIndex !== null && stepIndex === proof_steps.length - 1);
+
+          if (proven_goals.length > 0 && atLastStep) {
+            content.appendChild(buildSimpleSection('Proved So Far', proven_goals.map(remapRef)));
           }
           if (proof_steps.length > 0) {
-            const stepIndex = appStore.activeProofStepIndex;
             const nav = buildStepNavigator(job.result.proof_sections, appStore);
             content.appendChild(nav);
             if (stepIndex !== null) {

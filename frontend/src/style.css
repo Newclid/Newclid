@@ -1001,6 +1001,74 @@ body.is-resizing {
   letter-spacing: 0.02em;
 }
 
+/* ---------- Proof legend ---------- */
+
+.proof-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: rgba(26, 24, 22, 0.03);
+  border: 1px solid var(--rule-soft);
+  border-radius: 5px;
+}
+
+.proof-legend-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.proof-legend-desc {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+/* Inline ref-label badges used in Premises, Numerical Checks, Derived Facts lists
+   and remapped inside proof-step-premise / proof-step-conclusion spans. */
+.proof-ref-label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-right: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.proof-ref-premise {
+  background: rgba(42, 74, 127, 0.12);
+  color: #2A4A7F;
+}
+
+.proof-ref-numerical {
+  background: rgba(80, 50, 120, 0.12);
+  color: #503278;
+}
+
+.proof-ref-derived {
+  background: rgba(26, 100, 26, 0.12);
+  color: #1A641A;
+}
+
+/* List items that use an inline ref-label badge instead of raw text. */
+.proof-labeled-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.proof-empty-hint {
+  color: var(--ink-faint);
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 11px;
+}
+
 /* ---------- Goal picker (visual problem definition) ---------- */
 
 .goal-chooser-section {
