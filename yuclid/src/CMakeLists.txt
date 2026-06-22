@@ -27,6 +27,7 @@ add_library(yuclid
   parser/problem_parser.cpp
   parser/rule_parser.cpp
   rules/theorem_builder.cpp
+  rules/schema_validator.cpp
   problem.cpp
   solver/ddar_solver.cpp
   solver/statement_proof.cpp
