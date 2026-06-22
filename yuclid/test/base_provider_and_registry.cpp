@@ -30,4 +30,18 @@ BOOST_AUTO_TEST_CASE(registry_null_fallback_throws) {
     BOOST_CHECK_THROW(PredicateProviderRegistry(nullptr), std::runtime_error);
 }
 
+BOOST_AUTO_TEST_CASE(registry_routes_to_fallback) {
+    auto fallback = std::make_unique<DummyProvider>(999);
+    PredicateProviderRegistry registry(std::move(fallback));
+
+    // Requesting a predicate that hasn't been registered should return the fallback
+    const PredicateProvider* provider = registry.get_provider("unregistered_pred");
+    BOOST_REQUIRE(provider != nullptr);
+    
+    // Cast to DummyProvider to verify it's our fallback
+    const DummyProvider* dummy = dynamic_cast<const DummyProvider*>(provider);
+    BOOST_REQUIRE(dummy != nullptr);
+    BOOST_CHECK_EQUAL(dummy->id, 999);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
