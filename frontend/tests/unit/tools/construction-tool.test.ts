@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { ConstructionTool } from '../../../src/tools/construction-tool';
 import { Scene } from '../../../src/scene/scene';
 import { world, screen } from '../../../src/geometry/coords';
-import type { CatalogEntry, SketchResult } from '../../../src/construction/catalog-types';
+import type { CatalogEntry } from '../../../src/construction/catalog-types';
 import type { ToolContext } from '../../../src/tools/tool';
 import type { ObjectId } from '../../../src/geometry/types-object';
 
@@ -209,7 +209,7 @@ describe('ConstructionTool.onClick – derive slot', () => {
           kind: 'derive',
           label: 'Derived',
           preview: () => [],
-          project: (_b, _s, cursor) => ({ x: cursor.x, y: 0 }), // project onto x-axis
+          project: (_b, _s, cursor) => world(cursor.x, 0), // project onto x-axis
         },
         { name: 'extra', kind: 'pick', label: 'Extra' },
       ],
@@ -386,7 +386,7 @@ describe('ConstructionTool.onClick – completion', () => {
     const scene = new Scene();
     // p1, p2, p3 all on x-axis — p1-p2 and p1-p3 define the same infinite line
     const p1 = scene.addPoint(0, 0);
-    const p2 = scene.addPoint(4, 0);
+    scene.addPoint(4, 0);
     const p3 = scene.addPoint(2, 0);
 
     // Existing construction with different bindings ({a: p1, b: p3}) but same line
@@ -422,7 +422,7 @@ describe('ConstructionTool.onClick – completion', () => {
   it('does not flag duplicate when lines do not match', () => {
     const scene = new Scene();
     const p1 = scene.addPoint(0, 0);
-    const p2 = scene.addPoint(4, 0);
+    scene.addPoint(4, 0);
     const p3 = scene.addPoint(0, 5); // off x-axis
 
     // Existing construction with perpendicular line (different geometry)
@@ -457,8 +457,8 @@ describe('ConstructionTool.onClick – completion', () => {
 
   it('linesAllMatch returns false when new line endpoints do not exist in scene', () => {
     const scene = new Scene();
-    const p1 = scene.addPoint(0, 0);
-    const p2 = scene.addPoint(4, 0);
+    scene.addPoint(0, 0);
+    scene.addPoint(4, 0);
 
     // Existing construction whose bindings produce different coords
     const p3 = scene.addPoint(10, 10);
@@ -491,7 +491,6 @@ describe('ConstructionTool.onClick – completion', () => {
     tool.onClick(makeCtx(scene, 0, 0)); // snap p1
     tool.onClick(makeCtx(scene, 4, 0)); // snap p2 → coords differ; lines have bad IDs → not dup
     expect(scene.slotError).not.toBe('This construction already exists');
-    void p2;
   });
 
   it('isDuplicateConstruction: circle in scene does not match new circle (false branch of match check)', () => {
@@ -577,8 +576,8 @@ describe('ConstructionTool.onClick – completion', () => {
 
   it('linesAllMatch: existing construction line has bad IDs (inner continue branch)', () => {
     const scene = new Scene();
-    const p1 = scene.addPoint(0, 0);
-    const p2 = scene.addPoint(4, 0);
+    scene.addPoint(0, 0);
+    scene.addPoint(4, 0);
     const p3 = scene.addPoint(10, 10); // different coords from (p1,p2)
 
     const badId = 'bad' as ObjectId;
@@ -632,7 +631,7 @@ describe('ConstructionTool.onClick – completion', () => {
           kind: 'derive',
           label: 'Derived',
           preview: () => [],
-          project: () => ({ x: 0, y: 0 }),
+          project: () => world(0, 0),
         },
       ],
       sketch: (_b, s) => {
@@ -753,9 +752,9 @@ describe('ConstructionTool.onMove', () => {
           kind: 'derive',
           label: 'Derived',
           preview: () => [
-            { kind: 'auxLine', from: { x: 0, y: 0 }, to: { x: 1, y: 0 } },
-            { kind: 'circle', center: { x: 0, y: 0 }, through: { x: 1, y: 0 } },
-            { kind: 'point', at: { x: 0.5, y: 0 } },
+            { kind: 'auxLine', from: world(0, 0), to: world(1, 0) },
+            { kind: 'circle', center: world(0, 0), through: world(1, 0) },
+            { kind: 'point', at: world(0.5, 0) },
           ],
           project: (_b, _s, cursor) => cursor,
         },
@@ -776,9 +775,9 @@ describe('ConstructionTool.onMove', () => {
     const tool = new ConstructionTool(makeEntry({
       slots: [{ name: 'a', kind: 'pick', label: 'A' }],
       preview: () => [
-        { kind: 'auxLine', from: { x: 0, y: 0 }, to: { x: 1, y: 0 } },
-        { kind: 'circle', center: { x: 0, y: 0 }, through: { x: 1, y: 0 } },
-        { kind: 'point', at: { x: 0, y: 0 } },
+        { kind: 'auxLine', from: world(0, 0), to: world(1, 0) },
+        { kind: 'circle', center: world(0, 0), through: world(1, 0) },
+        { kind: 'point', at: world(0, 0) },
       ],
     }));
     const previews = tool.onMove(makeCtx(scene, 0, 0));
@@ -835,7 +834,7 @@ describe('ConstructionTool.onMove', () => {
           name: 'derived',
           kind: 'derive',
           label: 'Derived',
-          preview: () => [{ kind: 'unknown_aux' as never }], // none of auxLine/circle/point
+          preview: (() => [{ kind: 'unknown_aux' }]) as never, // none of auxLine/circle/point
           project: (_b, _s, cursor) => cursor,
         },
         { name: 'extra', kind: 'pick', label: 'E' },
@@ -850,7 +849,7 @@ describe('ConstructionTool.onMove', () => {
     const scene = new Scene();
     const tool = new ConstructionTool(makeEntry({
       slots: [{ name: 'a', kind: 'pick', label: 'A' }, { name: 'b', kind: 'pick', label: 'B' }],
-      preview: () => [{ kind: 'unknown_preview' as never }],
+      preview: (() => [{ kind: 'unknown_preview' }]) as never,
     }));
     // Unknown kind falls through all three else-ifs without error
     expect(() => tool.onMove(makeCtx(scene, 0, 0))).not.toThrow();

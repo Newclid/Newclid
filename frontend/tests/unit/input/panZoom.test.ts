@@ -38,7 +38,7 @@ function makeViewport(): Viewport {
   } as unknown as Viewport;
 }
 
-function makePointerEvent(type: string, overrides: Partial<PointerEvent> = {}): Partial<PointerEvent> {
+function makePointerEvent(type: string, overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     type,
     button: 0,
@@ -56,13 +56,13 @@ function makePointerEvent(type: string, overrides: Partial<PointerEvent> = {}): 
 describe('attachPanZoom', () => {
   let target: ReturnType<typeof makeMockTarget>;
   let viewport: Viewport;
-  let onChange: ReturnType<typeof vi.fn>;
+  let onChange: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
     vi.useFakeTimers();
     target = makeMockTarget();
     viewport = makeViewport();
-    onChange = vi.fn();
+    onChange = vi.fn<() => void>();
   });
 
   afterEach(() => {

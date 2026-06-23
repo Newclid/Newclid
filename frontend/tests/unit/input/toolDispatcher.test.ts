@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Scene } from '../../../src/scene/scene';
-import { screen } from '../../../src/geometry/coords';
 import type { Viewport } from '../../../src/geometry/viewport';
 import type { AppStore } from '../../../src/store/appStore';
 import type { ToolDispatcherHandle } from '../../../src/input/toolDispatcher';
@@ -75,7 +74,7 @@ describe('attachToolDispatcher', () => {
   let target: ReturnType<typeof makeMockTarget>;
   let viewport: Viewport;
   let scene: Scene;
-  let requestRedraw: ReturnType<typeof vi.fn>;
+  let requestRedraw: ReturnType<typeof vi.fn<() => void>>;
   let handle: ToolDispatcherHandle;
   let attachToolDispatcher: typeof import('../../../src/input/toolDispatcher')['attachToolDispatcher'];
   let getTool: ReturnType<typeof vi.fn>;
@@ -84,7 +83,7 @@ describe('attachToolDispatcher', () => {
     target = makeMockTarget();
     viewport = makeViewport();
     scene = new Scene();
-    requestRedraw = vi.fn();
+    requestRedraw = vi.fn<() => void>();
     ({ attachToolDispatcher } = await import('../../../src/input/toolDispatcher'));
     ({ getTool } = await import('../../../src/tools/registry') as { getTool: ReturnType<typeof vi.fn> });
   });
