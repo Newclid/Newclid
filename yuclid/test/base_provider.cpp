@@ -125,4 +125,31 @@ BOOST_AUTO_TEST_CASE(base_provider_generate_too_many_vars_early_exit) {
     BOOST_CHECK_EQUAL(count, 0);
 }
 
+BOOST_AUTO_TEST_CASE(base_provider_is_satisfied_numerical_check) {
+    // 3 perfectly collinear points
+    (void) prob.add_point("P1", 0.0, 0.0);
+    (void) prob.add_point("P2", 1.0, 0.0);
+    (void) prob.add_point("P3", 2.0, 0.0);
+    LazyGeometryCache cache(prob);
+
+    RuleSchema schema;
+    schema.id = "test_satisfied";
+    schema.variables = {"A", "B", "C"};
+    schema.hypotheses.push_back({"coll", {"A", "B", "C"}});
+
+    RulePlan plan = build_rule_plan(schema);
+    MappingState mapping(schema, prob);
+
+    // Manually assign them in the mapping state to simulate the end of a branch
+    bool res1 = mapping.try_apply_assignment(0, 0); // A -> P1
+    bool res2 = mapping.try_apply_assignment(1, 1); // B -> P2
+    bool res3 = mapping.try_apply_assignment(2, 2); // C -> P3
+
+    BOOST_CHECK(res1 && res2 && res3);
+
+    // The base provider should build the coll statement and check it numerically
+    bool satisfied = base_provider.is_satisfied(plan.candidate_generators[0], mapping, cache);
+    BOOST_CHECK_EQUAL(satisfied, true);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
