@@ -53,7 +53,20 @@ struct CongProviderFixture {
         (void) prob.add_point("P1", 1.0, 0.0); // 1
         (void) prob.add_point("P2", 1.0, 1.0); // 2
         (void) prob.add_point("P3", 0.0, 1.0); // 3
-        (void) prob.add_point("P4", 0.0, 5.0); // 4 Outlier
+        (void) prob.add_point("P4", 0.0, 5.0); // 4
+    }
+
+    // Helper to consume a generator and return unique assignment signatures
+    std::set<std::string> consume_generator(std::generator<MappingExtension>& gen) {
+        std::set<std::string> unique_signatures;
+        for (const MappingExtension& ext : gen) {
+            std::string sig = "";
+            for (const auto& assignment : ext.assignments()) {
+                sig += std::to_string(assignment.variable) + "->" + std::to_string(assignment.point) + "|";
+            }
+            unique_signatures.insert(sig);
+        }
+        return unique_signatures;
     }
 };
 
@@ -198,4 +211,43 @@ BOOST_AUTO_TEST_CASE(estimate_intersection_reduction_applied) {
     BOOST_CHECK_EQUAL(provider.estimate_extensions(pp, mapping, cache), 22);
 }
 
+// ----------------------------------------------------------------------
+// Generate Extensions Tests
+// ----------------------------------------------------------------------
+
+// Fast paths
+
+BOOST_AUTO_TEST_CASE(generation_tautology_0b0000) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    cache.segment_length_buckets(); 
+    MappingState mapping(schema, prob);
+    
+    // Identity mapping: cong A B A B
+    PlannedPredicate pp = build_planned_pred({"A", "B", "A", "B"});
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // 5 points total. We choose 2 distinct points: P(5, 2) = 20 combinations.
+    // The fast path should just blind generate all 20 without looking at lengths.
+    BOOST_CHECK_EQUAL(results.size(), 20);
+}
+
+BOOST_AUTO_TEST_CASE(generation_tautology_0b1010) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    cache.segment_length_buckets(); 
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "A", "B"});
+
+    // Map A -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // A is P0. B can be any of the 4 remaining free points.
+    BOOST_CHECK_EQUAL(results.size(), 4);
+}
 BOOST_AUTO_TEST_SUITE_END()
