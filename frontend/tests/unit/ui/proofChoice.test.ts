@@ -73,4 +73,12 @@ describe('createProofChoice', () => {
     handle.root.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     expect(handle.root.classList.contains('is-open')).toBe(false);
   });
+
+  // mousedown on a child element inside the dialog should not close it
+  it('mousedown on a child element (inside the dialog) does NOT close', () => {
+    handle.open();
+    const dialog = handle.root.querySelector('.jgex-dialog') as HTMLElement;
+    dialog.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    expect(handle.root.classList.contains('is-open')).toBe(true);
+  });
 });

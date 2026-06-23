@@ -75,4 +75,10 @@ describe('angle_bisector entry validate', () => {
     const scene = new Scene();
     expect(angleBisector.validate!({}, scene)).toBeNull();
   });
+
+  // returns null when bound point IDs are not yet present in the scene
+  it('returns null when bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    expect(angleBisector.validate!({ a: 'p99', b: 'p100', c: 'p101' }, scene)).toBeNull();
+  });
 });

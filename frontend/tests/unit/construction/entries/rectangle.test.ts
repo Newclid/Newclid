@@ -91,4 +91,10 @@ describe('rectangle entry validate', () => {
     const scene = new Scene();
     expect(rectangle.validate!({}, scene)).toBeNull();
   });
+
+  // guards against missing points when bound ids have not yet been added to the scene
+  it('validate returns null when bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    expect(rectangle.validate!({ a: 'p99', b: 'p100', c: 'p101' }, scene)).toBeNull();
+  });
 });

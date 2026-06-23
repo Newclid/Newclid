@@ -11,11 +11,22 @@ describe('on_aline entry slots', () => {
 });
 
 describe('on_aline entry sketch', () => {
+  // when x lands on the mirror side (ang2 closer), bindings.c and bindings.e are swapped
+  it('sketch uses the mirror arm order when x is closer to ang2', () => {
+    const scene = new Scene();
+    const { c, d, e, b, a, x } = addPoints(scene, {
+      c: [1, 1], d: [0, 0], e: [1, 0],
+      b: [8, 0], a: [5, 0],
+      x: [7, -2],
+    });
+    const result = onAline.sketch({ c, d, e, b, a, x }, scene);
+    const bindings = (result as { bindings: Record<string, string> }).bindings;
+    expect(bindings.c).toBe(e);
+    expect(bindings.e).toBe(c);
+  });
+
   it('records the angle-transfer construction with two lines', () => {
     const scene = new Scene();
-    // Source angle: c=(1,0), d=(0,0), e=(0,1) → 90° at origin
-    // Reference: a=(5,0), b=(5,3) with b on one ray
-    // x somewhere on the transferred angle line
     const { c, d, e, b, a, x } = addPoints(scene, {
       c: [1, 0], d: [0, 0], e: [0, 1],
       b: [8, 0], a: [5, 0],
@@ -38,18 +49,14 @@ describe('on_aline entry sketch', () => {
 describe('on_aline derive slot project', () => {
   it('snaps cursor onto the nearest copied-angle line', () => {
     const scene = new Scene();
-    // Copy 90° angle (c=x-axis arm, d=origin, e=y-axis arm) onto a=(5,0), b=(8,0)
     const { c, d, e, b, a } = addPoints(scene, {
       c: [1, 0], d: [0, 0], e: [0, 1],
       b: [8, 0], a: [5, 0],
     });
     const deriveSlot = onAline.slots.find(s => s.kind === 'derive')!;
     if (deriveSlot.kind !== 'derive') throw new Error('expected derive slot');
-
-    // Cursor above a: should snap to the perpendicular (90° from the reference ray a-b)
     const cursor = { x: 5, y: 5, _kind: 'world' as const };
     const pt = deriveSlot.project({ c, d, e, b, a }, scene, cursor);
-    // The point should be on the line through a (x=5)
     expect(pt.x).toBeCloseTo(5);
   });
 });
@@ -76,7 +83,7 @@ describe('on_aline entry preview', () => {
 });
 
 describe('on_aline derive slot inner preview', () => {
-  it('returns empty — preview is handled at the entry level', () => {
+  it('returns empty (preview is handled at the entry level)', () => {
     const scene = new Scene();
     const { c, d, e, b, a } = addPoints(scene, {
       c: [1, 0], d: [0, 0], e: [0, 1],
@@ -113,5 +120,11 @@ describe('on_aline entry validate', () => {
   it('accepts partial binding', () => {
     const scene = new Scene();
     expect(onAline.validate!({}, scene)).toBeNull();
+  });
+
+  // returns null when c, d and e are all provided but the IDs are not yet in the scene
+  it('validate returns null when c, d or e are missing from the scene', () => {
+    const scene = new Scene();
+    expect(onAline.validate!({ c: 'p99', d: 'p100', e: 'p101' }, scene)).toBeNull();
   });
 });

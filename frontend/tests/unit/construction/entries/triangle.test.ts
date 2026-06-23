@@ -80,4 +80,12 @@ describe('triangle entry validate', () => {
     const { a, b } = addPoints(scene, { a: [0, 0], b: [1, 0] });
     expect(triangle.validate!({ a, b }, scene)).toBeNull();
   });
+
+  // Validates the FALSE path when some point IDs are missing from the scene
+  it('validate returns null when some bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    const { a } = addPoints(scene, { a: [0, 0] });
+    // b and c ids don't exist in scene → if (pa && pb && pc) is false → return null
+    expect(triangle.validate!({ a, b: 'p99', c: 'p100' }, scene)).toBeNull();
+  });
 });

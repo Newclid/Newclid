@@ -53,6 +53,20 @@ describe('circumcircle entry sketch', () => {
       expect(x.y).toBeCloseTo(h / 3);
     }
   });
+
+  // sketch falls back to pa coords when circumcenter returns null for collinear input
+  it('sketch falls back to pa coords when points are collinear', () => {
+    const scene = new Scene();
+    const { a, b, c } = addPoints(scene, { a: [0, 0], b: [1, 0], c: [2, 0] });
+    const result = circumcircle.sketch({ a, b, c }, scene);
+    const bindings = (result as { bindings: Record<string, string> }).bindings;
+    const x = scene.objects.get(bindings.x)!;
+    expect(x.kind).toBe('point');
+    if (x.kind === 'point') {
+      expect(x.x).toBeCloseTo(0);
+      expect(x.y).toBeCloseTo(0);
+    }
+  });
 });
 
 describe('circumcircle entry preview', () => {
@@ -103,5 +117,11 @@ describe('circumcircle entry validate', () => {
   it('accepts partial binding', () => {
     const scene = new Scene();
     expect(circumcircle.validate!({}, scene)).toBeNull();
+  });
+
+  // validate returns null when bound ids reference points not yet in scene
+  it('validate returns null when bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    expect(circumcircle.validate!({ a: 'p99', b: 'p100', c: 'p101' }, scene)).toBeNull();
   });
 });
