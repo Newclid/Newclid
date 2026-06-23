@@ -8,51 +8,43 @@ Yuclid matcher module map
 -------------------------
 
 .. list-table::
-   :widths: 34 66
+   :widths: 30 70
    :header-rows: 1
 
    * - Module page
      - What it explains
-   * - :doc:`custom_rule_pipeline`
-     - The end-to-end flow from Newclid custom rules to Yuclid theorem candidates.
    * - :doc:`rule_schema_and_parsing`
-     - Rule schema format, parsing, validation, and variable handling.
-   * - :doc:`statement_and_theorem_building`
-     - Conversion from matched rule variables into Yuclid statements and theorem candidates.
-   * - :doc:`matcher_integration`
-     - Where custom rules enter the existing theorem matcher and DDAR solver.
-   * - :doc:`generic_rule_matcher`
-     - The generic matcher algorithm and its responsibilities.
+     - Custom rule text, ``rule`` / ``require`` / ``conclude`` / ``end`` parsing, validation, and variable handling.
    * - :doc:`rule_planning`
-     - Rule planning, predicate metadata, mapping state, and filter state.
+     - Planned predicates, variable indices, mapping state, filter state, and predicate ordering metadata.
+   * - :doc:`generic_rule_matcher`
+     - The search loop that combines provider-generated mappings, check-only filters, and theorem construction.
    * - :doc:`predicate_providers`
-     - Provider interface, fallback provider, and the optimized congruence provider.
+     - How providers suggest only plausible mappings instead of enumerating every point assignment.
    * - :doc:`lazy_geometry_cache`
-     - Lazy point/segment buckets used by providers.
+     - Lazy point pairs, segment-length buckets, and shared geometry data used by providers.
    * - :doc:`matching_and_optimization`
-     - Join order, pruning, fallback enumeration, and performance behavior.
+     - Join order, early pruning, fallback enumeration, and expensive-rule behavior.
    * - :doc:`theorem_candidate_validation`
-     - Why generated matches are still validated before becoming accepted theorems.
+     - Statement building, theorem candidate construction, and final numerical validation.
    * - :doc:`integration_with_newclid`
-     - Python adapter and Newclid API integration.
-   * - :doc:`configuration_and_cli`
-     - CLI/configuration support for additional rule files.
-   * - :doc:`build_and_packaging`
-     - CMake, wheel, Boost, and runtime packaging changes.
+     - Newclid API, Python adapter, temporary custom-rule files, and deduction mapping back to Newclid.
+
+Yuclid matcher navigation
+-------------------------
+
+The sidebar uses short labels, but the page titles stay globally unique for
+Sphinx labels. Start with ``Rule parsing`` and follow the order below if you
+want to understand the matcher from input to accepted theorem.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   custom_rule_pipeline
-   rule_schema_and_parsing
-   statement_and_theorem_building
-   matcher_integration
-   generic_rule_matcher
-   rule_planning
-   predicate_providers
-   lazy_geometry_cache
-   matching_and_optimization
-   theorem_candidate_validation
-   integration_with_newclid
-   configuration_and_cli
-   build_and_packaging
+   Rule parsing <rule_schema_and_parsing>
+   Rule planning <rule_planning>
+   Generic matcher <generic_rule_matcher>
+   Providers <predicate_providers>
+   Geometry cache <lazy_geometry_cache>
+   Optimization <matching_and_optimization>
+   Theorem validation <theorem_candidate_validation>
+   Newclid integration <integration_with_newclid>
