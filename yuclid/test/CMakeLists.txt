@@ -24,6 +24,7 @@ foreach(name
     lazy_geometry_cache
     rule_plan
     provider_registry
+    base_provider
     custom_rule_integration_test
   )
   add_executable(test_${name} ${name}.cpp)
