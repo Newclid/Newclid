@@ -2,7 +2,7 @@ import { AppStore } from '../store/appStore';
 import type { NewclidProofSections } from '../api/types';
 import { el } from './dom';
 
-// Count text premises in a raw proof step string (each ends with a bracket ref like [C0], [N1], [36]).
+// Count text premise refs in a raw proof step string (each ends with a bracket ref like [C0], [N1], [36]).
 function countTextPremises(rawStep: string): number {
   const premiseSection = rawStep.match(/^\d+\.\s*\|\s*(.+?)\s*=\(/)?.[1] ?? '';
   const premRegex = /.*?\[\w*\d+\]/g;
@@ -28,7 +28,92 @@ export function statusLabel(status: string): string {
   }
 }
 
-function buildSection(title: string, items: string[]): HTMLElement {
+// Strip the backend bracket-ref prefix "[C0] : " (or "[N0] : " etc.) from an assumption string.
+function extractPredicate(raw: string): string {
+  return raw.replace(/^\[\w+\d*\]\s*:\s*/, '').trim();
+}
+
+// Remap backend bracket refs to user-friendly 1-based labels for display only.
+// [C0] → [P1]  (exercise premises, 1-based)
+// [N0] → [N1]  (numerical checks, 1-based)
+// [36] → [F37] (derived proof facts, 1-based)
+// Raw strings passed to buildTextPremiseSigs in main.ts are never transformed here.
+function remapRef(s: string): string {
+  return s
+    .replace(/\[C(\d+)\]/g, (_, n) => `[P${+n + 1}]`)
+    .replace(/\[N(\d+)\]/g, (_, n) => `[N${+n + 1}]`)
+    .replace(/\[(\d+)\]/g, (_, n) => `[F${+n + 1}]`);
+}
+
+function buildLegend(): HTMLElement {
+  const legend = el('div', { class: 'proof-legend' });
+  const entries: [string, string, string][] = [
+    ['proof-ref-label proof-ref-premise', 'P1, P2…', 'Premises given in the exercise'],
+    ['proof-ref-label proof-ref-numerical', 'N1, N2…', 'Numerical checks (computed values)'],
+    ['proof-ref-label proof-ref-derived', 'F1, F2…', 'Facts derived during the proof'],
+  ];
+  for (const [cls, key, desc] of entries) {
+    const row = el('div', { class: 'proof-legend-row' });
+    row.appendChild(el('span', { class: cls }, [key]));
+    row.appendChild(el('span', { class: 'proof-legend-desc' }, [desc]));
+    legend.appendChild(row);
+  }
+  return legend;
+}
+
+function buildPremisesSection(assumptions: string[]): HTMLElement {
+  const section = el('div', { class: 'proof-section' });
+  section.appendChild(el('div', { class: 'proof-section-title' }, ['Assumptions']));
+  const list = el('ol', { class: 'proof-steps-list' });
+  for (let i = 0; i < assumptions.length; i++) {
+    const predicate = extractPredicate(assumptions[i]);
+    const item = el('li', { class: 'proof-step-item proof-labeled-item' });
+    item.appendChild(el('span', { class: 'proof-ref-label proof-ref-premise' }, [`P${i + 1}`]));
+    item.appendChild(document.createTextNode(predicate));
+    list.appendChild(item);
+  }
+  section.appendChild(list);
+  return section;
+}
+
+function buildNumericalChecksSection(checks: string[]): HTMLElement {
+  const section = el('div', { class: 'proof-section' });
+  section.appendChild(el('div', { class: 'proof-section-title' }, ['Numerical Checks']));
+  const list = el('ol', { class: 'proof-steps-list' });
+  for (let i = 0; i < checks.length; i++) {
+    const predicate = extractPredicate(checks[i]);
+    const item = el('li', { class: 'proof-step-item proof-labeled-item' });
+    item.appendChild(el('span', { class: 'proof-ref-label proof-ref-numerical' }, [`N${i + 1}`]));
+    item.appendChild(document.createTextNode(predicate));
+    list.appendChild(item);
+  }
+  section.appendChild(list);
+  return section;
+}
+
+// Live-updating list of fact conclusions accumulated up to the current step (inclusive).
+function buildDerivedFactsSection(steps: string[], upToIdx: number): HTMLElement {
+  const section = el('div', { class: 'proof-section' });
+  section.appendChild(el('div', { class: 'proof-section-title' }, ['Derived Facts']));
+  const list = el('ol', { class: 'proof-steps-list' });
+  let count = 0;
+  for (let i = 0; i <= upToIdx && i < steps.length; i++) {
+    const parsed = parseProofStep(steps[i]);
+    if (!parsed) continue;
+    count++;
+    const item = el('li', { class: 'proof-step-item proof-labeled-item' });
+    item.appendChild(el('span', { class: 'proof-ref-label proof-ref-derived' }, [`F${count}`]));
+    item.appendChild(document.createTextNode(remapRef(parsed.conclusion)));
+    list.appendChild(item);
+  }
+  if (count === 0) {
+    list.appendChild(el('li', { class: 'proof-step-item proof-empty-hint' }, ['Step through the proof to see derived facts.']));
+  }
+  section.appendChild(list);
+  return section;
+}
+
+function buildSimpleSection(title: string, items: string[]): HTMLElement {
   const section = el('div', { class: 'proof-section' });
   section.appendChild(el('div', { class: 'proof-section-title' }, [title]));
   const list = el('ol', { class: 'proof-steps-list' });
@@ -78,15 +163,17 @@ function buildProofStepItem(raw: string, activeSubStep?: number): HTMLElement {
     return el('li', { class: 'proof-step-item' }, [raw]);
   }
 
+  // 1-based step number for display (backend uses 0-indexed "000", "001", …).
+  const displayNum = String(parseInt(parsed.num, 10) + 1);
   const conclusionSubStep = parsed.premises.length;
   const card = el('li', { class: 'proof-step-card' });
-  card.appendChild(el('span', { class: 'proof-step-num' }, [parsed.num]));
+  card.appendChild(el('span', { class: 'proof-step-num' }, [displayNum]));
 
   for (let i = 0; i < parsed.premises.length; i++) {
     const cls = (activeSubStep === i)
       ? 'proof-step-premise is-active-substep'
       : 'proof-step-premise';
-    card.appendChild(el('span', { class: cls }, [parsed.premises[i]]));
+    card.appendChild(el('span', { class: cls }, [remapRef(parsed.premises[i])]));
   }
 
   card.appendChild(el('span', { class: 'proof-step-rule' }, [parsed.rule]));
@@ -94,7 +181,7 @@ function buildProofStepItem(raw: string, activeSubStep?: number): HTMLElement {
   const conclusionCls = (activeSubStep === conclusionSubStep)
     ? 'proof-step-conclusion is-active-substep'
     : 'proof-step-conclusion';
-  card.appendChild(el('span', { class: conclusionCls }, [parsed.conclusion]));
+  card.appendChild(el('span', { class: conclusionCls }, [remapRef(parsed.conclusion)]));
   return card;
 }
 
@@ -160,11 +247,6 @@ function buildStepNavigator(sections: NewclidProofSections, appStore: AppStore):
   return section;
 }
 
-function buildStepNavigatorFromSections(sections: NewclidProofSections, appStore: AppStore): HTMLElement | null {
-  if (sections.proof_steps.length === 0) return null;
-  return buildStepNavigator(sections, appStore);
-}
-
 export function createProofPanel(appStore: AppStore): ProofPanelHandle {
   const root = el('div', { class: 'proof-panel' });
 
@@ -199,40 +281,69 @@ export function createProofPanel(appStore: AppStore): ProofPanelHandle {
 
     if (job.result) {
       if (job.result.status === 'succeeded' && job.result.proof_sections) {
-        const { assumptions, proven_goals, unproven_goals, proof_steps } =
-          job.result.proof_sections;
+        const {
+          assumptions, numerical_checks, proven_goals, unproven_goals, proof_steps,
+        } = job.result.proof_sections;
+
+        content.appendChild(buildLegend());
+
         if (assumptions.length > 0) {
-          content.appendChild(buildSection('Assumptions', assumptions));
+          content.appendChild(buildPremisesSection(assumptions));
         }
-        if (proven_goals.length > 0) {
-          content.appendChild(buildSection('Proven Goals', proven_goals));
+        if (numerical_checks && numerical_checks.length > 0) {
+          content.appendChild(buildNumericalChecksSection(numerical_checks));
+        }
+
+        const stepIndex = appStore.activeProofStepIndex;
+        const atLastStep = proof_steps.length === 0
+          || (stepIndex !== null && stepIndex === proof_steps.length - 1);
+
+        if (proof_steps.length > 0) {
+          content.appendChild(buildStepNavigator(job.result.proof_sections, appStore));
+          if (stepIndex !== null) {
+            content.appendChild(buildDerivedFactsSection(proof_steps, stepIndex));
+          }
+        }
+
+        if (proven_goals.length > 0 && atLastStep) {
+          content.appendChild(buildSimpleSection('Proven Goals', proven_goals.map(remapRef)));
         }
         if (unproven_goals.length > 0) {
-          content.appendChild(buildSection('Unproven Goals', unproven_goals));
-        }
-        if (proof_steps.length > 0) {
-          const nav = buildStepNavigatorFromSections(job.result.proof_sections, appStore);
-          if (nav) content.appendChild(nav);
+          content.appendChild(buildSimpleSection('Unproven Goals', unproven_goals));
         }
       } else {
         if (job.result.message) {
           content.appendChild(el('p', { class: 'proof-error-msg' }, [job.result.message]));
         }
         if (job.result.proof_sections) {
-          const { assumptions, proven_goals, unproven_goals, proof_steps } =
-            job.result.proof_sections;
+          const {
+            assumptions, numerical_checks, proven_goals, unproven_goals, proof_steps,
+          } = job.result.proof_sections;
+
+          content.appendChild(buildLegend());
+
           if (unproven_goals.length > 0) {
-            content.appendChild(buildSection('Unproven Goals', unproven_goals));
+            content.appendChild(buildSimpleSection('Unproven Goals', unproven_goals));
           }
           if (assumptions.length > 0) {
-            content.appendChild(buildSection('Assumptions', assumptions));
+            content.appendChild(buildPremisesSection(assumptions));
           }
-          if (proven_goals.length > 0) {
-            content.appendChild(buildSection('Proved So Far', proven_goals));
+          if (numerical_checks && numerical_checks.length > 0) {
+            content.appendChild(buildNumericalChecksSection(numerical_checks));
+          }
+          const stepIndex = appStore.activeProofStepIndex;
+          const atLastStep = proof_steps.length === 0
+            || (stepIndex !== null && stepIndex === proof_steps.length - 1);
+
+          if (proven_goals.length > 0 && atLastStep) {
+            content.appendChild(buildSimpleSection('Proved So Far', proven_goals.map(remapRef)));
           }
           if (proof_steps.length > 0) {
-            const nav = buildStepNavigatorFromSections(job.result.proof_sections, appStore);
-            if (nav) content.appendChild(nav);
+            const nav = buildStepNavigator(job.result.proof_sections, appStore);
+            content.appendChild(nav);
+            if (stepIndex !== null) {
+              content.appendChild(buildDerivedFactsSection(proof_steps, stepIndex));
+            }
           }
         }
         if (job.result.stderr) {
