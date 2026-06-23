@@ -11,6 +11,7 @@
 #include "lazy_geometry_cache.hpp"
 #include "filter_state.hpp"
 #include "rules/schema_validator.hpp"
+#include "matchers/cong_provider.hpp"
 
 #include <boost/log/trivial.hpp>
 #include <span>
@@ -106,7 +107,7 @@ namespace Yuclid {
 
     void GenericRuleMatcher::add_providers_to_registry() {
         // add all providers that are implemented
-        // m_provider_registry.register_provider(pred_name, provider);
+        m_provider_registry.register_provider("cong", make_unique<BaseProvider>());
     }
 
     std::vector<Theorem> GenericRuleMatcher::optimized_match() const {
