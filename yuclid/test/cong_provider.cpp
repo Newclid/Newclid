@@ -69,6 +69,32 @@ struct CongProviderFixture {
         (void) prob.add_point("P3", 0.0, 1.0); // 3
         (void) prob.add_point("P4", 0.0, 5.0); // 4
     }
+
+    // 3x3 Grid (9 points). 
+    // Highly connected, lots of segments of length 1, sqrt(2), 2, etc.
+    void setup_large_grid() {
+        int idx = 0;
+        for (int x = 0; x < 3; ++x) {
+            for (int y = 0; y < 3; ++y) {
+                (void) prob.add_point("G" + std::to_string(idx++), x * 1.0, y * 1.0);
+            }
+        }
+    }
+
+    void run_comparison(CongProvider& provider, PlannedPredicate& pp, MappingState& mapping, LazyGeometryCache& cache, const std::string& name) {
+        std::size_t estimate = provider.estimate_extensions(pp, mapping, cache);
+        
+        auto generator = provider.generate_extensions(pp, mapping, cache);
+        std::size_t generated = 0;
+        for (const auto& ext : generator) {
+            (void) ext;
+            generated++;
+        }
+
+        BOOST_TEST_MESSAGE("---- " << name << " ----");
+        BOOST_TEST_MESSAGE("Estimated Cost: " << estimate);
+        BOOST_TEST_MESSAGE("Actually Generated: " << generated);
+    }
 };
 
 BOOST_FIXTURE_TEST_SUITE(cong_provider_phase1_suite, CongProviderFixture)
@@ -310,7 +336,7 @@ BOOST_AUTO_TEST_CASE(generation_state_1010_shared_variable) {
     LazyGeometryCache cache(prob);
     MappingState mapping(schema, prob);
     
-    // Isosceles dedup rule: cong A B A C
+    // Isosceles triangle rule: cong A B A C
     PlannedPredicate pp = build_planned_pred({"A", "B", "A", "C"});
 
     // Map A -> P0
@@ -341,6 +367,66 @@ BOOST_AUTO_TEST_CASE(generation_state_0000_brute_force) {
     // Disjoint pairs: [(0,2),(1,3)]. Gives 8 permutations.
     // Total mathematically valid distinct pairs = 24.
     BOOST_CHECK_EQUAL(results.size(), 24);
+}
+
+// Compare estimations to generations
+
+// --- Small benchmarks with (5 Points) ---
+
+BOOST_AUTO_TEST_CASE(benchmark_small_0000_brute_force) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    run_comparison(provider, pp, mapping, cache, "Small Grid: 0b0000 (Brute Force)");
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_small_1000_one_point) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> P0
+    run_comparison(provider, pp, mapping, cache, "Small Grid: 0b1000 (One Point Known)");
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_small_1010_two_independent_points) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Map A -> P0, C -> P2
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); 
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2));
+    run_comparison(provider, pp, mapping, cache, "Small Grid: 0b1010 (Two Independent Points)");
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_small_1100_segment_known) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Map A -> P0, B -> P1
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+    run_comparison(provider, pp, mapping, cache, "Small Grid: 0b1100 (Segment Known)");
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_small_1110_three_points_known) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Map A -> P0, B -> P1, C -> P3
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 3));
+    run_comparison(provider, pp, mapping, cache, "Small Grid: 0b1110 (Three Points Known)");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
