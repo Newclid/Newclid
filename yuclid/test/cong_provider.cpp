@@ -49,16 +49,17 @@ struct CongProviderFixture {
     // Length sqrt(2) segments: 2 (diagonals)
     // The other buckets are singletons
     void setup_geometry() {
-        (void) prob.add_point("P0", 0.0, 0.0); // Index 0
-        (void) prob.add_point("P1", 1.0, 0.0); // Index 1
-        (void) prob.add_point("P2", 1.0, 1.0); // Index 2
-        (void) prob.add_point("P3", 0.0, 1.0); // Index 3
-        (void) prob.add_point("P4", 0.0, 5.0); // Index 4
+        (void) prob.add_point("P0", 0.0, 0.0); // 0
+        (void) prob.add_point("P1", 1.0, 0.0); // 1
+        (void) prob.add_point("P2", 1.0, 1.0); // 2
+        (void) prob.add_point("P3", 0.0, 1.0); // 3
+        (void) prob.add_point("P4", 0.0, 5.0); // 4 Outlier
     }
 };
 
 BOOST_FIXTURE_TEST_SUITE(cong_provider_phase1_suite, CongProviderFixture)
 
+// Test is_satisfied
 
 BOOST_AUTO_TEST_CASE(is_satisfied_numerical_match) {
     setup_geometry();
@@ -120,6 +121,81 @@ BOOST_AUTO_TEST_CASE(is_satisfied_degenerate_segment) {
 
     // Congruence requires non-degenerate lines. Check_nondegen() should catch C=C (length 0).
     BOOST_CHECK_EQUAL(provider.is_satisfied(pp, mapping, cache), false);
+}
+
+// Test estimate_extensions
+
+BOOST_AUTO_TEST_CASE(estimate_state_1111_all_known) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); 
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2));
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 3));
+
+    // Estimate should be exactly base_cost (20) + 0 extensions
+    BOOST_CHECK_EQUAL(provider.estimate_extensions(pp, mapping, cache), 20);
+}
+
+BOOST_AUTO_TEST_CASE(estimate_state_1100_length_known) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1)); // B -> P1
+
+    // The length 1.0 bucket contains 4 segments.
+    // P4 (Outlier) doesn't create any length 1.0 segments, so it doesn't affect this bucket.
+    // Known segment is excluded (-1) = 3 segments.
+    // Directional permutations (*2) = 6 estimates.
+    // Total = base_cost (20) + 6 = 26.
+    BOOST_CHECK_EQUAL(provider.estimate_extensions(pp, mapping, cache), 26);
+}
+
+BOOST_AUTO_TEST_CASE(estimate_state_0000_brute_force) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // 0 points known.
+    // 5 points total -> 10 PointPairs.
+    // Bucket 1 (Length 1.0) has 4 pairs.
+    // Bucket 2 (Length sqrt(2)) has 2 pairs.
+    // All distances to P4 are unique, so they are singletons and skipped by the cache builder.
+    // avg_bucket_size = total_pairs (10) / num_buckets (2) = 5.
+    // Math: num_buckets(2) * (avg_bucket_size(5) * avg_bucket_size(5) * 4) = 2 * (25 * 4) = 200.
+    // Total = base_cost (20) + 200 = 220.
+    
+    std::size_t est = provider.estimate_extensions(pp, mapping, cache);
+    BOOST_CHECK_EQUAL(est, 220);
+}
+
+BOOST_AUTO_TEST_CASE(estimate_intersection_reduction_applied) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Assign A, B, and C (State 0b1110)
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); 
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2));
+
+    // Length 1.0 bucket has 4 segments.
+    // Base math: (4 - 1) * 2 = 6.
+    // N = 5 points in cache.
+    // Intersection reduction ceiling division: (6 + N(5) - 1) / 5 = 10 / 5 = 2.
+    // Total = base_cost (20) + 2 = 22.
+    BOOST_CHECK_EQUAL(provider.estimate_extensions(pp, mapping, cache), 22);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
