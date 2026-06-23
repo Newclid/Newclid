@@ -1,5 +1,7 @@
 import { defineConfig } from 'vitest/config';
 
+const setupFiles = ['tests/setup/testSetup.ts'];
+
 export default defineConfig({
   test: {
     projects: [
@@ -8,6 +10,12 @@ export default defineConfig({
           name: 'unit',
           include: ['tests/unit/**/*.test.ts'],
           environment: 'jsdom',
+          setupFiles,
+          environmentOptions: {
+            jsdom: {
+              url: 'http://localhost:5173',
+            },
+          },
         },
       },
       {
@@ -15,6 +23,12 @@ export default defineConfig({
           name: 'integration',
           include: ['tests/integration/**/*.test.ts'],
           environment: 'jsdom',
+          setupFiles,
+          environmentOptions: {
+            jsdom: {
+              url: 'http://localhost:5173',
+            },
+          },
         },
       },
     ],

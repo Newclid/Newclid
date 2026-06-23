@@ -82,10 +82,15 @@ export function attachToolDispatcher(
     tool.onClick(buildCtx(e));
     const toolAfter = tool.captureState?.();
     const slotChanged = toolAfter?.currentSlotIndex !== toolBefore?.currentSlotIndex;
-    // Construction tools (captureState defined): accept only when slot advanced so
-    // validation rejections don't clear the error or push a spurious undo entry.
-    // Other tools: accept when the scene actually changed.
-    const clickAccepted = slotChanged || (!toolBefore && scene.revision !== rev);
+    // Construction tools (captureState defined): accept when a slot advanced OR when
+    // the scene gained objects (handles single-slot constructions that complete and
+    // reset to slot 0 in one click, e.g. the Point tool). Validation rejections clean
+    // up any temporarily created point so scene.objects.size stays unchanged — that's
+    // what distinguishes a rejection from a real completion here.
+    // Non-construction tools: accept when the scene actually changed.
+    const clickAccepted = slotChanged
+      || (!toolBefore && scene.revision !== rev)
+      || (!!toolBefore && scene.objects.size > before.objects.size);
     if (clickAccepted) {
       const toolName = scene.tool;
       scene.pushUndo(before, toolBefore ? () => {
@@ -124,11 +129,11 @@ export function attachToolDispatcher(
       requestRedraw();
       return;
     }
-    if (!appStore?.activeToolGroup) {
+    const tool = getTool(scene.tool);
+    if (!appStore?.activeToolGroup && tool?.currentSlotLabel?.() == null) {
       if (scene.previews.length > 0) { scene.setPreviews([]); requestRedraw(); }
       return;
     }
-    const tool = getTool(scene.tool);
     if (!tool) return;
     const previews = tool.onMove(buildCtx(e));
     scene.setPreviews(previews);

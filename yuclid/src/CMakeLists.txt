@@ -19,6 +19,7 @@ add_library(yuclid
   matchers/predicate_provider.cpp
   matchers/predicate_matching_metadata.cpp
   matchers/base_provider.cpp
+  matchers/cong_provider.cpp
   numbers/add_circle.cpp
   numbers/posreal.cpp
   numbers/root_rat.cpp
@@ -26,6 +27,7 @@ add_library(yuclid
   parser/problem_parser.cpp
   parser/rule_parser.cpp
   rules/theorem_builder.cpp
+  rules/schema_validator.cpp
   problem.cpp
   solver/ddar_solver.cpp
   solver/statement_proof.cpp

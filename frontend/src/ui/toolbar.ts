@@ -262,7 +262,10 @@ export function createToolbar(
         const confirmClear = el('button', { type: 'button', class: 'jgex-btn jgex-btn-danger' }, ['Clear everything']) as HTMLButtonElement;
         confirmClear.addEventListener('click', () => {
           clearConfirmBackdrop.classList.remove('is-open');
+          getTool(scene.tool)?.onDeactivate?.({ scene });
           scene.clear();
+          const entry = CONSTRUCTION_CATALOG[scene.tool];
+          scene.setSlotHint(entry?.slots[0]?.label ?? null);
         });
         return confirmClear;
       })(),

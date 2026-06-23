@@ -275,4 +275,283 @@ BOOST_AUTO_TEST_CASE(rule_with_unique_variables_is_valid) {
     BOOST_CHECK_EQUAL(rule.variables.at(2), "C");
 }
 
+/**
+ * @brief Empty and whitespace-only streams contain no rule schemas.
+ */
+BOOST_AUTO_TEST_CASE(empty_input_returns_no_rules) {
+    std::istringstream empty_input("");
+
+    const std::vector<RuleSchema> empty_rules =
+        parse_rule_schemas(empty_input);
+
+    BOOST_CHECK(empty_rules.empty());
+
+    std::istringstream whitespace_input(
+        "\n"
+        "       \n"
+        "\t\t\n"
+        "   \n"
+    );
+
+    const std::vector<RuleSchema> whitespace_rules =
+        parse_rule_schemas(whitespace_input);
+
+    BOOST_CHECK(whitespace_rules.empty());
+}
+
+/**
+ * @brief Additional spaces and tabs do not change the parsed rule.
+ */
+BOOST_AUTO_TEST_CASE(extra_whitespace_is_ignored) {
+    std::istringstream input(
+        "\n"
+        "\trule    spaced_rule    A\tB    C    \n"
+        "\n"
+        "   require     coll    A    B\tC    \n"
+        "\tconclude    cong\tA\tB\tA\tC    \n"
+        "    end    \n"
+    );
+
+    const std::vector<RuleSchema> rules =
+        parse_rule_schemas(input);
+
+    BOOST_REQUIRE_EQUAL(rules.size(), 1U);
+
+    const RuleSchema& rule = rules.at(0);
+
+    BOOST_CHECK_EQUAL(rule.id, "spaced_rule");
+
+    BOOST_REQUIRE_EQUAL(rule.variables.size(), 3U);
+    BOOST_CHECK_EQUAL(rule.variables.at(0), "A");
+    BOOST_CHECK_EQUAL(rule.variables.at(1), "B");
+    BOOST_CHECK_EQUAL(rule.variables.at(2), "C");
+
+    BOOST_REQUIRE_EQUAL(rule.hypotheses.size(), 1U);
+    BOOST_CHECK_EQUAL(
+        rule.hypotheses.at(0).name,
+        "coll"
+    );
+
+    BOOST_REQUIRE_EQUAL(
+        rule.hypotheses.at(0).args.size(),
+        3U
+    );
+    BOOST_CHECK_EQUAL(
+        rule.hypotheses.at(0).args.at(0),
+        "A"
+    );
+    BOOST_CHECK_EQUAL(
+        rule.hypotheses.at(0).args.at(1),
+        "B"
+    );
+    BOOST_CHECK_EQUAL(
+        rule.hypotheses.at(0).args.at(2),
+        "C"
+    );
+
+    BOOST_REQUIRE_EQUAL(rule.conclusions.size(), 1U);
+    BOOST_CHECK_EQUAL(
+        rule.conclusions.at(0).name,
+        "cong"
+    );
+
+    BOOST_REQUIRE_EQUAL(
+        rule.conclusions.at(0).args.size(),
+        4U
+    );
+}
+
+/**
+ * @brief Constant predicate arguments are preserved as ordinary argument text.
+ */
+BOOST_AUTO_TEST_CASE(predicate_constants_are_preserved) {
+    std::istringstream input(R"(
+        rule constant_rule A B C D
+        require rconst A B C D 1/2
+        require aconst A B C D -1/3
+        conclude cong A B C D
+        end
+    )");
+
+    const std::vector<RuleSchema> rules =
+        parse_rule_schemas(input);
+
+    BOOST_REQUIRE_EQUAL(rules.size(), 1U);
+
+    const RuleSchema& rule = rules.at(0);
+
+    BOOST_REQUIRE_EQUAL(rule.hypotheses.size(), 2U);
+
+    BOOST_CHECK_EQUAL(
+        rule.hypotheses.at(0).name,
+        "rconst"
+    );
+    BOOST_REQUIRE_EQUAL(
+        rule.hypotheses.at(0).args.size(),
+        5U
+    );
+    BOOST_CHECK_EQUAL(
+        rule.hypotheses.at(0).args.at(4),
+        "1/2"
+    );
+
+    BOOST_CHECK_EQUAL(
+        rule.hypotheses.at(1).name,
+        "aconst"
+    );
+    BOOST_REQUIRE_EQUAL(
+        rule.hypotheses.at(1).args.size(),
+        5U
+    );
+    BOOST_CHECK_EQUAL(
+        rule.hypotheses.at(1).args.at(4),
+        "-1/3"
+    );
+}
+
+/**
+ * @brief A rule declaration must contain an identifier.
+ */
+BOOST_AUTO_TEST_CASE(rule_without_id_is_error) {
+    std::istringstream input(R"(
+        rule
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A rule declaration must contain at least one variable.
+ */
+BOOST_AUTO_TEST_CASE(rule_without_variables_is_error) {
+    std::istringstream input(R"(
+        rule no_variables
+        require diff A B
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A require action must contain a predicate name.
+ */
+BOOST_AUTO_TEST_CASE(require_without_predicate_name_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A conclude action must contain a predicate name.
+ */
+BOOST_AUTO_TEST_CASE(conclude_without_predicate_name_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff A B
+        conclude
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A required predicate must contain at least one argument.
+ */
+BOOST_AUTO_TEST_CASE(require_predicate_without_arguments_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief A concluded predicate must contain at least one argument.
+ */
+BOOST_AUTO_TEST_CASE(conclude_predicate_without_arguments_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff A B
+        conclude diff
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
+/**
+ * @brief Unknown parser actions are rejected.
+ */
+BOOST_AUTO_TEST_CASE(unknown_action_is_error) {
+    std::istringstream input(R"(
+        rule bad A B
+        require diff A B
+        invalid_action diff B A
+        conclude diff B A
+        end
+    )");
+
+    BOOST_CHECK_THROW(
+        {
+            const auto rules =
+                parse_rule_schemas(input);
+            static_cast<void>(rules);
+        },
+        std::runtime_error
+    );
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -518,3 +518,60 @@ describe('GeoObject typing smoke check', () => {
     expect(circle.kind).toBe('circle');
   });
 });
+
+describe('Scene.renamePoint', () => {
+  // updates the label field, increments revision, and fires subscribers
+  it('updates the label of an existing point, bumps revision, and notifies', () => {
+    const scene = new Scene();
+    const id = scene.addPoint(0, 0);
+    const listener = vi.fn();
+    scene.subscribe(listener);
+    const before = scene.revision;
+    scene.renamePoint(id, 'Z');
+    expect((scene.objects.get(id) as { label: string }).label).toBe('Z');
+    expect(scene.revision).toBe(before + 1);
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  // renaming an id that does not exist must leave the scene unchanged
+  it('is a no-op for an unknown id', () => {
+    const scene = new Scene();
+    const listener = vi.fn();
+    scene.subscribe(listener);
+    const before = scene.revision;
+    scene.renamePoint('missing', 'Z');
+    expect(scene.revision).toBe(before);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  // renaming a non-point object must not change revision or fire listeners
+  it('is a no-op when the id refers to a non-point object', () => {
+    const scene = new Scene();
+    const a = scene.addPoint(0, 0);
+    const b = scene.addPoint(1, 0);
+    const circleId = scene.addObject({ kind: 'circle', mode: 'center-through', center: a, through: b });
+    const before = scene.revision;
+    scene.renamePoint(circleId, 'Z');
+    expect(scene.revision).toBe(before);
+  });
+});
+
+describe('Scene.removeObject — construction output-point cascade', () => {
+  // removing a binding point should cascade to the construction and also delete the construction's output point
+  it('also removes output points of a construction when a binding point is deleted', () => {
+    const scene = new Scene();
+    const a = scene.addPoint(0, 0);
+    const b = scene.addPoint(2, 0);
+    const x = scene.addPoint(1, 0);
+    const constructionId = scene.addObject({
+      kind: 'construction',
+      name: 'midpoint',
+      bindings: { a, b, m: x },
+      edges: [],
+      circles: [],
+    });
+    scene.removeObject(a);
+    expect(scene.objects.has(constructionId)).toBe(false);
+    expect(scene.objects.has(x)).toBe(false);
+  });
+});

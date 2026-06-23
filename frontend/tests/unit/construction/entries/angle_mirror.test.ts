@@ -49,6 +49,23 @@ describe('angle_mirror entry sketch', () => {
       expect(x.y).toBeCloseTo(1);
     }
   });
+
+  // When b and c are the same point, the reflection is a no-op (returns a unchanged)
+  it('sketch handles degenerate mirror line (b === c) without throwing', () => {
+    const scene = new Scene();
+    const { a, b } = addPoints(scene, { a: [2, 3], b: [1, 1] });
+    // Pass c === b to hit the len2 < 1e-12 guard in reflectAcrossLine
+    const result = angleMirror.sketch({ a, b, c: b }, scene);
+    expect(result).toMatchObject({ kind: 'construction', name: 'angle_mirror' });
+    const bindings = (result as { bindings: Record<string, string> }).bindings;
+    const x = scene.objects.get(bindings.x)!;
+    // Degenerate reflection returns a unchanged, so x coords ≈ a coords
+    expect(x.kind).toBe('point');
+    if (x.kind === 'point') {
+      expect(x.x).toBeCloseTo(2);
+      expect(x.y).toBeCloseTo(3);
+    }
+  });
 });
 
 describe('angle_mirror entry preview', () => {
@@ -91,5 +108,11 @@ describe('angle_mirror entry validate', () => {
   it('accepts partial binding', () => {
     const scene = new Scene();
     expect(angleMirror.validate!({}, scene)).toBeNull();
+  });
+
+  // When bound ids are not in the scene, validate returns null early
+  it('returns null when bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    expect(angleMirror.validate!({ a: 'p99', b: 'p100', c: 'p101' }, scene)).toBeNull();
   });
 });

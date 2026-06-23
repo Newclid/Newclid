@@ -43,6 +43,17 @@ describe('lineExists', () => {
     scene.addObject({ kind: 'circle', mode: 'center-through', center: a, through: b });
     expect(lineExists(scene, a, b)).toBe(false);
   });
+
+  // Detect when line is stored with reversed point order
+  it('is true when line is stored as [b, a] and checked as (a, b)', () => {
+    const scene = new Scene();
+    const { a, b } = addPoints(scene, { a: [0, 0], b: [1, 0] });
+    scene.addObject({
+      kind: 'construction', name: 'line', bindings: { a: b, b: a },
+      edges: [], lines: [[b, a]], circles: [],
+    });
+    expect(lineExists(scene, a, b)).toBe(true);
+  });
 });
 
 describe('ensureReferenceLine', () => {

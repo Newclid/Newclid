@@ -10,6 +10,7 @@
 #include "base_provider.hpp"
 #include "lazy_geometry_cache.hpp"
 #include "filter_state.hpp"
+#include "rules/schema_validator.hpp"
 
 #include <boost/log/trivial.hpp>
 #include <span>
@@ -113,34 +114,49 @@ namespace Yuclid {
         LazyGeometryCache geometry_cache(*m_problem);
 
         for(const RuleSchema &schema: m_rules){
-            // TODO: decide what to do if we let different varables map to the same point
-            if(schema.variables.size() > m_problem->num_points()) {
-                BOOST_LOG_TRIVIAL(warning) << "Generic rule matcher skipped rule " << schema.id << ". Reason: Insufficient number of points in problem.";
+            try {
+                // Schema validation
+                // Catch typos, bad arity, and missing variables.
+                std::optional<std::string> validation_error = validate_schema(schema);
+                if (validation_error.has_value()) {
+                    BOOST_LOG_TRIVIAL(warning) << validation_error.value();
+                    continue; 
+                }
+
+                // TODO: decide what to do if we let different varables map to the same point
+                if(schema.variables.size() > m_problem->num_points()) {
+                    BOOST_LOG_TRIVIAL(warning) << "Generic rule matcher skipped rule " << schema.id << ". Reason: Insufficient number of points in problem.";
+                    continue;
+                }
+
+                // plan stage
+                RulePlan current_plan = build_rule_plan(schema);
+                if(current_plan.unsupported_predicates.size() > 0) {
+                    BOOST_LOG_TRIVIAL(warning) << "Generic rule matcher skipped rule " 
+                                                << schema.id << ". Reason: The schema contains " 
+                                                << current_plan.unsupported_predicates.size() << " unsupported predicates.";
+                    continue;
+                }
+
+                // setup for search stage
+                MappingState mapping_state(schema, *m_problem);
+                std::vector<RuleMapping> mapping_results;
+                FilterState filter_state(current_plan.validators.size());
+
+                // search stage
+                search(current_plan, mapping_state, filter_state, geometry_cache, mapping_results);
+
+                // build stage
+                std::vector<Theorem> valid_theorems = build_valid_theorems_from_mappings(schema, mapping_results);
+
+                for(auto &candidate : valid_theorems) {
+                    all_correct_generated_theorems.push_back(std::move(candidate));
+                }
+                
+            } catch (const std::exception &e) {
+                BOOST_LOG_TRIVIAL(warning)
+                    << "Skipping custom rule " << schema.id << ": " << e.what();
                 continue;
-            }
-
-            // plan stage
-            RulePlan current_plan = build_rule_plan(schema);
-            if(current_plan.unsupported_predicates.size() > 0) {
-                BOOST_LOG_TRIVIAL(warning) << "Generic rule matcher skipped rule " 
-                                            << schema.id << ". Reason: The schema contains " 
-                                            << current_plan.unsupported_predicates.size() << " unsupported predicates.";
-                continue;
-            }
-
-            // setup for search stage
-            MappingState mapping_state(schema, *m_problem);
-            std::vector<RuleMapping> mapping_results;
-            FilterState filter_state(current_plan.validators.size());
-
-            // search stage
-            search(current_plan, mapping_state, filter_state, geometry_cache, mapping_results);
-
-            // build stage
-            std::vector<Theorem> valid_theorems = build_valid_theorems_from_mappings(schema, mapping_results);
-
-            for(auto &candidate : valid_theorems) {
-                all_correct_generated_theorems.push_back(std::move(candidate));
             }
         }
 
@@ -157,6 +173,9 @@ namespace Yuclid {
 
         for(const PlannedPredicate &candidate: predicates){
             // if everything in the generator is assigned skip it
+            // TODO: Decide wether to run is_satisfied? 
+            // But then there has to be an indication of wether were evaluating generators or filters (filters are already checked, no need to do it twice)
+            // Predicates that already have their own provider will probably not cost to check, but the ones from the base provider will slow things down
             if(are_pattern_variables_assigned(candidate, state)) continue;
 
             // get provider and metadata

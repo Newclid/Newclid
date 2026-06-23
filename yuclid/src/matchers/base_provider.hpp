@@ -1,10 +1,8 @@
 #pragma once
 
 #include "predicate_provider.hpp"
-#include "predicate_matching_metadata.hpp"
 #include "mapping_state.hpp"
 #include "lazy_geometry_cache.hpp"
-#include "rule_plan.hpp"
 
 namespace Yuclid {
 
