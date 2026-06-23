@@ -366,6 +366,33 @@ body.is-resizing {
   background: var(--accent-soft);
 }
 
+/* ---------- Advanced Options expandable ---------- */
+
+.advanced-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.advanced-arrow {
+  font-size: 14px;
+  color: var(--ink-faint);
+  margin-left: auto;
+  line-height: 1;
+  display: inline-block;
+  transition: transform 120ms ease;
+}
+
+.advanced-section.is-open .advanced-arrow {
+  transform: rotate(90deg);
+}
+
+.advanced-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 4px;
+}
+
 /* ---------- Panel tab switch (Toolbar | Proofs) ---------- */
 
 .panel-tab-switch {
