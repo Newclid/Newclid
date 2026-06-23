@@ -5,6 +5,7 @@ import { AppStore } from '../../src/store/appStore';
 import { Scene } from '../../src/scene/scene';
 import { emitScene } from '../../src/emit/jgex';
 import { buildNameTable } from '../../src/emit/names';
+import { expandJgexPredicates } from '../../src/emit/jgexParser';
 
 type FetchMock = ReturnType<typeof vi.fn>;
 
@@ -49,6 +50,35 @@ describe('problem submission and job lifecycle', () => {
     const jgex = emitScene(scene);
     expect(nameTable.size).toBe(2);
     expect(jgex).toContain('free');
+  });
+
+  // emitScene + a goal string → expandJgexPredicates → submitJob must send the full JGEX
+  it('builds a complete solver request from a scene and a goal', async () => {
+    const scene = new Scene();
+    // Three free points inserted in order → named a, b, c by buildNameTable
+    scene.addPoint(0, 0);
+    scene.addPoint(2, 0);
+    scene.addPoint(1, 0);
+
+    const nameTable = buildNameTable(scene);
+    const names = [...nameTable.values()]; // ['a', 'b', 'c']
+
+    const setup = emitScene(scene);                           // "a = free a; b = free b; c = free c"
+    const goal = `midp ${names[2]} ${names[0]} ${names[1]}`; // "midp c a b"
+    const fullJgex = expandJgexPredicates(`${setup} ? ${goal}`);
+
+    expect(fullJgex).toContain('? midp');
+    expect(fullJgex).toContain('free');
+
+    mockFetchOnce({ job_id: 'j2', status: 'queued' });
+    const resp = await client.submitJob(fullJgex, []);
+
+    const call = (globalThis.fetch as FetchMock).mock.calls[0];
+    const body = JSON.parse(call[1].body as string);
+    expect(body.input_type).toBe('jgex');
+    expect(body.problem_input).toBe(fullJgex);
+    expect(body.problem_input).toContain('? midp');
+    expect(resp.job_id).toBe('j2');
   });
 
   // submitJob must POST to /api/jobs with the correct body shape
@@ -166,6 +196,39 @@ describe('problem submission and job lifecycle', () => {
 
     expect(store.jobs.get('j1')?.status).toBe('failed');
     expect(store.jobs.get('j1')?.result?.status).toBe('failed');
+  });
+
+  // a timed_out response from the poller must fetch the result and stop the interval
+  it('fetches the result and stops polling when the job times out', async () => {
+    store.addJob('j1', 'A = free A');
+
+    mockFetchOnce({ job_id: 'j1', status: 'timed_out', message: 'Timed out' });
+    mockFetchOnce({
+      job_id: 'j1',
+      status: 'timed_out',
+      result: {
+        status: 'timed_out',
+        message: 'Timed out',
+        proof_text: null,
+        proof_sections: null,
+        run_info: null,
+        sketch_points: [],
+        stdout: '',
+        stderr: '',
+      },
+      error: null,
+    });
+    poller.start('j1');
+    await vi.advanceTimersByTimeAsync(2000);
+    await vi.runAllTimersAsync();
+
+    expect(store.jobs.get('j1')?.status).toBe('timed_out');
+    expect(store.jobs.get('j1')?.result?.status).toBe('timed_out');
+
+    // no further fetch calls after terminal status
+    const callCount = (globalThis.fetch as FetchMock).mock.calls.length;
+    await vi.advanceTimersByTimeAsync(4000);
+    expect((globalThis.fetch as FetchMock).mock.calls.length).toBe(callCount);
   });
 
   // after a terminal status the poller interval must be cleared with no further status calls
