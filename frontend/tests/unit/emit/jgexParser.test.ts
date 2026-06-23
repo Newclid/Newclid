@@ -86,9 +86,7 @@ describe('expandJgexPredicates', () => {
   });
 
   it('does not expand a circle goal with 4 or fewer args', () => {
-    const s = 'a = free a ? circle o a b c d';
-    // 4 non-center args → args.length (5) > 4, so this WILL expand
-    // use 3 non-center args to stay at ≤4:
+    // 3 non-center args → args.length (4) ≤ 4, so no expansion
     const s2 = 'a = free a ? circle o a b c';
     expect(expandJgexPredicates(s2)).toBe(s2);
   });
