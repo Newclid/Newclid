@@ -92,4 +92,34 @@ BOOST_AUTO_TEST_CASE(is_satisfied_numerical_mismatch) {
     BOOST_CHECK_EQUAL(provider.is_satisfied(pp, mapping, cache), false);
 }
 
+BOOST_AUTO_TEST_CASE(is_satisfied_failsafe_partial_mapping) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Map only 3 variables
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); 
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 3));
+
+    // Should hit the failsafe and return false instead of crashing on empty assignment
+    BOOST_CHECK_EQUAL(provider.is_satisfied(pp, mapping, cache), false);
+}
+
+BOOST_AUTO_TEST_CASE(is_satisfied_degenerate_segment) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "C"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1)); // B -> P1
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2)); // C -> P2
+
+    // Congruence requires non-degenerate lines. Check_nondegen() should catch C=C (length 0).
+    BOOST_CHECK_EQUAL(provider.is_satisfied(pp, mapping, cache), false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
