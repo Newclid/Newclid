@@ -22,10 +22,10 @@ Steps
         name: 'my-construction',
         label: 'My construction',
         shortcut: 'm',           // unique letter, shown in the toolbar tooltip
-        icon: '…',               // SVG string or icon key
-        slots: […],
-        edges: […],
-        sketch(slots, scene) { … },
+        icon: '...',             // SVG string or icon key
+        slots: [/* ... */],
+        edges: [/* ... */],
+        sketch(slots, scene) { /* ... */ },
       };
 
    Choose a ``shortcut`` letter that is not already used by another construction.
@@ -70,7 +70,7 @@ Steps
       import { myConstruction } from './entries/my_construction';
       // add to the exported array:
       export const catalog: CatalogEntry[] = [
-        …,
+        // ...existing entries...
         myConstruction,
       ];
 
