@@ -34,13 +34,13 @@ function extractPredicate(raw: string): string {
 }
 
 // Remap backend bracket refs to user-friendly 1-based labels for display only.
-// [C0] → [A1]  (exercise premises, 1-based)
+// [C0] → [P1]  (exercise premises, 1-based)
 // [N0] → [N1]  (numerical checks, 1-based)
 // [36] → [F37] (derived proof facts, 1-based)
 // Raw strings passed to buildTextPremiseSigs in main.ts are never transformed here.
 function remapRef(s: string): string {
   return s
-    .replace(/\[C(\d+)\]/g, (_, n) => `[A${+n + 1}]`)
+    .replace(/\[C(\d+)\]/g, (_, n) => `[P${+n + 1}]`)
     .replace(/\[N(\d+)\]/g, (_, n) => `[N${+n + 1}]`)
     .replace(/\[(\d+)\]/g, (_, n) => `[F${+n + 1}]`);
 }
@@ -48,7 +48,7 @@ function remapRef(s: string): string {
 function buildLegend(): HTMLElement {
   const legend = el('div', { class: 'proof-legend' });
   const entries: [string, string, string][] = [
-    ['proof-ref-label proof-ref-premise', 'A1, A2…', 'Premises given in the exercise'],
+    ['proof-ref-label proof-ref-premise', 'P1, P2…', 'Premises given in the exercise'],
     ['proof-ref-label proof-ref-numerical', 'N1, N2…', 'Numerical checks (computed values)'],
     ['proof-ref-label proof-ref-derived', 'F1, F2…', 'Facts derived during the proof'],
   ];
@@ -63,12 +63,12 @@ function buildLegend(): HTMLElement {
 
 function buildPremisesSection(assumptions: string[]): HTMLElement {
   const section = el('div', { class: 'proof-section' });
-  section.appendChild(el('div', { class: 'proof-section-title' }, ['Premises']));
+  section.appendChild(el('div', { class: 'proof-section-title' }, ['Assumptions']));
   const list = el('ol', { class: 'proof-steps-list' });
   for (let i = 0; i < assumptions.length; i++) {
     const predicate = extractPredicate(assumptions[i]);
     const item = el('li', { class: 'proof-step-item proof-labeled-item' });
-    item.appendChild(el('span', { class: 'proof-ref-label proof-ref-premise' }, [`A${i + 1}`]));
+    item.appendChild(el('span', { class: 'proof-ref-label proof-ref-premise' }, [`P${i + 1}`]));
     item.appendChild(document.createTextNode(predicate));
     list.appendChild(item);
   }
