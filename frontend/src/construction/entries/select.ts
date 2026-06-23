@@ -8,7 +8,7 @@ pointer layer, not by this tool.
 **/
 export const select: CatalogEntry = {
   name: 'select',
-  label: 'Select',
+  label: 'Edit Point',
   shortcut: 'V',
   icon: () =>
     iconWrap([

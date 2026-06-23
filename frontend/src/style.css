@@ -371,7 +371,7 @@ body.is-resizing {
 .panel-tab-switch {
   display: flex;
   align-items: stretch;
-  margin: 8px 0 6px;
+  margin: 6px 0 0;
   padding: 2px;
   background: rgba(26, 24, 22, 0.04);
   border: 1px solid var(--rule-mid);
