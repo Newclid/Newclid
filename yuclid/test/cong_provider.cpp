@@ -81,6 +81,24 @@ struct CongProviderFixture {
         }
     }
 
+    // Random problems setup, the cache will be empty so estimates should be low too
+    void setup_irregular_geometry() {
+        (void) prob.add_point("R0", 0.0, 0.0);
+        (void) prob.add_point("R1", 1.23, 4.56);
+        (void) prob.add_point("R2", -3.14, 2.71);
+        (void) prob.add_point("R3", 5.55, -1.11);
+        (void) prob.add_point("R4", 0.89, 8.90);
+    }
+
+    void setup_very_large_grid() {
+        int idx = 0;
+        for (int x = 0; x < 5; ++x) {
+            for (int y = 0; y < 5; ++y) {
+                (void) prob.add_point("M" + std::to_string(idx++), x * 1.0, y * 1.0);
+            }
+        }
+    }
+
     void run_comparison(CongProvider& provider, PlannedPredicate& pp, MappingState& mapping, LazyGeometryCache& cache, const std::string& name) {
         std::size_t estimate = provider.estimate_extensions(pp, mapping, cache);
         
@@ -371,7 +389,7 @@ BOOST_AUTO_TEST_CASE(generation_state_0000_brute_force) {
 
 // Compare estimations to generations
 
-// --- Small benchmarks with (5 Points) ---
+// Small benchmarks with (5 Points)
 
 BOOST_AUTO_TEST_CASE(benchmark_small_0000_brute_force) {
     setup_geometry();
@@ -427,6 +445,105 @@ BOOST_AUTO_TEST_CASE(benchmark_small_1110_three_points_known) {
     BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
     BOOST_REQUIRE(mapping.try_apply_assignment(2, 3));
     run_comparison(provider, pp, mapping, cache, "Small Grid: 0b1110 (Three Points Known)");
+}
+
+// Large geometry setup benchmarks (9 Points)
+
+BOOST_AUTO_TEST_CASE(benchmark_large_0000_brute_force) {
+    setup_large_grid();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    run_comparison(provider, pp, mapping, cache, "Large Grid: 0b0000 (Brute Force)");
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_large_1000_one_point) {
+    setup_large_grid();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Center of the 3x3 grid (highly connected!)
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 4)); 
+    run_comparison(provider, pp, mapping, cache, "Large Grid: 0b1000 (Center Point Known)");
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_large_1100_segment_known) {
+    setup_large_grid();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Map A and B to a length-1 segment in the grid
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 4)); // Center
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 5)); // Right
+    run_comparison(provider, pp, mapping, cache, "Large Grid: 0b1100 (Segment Known)");
+}
+
+// Very large setup benchmarks (5x5 square - 25 points)
+
+// This Currently severely underestimates because the provider uses an approximated average for pairs in a bucket 
+// However when we have a few very large buckets, the actual result is higher. In the future we'll decide wether to 
+// Have the cache remember bucket sizes or just have the estimate_extensions() function go over all buckets and get the size for each
+// The latter shouldn't slow the provider down too much.
+BOOST_AUTO_TEST_CASE(benchmark_very_large_0000_brute_force) {
+    setup_very_large_grid();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    run_comparison(provider, pp, mapping, cache, "Very Large Grid 5x5: 0b0000 (Brute Force)");
+}
+
+// This Currently severely underestimates because the provider uses an approximated average for pairs in a bucket 
+// However when we have a few very large buckets, the actual result is higher. In the future we'll decide wether to 
+// Have the cache remember bucket sizes or just have the estimate_extensions() function go over all buckets and get the size for each
+// The latter shouldn't slow the provider down too much.
+BOOST_AUTO_TEST_CASE(benchmark_very_large_1000_one_point) {
+    setup_very_large_grid();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Center of the 5x5 grid
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 12)); 
+    run_comparison(provider, pp, mapping, cache, "Very Large Grid 5x5: 0b1000 (Center Point Known)");
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_very_large_1100_segment_known) {
+    setup_very_large_grid();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Map A and B to a length-1 segment in the grid
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 12)); // Center
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 13)); // Right
+    run_comparison(provider, pp, mapping, cache, "Very Large Grid 5x5: 0b1100 (Segment Known)");
+}
+
+// Irregular setup benchmarks
+
+BOOST_AUTO_TEST_CASE(benchmark_irregular_0000_brute_force) {
+    setup_irregular_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // The generator should find 0 valid mappings on the irregular setup.
+    // The estimate should also be low
+    run_comparison(provider, pp, mapping, cache, "Irregular Geometry: 0b0000 (Brute Force)");
+}
+
+BOOST_AUTO_TEST_CASE(benchmark_irregular_1000_one_point) {
+    setup_irregular_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // Map to R0
+    run_comparison(provider, pp, mapping, cache, "Irregular Geometry: 0b1000 (One Point Known)");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
