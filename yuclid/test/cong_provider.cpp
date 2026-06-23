@@ -267,6 +267,65 @@ BOOST_AUTO_TEST_CASE(generation_state_1111_all_known) {
     BOOST_CHECK_EQUAL(results.size(), 0);
 }
 
+BOOST_AUTO_TEST_CASE(generation_state_1100_segment_known) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // A->P0, B->P1 (Length 1)
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // The length 1 bucket has pairs: (0,1), (1,2), (2,3), (3,0).
+    // Points 0 and 1 are used. The only pair using free points is (2,3).
+    // We expect 2 permutations: C->2, D->3 AND C->3, D->2.
+    BOOST_CHECK_EQUAL(results.size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_1110_one_missing) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // A->P0, B->P1 (Length 1)
+    // C->P3 (Target anchor)
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 3));
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // D must map to P2 (the only point exactly length 1 away from P3 that isn't P0).
+    BOOST_CHECK_EQUAL(results.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_1010_shared_variable) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    
+    // Isosceles dedup rule: cong A B A C
+    PlannedPredicate pp = build_planned_pred({"A", "B", "A", "C"});
+
+    // Map A -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // We need segments originating from P0 of equal length.
+    // Length 1: (0,1) and (0,3). Thus B=1, C=3 OR B=3, C=1.
+    // Length sqrt(2): Only (0,2). We can't have B=2 and C=2 because B and C must be distinct.
+    // P4 (Outlier) has no equal length segment.
+    BOOST_CHECK_EQUAL(results.size(), 2); 
+}
+
 BOOST_AUTO_TEST_CASE(generation_state_0000_brute_force) {
     setup_geometry();
     LazyGeometryCache cache(prob);
