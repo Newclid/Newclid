@@ -95,9 +95,49 @@ body.is-resizing {
   height: 100%;
 }
 
-.redraw-btn {
+.zoom-controls {
   position: absolute;
   bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+.zoom-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  background: var(--bg-elevated);
+  color: var(--ink-strong);
+  border: 1px solid var(--rule-mid);
+  border-bottom: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-btn:last-child {
+  border-bottom: 1px solid var(--rule-mid);
+}
+
+.zoom-btn:hover {
+  background: rgba(26, 24, 22, 0.06);
+}
+
+.zoom-btn:active {
+  background: rgba(26, 24, 22, 0.12);
+}
+
+.redraw-btn {
+  position: absolute;
+  bottom: calc(1.25rem + 80px);
   right: 1.25rem;
   padding: 8px 16px;
   border-radius: 6px;
@@ -264,6 +304,21 @@ body.is-resizing {
   color: #8B2828;
 }
 
+.tool-btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-radius: 6px;
+}
+
+.tool-btn-primary:hover {
+  background: #20396A;
+  color: #FFFFFF;
+}
+
+.tool-btn-primary .tool-btn-label {
+  color: #FFFFFF;
+}
+
 /* ---------- Toolbar group buttons ---------- */
 
 /* Thin rule separating select from the group list */
@@ -311,12 +366,39 @@ body.is-resizing {
   background: var(--accent-soft);
 }
 
+/* ---------- Advanced Options expandable ---------- */
+
+.advanced-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.advanced-arrow {
+  font-size: 14px;
+  color: var(--ink-faint);
+  margin-left: auto;
+  line-height: 1;
+  display: inline-block;
+  transition: transform 120ms ease;
+}
+
+.advanced-section.is-open .advanced-arrow {
+  transform: rotate(90deg);
+}
+
+.advanced-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 4px;
+}
+
 /* ---------- Panel tab switch (Toolbar | Proofs) ---------- */
 
 .panel-tab-switch {
   display: flex;
   align-items: stretch;
-  margin: 8px 0 6px;
+  margin: 6px 0 0;
   padding: 2px;
   background: rgba(26, 24, 22, 0.04);
   border: 1px solid var(--rule-mid);
@@ -700,6 +782,13 @@ body.is-resizing {
 
 .jgex-btn-danger:hover {
   background: #6E1F1F;
+}
+
+.clear-confirm-msg {
+  margin: 0 0 20px;
+  font-size: 13.5px;
+  color: var(--ink-mid);
+  line-height: 1.55;
 }
 
 .remove-confirm-dialog {
@@ -1688,36 +1777,38 @@ body.is-resizing {
 
 .slot-hint {
   position: absolute;
-  bottom: 20px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(26, 24, 22, 0.72);
+  background: rgba(26, 24, 22, 0.80);
   color: #FAF8F4;
-  padding: 6px 16px;
+  padding: 10px 22px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 15px;
   font-family: var(--font-sans);
   pointer-events: none;
   z-index: 6;
   white-space: nowrap;
   user-select: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 .slot-error {
   position: absolute;
-  bottom: 56px;
+  bottom: 136px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(200, 40, 40, 0.88);
+  background: rgba(180, 30, 30, 0.92);
   color: #FFF;
-  padding: 5px 14px;
+  padding: 9px 20px;
   border-radius: 999px;
-  font-size: 12.5px;
+  font-size: 14px;
   font-family: var(--font-sans);
   pointer-events: none;
   z-index: 6;
   white-space: nowrap;
   user-select: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 .point-context-menu {
   position: absolute;

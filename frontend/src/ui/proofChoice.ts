@@ -52,7 +52,7 @@ export function createProofChoice(opts: {
     'aria-modal': 'true',
     'aria-labelledby': 'proof-choice-title',
   }, [
-    el('div', { class: 'jgex-title', id: 'proof-choice-title' }, ['Solve a new problem']),
+    el('div', { class: 'jgex-title', id: 'proof-choice-title' }, ['Solve New Problem']),
     el('div', { class: 'proof-choice-options' }, [visualOpt, syntaxOpt]),
     el('div', { class: 'proof-choice-footer' }, [cancelBtn]),
   ]);

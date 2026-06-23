@@ -10,7 +10,6 @@ import type { CatalogEntry } from '../construction/catalog-types';
 import { AppStore } from '../store/appStore';
 import { createProofPanel } from './proofPanel';
 import { createProofsList } from './proofsList';
-import { createProofChoice } from './proofChoice';
 import { createProofByPointsPanel } from './proofByPointsPanel';
 import { createTheoremManager } from './theoremManager';
 import { theoremStore } from '../store/theoremStore';
@@ -47,6 +46,24 @@ function theoremIcon(): SVGSVGElement {
       stroke: 'currentColor',
       'stroke-width': '1.4',
       'stroke-linecap': 'round',
+    }),
+  ]);
+}
+
+// Target/crosshair glyph for the "Define Goal" primary action.
+function goalIcon(): SVGSVGElement {
+  return iconWrap([
+    svgEl('circle', {
+      cx: '11', cy: '11', r: '7',
+      fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5',
+    }),
+    svgEl('circle', {
+      cx: '11', cy: '11', r: '2.5',
+      fill: 'currentColor',
+    }),
+    svgEl('path', {
+      d: 'M11 4 L11 6 M11 16 L11 18 M4 11 L6 11 M16 11 L18 11',
+      stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round',
     }),
   ]);
 }
@@ -171,32 +188,95 @@ export function createToolbar(
   const spacer = el('div', { class: 'toolbar-spacer' });
 
   // ---------- create proof ----------
-  // The JGEX input still exists; it is now reached through the choice modal.
   const jgex = createJgexInput(onJgexTextSubmit ?? onCanvasProofSubmit);
-  const proofChoice = createProofChoice({
-    onJgex: () => jgex.open(),
-    onPoints: () => appStore?.enterProofByPoints(),
-  });
   const createProofBtn = el('button', {
     type: 'button',
-    class: 'tool-btn',
-    title: 'Solve a new problem',
+    class: 'tool-btn tool-btn-primary',
+    title: 'Define goal visually',
   }) as HTMLButtonElement;
-  createProofBtn.appendChild(jgexIcon());
-  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Solve new problem']));
-  createProofBtn.addEventListener('click', () => proofChoice.open());
+  createProofBtn.appendChild(goalIcon());
+  createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Define Goal']));
+  createProofBtn.addEventListener('click', () => appStore?.enterProofByPoints());
 
-  // ---------- theorems ----------
-  const manageTheoremsBtn = el('button', {
+  // ---------- advanced options (JGEX + theorems) ----------
+  const advancedSection = el('div', { class: 'advanced-section' });
+  const advancedToggle = el('button', {
+    type: 'button',
+    class: 'tool-btn advanced-toggle',
+    title: 'Advanced Options',
+  }) as HTMLButtonElement;
+  advancedToggle.appendChild(el('span', { class: 'tool-btn-label' }, ['Advanced Options']));
+  advancedToggle.appendChild(el('span', { class: 'advanced-arrow' }, ['›']));
+
+  const advancedItems = el('div', { class: 'advanced-items' });
+  advancedItems.style.display = 'none';
+
+  const jgexAdvBtn = el('button', {
+    type: 'button',
+    class: 'tool-btn',
+    title: 'Define problem using JGEX',
+  }) as HTMLButtonElement;
+  jgexAdvBtn.appendChild(jgexIcon());
+  jgexAdvBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Define Problem Using JGEX']));
+  jgexAdvBtn.addEventListener('click', () => jgex.open());
+
+  const theoremsAdvBtn = el('button', {
     type: 'button',
     class: 'tool-btn',
     title: 'Manage custom theorems',
   }) as HTMLButtonElement;
-  manageTheoremsBtn.appendChild(theoremIcon());
-  manageTheoremsBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['User-Defined Theorems']));
-  manageTheoremsBtn.addEventListener('click', () => appStore?.enterTheoremManager());
+  theoremsAdvBtn.appendChild(theoremIcon());
+  theoremsAdvBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['User-Defined Theorems']));
+  theoremsAdvBtn.addEventListener('click', () => appStore?.enterTheoremManager());
 
-  // ---------- clear ----------
+  advancedItems.appendChild(jgexAdvBtn);
+  advancedItems.appendChild(theoremsAdvBtn);
+
+  advancedToggle.addEventListener('click', () => {
+    const isOpen = advancedItems.style.display !== 'none';
+    advancedItems.style.display = isOpen ? 'none' : 'flex';
+    advancedSection.classList.toggle('is-open', !isOpen);
+  });
+
+  advancedSection.appendChild(advancedToggle);
+  advancedSection.appendChild(advancedItems);
+
+  // ---------- clear (with confirmation dialog) ----------
+  const clearConfirmBackdrop = el('div', { class: 'jgex-backdrop' });
+  const clearConfirmDialog = el('div', {
+    class: 'jgex-dialog',
+    role: 'dialog',
+    'aria-modal': 'true',
+  }, [
+    el('div', { class: 'jgex-title' }, ['Clear canvas?']),
+    el('p', { class: 'clear-confirm-msg' }, [
+      'This will remove all points, lines, and shapes from the canvas. This action cannot be undone.',
+    ]),
+    el('div', { class: 'jgex-actions' }, [
+      (() => {
+        const cancelClear = el('button', { type: 'button', class: 'jgex-btn jgex-btn-quiet' }, ['Cancel']) as HTMLButtonElement;
+        cancelClear.addEventListener('click', () => clearConfirmBackdrop.classList.remove('is-open'));
+        return cancelClear;
+      })(),
+      (() => {
+        const confirmClear = el('button', { type: 'button', class: 'jgex-btn jgex-btn-danger' }, ['Clear everything']) as HTMLButtonElement;
+        confirmClear.addEventListener('click', () => {
+          clearConfirmBackdrop.classList.remove('is-open');
+          getTool(scene.tool)?.onDeactivate?.({ scene });
+          scene.clear();
+          const entry = CONSTRUCTION_CATALOG[scene.tool];
+          scene.setSlotHint(entry?.slots[0]?.label ?? null);
+        });
+        return confirmClear;
+      })(),
+    ]),
+  ]);
+  clearConfirmBackdrop.appendChild(clearConfirmDialog);
+  clearConfirmBackdrop.addEventListener('mousedown', (e) => {
+    if (e.target === clearConfirmBackdrop) clearConfirmBackdrop.classList.remove('is-open');
+  });
+  document.body.appendChild(clearConfirmBackdrop);
+
   const clearBtn = el('button', {
     type: 'button',
     class: 'tool-btn tool-btn-danger',
@@ -204,12 +284,7 @@ export function createToolbar(
   }) as HTMLButtonElement;
   clearBtn.appendChild(trashIcon());
   clearBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Clear']));
-  clearBtn.addEventListener('click', () => {
-    getTool(scene.tool)?.onDeactivate?.({ scene });
-    scene.clear();
-    const entry = CONSTRUCTION_CATALOG[scene.tool];
-    scene.setSlotHint(entry?.slots[0]?.label ?? null);
-  });
+  clearBtn.addEventListener('click', () => clearConfirmBackdrop.classList.add('is-open'));
 
   // ---------- proof panel ----------
   const proofPanel = appStore ? createProofPanel(appStore) : null;
@@ -240,7 +315,7 @@ export function createToolbar(
     class: 'panel-tab-btn',
     role: 'tab',
     'aria-selected': 'false',
-  }, ['Proofs']) as HTMLButtonElement;
+  }, ['My Solutions']) as HTMLButtonElement;
   panelTabSwitch.appendChild(toolbarTabBtn);
   panelTabSwitch.appendChild(proofsTabBtn);
   toolbarTabBtn.addEventListener('click', () => {
@@ -263,9 +338,15 @@ export function createToolbar(
     proofsContent.appendChild(proofsList.root);
   }
 
+  // Separator between primary action and the tool navigation tabs.
+  const primarySep = el('div', { class: 'toolbar-sep' });
+  // Separator above the tab switch at the bottom.
+  const tabSep = el('div', { class: 'toolbar-sep' });
+
   const toolElements = [
-    group, proofsContent, spacer, panelTabSwitch,
-    createProofBtn, manageTheoremsBtn, clearBtn,
+    createProofBtn, primarySep,
+    group, proofsContent, spacer, tabSep, panelTabSwitch,
+    advancedSection, clearBtn,
   ];
 
   const syncPanelState = () => {
@@ -304,12 +385,14 @@ export function createToolbar(
 
   // ---------- assemble ----------
   aside.appendChild(brand);
+  aside.appendChild(createProofBtn);
+  aside.appendChild(primarySep);
   aside.appendChild(group);
   aside.appendChild(proofsContent);
   aside.appendChild(spacer);
+  aside.appendChild(tabSep);
   aside.appendChild(panelTabSwitch);
-  aside.appendChild(createProofBtn);
-  aside.appendChild(manageTheoremsBtn);
+  aside.appendChild(advancedSection);
   aside.appendChild(clearBtn);
   if (proofPanel) {
     proofPanel.root.style.display = 'none';
@@ -360,8 +443,8 @@ export function createToolbar(
       proofByPointsPanel?.destroy();
       theoremManagerPanel?.destroy();
       proofsList?.destroy();
-      proofChoice.destroy();
       jgex.destroy();
+      clearConfirmBackdrop.remove();
     },
   };
 }

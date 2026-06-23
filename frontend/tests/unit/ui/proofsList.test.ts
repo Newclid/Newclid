@@ -29,7 +29,7 @@ describe('createProofsList', () => {
   // when the store has no jobs the empty state must be visible
   it('shows empty state paragraph when no jobs exist', () => {
     const empty = handle.root.querySelector('.proofs-list-empty');
-    expect(empty?.textContent).toBe('No proofs yet.');
+    expect(empty?.textContent).toBe('No solutions yet.');
   });
 
   // once a job exists the empty state must be gone
