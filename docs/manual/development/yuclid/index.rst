@@ -25,7 +25,7 @@ matcher.
    * - :doc:`architecture`
      - Understanding the complete custom-rule matching pipeline.
    * - :doc:`modules/index`
-     - Understanding the parser, matcher, providers, cache, and integration modules.
+     - Understanding the parser, matcher, providers, geometry cache, and integration modules.
    * - :doc:`guides/index`
      - Extending or debugging the custom-rule matcher.
    * - :doc:`testing`
@@ -52,10 +52,38 @@ The main files added or modified for this work are:
    yuclid/python/py_yuclid/yuclid_adapter.py
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :caption: Start here
 
-   setup
-   architecture
-   modules/index
-   guides/index
-   testing
+   Setup <setup>
+   Architecture <architecture>
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Matcher internals
+
+   Modules overview <modules/index>
+   Rule parsing <modules/rule_schema_and_parsing>
+   Rule planning <modules/rule_planning>
+   Generic matcher <modules/generic_rule_matcher>
+   Providers <modules/predicate_providers>
+   Geometry cache <modules/lazy_geometry_cache>
+   Optimization <modules/matching_and_optimization>
+   Theorem validation <modules/theorem_candidate_validation>
+   Newclid integration <modules/integration_with_newclid>
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Extension guides
+
+   Guides overview <guides/index>
+   Add a provider <guides/add_a_predicate_provider>
+   Add a cache <guides/add_a_lazy_cache>
+   Optimize a rule <guides/optimize_a_generic_rule>
+   Debug matching <guides/debug_generic_matching>
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Testing
+
+   Tests <testing>

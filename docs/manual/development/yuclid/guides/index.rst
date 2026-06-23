@@ -17,21 +17,15 @@ Yuclid guide map
      - Adding an optimized provider for a predicate such as ``coll``, ``para``, or ``perp``.
    * - :doc:`add_a_lazy_cache`
      - Adding shared cached geometry needed by providers.
-   * - :doc:`add_a_supported_predicate`
-     - Supporting a predicate end-to-end in parsing, statement building, matching, and theorem construction.
    * - :doc:`optimize_a_generic_rule`
      - Improving performance for a rule that currently falls back to enumeration.
    * - :doc:`debug_generic_matching`
      - Debugging rules that parse but produce no candidates or too many candidates.
-   * - :doc:`debug_custom_rule_integration`
-     - Debugging the Newclid adapter to Yuclid executable path.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   add_a_predicate_provider
-   add_a_lazy_cache
-   add_a_supported_predicate
-   optimize_a_generic_rule
-   debug_generic_matching
-   debug_custom_rule_integration
+   Add a provider <add_a_predicate_provider>
+   Add a cache <add_a_lazy_cache>
+   Optimize a rule <optimize_a_generic_rule>
+   Debug matching <debug_generic_matching>
