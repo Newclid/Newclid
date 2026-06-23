@@ -36,7 +36,7 @@ export function createJgexInput(
     'aria-modal': 'true',
     'aria-labelledby': 'jgex-dialog-title',
   }, [
-    el('div', { class: 'jgex-title', id: 'jgex-dialog-title' }, ['Enter a JGEX line']),
+    el('div', { class: 'jgex-title', id: 'jgex-dialog-title' }, ['Define Problem Using JGEX']),
     input,
     errorMsg,
     el('div', { class: 'jgex-actions' }, [cancelBtn, submitBtn]),

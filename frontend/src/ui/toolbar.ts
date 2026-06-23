@@ -50,6 +50,24 @@ function theoremIcon(): SVGSVGElement {
   ]);
 }
 
+// Target/crosshair glyph for the "Define Goal" primary action.
+function goalIcon(): SVGSVGElement {
+  return iconWrap([
+    svgEl('circle', {
+      cx: '11', cy: '11', r: '7',
+      fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5',
+    }),
+    svgEl('circle', {
+      cx: '11', cy: '11', r: '2.5',
+      fill: 'currentColor',
+    }),
+    svgEl('path', {
+      d: 'M11 4 L11 6 M11 16 L11 18 M4 11 L6 11 M16 11 L18 11',
+      stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round',
+    }),
+  ]);
+}
+
 // Angle-brackets glyph, so the button reads as "type code".
 function jgexIcon(): SVGSVGElement {
   return iconWrap([
@@ -176,7 +194,7 @@ export function createToolbar(
     class: 'tool-btn tool-btn-primary',
     title: 'Define goal visually',
   }) as HTMLButtonElement;
-  createProofBtn.appendChild(jgexIcon());
+  createProofBtn.appendChild(goalIcon());
   createProofBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Define Goal']));
   createProofBtn.addEventListener('click', () => appStore?.enterProofByPoints());
 
@@ -191,7 +209,7 @@ export function createToolbar(
   advancedToggle.appendChild(el('span', { class: 'advanced-arrow' }, ['›']));
 
   const advancedItems = el('div', { class: 'advanced-items' });
-  advancedItems.hidden = true;
+  advancedItems.style.display = 'none';
 
   const jgexAdvBtn = el('button', {
     type: 'button',
@@ -215,8 +233,8 @@ export function createToolbar(
   advancedItems.appendChild(theoremsAdvBtn);
 
   advancedToggle.addEventListener('click', () => {
-    const isOpen = !advancedItems.hidden;
-    advancedItems.hidden = isOpen;
+    const isOpen = advancedItems.style.display !== 'none';
+    advancedItems.style.display = isOpen ? 'none' : 'flex';
     advancedSection.classList.toggle('is-open', !isOpen);
   });
 
