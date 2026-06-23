@@ -204,7 +204,12 @@ export function createToolbar(
   }) as HTMLButtonElement;
   clearBtn.appendChild(trashIcon());
   clearBtn.appendChild(el('span', { class: 'tool-btn-label' }, ['Clear']));
-  clearBtn.addEventListener('click', () => { getTool(scene.tool)?.onDeactivate?.({ scene }); scene.clear(); });
+  clearBtn.addEventListener('click', () => {
+    getTool(scene.tool)?.onDeactivate?.({ scene });
+    scene.clear();
+    const entry = CONSTRUCTION_CATALOG[scene.tool];
+    scene.setSlotHint(entry?.slots[0]?.label ?? null);
+  });
 
   // ---------- proof panel ----------
   const proofPanel = appStore ? createProofPanel(appStore) : null;
