@@ -17,6 +17,7 @@ foreach(name
     rule_parser
     generic_rule_matcher
     statement_builder
+    theorem_builder
     filter_state
     mapping_state
     problem_parser
