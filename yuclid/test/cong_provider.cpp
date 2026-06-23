@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <set>
 #include <algorithm>
 
 #include "matchers/cong_provider.hpp"
@@ -43,6 +44,19 @@ struct CongProviderFixture {
         return pp;
     }
 
+    // Helper to consume a generator and return unique assignment signatures
+    std::set<std::string> consume_generator(std::generator<MappingExtension>& gen) {
+        std::set<std::string> unique_signatures;
+        for (const MappingExtension& ext : gen) {
+            std::string sig = "";
+            for (const auto& assignment : ext.assignments()) {
+                sig += std::to_string(assignment.variable_idx) + "->" + std::to_string(assignment.point_idx) + "|";
+            }
+            unique_signatures.insert(sig);
+        }
+        return unique_signatures;
+    }
+
     // Helper to set up a geometric grid
     // 4 points forming a 1x1 square.
     // Length 1.0 segments: 4 (sides)
@@ -54,19 +68,6 @@ struct CongProviderFixture {
         (void) prob.add_point("P2", 1.0, 1.0); // 2
         (void) prob.add_point("P3", 0.0, 1.0); // 3
         (void) prob.add_point("P4", 0.0, 5.0); // 4
-    }
-
-    // Helper to consume a generator and return unique assignment signatures
-    std::set<std::string> consume_generator(std::generator<MappingExtension>& gen) {
-        std::set<std::string> unique_signatures;
-        for (const MappingExtension& ext : gen) {
-            std::string sig = "";
-            for (const auto& assignment : ext.assignments()) {
-                sig += std::to_string(assignment.variable) + "->" + std::to_string(assignment.point) + "|";
-            }
-            unique_signatures.insert(sig);
-        }
-        return unique_signatures;
     }
 };
 
@@ -156,7 +157,6 @@ BOOST_AUTO_TEST_CASE(estimate_state_1111_all_known) {
 BOOST_AUTO_TEST_CASE(estimate_state_1100_length_known) {
     setup_geometry();
     LazyGeometryCache cache(prob);
-    
     MappingState mapping(schema, prob);
     PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
 
@@ -174,7 +174,6 @@ BOOST_AUTO_TEST_CASE(estimate_state_1100_length_known) {
 BOOST_AUTO_TEST_CASE(estimate_state_0000_brute_force) {
     setup_geometry();
     LazyGeometryCache cache(prob);
-    
     MappingState mapping(schema, prob);
     PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
 
@@ -194,7 +193,6 @@ BOOST_AUTO_TEST_CASE(estimate_state_0000_brute_force) {
 BOOST_AUTO_TEST_CASE(estimate_intersection_reduction_applied) {
     setup_geometry();
     LazyGeometryCache cache(prob);
-    
     MappingState mapping(schema, prob);
     PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
 
@@ -220,7 +218,6 @@ BOOST_AUTO_TEST_CASE(estimate_intersection_reduction_applied) {
 BOOST_AUTO_TEST_CASE(generation_tautology_0b0000) {
     setup_geometry();
     LazyGeometryCache cache(prob);
-    cache.segment_length_buckets(); 
     MappingState mapping(schema, prob);
     
     // Identity mapping: cong A B A B
@@ -230,14 +227,13 @@ BOOST_AUTO_TEST_CASE(generation_tautology_0b0000) {
     auto results = consume_generator(generator);
 
     // 5 points total. We choose 2 distinct points: P(5, 2) = 20 combinations.
-    // The fast path should just blind generate all 20 without looking at lengths.
+    // The fast path should just generate all 20 without looking at lengths.
     BOOST_CHECK_EQUAL(results.size(), 20);
 }
 
 BOOST_AUTO_TEST_CASE(generation_tautology_0b1010) {
     setup_geometry();
     LazyGeometryCache cache(prob);
-    cache.segment_length_buckets(); 
     MappingState mapping(schema, prob);
     PlannedPredicate pp = build_planned_pred({"A", "B", "A", "B"});
 
@@ -250,4 +246,42 @@ BOOST_AUTO_TEST_CASE(generation_tautology_0b1010) {
     // A is P0. B can be any of the 4 remaining free points.
     BOOST_CHECK_EQUAL(results.size(), 4);
 }
+
+// Test specific bitmasks
+
+BOOST_AUTO_TEST_CASE(generation_state_1111_all_known) {
+    setup_geometry();
+    LazyGeometryCache cache(prob); 
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2));
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 3));
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // Nothing left to map, should co_return immediately
+    BOOST_CHECK_EQUAL(results.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_0000_brute_force) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // Bucket 1 (Length 1): (0,1), (1,2), (2,3), (3,0). 
+    // Disjoint pairs: [(0,1),(2,3)], [(1,2),(3,0)]. Each gives 8 permutations. = 16 total.
+    // Bucket 2 (Length sqrt 2): (0,2), (1,3).
+    // Disjoint pairs: [(0,2),(1,3)]. Gives 8 permutations.
+    // Total mathematically valid distinct pairs = 24.
+    BOOST_CHECK_EQUAL(results.size(), 24);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
