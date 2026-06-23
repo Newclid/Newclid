@@ -64,4 +64,65 @@ BOOST_AUTO_TEST_CASE(base_provider_estimate_penalty_math) {
     BOOST_CHECK_EQUAL(est_unsupported, 1'000'020);
 }
 
+BOOST_AUTO_TEST_CASE(base_provider_generate_permutations) {
+    for(int i=0; i<4; ++i) (void) prob.add_point("P" + std::to_string(i), i, i);
+    LazyGeometryCache cache(prob);
+
+    // Create a schema that uses exactly 2 UNIQUE variables to test P(4, 2)
+    RuleSchema schema;
+    schema.id = "test_perms";
+    schema.variables = {"A", "B"};
+    schema.hypotheses.push_back({"coll", {"A", "B", "A"}}); // Reuses A, so only 2 unique vars to map
+
+    RulePlan plan = build_rule_plan(schema);
+    BOOST_REQUIRE_EQUAL(plan.candidate_generators.size(), 1);
+
+    MappingState mapping(schema, prob);
+
+    // We expect P(4, 2) = 4 * 3 = 12 unique extensions.
+    auto generator = base_provider.generate_extensions(plan.candidate_generators[0], mapping, cache);
+    
+    std::set<std::string> unique_signatures;
+    std::size_t count = 0;
+
+    for (const MappingExtension& ext : generator) {
+        count++;
+        std::string sig = "";
+        for (const auto& assignment : ext.assignments()) {
+            sig += std::to_string(assignment.variable_idx) + "->" + std::to_string(assignment.point_idx) + "|";
+        }
+        unique_signatures.insert(sig);
+    }
+
+    BOOST_CHECK_EQUAL(count, 12);
+    BOOST_CHECK_EQUAL(unique_signatures.size(), 12); 
+}
+
+BOOST_AUTO_TEST_CASE(base_provider_generate_too_many_vars_early_exit) {
+    // Only 2 points in geometry
+    (void) prob.add_point("P1", 0, 0);
+    (void) prob.add_point("P2", 1, 1);
+    LazyGeometryCache cache(prob);
+
+    RuleSchema schema;
+    schema.id = "test_impossible";
+    schema.variables = {"A", "B", "C"};
+    schema.hypotheses.push_back({"coll", {"A", "B", "C"}});
+
+    RulePlan plan = build_rule_plan(schema);
+    MappingState mapping(schema, prob);
+
+    // Predicate wants 3 unique variables, but only 2 free points exist.
+    auto generator = base_provider.generate_extensions(plan.candidate_generators[0], mapping, cache);
+    
+    std::size_t count = 0;
+    for (const auto& ext : generator) {
+        (void) ext;
+        count++;
+    }
+
+    // Should yield 0 items
+    BOOST_CHECK_EQUAL(count, 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
