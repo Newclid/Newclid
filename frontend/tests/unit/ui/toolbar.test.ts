@@ -14,9 +14,6 @@ vi.mock('../../../src/ui/proofPanel', () => ({
 vi.mock('../../../src/ui/proofsList', () => ({
   createProofsList: vi.fn(() => makeFakePanelHandle()),
 }));
-vi.mock('../../../src/ui/proofChoice', () => ({
-  createProofChoice: vi.fn(() => makeFakeDialogHandle()),
-}));
 vi.mock('../../../src/ui/proofByPointsPanel', () => ({
   createProofByPointsPanel: vi.fn(() => makeFakePanelHandle()),
 }));
@@ -35,7 +32,6 @@ import { TOOL_GROUPS } from '../../../src/tools/groups';
 import { createJgexInput } from '../../../src/ui/jgexInput';
 import { createProofPanel } from '../../../src/ui/proofPanel';
 import { createProofsList } from '../../../src/ui/proofsList';
-import { createProofChoice } from '../../../src/ui/proofChoice';
 import { createProofByPointsPanel } from '../../../src/ui/proofByPointsPanel';
 import { createTheoremManager } from '../../../src/ui/theoremManager';
 
@@ -224,35 +220,23 @@ describe('createToolbar', () => {
   });
 
   describe('create-proof / theorems / clear buttons', () => {
-    // this button is the entry point into the whole proof flow
-    it('clicking create-proof opens the proof choice dialog', () => {
-      const { root } = createToolbar(scene, undefined, appStore);
-      findButtonByLabel(root, 'Solve new problem')!.click();
-
-      const fakeProofChoice = (createProofChoice as ReturnType<typeof vi.fn>).mock.results[0].value;
-      expect(fakeProofChoice.open).toHaveBeenCalled();
-    });
-
-    // choosing the JGEX path should hand off to the jgex modal
-    it("proofChoice's onJgex callback opens the jgex input dialog", () => {
-      createToolbar(scene, undefined, appStore);
-      const opts = (createProofChoice as ReturnType<typeof vi.fn>).mock.calls[0][0];
-      const fakeJgex = (createJgexInput as ReturnType<typeof vi.fn>).mock.results[0].value;
-
-      opts.onJgex();
-
-      expect(fakeJgex.open).toHaveBeenCalled();
-    });
-
-    // choosing the points path should hand off to appStore instead
-    it("proofChoice's onPoints callback calls appStore.enterProofByPoints", () => {
+    // Define Goal is the primary action — goes straight to visual goal definition
+    it('clicking Define Goal calls appStore.enterProofByPoints', () => {
       const enterSpy = vi.spyOn(appStore, 'enterProofByPoints');
-      createToolbar(scene, undefined, appStore);
-      const opts = (createProofChoice as ReturnType<typeof vi.fn>).mock.calls[0][0];
-
-      opts.onPoints();
+      const { root } = createToolbar(scene, undefined, appStore);
+      findButtonByLabel(root, 'Define Goal')!.click();
 
       expect(enterSpy).toHaveBeenCalled();
+    });
+
+    // the JGEX path lives inside Advanced Options
+    it('clicking Define Problem Using JGEX opens the jgex input dialog', () => {
+      const { root } = createToolbar(scene, undefined, appStore);
+      findButtonByLabel(root, 'Advanced Options')!.click(); // expand
+      const fakeJgex = (createJgexInput as ReturnType<typeof vi.fn>).mock.results[0].value;
+      findButtonByLabel(root, 'Define Problem Using JGEX')!.click();
+
+      expect(fakeJgex.open).toHaveBeenCalled();
     });
 
     // this button is just a thin wrapper around appStore
@@ -270,11 +254,13 @@ describe('createToolbar', () => {
       expect(() => findButtonByLabel(root, 'User-Defined Theorems')!.click()).not.toThrow();
     });
 
-    // clear should go straight through to the scene, nothing fancier
-    it('clicking clear calls scene.clear()', () => {
+    // clear opens a confirmation dialog; confirming calls scene.clear()
+    it('clicking clear then confirming calls scene.clear()', () => {
       const clearSpy = vi.spyOn(scene, 'clear');
       const { root } = createToolbar(scene);
       findButtonByLabel(root, 'Clear')!.click();
+      const confirmBtn = document.querySelector('.jgex-backdrop.is-open .jgex-btn-danger') as HTMLButtonElement;
+      confirmBtn.click();
 
       expect(clearSpy).toHaveBeenCalled();
     });
@@ -285,7 +271,7 @@ describe('createToolbar', () => {
       const tabs = Array.from(root.querySelectorAll('.panel-tab-btn')) as HTMLButtonElement[];
       return {
         toolbarTab: tabs.find((b) => b.textContent === 'Toolbar')!,
-        proofsTab: tabs.find((b) => b.textContent === 'Proofs')!,
+        proofsTab: tabs.find((b) => b.textContent === 'My Solutions')!,
       };
     }
 
@@ -431,13 +417,12 @@ describe('createToolbar', () => {
     });
 
     // destroy needs to cascade to every child panel it created, not just itself
-    it('destroy() calls destroy on proofPanel, proofByPointsPanel, theoremManagerPanel, proofsList, proofChoice, and jgex', () => {
+    it('destroy() calls destroy on proofPanel, proofByPointsPanel, theoremManagerPanel, proofsList, and jgex', () => {
       const { destroy } = createToolbar(scene, undefined, appStore);
       const fakeProofPanel = (createProofPanel as ReturnType<typeof vi.fn>).mock.results[0].value;
       const fakeProofByPoints = (createProofByPointsPanel as ReturnType<typeof vi.fn>).mock.results[0].value;
       const fakeTheoremManager = (createTheoremManager as ReturnType<typeof vi.fn>).mock.results[0].value;
       const fakeProofsList = (createProofsList as ReturnType<typeof vi.fn>).mock.results[0].value;
-      const fakeProofChoice = (createProofChoice as ReturnType<typeof vi.fn>).mock.results[0].value;
       const fakeJgex = (createJgexInput as ReturnType<typeof vi.fn>).mock.results[0].value;
 
       destroy();
@@ -446,7 +431,6 @@ describe('createToolbar', () => {
       expect(fakeProofByPoints.destroy).toHaveBeenCalled();
       expect(fakeTheoremManager.destroy).toHaveBeenCalled();
       expect(fakeProofsList.destroy).toHaveBeenCalled();
-      expect(fakeProofChoice.destroy).toHaveBeenCalled();
       expect(fakeJgex.destroy).toHaveBeenCalled();
     });
 

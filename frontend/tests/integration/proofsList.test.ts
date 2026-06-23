@@ -35,10 +35,10 @@ describe('createProofsList + AppStore', () => {
 
   describe('empty state', () => {
     // no jobs yet → show a clear empty-state message
-    it('renders "No proofs yet." when the jobs map is empty', () => {
+    it('renders "No solutions yet." when the jobs map is empty', () => {
       const { root, destroy } = createProofsList(appStore);
       destroyList = destroy;
-      expect(root.querySelector('.proofs-list-empty')?.textContent).toBe('No proofs yet.');
+      expect(root.querySelector('.proofs-list-empty')?.textContent).toBe('No solutions yet.');
     });
   });
 

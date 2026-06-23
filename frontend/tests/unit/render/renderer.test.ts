@@ -346,7 +346,7 @@ describe('Renderer', () => {
       });
       renderer.draw();
       const circleEl = Array.from(renderer.svg.querySelectorAll('circle')).find(
-        (c) => c.getAttribute('fill') === 'none' && c.getAttribute('stroke') === '#888',
+        (c) => c.getAttribute('fill') === 'none' && c.getAttribute('stroke') === '#1A1816',
       );
       expect(circleEl).toBeTruthy();
     });
