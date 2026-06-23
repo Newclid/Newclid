@@ -29,7 +29,15 @@
 #include "typedef.hpp"
 #include "type/point.hpp"
 #include "problem.hpp"
+#include <cstddef>
+#include <memory>
 #include <stdexcept>
+#include <string>
+#include <system_error>
+#include <type_traits>
+#include <typeinfo>
+#include <variant>
+#include <vector>
 
 using namespace std;
 using namespace Yuclid;
@@ -533,6 +541,291 @@ BOOST_AUTO_TEST_CASE(statement_builder_circumcenter_rolling) {
 
     std::vector<string> expected_order_2 = {"A", "C", "D", "E"};
     verify_point_mapping(results[1], expected_order_2);
+}
+
+/**
+ * @brief Test both supported names for 6-argument angle equality.
+ */
+BOOST_AUTO_TEST_CASE(statement_builder_equal_angles_alias_6_args) {
+    RulePredicatePattern pattern = {
+        "equal_angles",
+        {"A", "B", "C", "D", "E", "F"}
+    };
+
+    auto results = build_statements_from_pattern(pattern, mapping);
+    verify_results<EqualAngles>(results, 1);
+
+    std::vector<std::string> expected_order = {
+        "A", "B", "C", "D", "E", "F"
+    };
+
+    verify_point_mapping(results[0], expected_order);
+}
+
+/**
+ * @brief Test the eqangle name for 8-argument line-angle equality.
+ */
+BOOST_AUTO_TEST_CASE(statement_builder_eqangle_8_arg_name) {
+    RulePredicatePattern pattern = {
+        "eqangle",
+        {"A", "B", "C", "D", "E", "F", "G", "H"}
+    };
+
+    auto results = build_statements_from_pattern(pattern, mapping);
+    verify_results<EqualLineAngles>(results, 1);
+
+    std::vector<std::string> expected_order = {
+        "A", "B", "C", "D", "E", "F", "G", "H"
+    };
+
+    verify_point_mapping(results[0], expected_order);
+}
+
+/**
+ * @brief Test that circle is accepted as an alias for circumcenter.
+ */
+BOOST_AUTO_TEST_CASE(statement_builder_circle_alias_rolling) {
+    RulePredicatePattern pattern = {
+        "circle",
+        {"A", "B", "C", "D", "E"}
+    };
+
+    auto results = build_statements_from_pattern(pattern, mapping);
+    verify_results<Circumcenter>(results, 2);
+
+    std::vector<std::string> expected_order_1 = {
+        "A", "B", "C", "D"
+    };
+
+    verify_point_mapping(results[0], expected_order_1);
+
+    std::vector<std::string> expected_order_2 = {
+        "A", "C", "D", "E"
+    };
+
+    verify_point_mapping(results[1], expected_order_2);
+}
+
+/**
+ * @brief All fixed-arity predicates reject malformed argument counts.
+ */
+BOOST_AUTO_TEST_CASE(statement_builder_fixed_arity_predicates_reject_wrong_arity) {
+    const std::vector<RulePredicatePattern> bad_patterns = {
+        {"para", {"A", "B", "C"}},
+        {"perp", {"A", "B", "C"}},
+        {"eqratio", {"A", "B", "C", "D", "E", "F", "G"}},
+
+        {"simtri", {"A", "B", "C", "D", "E"}},
+        {"simtrir", {"A", "B", "C", "D", "E"}},
+        {"contri", {"A", "B", "C", "D", "E"}},
+        {"contrir", {"A", "B", "C", "D", "E"}},
+
+        {"midp", {"A", "B"}},
+        {"obtuse_angle", {"A", "B"}},
+
+        {"sameclock", {"A", "B", "C", "D", "E"}},
+        {"sameside", {"A", "B", "C", "D", "E"}},
+        {"nsameside", {"A", "B", "C", "D", "E"}},
+
+        {"r2const", {"A", "B", "C", "D"}},
+        {"lconst", {"A", "B"}},
+        {"l2const", {"A", "B"}},
+        {"aconst", {"A", "B", "C", "D"}},
+    };
+
+    for (const RulePredicatePattern& pattern : bad_patterns) {
+        BOOST_TEST_CONTEXT("predicate: " << pattern.name) {
+            BOOST_CHECK_THROW(
+                (void)build_statements_from_pattern(pattern, mapping),
+                std::runtime_error
+            );
+        }
+    }
+}
+
+/**
+ * @brief Legacy silent constant parsing defaults are preserved for all
+ * constant predicate families.
+ *
+ * Inputs without a slash, such as "3", and division-by-zero inputs, such as
+ * "2/0", currently parse to the default value 0/1.
+ */
+BOOST_AUTO_TEST_CASE(statement_builder_silent_default_constants_all_families) {
+    const std::vector<std::string> default_values = {
+        "3",
+        "2/0",
+    };
+
+    for (const std::string& value : default_values) {
+        BOOST_TEST_CONTEXT("rconst value: " << value) {
+            RulePredicatePattern pattern = {
+                "rconst",
+                {"A", "B", "C", "D", value}
+            };
+
+            auto results = build_statements_from_pattern(pattern, mapping);
+            verify_results<RatioDistEquals>(results, 1);
+
+            auto* result_ptr =
+                dynamic_cast<RatioDistEquals*>(results[0].get());
+
+            BOOST_REQUIRE(result_ptr != nullptr);
+            BOOST_CHECK(result_ptr->ratio() == NNRat(0, 1));
+        }
+
+        BOOST_TEST_CONTEXT("r2const value: " << value) {
+            RulePredicatePattern pattern = {
+                "r2const",
+                {"A", "B", "C", "D", value}
+            };
+
+            auto results = build_statements_from_pattern(pattern, mapping);
+            verify_results<RatioSquaredDist>(results, 1);
+
+            auto* result_ptr =
+                dynamic_cast<RatioSquaredDist*>(results[0].get());
+
+            BOOST_REQUIRE(result_ptr != nullptr);
+            BOOST_CHECK(result_ptr->ratio() == NNRat(0, 1));
+        }
+
+        BOOST_TEST_CONTEXT("lconst value: " << value) {
+            RulePredicatePattern pattern = {
+                "lconst",
+                {"A", "B", value}
+            };
+
+            auto results = build_statements_from_pattern(pattern, mapping);
+            verify_results<DistEq>(results, 1);
+
+            auto* result_ptr =
+                dynamic_cast<DistEq*>(results[0].get());
+
+            BOOST_REQUIRE(result_ptr != nullptr);
+
+            const auto args = result_ptr->args();
+            const NNRat actual_ratio =
+                std::get<NNRat>(args[1]);
+
+            BOOST_CHECK(actual_ratio == NNRat(0, 1));
+        }
+
+        BOOST_TEST_CONTEXT("l2const value: " << value) {
+            RulePredicatePattern pattern = {
+                "l2const",
+                {"A", "B", value}
+            };
+
+            auto results = build_statements_from_pattern(pattern, mapping);
+            verify_results<SquaredDistEq>(results, 1);
+
+            auto* result_ptr =
+                dynamic_cast<SquaredDistEq*>(results[0].get());
+
+            BOOST_REQUIRE(result_ptr != nullptr);
+
+            const auto args = result_ptr->args();
+            const NNRat actual_ratio =
+                std::get<NNRat>(args[1]);
+
+            BOOST_CHECK(actual_ratio == NNRat(0, 1));
+        }
+
+        BOOST_TEST_CONTEXT("aconst value: " << value) {
+            RulePredicatePattern pattern = {
+                "aconst",
+                {"A", "B", "C", "D", value}
+            };
+
+            auto results = build_statements_from_pattern(pattern, mapping);
+            verify_results<LineAngleEq>(results, 1);
+
+            auto* result_ptr =
+                dynamic_cast<LineAngleEq*>(results[0].get());
+
+            BOOST_REQUIRE(result_ptr != nullptr);
+
+            const auto args = result_ptr->args();
+            const AddCircle<Rat> circle_value =
+                std::get<AddCircle<Rat>>(args[2]);
+
+            BOOST_CHECK(circle_value.number() == Rat(0, 1));
+        }
+    }
+}
+
+/**
+ * @brief Malformed constants throw for every constant predicate family.
+ */
+BOOST_AUTO_TEST_CASE(statement_builder_bad_constants_all_families) {
+    const std::vector<std::string> bad_values = {
+        "5/",
+        "/5",
+        "5/abc",
+        "a/5",
+    };
+
+    for (const std::string& value : bad_values) {
+        BOOST_TEST_CONTEXT("rconst value: " << value) {
+            RulePredicatePattern pattern = {
+                "rconst",
+                {"A", "B", "C", "D", value}
+            };
+
+            BOOST_CHECK_THROW(
+                (void)build_statements_from_pattern(pattern, mapping),
+                std::system_error
+            );
+        }
+
+        BOOST_TEST_CONTEXT("r2const value: " << value) {
+            RulePredicatePattern pattern = {
+                "r2const",
+                {"A", "B", "C", "D", value}
+            };
+
+            BOOST_CHECK_THROW(
+                (void)build_statements_from_pattern(pattern, mapping),
+                std::system_error
+            );
+        }
+
+        BOOST_TEST_CONTEXT("lconst value: " << value) {
+            RulePredicatePattern pattern = {
+                "lconst",
+                {"A", "B", value}
+            };
+
+            BOOST_CHECK_THROW(
+                (void)build_statements_from_pattern(pattern, mapping),
+                std::system_error
+            );
+        }
+
+        BOOST_TEST_CONTEXT("l2const value: " << value) {
+            RulePredicatePattern pattern = {
+                "l2const",
+                {"A", "B", value}
+            };
+
+            BOOST_CHECK_THROW(
+                (void)build_statements_from_pattern(pattern, mapping),
+                std::system_error
+            );
+        }
+
+        BOOST_TEST_CONTEXT("aconst value: " << value) {
+            RulePredicatePattern pattern = {
+                "aconst",
+                {"A", "B", "C", "D", value}
+            };
+
+            BOOST_CHECK_THROW(
+                (void)build_statements_from_pattern(pattern, mapping),
+                std::system_error
+            );
+        }
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
