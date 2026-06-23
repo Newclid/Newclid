@@ -81,4 +81,10 @@ describe('parallelogram entry validate', () => {
     const scene = new Scene();
     expect(parallelogram.validate!({}, scene)).toBeNull();
   });
+
+  // validate should return null when bound point IDs do not exist in the scene
+  it('validate returns null when bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    expect(parallelogram.validate!({ a: 'p99', b: 'p100', c: 'p101' }, scene)).toBeNull();
+  });
 });

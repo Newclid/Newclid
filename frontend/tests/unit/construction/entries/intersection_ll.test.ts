@@ -12,6 +12,22 @@ describe('intersection_ll entry slots', () => {
 });
 
 describe('intersection_ll entry sketch', () => {
+  // falls back to point a's coordinates when the two lines are parallel and lineIntersection returns null
+  it('sketch falls back to point a when lines are parallel (lineIntersection returns null)', () => {
+    const scene = new Scene();
+    // Two horizontal parallel lines
+    const { a, b, c, d } = addPoints(scene, { a: [0, 0], b: [4, 0], c: [0, 1], d: [4, 1] });
+    const result = intersectionLL.sketch({ a, b, c, d }, scene);
+    const bindings = (result as { bindings: Record<string, string> }).bindings;
+    const x = scene.objects.get(bindings.x)!;
+    expect(x.kind).toBe('point');
+    // fallback to a.x, a.y
+    if (x.kind === 'point') {
+      expect(x.x).toBeCloseTo(0);
+      expect(x.y).toBeCloseTo(0);
+    }
+  });
+
   it('places the intersection of two perpendicular lines', () => {
     const scene = new Scene();
     // Line 1: y=0 (horizontal), Line 2: x=2 (vertical)
@@ -123,5 +139,11 @@ describe('intersection_ll entry validate', () => {
   it('accepts partial binding', () => {
     const scene = new Scene();
     expect(intersectionLL.validate!({}, scene)).toBeNull();
+  });
+
+  // returns null when all four bound IDs reference points not present in the scene
+  it('validate returns null when bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    expect(intersectionLL.validate!({ a: 'p99', b: 'p100', c: 'p101', d: 'p102' }, scene)).toBeNull();
   });
 });

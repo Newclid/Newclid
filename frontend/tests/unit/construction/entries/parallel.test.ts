@@ -84,4 +84,10 @@ describe('parallel entry validate', () => {
     const scene = new Scene();
     expect(parallel.validate!({}, scene)).toBeNull();
   });
+
+  // returns null when any of the bound point ids don't exist yet in the scene
+  it('validate returns null when bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    expect(parallel.validate!({ a: 'p99', b: 'p100', p: 'p101' }, scene)).toBeNull();
+  });
 });

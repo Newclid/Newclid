@@ -379,6 +379,19 @@ describe('createToolbar', () => {
       expect(group.style.display).toBe('none');
     });
 
+    // when no group was ever visited lastToolGroup is null so the if block is skipped and setActiveToolGroup gets null
+    it("clicking Toolbar tab when lastToolGroup is null does not call setActiveToolGroup with a group", () => {
+      const setActiveSpy = vi.spyOn(appStore, 'setActiveToolGroup');
+      const { root } = createToolbar(scene, undefined, appStore);
+      const { toolbarTab, proofsTab } = getTabBtns(root);
+      proofsTab.click();
+      setActiveSpy.mockClear();
+
+      toolbarTab.click();
+
+      expect(setActiveSpy).toHaveBeenCalledWith(null);
+    });
+
     // exiting a full panel mode should hand the UI back to wherever panelTab points
     it('leaving all full-panel modes shows tool elements again', () => {
       const { root } = createToolbar(scene, undefined, appStore);

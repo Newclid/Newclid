@@ -98,4 +98,18 @@ describe('createJgexInput', () => {
       expect(errorEl.textContent).toBe('Server Error');
     });
   });
+
+  // submit without an onSubmit callback just closes the dialog without calling anything
+  it('clicking submit without an onSubmit callback just closes the dialog', async () => {
+    handle = createJgexInput(); // no onSubmit
+    handle.open();
+    const input = handle.root.querySelector('input') as HTMLInputElement;
+    input.value = 'perp A B C D';
+    const submitBtn = handle.root.querySelector('.jgex-btn-accent') as HTMLButtonElement;
+    submitBtn.click();
+    // Should close without throwing
+    await vi.waitFor(() => {
+      expect(handle.root.classList.contains('is-open')).toBe(false);
+    });
+  });
 });

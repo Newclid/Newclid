@@ -85,4 +85,19 @@ describe('intersection_lc entry validate', () => {
     const scene = new Scene();
     expect(intersectionLC.validate!({}, scene)).toBeNull();
   });
+
+  // returns null when only o is bound and no line points have been picked yet
+  it('validate returns null when only o is provided (line and circle not yet set)', () => {
+    const scene = new Scene();
+    const { center: o } = addCircle(scene, [2, 0], [5, 0]);
+    expect(intersectionLC.validate!({ o }, scene)).toBeNull();
+  });
+
+  // returns a circle-related error when o refers to a non-point object (circleAtCentre returns null)
+  it('validate rejects o pointing to a non-point object', () => {
+    const scene = new Scene();
+    const { a, b } = addPoints(scene, { a: [0, 0], b: [4, 0] });
+    const circleId = scene.addObject({ kind: 'circle', mode: 'center-through', center: a, through: b });
+    expect(intersectionLC.validate!({ a, b, o: circleId }, scene)).toMatch(/circle/i);
+  });
 });

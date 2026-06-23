@@ -105,4 +105,10 @@ describe('foot entry validate', () => {
     const scene = new Scene();
     expect(foot.validate!({}, scene)).toBeNull();
   });
+
+  // returns null when bound point IDs are not yet present in the scene
+  it('returns null when bound ids are not yet in the scene', () => {
+    const scene = new Scene();
+    expect(foot.validate!({ a: 'p99', b: 'p100', p: 'p101' }, scene)).toBeNull();
+  });
 });

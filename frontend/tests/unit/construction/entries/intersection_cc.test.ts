@@ -120,4 +120,11 @@ describe('intersection_cc entry validate', () => {
     const scene = new Scene();
     expect(intersectionCC.validate!({}, scene)).toBeNull();
   });
+
+  // validate should return an error mentioning circle when o points to a point with no circle centered there
+  it('validate rejects a point with no circle centred there', () => {
+    const scene = new Scene();
+    const { o, w } = addPoints(scene, { o: [0, 0], w: [5, 0] });
+    expect(intersectionCC.validate!({ o, w }, scene)).toMatch(/circle/i);
+  });
 });
