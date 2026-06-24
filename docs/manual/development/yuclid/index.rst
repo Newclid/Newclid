@@ -7,12 +7,21 @@ user-defined Newclid rule, passes through the Python Yuclid adapter, reaches the
 Yuclid executable as an additional rule file, and is matched by the generic rule
 matcher.
 
+.. toctree::
+   :maxdepth: 1
+
+   Setup <setup>
+   Architecture <architecture>
+   Matcher modules <modules/index>
+   Extension guides <guides/index>
+   Testing <testing>
+
 Yuclid guide reading order
 --------------------------
 
-Start with :doc:`architecture` to understand the complete flow. Then use the
-module pages as reference material and the guide pages when extending the
-matcher.
+Start with :doc:`architecture` to understand the complete flow. Then use
+:doc:`modules/index` as reference material and :doc:`guides/index` when changing
+or debugging the matcher.
 
 .. list-table::
    :widths: 32 68
@@ -25,9 +34,9 @@ matcher.
    * - :doc:`architecture`
      - Understanding the complete custom-rule matching pipeline.
    * - :doc:`modules/index`
-     - Understanding the parser, matcher, providers, geometry cache, and integration modules.
+     - Understanding the parser, matcher, providers, geometry cache, validation, and Newclid integration.
    * - :doc:`guides/index`
-     - Extending or debugging the custom-rule matcher.
+     - Following task recipes for extending providers, caches, predicates, optimization, and debugging.
    * - :doc:`testing`
      - Choosing and running the relevant Yuclid tests.
 
@@ -50,40 +59,3 @@ The main files added or modified for this work are:
    yuclid/src/matchers/cong_provider.*
    yuclid/src/matchers/lazy_geometry_cache.*
    yuclid/python/py_yuclid/yuclid_adapter.py
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Start here
-
-   Setup <setup>
-   Architecture <architecture>
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Matcher internals
-
-   Modules overview <modules/index>
-   Rule parsing <modules/rule_schema_and_parsing>
-   Rule planning <modules/rule_planning>
-   Generic matcher <modules/generic_rule_matcher>
-   Providers <modules/predicate_providers>
-   Geometry cache <modules/lazy_geometry_cache>
-   Optimization <modules/matching_and_optimization>
-   Theorem validation <modules/theorem_candidate_validation>
-   Newclid integration <modules/integration_with_newclid>
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Extension guides
-
-   Guides overview <guides/index>
-   Add a provider <guides/add_a_predicate_provider>
-   Add a cache <guides/add_a_lazy_cache>
-   Optimize a rule <guides/optimize_a_generic_rule>
-   Debug matching <guides/debug_generic_matching>
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Testing
-
-   Tests <testing>
