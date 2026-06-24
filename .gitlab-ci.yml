@@ -342,3 +342,137 @@ docs-build-linux:
     expire_in: 1 week
     paths:
       - docs/_build/html/
+
+frontend-backend-e2e-tests-linux:
+  stage: integration
+  timeout: 25m
+  image: node:22-bookworm-slim
+
+  interruptible: true
+
+  rules:
+    - exists:
+        - frontend/tests/e2e/**/*
+      changes:
+        - frontend/**/*
+        - backend/**/*
+        - uv.lock
+        - .gitlab-ci.yml
+    - when: never
+
+  services:
+    - name: redis:7-alpine
+      alias: redis
+
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+    REDIS_URL: "redis://redis:6379/15"
+    NEWCLID_QUEUE_NAME: "newclid"
+    FRONTEND_BASE_URL: "http://127.0.0.1:5173"
+    BACKEND_BASE_URL: "http://127.0.0.1:8000"
+    PLAYWRIGHT_JUNIT_OUTPUT_NAME: "../reports/e2e-junit.xml"
+
+  before_script:
+    - apt-get update -qq
+    - >
+      apt-get install -y --no-install-recommends
+      ca-certificates
+      curl
+      python3
+      python3-venv
+    - rm -rf /var/lib/apt/lists/*
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - mkdir -p "$CI_PROJECT_DIR/reports"
+
+  script:
+    - echo "Create backend environment"
+    - cd "$CI_PROJECT_DIR"
+    - uv venv
+    - uv pip install -e "backend[test]"
+
+    - echo "Install frontend dependencies"
+    - cd "$CI_PROJECT_DIR/frontend"
+    - npm ci
+    - npx playwright install --with-deps chromium
+    - cd "$CI_PROJECT_DIR"
+
+    - echo "Wait for Redis"
+    - |
+      .venv/bin/python - <<'PY'
+      import os
+      import time
+      from redis import Redis
+
+      redis = Redis.from_url(os.environ["REDIS_URL"])
+
+      for _ in range(30):
+          try:
+              redis.ping()
+              print("Redis is ready")
+              break
+          except Exception:
+              time.sleep(1)
+      else:
+          raise SystemExit("Redis did not become ready")
+      PY
+
+    - echo "Start backend"
+    - >
+      REDIS_URL="$REDIS_URL"
+      NEWCLID_QUEUE_NAME="$NEWCLID_QUEUE_NAME"
+      "$CI_PROJECT_DIR/.venv/bin/python" -m uvicorn newclid_backend.main:app
+      --app-dir "$CI_PROJECT_DIR/backend/src"
+      --host 0.0.0.0
+      --port 8000
+      > "$CI_PROJECT_DIR/reports/backend-e2e.log" 2>&1 &
+    - export BACKEND_PID=$!
+
+    - echo "Start frontend"
+    - >
+      cd "$CI_PROJECT_DIR/frontend" &&
+      npm run dev -- --host 0.0.0.0 --port 5173
+      > "$CI_PROJECT_DIR/reports/frontend-e2e.log" 2>&1 &
+    - export FRONTEND_PID=$!
+    - cd "$CI_PROJECT_DIR"
+
+    - echo "Wait for backend and frontend"
+    - |
+      cleanup() {
+        kill "$BACKEND_PID" "$FRONTEND_PID" 2>/dev/null || true
+      }
+      trap cleanup EXIT
+
+      for i in $(seq 1 30); do
+        if curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null; then
+          echo "Backend is ready"
+          break
+        fi
+        sleep 1
+      done
+      curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null
+
+      for i in $(seq 1 30); do
+        if curl -sf "$FRONTEND_BASE_URL" >/dev/null; then
+          echo "Frontend is ready"
+          break
+        fi
+        sleep 1
+      done
+      curl -sf "$FRONTEND_BASE_URL" >/dev/null
+
+    - echo "Run frontend-backend E2E tests"
+    - cd "$CI_PROJECT_DIR/frontend"
+    - npm run test:e2e:frontend-backend
+
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit:
+        - reports/e2e-junit.xml
+    paths:
+      - reports/backend-e2e.log
+      - reports/frontend-e2e.log
+      - frontend/test-results/
+      - frontend/playwright-report/
