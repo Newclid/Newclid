@@ -518,3 +518,248 @@ jobs:
           done
 
           echo "Integration stage passed. Skipped jobs are allowed."
+
+
+  frontend-backend-e2e-tests:
+    name: Frontend ↔ Backend e2e tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs:
+      - detect-changes
+      - integration-gate
+    if: >-
+      ${{
+        always() &&
+        needs.integration-gate.result == 'success' &&
+        (
+          needs.detect-changes.outputs.run_all == 'true' ||
+          needs.detect-changes.outputs.frontend == 'true' ||
+          needs.detect-changes.outputs.backend == 'true' ||
+          needs.detect-changes.outputs.docker == 'true' ||
+          needs.detect-changes.outputs.python == 'true' ||
+          needs.detect-changes.outputs.workflows == 'true'
+        )
+      }}
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+      NEWCLID_QUEUE_NAME: newclid
+      FRONTEND_BASE_URL: http://127.0.0.1:5173
+      BACKEND_BASE_URL: http://127.0.0.1:8000
+      PLAYWRIGHT_JUNIT_OUTPUT_NAME: ../reports/e2e-junit.xml
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Install backend test environment
+        run: |
+          uv venv
+          uv pip install -e "backend[test]"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for Redis
+        run: |
+          .venv/bin/python - <<'PY'
+          import os
+          import time
+          from redis import Redis
+
+          redis = Redis.from_url(os.environ["REDIS_URL"])
+
+          for _ in range(30):
+              try:
+                  redis.ping()
+                  print("Redis is ready")
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Redis did not become ready")
+          PY
+
+      - name: Start backend
+        run: |
+          REDIS_URL="$REDIS_URL" \
+          NEWCLID_QUEUE_NAME="$NEWCLID_QUEUE_NAME" \
+          .venv/bin/python -m uvicorn newclid_backend.main:app \
+            --app-dir backend/src \
+            --host 127.0.0.1 \
+            --port 8000 \
+            > reports/backend-e2e.log 2>&1 &
+
+          echo $! > reports/backend.pid
+
+      - name: Start frontend
+        run: |
+          cd frontend
+          npm run dev -- --host 127.0.0.1 --port 5173 \
+            > ../reports/frontend-e2e.log 2>&1 &
+
+          echo $! > ../reports/frontend.pid
+
+      - name: Wait for backend and frontend
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null; then
+              echo "Backend is ready"
+              break
+            fi
+            sleep 1
+          done
+
+          curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null
+
+          for _ in $(seq 1 30); do
+            if curl -sf "$FRONTEND_BASE_URL" >/dev/null; then
+              echo "Frontend is ready"
+              break
+            fi
+            sleep 1
+          done
+
+          curl -sf "$FRONTEND_BASE_URL" >/dev/null
+
+      - name: Run frontend-backend e2e tests
+        working-directory: frontend
+        run: npm run test:e2e:frontend-backend
+
+      - name: Stop background services
+        if: always()
+        run: |
+          if [ -f reports/backend.pid ]; then
+            kill "$(cat reports/backend.pid)" 2>/dev/null || true
+          fi
+
+          if [ -f reports/frontend.pid ]; then
+            kill "$(cat reports/frontend.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload frontend-backend e2e artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-backend-e2e-artifacts
+          path: |
+            reports/backend-e2e.log
+            reports/frontend-e2e.log
+            reports/e2e-junit.xml
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+
+  backend-newclid-e2e-tests:
+    name: Backend ↔ Newclid e2e tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs:
+      - detect-changes
+      - integration-gate
+    if: >-
+      ${{
+        always() &&
+        needs.integration-gate.result == 'success' &&
+        (
+          needs.detect-changes.outputs.run_all == 'true' ||
+          needs.detect-changes.outputs.backend == 'true' ||
+          needs.detect-changes.outputs.newclid == 'true' ||
+          needs.detect-changes.outputs.ncdgen == 'true' ||
+          needs.detect-changes.outputs.yuclid == 'true' ||
+          needs.detect-changes.outputs.python == 'true' ||
+          needs.detect-changes.outputs.workflows == 'true'
+        )
+      }}
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-all-dev \
+            ca-certificates
+
+          if apt-cache show gcc-14 >/dev/null 2>&1; then
+            sudo apt-get install -y --no-install-recommends gcc-14 g++-14
+            echo "CC=gcc-14" >> "$GITHUB_ENV"
+            echo "CXX=g++-14" >> "$GITHUB_ENV"
+          else
+            echo "CC=gcc" >> "$GITHUB_ENV"
+            echo "CXX=g++" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Sync full Newclid/Yuclid environment
+        run: uv sync --frozen -v
+
+      - name: Run backend-Newclid e2e tests
+        run: |
+          uv run pytest backend/tests/integration -m "slow" -q \
+            --junitxml=reports/pytest-backend-newclid-e2e.xml
+
+      - name: Upload backend-Newclid e2e report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-newclid-e2e-report
+          path: reports/pytest-backend-newclid-e2e.xml
+          if-no-files-found: ignore
