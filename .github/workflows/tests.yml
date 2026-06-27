@@ -6,14 +6,14 @@ on:
   push:
     branches:
       - main
-      - "ci/**"
   workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -119,8 +119,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -158,8 +156,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -193,6 +189,8 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
 
       - name: Create reports directory
         run: mkdir -p reports
@@ -247,7 +245,11 @@ jobs:
             build-essential \
             cmake \
             ninja-build \
-            libboost-all-dev \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
             gcc-14 \
             g++-14 \
             ca-certificates
@@ -262,6 +264,8 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
 
       - name: Create reports directory
         run: mkdir -p reports
@@ -366,8 +370,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -427,17 +429,17 @@ jobs:
             build-essential \
             cmake \
             ninja-build \
-            libboost-all-dev \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
             ca-certificates
 
-          if apt-cache show gcc-14 >/dev/null 2>&1; then
-            sudo apt-get install -y --no-install-recommends gcc-14 g++-14
-            echo "CC=gcc-14" >> "$GITHUB_ENV"
-            echo "CXX=g++-14" >> "$GITHUB_ENV"
-          else
-            echo "CC=gcc" >> "$GITHUB_ENV"
-            echo "CXX=g++" >> "$GITHUB_ENV"
-          fi
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -446,6 +448,8 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
 
       - name: Create reports directory
         run: mkdir -p reports
@@ -516,7 +520,6 @@ jobs:
 
           echo "Integration stage passed. Skipped jobs are allowed."
 
-
   frontend-backend-e2e-tests:
     name: Frontend ↔ Backend e2e tests
     runs-on: ubuntu-24.04
@@ -567,13 +570,13 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Create reports directory
         run: mkdir -p reports
@@ -722,17 +725,17 @@ jobs:
             build-essential \
             cmake \
             ninja-build \
-            libboost-all-dev \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
             ca-certificates
 
-          if apt-cache show gcc-14 >/dev/null 2>&1; then
-            sudo apt-get install -y --no-install-recommends gcc-14 g++-14
-            echo "CC=gcc-14" >> "$GITHUB_ENV"
-            echo "CXX=g++-14" >> "$GITHUB_ENV"
-          else
-            echo "CC=gcc" >> "$GITHUB_ENV"
-            echo "CXX=g++" >> "$GITHUB_ENV"
-          fi
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -741,6 +744,8 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
 
       - name: Create reports directory
         run: mkdir -p reports
