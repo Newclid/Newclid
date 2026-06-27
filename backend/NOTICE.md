@@ -1,147 +1,53 @@
-Newclid Backend - NOTICE
-========================
+# Newclid Backend - NOTICE
 
 The Newclid backend service was developed in 2026 as part of the
 TU Delft Computer Science and Engineering Software Project, where the project
 team worked on extending Newclid with a web backend for submitting and running
-Newclid/Yuclid jobs.
+Newclid/Yuclid solving jobs.
 
-Backend component authors and contributors
-------------------------------------------
+## Backend component authors and contributors
 
 Copyright 2026 Simeon Vutov
 
-The initial Newclid backend module was created by Simeon Vutov. It includes
-the FastAPI service structure, job submission API, Redis/RQ integration,
-backend schemas, runner integration, and backend test setup.
+The initial Newclid backend module was created by Simeon Vutov. It includes the
+FastAPI service structure, job submission API, Redis/RQ integration, backend
+schemas, runner integration, Newclid execution adapter, and backend test setup.
 
-THIRD-PARTY SOFTWARE NOTICES
-============================
+## Third-party software notices
 
-The backend component directly depends on the following third-party software
-components:
+The backend component uses third-party Python packages for the API server,
+request validation, background job processing, Redis communication, testing, and
+build tooling.
 
-Runtime dependencies:
+The currently declared direct backend dependencies include, at a high level:
 
-- FastAPI
-- redis-py
-- RQ
-- Uvicorn
+* FastAPI, used to define the HTTP API and expose interactive API
+  documentation;
+* redis-py, used as the Python client for connecting to the Redis-compatible
+  queue backend;
+* RQ, used to enqueue and process long-running Newclid solver jobs in worker
+  processes;
+* Uvicorn, used as the ASGI server for running the FastAPI application;
+* pytest, used for backend unit and integration tests;
+* HTTPX, used by the FastAPI/TestClient testing stack;
+* uv_build, used as the backend Python build backend.
 
-Development, testing, and build dependencies:
+A generated list of direct and transitive Python package licenses is provided
+in:
 
-- pytest
-- HTTPX
-- uv_build
+[`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md)
 
-This notice lists the direct backend dependencies declared by the backend
-package. Transitive dependency licenses should be reviewed from the lockfile or
-from a generated dependency license report before a public binary or container
-distribution.
+That file is generated from the installed backend Python environment and should
+be regenerated whenever `pyproject.toml` or the backend lockfile changes.
 
---------------------------------------------------------------------------------
+## Redis-compatible server notice
 
-FastAPI
--------
+The backend is designed to use a Redis-compatible server for queue storage and
+temporary job state. The Python package `redis` listed in the generated license
+report is only the Redis Python client.
 
-FastAPI is licensed under the MIT License.
+If a Redis-compatible server binary or Docker image is distributed together with
+the backend, its license must be checked separately for the exact server version
+or image being distributed. This backend notice covers the Python backend
+package dependencies, not the Redis server itself.
 
-Copyright (c) 2018 Sebastián Ramírez
-
-The full license text copied from the installed package is included under:
-
-    third_party_licenses/fastapi/
-
---------------------------------------------------------------------------------
-
-redis-py
---------
-
-redis-py is licensed under the MIT License.
-
-Copyright (c) 2022-2023, Redis, inc.
-
-The full license text copied from the installed package is included under:
-
-    third_party_licenses/redis-py/
-
---------------------------------------------------------------------------------
-
-RQ
---
-
-RQ (Redis Queue) is licensed under the BSD 2-Clause License.
-
-Redis Queue is used by the backend for queueing and processing background jobs.
-
-The full license text copied from the installed package is included under:
-
-    third_party_licenses/rq/
-
---------------------------------------------------------------------------------
-
-Uvicorn
--------
-
-Uvicorn is licensed under the BSD 3-Clause License.
-
-Copyright (c) 2017-present, Encode OSS Ltd.
-All rights reserved.
-
-The full license text copied from the installed package is included under:
-
-    third_party_licenses/uvicorn/
-
---------------------------------------------------------------------------------
-
-pytest
-------
-
-pytest is distributed under the terms of the MIT License.
-
-Copyright Holger Krekel and others, 2004.
-
-The full license text copied from the installed package is included under:
-
-    third_party_licenses/pytest/
-
---------------------------------------------------------------------------------
-
-HTTPX
------
-
-HTTPX is licensed under the BSD 3-Clause License.
-
-Copyright (c) 2019-present, Encode OSS Ltd.
-All rights reserved.
-
-The full license text copied from the installed package is included under:
-
-    third_party_licenses/httpx/
-
---------------------------------------------------------------------------------
-
-uv_build
---------
-
-uv_build is part of the uv project. The uv project is licensed under either
-the Apache License, Version 2.0, or the MIT License, at the user's option.
-
-Copyright (c) 2025 Astral Software Inc.
-
-The full license text copied from the installed package is included under:
-
-    third_party_licenses/uv-build/
-
---------------------------------------------------------------------------------
-
-Redis server
-------------
-
-The backend is designed to use a Redis-compatible server for queue storage.
-The Python package listed above as redis-py is only the Redis Python client.
-
-If a Redis server binary or Docker image is distributed together with the
-backend, its license must be checked separately for the exact Redis server
-version being distributed. This notice covers the Python redis-py client only,
-not the Redis server itself.
