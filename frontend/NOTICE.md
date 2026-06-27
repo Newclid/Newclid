@@ -3,123 +3,59 @@
 The Newclid frontend was developed in 2026 as part of the
 TU Delft Computer Science and Engineering Software Project, where the project
 team worked on extending Newclid with a browser-based interface for editing
-geometry problems, submitting jobs to the backend, and displaying generated
-proof information.
+geometry problems, submitting solving jobs, and displaying generated proof
+information.
 
 ## Frontend component authors and contributors
 
 Copyright 2026 Georgi Georgiev, Hristo Bozhkov, Sayf Persevi
 
 This frontend component includes TypeScript source code for the Newclid web
-interface, including geometry rendering, problem input, frontend state, backend
-API communication, and proof display UI.
+interface, including geometry rendering, problem input, frontend state
+management, backend API communication, and proof display UI.
 
-# THIRD-PARTY SOFTWARE NOTICES
+## Third-party software notices
 
-The frontend component directly depends on the following third-party software
-components:
+The frontend component uses npm packages for building, developing, testing, and
+validating the browser-based Newclid interface. The direct dependencies declared
+for the frontend are grouped by purpose below.
 
-Runtime dependencies:
+### Frontend build and development tooling
 
-* React
-* React DOM
+* Vite is used as the frontend build tool and development server. It handles
+  local development, asset processing, module bundling, and production builds.
 
-Development and build dependencies:
+* TypeScript is used as the main implementation language and compiler for the
+  frontend source code.
 
-* Vite
-* @vitejs/plugin-react
-* TypeScript
-* @types/react
-* @types/react-dom
+* `@types/node` provides TypeScript type definitions for Node.js APIs used by
+  frontend tooling, configuration files, and tests.
 
-This notice lists the direct frontend dependencies declared by the frontend
-package. Transitive dependency licenses should be reviewed from the package
-lockfile or from a generated dependency license report before a public binary,
-container, or bundled frontend distribution.
+### Testing and coverage tooling
 
----
+* Vitest is used for frontend unit tests and component-level tests.
 
-## React
+* `@vitest/coverage-v8` is used to generate test coverage reports for the
+  Vitest test suite.
 
-React is licensed under the MIT License.
+* jsdom is used to provide a DOM-like environment during tests, allowing
+  browser-oriented frontend code to be tested in a Node.js environment.
 
-Copyright (c) Meta Platforms, Inc. and affiliates.
+* Playwright, through `@playwright/test`, is used for browser-based and
+  end-to-end testing of the frontend.
 
-The full license text copied from the installed package is included under:
+### Integration and development support
 
-[`third_party_licenses/react/`](third_party_licenses/react/)
+* ioredis is declared for frontend-related tooling or integration code that
+  needs to communicate with Redis during development or testing.
 
----
+A generated list of direct and transitive npm package licenses is provided in:
 
-## React DOM
+[`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md)
 
-React DOM is licensed under the MIT License.
+That file is generated from the installed npm dependency tree and should be
+regenerated whenever `package.json` or `package-lock.json` changes.
 
-Copyright (c) Meta Platforms, Inc. and affiliates.
-
-The full license text copied from the installed package is included under:
-
-[`third_party_licenses/react-dom/`](third_party_licenses/react-dom/)
-
----
-
-## Vite
-
-Vite is licensed under the MIT License.
-
-Copyright (c) 2019-present, VoidZero Inc. and Vite contributors.
-
-The full license text copied from the installed package is included under:
-
-[`third_party_licenses/vite/`](third_party_licenses/vite/)
-
----
-
-## @vitejs/plugin-react
-
-@vitejs/plugin-react is licensed under the MIT License.
-
-Copyright (c) 2019-present, Yuxi (Evan) You and Vite contributors.
-
-The full license text copied from the installed package is included under:
-
-[`third_party_licenses/@vitejs/plugin-react/`](third_party_licenses/@vitejs/plugin-react/)
-
----
-
-## TypeScript
-
-TypeScript is licensed under the Apache License, Version 2.0.
-
-The full license text copied from the installed package is included under:
-
-[`third_party_licenses/typescript/`](third_party_licenses/typescript/)
-
----
-
-## @types/react
-
-@types/react is distributed through the DefinitelyTyped project and is licensed
-under the MIT License.
-
-Copyrights are respective of each contributor listed at the beginning of each
-definition file.
-
-The full license text copied from the installed package is included under:
-
-[`third_party_licenses/@types/react/`](third_party_licenses/@types/react/)
-
----
-
-## @types/react-dom
-
-@types/react-dom is distributed through the DefinitelyTyped project and is
-licensed under the MIT License.
-
-Copyrights are respective of each contributor listed at the beginning of each
-definition file.
-
-The full license text copied from the installed package is included under:
-
-[`third_party_licenses/@types/react-dom/`](third_party_licenses/@types/react-dom/)
+Optional npm dependencies declared by third-party packages but not installed on
+the current platform are not included in the generated license index.
 
