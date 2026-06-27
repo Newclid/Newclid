@@ -216,7 +216,7 @@ jobs:
           if-no-files-found: ignore
 
   yuclid-compile-and-test:
-    name: Yuclid compile, CTest, and pytest
+    name: Yuclid C++ compile and CTest
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: detect-changes
@@ -248,16 +248,12 @@ jobs:
             cmake \
             ninja-build \
             libboost-all-dev \
+            gcc-14 \
+            g++-14 \
             ca-certificates
 
-          if apt-cache show gcc-14 >/dev/null 2>&1; then
-            sudo apt-get install -y --no-install-recommends gcc-14 g++-14
-            echo "CC=gcc-14" >> "$GITHUB_ENV"
-            echo "CXX=g++-14" >> "$GITHUB_ENV"
-          else
-            echo "CC=gcc" >> "$GITHUB_ENV"
-            echo "CXX=g++" >> "$GITHUB_ENV"
-          fi
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -276,22 +272,23 @@ jobs:
       - name: Find Yuclid CMake build directory
         id: yuclid-build-dir
         run: |
-          CMAKE_CACHE="$(find yuclid/build -name CMakeCache.txt | head -n 1)"
+          YUCLID_BUILD_DIR="$(dirname "$(find yuclid/build -name CMakeCache.txt | head -n 1)")"
 
-          if [ -z "$CMAKE_CACHE" ]; then
+          if [ -z "$YUCLID_BUILD_DIR" ]; then
             echo "Could not find Yuclid CMake build directory"
             find yuclid -maxdepth 4 -type d || true
             exit 1
           fi
 
-          YUCLID_BUILD_DIR="$(dirname "$CMAKE_CACHE")"
           echo "Yuclid build dir: $YUCLID_BUILD_DIR"
           echo "dir=$YUCLID_BUILD_DIR" >> "$GITHUB_OUTPUT"
 
       - name: Build Yuclid C++ test targets
-        run: cmake --build "${{ steps.yuclid-build-dir.outputs.dir }}" --parallel "$(nproc)"
+        run: |
+          cmake --build "${{ steps.yuclid-build-dir.outputs.dir }}" \
+            --parallel "$(nproc)"
 
-      - name: Run Yuclid CTest tests
+      - name: Run Yuclid CTest suite
         run: |
           ctest \
             --test-dir "${{ steps.yuclid-build-dir.outputs.dir }}" \
@@ -299,7 +296,7 @@ jobs:
             --parallel "$(nproc)" \
             --output-junit "$GITHUB_WORKSPACE/reports/ctest-yuclid.xml"
 
-      - name: Run Yuclid Python tests
+      - name: Run Yuclid Python pytest tests
         run: |
           uv run pytest yuclid/tests -q \
             --junitxml=reports/pytest-yuclid.xml
