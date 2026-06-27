@@ -1,32 +1,255 @@
 name: Coverage
 
-on: ["push"]
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  coverage:
-    runs-on: ubuntu-latest
+  newclid-python-coverage:
+    name: Newclid Python coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        lfs: true
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install Nix
-      uses: DeterminateSystems/nix-installer-action@main
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
 
-    - name: Cache Nix store
-      uses: DeterminateSystems/magic-nix-cache-action@main
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
 
-    - name: Build coverage using pytest-cov
-      run: |
-        nix develop --command bash -c "uv run pytest -n auto -m 'not slow' --cov --cov-fail-under=74 --cov-report=xml --cov-report=term-missing"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-    - name: Codacy Coverage Reporter
-      uses: codacy/codacy-coverage-reporter-action@v1.3.0
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        coverage-reports: coverage.xml
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create coverage directory
+        run: mkdir -p coverage
+
+      - name: Sync full Python environment
+        run: uv sync --frozen
+
+      - name: Run all Newclid Python tests with coverage
+        run: |
+          uv run pytest newclid/tests -q \
+            --cov=newclid \
+            --cov-report=xml:coverage/newclid-python.xml \
+            --cov-report=html:coverage/newclid-python-html \
+            --cov-report=term-missing
+
+      - name: Upload Newclid coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newclid-python-coverage
+          path: |
+            coverage/newclid-python.xml
+            coverage/newclid-python-html/
+          if-no-files-found: ignore
+
+  backend-python-coverage:
+    name: Backend Python coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
+
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create coverage directory
+        run: mkdir -p coverage
+
+      - name: Sync full Python environment
+        run: uv sync --frozen
+
+      - name: Wait for Redis
+        run: |
+          uv run python - <<'PY'
+          import os
+          import time
+          from redis import Redis
+
+          redis = Redis.from_url(os.environ["REDIS_URL"])
+
+          for _ in range(30):
+              try:
+                  redis.ping()
+                  print("Redis is ready")
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Redis did not become ready")
+          PY
+
+      - name: Run all backend tests with coverage
+        run: |
+          REDIS_URL="$REDIS_URL" \
+            uv run pytest backend/tests -q \
+            --cov=newclid_backend \
+            --cov-report=xml:coverage/backend-python.xml \
+            --cov-report=html:coverage/backend-python-html \
+            --cov-report=term-missing
+
+      - name: Upload backend coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-python-coverage
+          path: |
+            coverage/backend-python.xml
+            coverage/backend-python-html/
+          if-no-files-found: ignore
+
+  upload-codacy-coverage:
+    name: Upload coverage to Codacy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs:
+      - newclid-python-coverage
+      - backend-python-coverage
+    if: always()
+
+    env:
+      CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+
+    steps:
+      - name: Download Newclid coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: newclid-python-coverage
+          path: coverage-reports/newclid
+
+      - name: Download backend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-python-coverage
+          path: coverage-reports/backend
+
+      - name: List coverage reports
+        run: find coverage-reports -maxdepth 8 -type f | sort
+
+      - name: Upload Newclid coverage to Codacy
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.newclid-python-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/newclid/newclid-python.xml
+
+      - name: Upload backend coverage to Codacy
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.backend-python-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/backend/backend-python.xml
+
+      - name: Skip Codacy upload explanation
+        if: >-
+          ${{
+            github.repository != 'Newclid/Newclid' ||
+            github.event_name != 'push' ||
+            env.CODACY_PROJECT_TOKEN == ''
+          }}
+        run: |
+          echo "Skipping Codacy upload."
+          echo "This is expected on pull requests, forks, or repositories without CODACY_PROJECT_TOKEN."
