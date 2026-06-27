@@ -342,3 +342,179 @@ jobs:
           done
 
           echo "Unit stage passed. Skipped jobs are allowed."
+
+  frontend-integration-tests:
+    name: Frontend integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - detect-changes
+      - unit-gate
+    if: >-
+      ${{
+        always() &&
+        needs.unit-gate.result == 'success' &&
+        (
+          needs.detect-changes.outputs.run_all == 'true' ||
+          needs.detect-changes.outputs.frontend == 'true' ||
+          needs.detect-changes.outputs.workflows == 'true'
+        )
+      }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend integration tests
+        working-directory: frontend
+        run: npm run test:integration:run
+
+  backend-integration-tests:
+    name: Backend Redis/RQ integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs:
+      - detect-changes
+      - unit-gate
+    if: >-
+      ${{
+        always() &&
+        needs.unit-gate.result == 'success' &&
+        (
+          needs.detect-changes.outputs.run_all == 'true' ||
+          needs.detect-changes.outputs.backend == 'true' ||
+          needs.detect-changes.outputs.python == 'true' ||
+          needs.detect-changes.outputs.workflows == 'true'
+        )
+      }}
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-all-dev \
+            ca-certificates
+
+          if apt-cache show gcc-14 >/dev/null 2>&1; then
+            sudo apt-get install -y --no-install-recommends gcc-14 g++-14
+            echo "CC=gcc-14" >> "$GITHUB_ENV"
+            echo "CXX=g++-14" >> "$GITHUB_ENV"
+          else
+            echo "CC=gcc" >> "$GITHUB_ENV"
+            echo "CXX=g++" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Sync full Newclid/Yuclid environment
+        run: uv sync --frozen -v
+
+      - name: Wait for Redis
+        run: |
+          uv run python - <<'PY'
+          import os
+          import time
+          from redis import Redis
+
+          redis = Redis.from_url(os.environ["REDIS_URL"])
+
+          for _ in range(30):
+              try:
+                  redis.ping()
+                  print("Redis is ready")
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Redis did not become ready")
+          PY
+
+      - name: Run backend Redis/RQ integration tests
+        run: |
+          REDIS_URL="$REDIS_URL" \
+            uv run pytest backend/tests/integration -m "redis and not slow" -q \
+            --junitxml=reports/pytest-backend-integration.xml
+
+      - name: Upload backend integration test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-integration-test-report
+          path: reports/pytest-backend-integration.xml
+          if-no-files-found: ignore
+
+  integration-gate:
+    name: Integration stage gate
+    runs-on: ubuntu-latest
+    needs:
+      - detect-changes
+      - unit-gate
+      - frontend-integration-tests
+      - backend-integration-tests
+    if: always()
+
+    steps:
+      - name: Check integration stage results
+        run: |
+          results=(
+            "${{ needs.detect-changes.result }}"
+            "${{ needs.unit-gate.result }}"
+            "${{ needs.frontend-integration-tests.result }}"
+            "${{ needs.backend-integration-tests.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "Integration stage failed with result: $result"
+              exit 1
+            fi
+          done
+
+          echo "Integration stage passed. Skipped jobs are allowed."
