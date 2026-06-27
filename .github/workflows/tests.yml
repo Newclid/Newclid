@@ -98,3 +98,247 @@ jobs:
           echo "docker=${{ steps.filter.outputs.docker }}"
           echo "python=${{ steps.filter.outputs.python }}"
           echo "workflows=${{ steps.filter.outputs.workflows }}"
+
+  frontend-build:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: detect-changes
+    if: >-
+      ${{
+        needs.detect-changes.outputs.run_all == 'true' ||
+        needs.detect-changes.outputs.frontend == 'true' ||
+        needs.detect-changes.outputs.workflows == 'true'
+      }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Upload frontend build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          if-no-files-found: ignore
+
+  frontend-unit-tests:
+    name: Frontend unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: detect-changes
+    if: >-
+      ${{
+        needs.detect-changes.outputs.run_all == 'true' ||
+        needs.detect-changes.outputs.frontend == 'true' ||
+        needs.detect-changes.outputs.workflows == 'true'
+      }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: npm run test:unit:run
+
+  backend-unit-tests:
+    name: Backend unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: detect-changes
+    if: >-
+      ${{
+        needs.detect-changes.outputs.run_all == 'true' ||
+        needs.detect-changes.outputs.backend == 'true' ||
+        needs.detect-changes.outputs.python == 'true' ||
+        needs.detect-changes.outputs.workflows == 'true'
+      }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Install backend test environment
+        run: |
+          uv venv
+          uv pip install -e "backend[test]"
+
+      - name: Run backend unit tests
+        run: |
+          .venv/bin/python -m pytest backend/tests/unit -q \
+            --junitxml=reports/pytest-backend-unit.xml
+
+      - name: Upload backend unit test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-unit-test-report
+          path: reports/pytest-backend-unit.xml
+          if-no-files-found: ignore
+
+  yuclid-compile-and-test:
+    name: Yuclid compile, CTest, and pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: detect-changes
+    if: >-
+      ${{
+        needs.detect-changes.outputs.run_all == 'true' ||
+        needs.detect-changes.outputs.yuclid == 'true' ||
+        needs.detect-changes.outputs.python == 'true' ||
+        needs.detect-changes.outputs.workflows == 'true'
+      }}
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-all-dev \
+            ca-certificates
+
+          if apt-cache show gcc-14 >/dev/null 2>&1; then
+            sudo apt-get install -y --no-install-recommends gcc-14 g++-14
+            echo "CC=gcc-14" >> "$GITHUB_ENV"
+            echo "CXX=g++-14" >> "$GITHUB_ENV"
+          else
+            echo "CC=gcc" >> "$GITHUB_ENV"
+            echo "CXX=g++" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Sync Python environment and build Yuclid
+        run: uv sync --frozen -v
+
+      - name: Find Yuclid CMake build directory
+        id: yuclid-build-dir
+        run: |
+          CMAKE_CACHE="$(find yuclid/build -name CMakeCache.txt | head -n 1)"
+
+          if [ -z "$CMAKE_CACHE" ]; then
+            echo "Could not find Yuclid CMake build directory"
+            find yuclid -maxdepth 4 -type d || true
+            exit 1
+          fi
+
+          YUCLID_BUILD_DIR="$(dirname "$CMAKE_CACHE")"
+          echo "Yuclid build dir: $YUCLID_BUILD_DIR"
+          echo "dir=$YUCLID_BUILD_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Build Yuclid C++ test targets
+        run: cmake --build "${{ steps.yuclid-build-dir.outputs.dir }}" --parallel "$(nproc)"
+
+      - name: Run Yuclid CTest tests
+        run: |
+          ctest \
+            --test-dir "${{ steps.yuclid-build-dir.outputs.dir }}" \
+            --output-on-failure \
+            --parallel "$(nproc)" \
+            --output-junit "$GITHUB_WORKSPACE/reports/ctest-yuclid.xml"
+
+      - name: Run Yuclid Python tests
+        run: |
+          uv run pytest yuclid/tests -q \
+            --junitxml=reports/pytest-yuclid.xml
+
+      - name: Upload Yuclid test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuclid-test-reports
+          path: reports/*.xml
+          if-no-files-found: ignore
+
+  unit-gate:
+    name: Unit stage gate
+    runs-on: ubuntu-latest
+    needs:
+      - detect-changes
+      - frontend-build
+      - frontend-unit-tests
+      - backend-unit-tests
+      - yuclid-compile-and-test
+    if: always()
+
+    steps:
+      - name: Check unit stage results
+        run: |
+          results=(
+            "${{ needs.detect-changes.result }}"
+            "${{ needs.frontend-build.result }}"
+            "${{ needs.frontend-unit-tests.result }}"
+            "${{ needs.backend-unit-tests.result }}"
+            "${{ needs.yuclid-compile-and-test.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "Unit stage failed with result: $result"
+              exit 1
+            fi
+          done
+
+          echo "Unit stage passed. Skipped jobs are allowed."
