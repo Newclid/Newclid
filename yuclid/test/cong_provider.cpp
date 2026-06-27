@@ -99,10 +99,10 @@ struct CongProviderFixture {
         }
     }
 
-    void run_comparison(CongProvider& provider, PlannedPredicate& pp, MappingState& mapping, LazyGeometryCache& cache, const std::string& name) {
-        std::size_t estimate = provider.estimate_extensions(pp, mapping, cache);
+    void run_comparison(CongProvider& cong_provider, PlannedPredicate& pp, MappingState& mapping, LazyGeometryCache& cache, const std::string& name) {
+        std::size_t estimate = cong_provider.estimate_extensions(pp, mapping, cache);
         
-        auto generator = provider.generate_extensions(pp, mapping, cache);
+        auto generator = cong_provider.generate_extensions(pp, mapping, cache);
         std::size_t generated = 0;
         for (const auto& ext : generator) {
             (void) ext;
