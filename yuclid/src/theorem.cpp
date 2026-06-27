@@ -16,8 +16,8 @@
       --- MODIFICATIONS ---
    Copyright 2026 Simeon Vutov, Petar Iliev
 
-   Contributions: Added construction of theorem objects from dynamically
-   built hypothesis and conclusion statements.
+   Contributions: Added `Theorem::from_statements` for constructing theorem
+   objects from dynamically built hypothesis and conclusion statements.
 */
 #include "ar/equation.hpp"
 #include "ar/linear_combination.hpp"

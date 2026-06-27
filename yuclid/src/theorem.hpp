@@ -13,11 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-      --- MODIFICATIONS ---
+         --- MODIFICATIONS ---
    Copyright 2026 Simeon Vutov, Petar Iliev
 
-   Contributions: Added a factory for constructing theorem objects from
-   dynamically built hypothesis and conclusion statements.
+   Contributions: Added `Theorem::from_statements` for generic custom-rule
+   theorem candidates and documented the lifetime requirements for string-view
+   backed theorem names and rule identifiers.
 */
 #pragma once
 #include <vector>

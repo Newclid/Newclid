@@ -17,7 +17,8 @@
    Copyright 2026 Simeon Vutov, Petar Iliev
 
    Contributions: Updated matcher includes after reorganizing the theorem
-   matcher into the matchers directory.
+   matcher into the matchers directory and added `point_at` for retrieving
+   existing problem points by index.
 */
 #include "matchers/matcher.hpp"
 #include "problem.hpp"

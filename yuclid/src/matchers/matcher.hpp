@@ -16,8 +16,9 @@
       --- MODIFICATIONS ---
    Copyright 2026 Simeon Vutov, Petar Iliev
 
-   Contributions: Moved the theorem matcher into the matchers namespace
-   directory and extended its interface to accept custom rule schemas.
+   Contributions: Moved the theorem matcher into the matchers directory,
+   extended its interface and state to carry custom rule schemas, and declared
+   the generic custom-rule matching hook.
 */
 #pragma once
 #include <boost/container_hash/hash.hpp>

@@ -16,8 +16,9 @@
       --- MODIFICATIONS ---
    Copyright 2026 Simeon Vutov, Petar Iliev
 
-   Contributions: Added configuration support for storing and exposing the
-   optional custom rule file path.
+   Contributions: Added CLI configuration for an optional additional custom-rule
+   file, including the `--input-additional-rules-file` option, stored path, and
+   accessor used by the Yuclid executable.
 */
 #pragma once
 
