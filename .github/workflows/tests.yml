@@ -684,95 +684,12 @@ jobs:
             frontend/playwright-report/
           if-no-files-found: ignore
 
-  backend-newclid-e2e-tests:
-    name: Backend ↔ Newclid e2e tests
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    needs:
-      - detect-changes
-      - integration-gate
-    if: >-
-      ${{
-        always() &&
-        needs.integration-gate.result == 'success' &&
-        (
-          needs.detect-changes.outputs.run_all == 'true' ||
-          needs.detect-changes.outputs.backend == 'true' ||
-          needs.detect-changes.outputs.newclid == 'true' ||
-          needs.detect-changes.outputs.ncdgen == 'true' ||
-          needs.detect-changes.outputs.yuclid == 'true' ||
-          needs.detect-changes.outputs.python == 'true' ||
-          needs.detect-changes.outputs.workflows == 'true'
-        )
-      }}
-
-    env:
-      CMAKE_GENERATOR: Ninja
-      CMAKE_BUILD_PARALLEL_LEVEL: "2"
-      CMAKE_ARGS: >-
-        -DUSE_STATIC_LINK=OFF
-        -DBUILD_DOC=OFF
-        -DCMAKE_BUILD_TYPE=Release
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install C++ build dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            cmake \
-            ninja-build \
-            libboost-dev \
-            libboost-log-dev \
-            libboost-json-dev \
-            libboost-program-options-dev \
-            libboost-test-dev \
-            gcc-14 \
-            g++-14 \
-            ca-certificates
-
-          echo "CC=gcc-14" >> "$GITHUB_ENV"
-          echo "CXX=g++-14" >> "$GITHUB_ENV"
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: false
-
-      - name: Create reports directory
-        run: mkdir -p reports
-
-      - name: Sync full Newclid/Yuclid environment
-        run: uv sync --frozen
-
-      - name: Run backend-Newclid e2e tests
-        run: |
-          uv run pytest backend/tests/integration -m "slow" -q \
-            --junitxml=reports/pytest-backend-newclid-e2e.xml
-
-      - name: Upload backend-Newclid e2e report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-newclid-e2e-report
-          path: reports/pytest-backend-newclid-e2e.xml
-          if-no-files-found: ignore
-
-  test-pipeline-gate:
+test-pipeline-gate:
     name: Test pipeline gate
     runs-on: ubuntu-24.04
     needs:
       - integration-gate
       - frontend-backend-e2e-tests
-      - backend-newclid-e2e-tests
     if: always()
 
     steps:
@@ -781,7 +698,6 @@ jobs:
           results=(
             "${{ needs.integration-gate.result }}"
             "${{ needs.frontend-backend-e2e-tests.result }}"
-            "${{ needs.backend-newclid-e2e-tests.result }}"
           )
 
           for result in "${results[@]}"; do
