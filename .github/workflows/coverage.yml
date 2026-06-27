@@ -285,6 +285,186 @@ jobs:
             coverage/yuclid-cpp-html/
           if-no-files-found: ignore
 
+  frontend-coverage:
+    name: Frontend coverage and e2e checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+      NEWCLID_QUEUE_NAME: newclid
+      FRONTEND_BASE_URL: http://127.0.0.1:5173
+      BACKEND_BASE_URL: http://127.0.0.1:8000
+      PLAYWRIGHT_JUNIT_OUTPUT_NAME: ../coverage/frontend-e2e-junit.xml
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Create coverage directory
+        run: mkdir -p coverage
+
+      - name: Install backend test environment
+        run: |
+          uv venv
+          uv pip install -e "backend[test]"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run frontend unit tests with Vitest coverage
+        working-directory: frontend
+        run: |
+          npm run test:unit:run -- \
+            --coverage \
+            --coverage.provider=v8 \
+            --coverage.reporter=text \
+            --coverage.reporter=lcov \
+            --coverage.reporter=html \
+            --coverage.reporter=json-summary \
+            --coverage.reportsDirectory=coverage/unit
+
+      - name: Run frontend integration tests with Vitest coverage
+        working-directory: frontend
+        run: |
+          npm run test:integration:run -- \
+            --coverage \
+            --coverage.provider=v8 \
+            --coverage.reporter=text \
+            --coverage.reporter=lcov \
+            --coverage.reporter=html \
+            --coverage.reporter=json-summary \
+            --coverage.reportsDirectory=coverage/integration
+
+      - name: Wait for Redis
+        run: |
+          .venv/bin/python - <<'PY'
+          import os
+          import time
+          from redis import Redis
+
+          redis = Redis.from_url(os.environ["REDIS_URL"])
+
+          for _ in range(30):
+              try:
+                  redis.ping()
+                  print("Redis is ready")
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Redis did not become ready")
+          PY
+
+      - name: Start backend
+        run: |
+          REDIS_URL="$REDIS_URL" \
+          NEWCLID_QUEUE_NAME="$NEWCLID_QUEUE_NAME" \
+          .venv/bin/python -m uvicorn newclid_backend.main:app \
+            --app-dir backend/src \
+            --host 127.0.0.1 \
+            --port 8000 \
+            > coverage/backend-e2e.log 2>&1 &
+
+          echo $! > coverage/backend.pid
+
+      - name: Start frontend
+        run: |
+          cd frontend
+          npm run dev -- --host 127.0.0.1 --port 5173 \
+            > ../coverage/frontend-e2e.log 2>&1 &
+
+          echo $! > ../coverage/frontend.pid
+
+      - name: Wait for backend and frontend
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null; then
+              echo "Backend is ready"
+              break
+            fi
+            sleep 1
+          done
+
+          curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null
+
+          for _ in $(seq 1 30); do
+            if curl -sf "$FRONTEND_BASE_URL" >/dev/null; then
+              echo "Frontend is ready"
+              break
+            fi
+            sleep 1
+          done
+
+          curl -sf "$FRONTEND_BASE_URL" >/dev/null
+
+      - name: Run frontend-backend e2e tests
+        working-directory: frontend
+        run: npm run test:e2e:frontend-backend
+
+      - name: Stop background services
+        if: always()
+        run: |
+          if [ -f coverage/backend.pid ]; then
+            kill "$(cat coverage/backend.pid)" 2>/dev/null || true
+          fi
+
+          if [ -f coverage/frontend.pid ]; then
+            kill "$(cat coverage/frontend.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload frontend coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: |
+            frontend/coverage/unit/lcov.info
+            frontend/coverage/unit/index.html
+            frontend/coverage/unit/**/*.html
+            frontend/coverage/unit/coverage-summary.json
+            frontend/coverage/integration/lcov.info
+            frontend/coverage/integration/index.html
+            frontend/coverage/integration/**/*.html
+            frontend/coverage/integration/coverage-summary.json
+            coverage/frontend-e2e-junit.xml
+            coverage/backend-e2e.log
+            coverage/frontend-e2e.log
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+
   upload-codacy-coverage:
     name: Upload coverage to Codacy
     runs-on: ubuntu-24.04
@@ -293,6 +473,7 @@ jobs:
       - newclid-python-coverage
       - backend-python-coverage
       - yuclid-cpp-coverage
+      - frontend-coverage
     if: always()
 
     env:
@@ -316,6 +497,12 @@ jobs:
         with:
           name: yuclid-cpp-coverage
           path: coverage-reports/yuclid
+
+      - name: Download frontend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage
+          path: coverage-reports/frontend
 
       - name: List coverage reports
         run: find coverage-reports -maxdepth 8 -type f | sort
@@ -358,6 +545,32 @@ jobs:
         with:
           project-token: ${{ env.CODACY_PROJECT_TOKEN }}
           coverage-reports: coverage-reports/yuclid/yuclid-cpp.xml
+
+      - name: Upload frontend unit coverage to Codacy
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.frontend-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/frontend/unit/lcov.info
+
+      - name: Upload frontend integration coverage to Codacy
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.frontend-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/frontend/integration/lcov.info
 
       - name: Skip Codacy upload explanation
         if: >-
