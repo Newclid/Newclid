@@ -68,7 +68,7 @@ jobs:
       - name: Sync full Python environment
         run: uv sync --frozen
 
-      - name: Run all Newclid Python tests with coverage
+      - name: Collect Newclid Python coverage
         run: |
           uv run pytest newclid/tests -q \
             --cov=newclid \
@@ -89,7 +89,7 @@ jobs:
   backend-python-coverage:
     name: Backend Python coverage
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 45
 
     services:
       redis:
@@ -170,7 +170,7 @@ jobs:
               raise SystemExit("Redis did not become ready")
           PY
 
-      - name: Run all backend tests with coverage
+      - name: Collect backend Python coverage
         run: |
           REDIS_URL="$REDIS_URL" \
             uv run pytest backend/tests -q \
@@ -252,7 +252,7 @@ jobs:
       - name: Clear old coverage counters
         run: find yuclid/build-coverage -name '*.gcda' -delete
 
-      - name: Run full Yuclid CTest suite
+      - name: Collect Yuclid C++ coverage with full CTest suite
         run: |
           ctest \
             --test-dir yuclid/build-coverage \
@@ -283,6 +283,76 @@ jobs:
           path: |
             coverage/yuclid-cpp.xml
             coverage/yuclid-cpp-html/
+          if-no-files-found: ignore
+
+  yuclid-python-coverage:
+    name: Yuclid Python coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
+
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create coverage directory
+        run: mkdir -p coverage
+
+      - name: Sync full Python environment and build Yuclid package
+        run: uv sync --frozen
+
+      - name: Collect Yuclid Python coverage
+        run: |
+          uv run pytest yuclid/tests -q \
+            --cov=py_yuclid \
+            --cov-report=xml:coverage/yuclid-python.xml \
+            --cov-report=html:coverage/yuclid-python-html \
+            --cov-report=term-missing
+
+      - name: Upload Yuclid Python coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuclid-python-coverage
+          path: |
+            coverage/yuclid-python.xml
+            coverage/yuclid-python-html/
           if-no-files-found: ignore
 
   frontend-coverage:
@@ -343,7 +413,7 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
-      - name: Run frontend unit tests with Vitest coverage
+      - name: Collect frontend unit coverage
         working-directory: frontend
         run: |
           npm run test:unit:run -- \
@@ -355,7 +425,7 @@ jobs:
             --coverage.reporter=json-summary \
             --coverage.reportsDirectory=coverage/unit
 
-      - name: Run frontend integration tests with Vitest coverage
+      - name: Collect frontend integration coverage
         working-directory: frontend
         run: |
           npm run test:integration:run -- \
@@ -429,7 +499,7 @@ jobs:
 
           curl -sf "$FRONTEND_BASE_URL" >/dev/null
 
-      - name: Run frontend-backend e2e tests
+      - name: Run frontend-backend e2e checks
         working-directory: frontend
         run: npm run test:e2e:frontend-backend
 
@@ -473,6 +543,7 @@ jobs:
       - newclid-python-coverage
       - backend-python-coverage
       - yuclid-cpp-coverage
+      - yuclid-python-coverage
       - frontend-coverage
     if: always()
 
@@ -480,25 +551,39 @@ jobs:
       CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
     steps:
+      - name: Prepare coverage reports directory
+        run: mkdir -p coverage-reports
+
       - name: Download Newclid coverage
+        if: ${{ needs.newclid-python-coverage.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: newclid-python-coverage
           path: coverage-reports/newclid
 
       - name: Download backend coverage
+        if: ${{ needs.backend-python-coverage.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: backend-python-coverage
           path: coverage-reports/backend
 
       - name: Download Yuclid C++ coverage
+        if: ${{ needs.yuclid-cpp-coverage.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: yuclid-cpp-coverage
-          path: coverage-reports/yuclid
+          path: coverage-reports/yuclid-cpp
+
+      - name: Download Yuclid Python coverage
+        if: ${{ needs.yuclid-python-coverage.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: yuclid-python-coverage
+          path: coverage-reports/yuclid-python
 
       - name: Download frontend coverage
+        if: ${{ needs.frontend-coverage.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: frontend-coverage
@@ -508,6 +593,7 @@ jobs:
         run: find coverage-reports -maxdepth 8 -type f | sort
 
       - name: Upload Newclid coverage to Codacy
+        continue-on-error: true
         if: >-
           ${{
             github.repository == 'Newclid/Newclid' &&
@@ -521,6 +607,7 @@ jobs:
           coverage-reports: coverage-reports/newclid/newclid-python.xml
 
       - name: Upload backend coverage to Codacy
+        continue-on-error: true
         if: >-
           ${{
             github.repository == 'Newclid/Newclid' &&
@@ -534,6 +621,7 @@ jobs:
           coverage-reports: coverage-reports/backend/backend-python.xml
 
       - name: Upload Yuclid C++ coverage to Codacy
+        continue-on-error: true
         if: >-
           ${{
             github.repository == 'Newclid/Newclid' &&
@@ -544,9 +632,24 @@ jobs:
         uses: codacy/codacy-coverage-reporter-action@v1.3.0
         with:
           project-token: ${{ env.CODACY_PROJECT_TOKEN }}
-          coverage-reports: coverage-reports/yuclid/yuclid-cpp.xml
+          coverage-reports: coverage-reports/yuclid-cpp/yuclid-cpp.xml
+
+      - name: Upload Yuclid Python coverage to Codacy
+        continue-on-error: true
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.yuclid-python-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/yuclid-python/yuclid-python.xml
 
       - name: Upload frontend unit coverage to Codacy
+        continue-on-error: true
         if: >-
           ${{
             github.repository == 'Newclid/Newclid' &&
@@ -560,6 +663,7 @@ jobs:
           coverage-reports: coverage-reports/frontend/unit/lcov.info
 
       - name: Upload frontend integration coverage to Codacy
+        continue-on-error: true
         if: >-
           ${{
             github.repository == 'Newclid/Newclid' &&
