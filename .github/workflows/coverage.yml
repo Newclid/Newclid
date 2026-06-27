@@ -253,3 +253,99 @@ jobs:
         run: |
           echo "Skipping Codacy upload."
           echo "This is expected on pull requests, forks, or repositories without CODACY_PROJECT_TOKEN."
+
+  yuclid-cpp-coverage:
+    name: Yuclid C++ coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ coverage dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
+
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Set up Python for gcovr
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install gcovr
+        run: python -m pip install gcovr
+
+      - name: Configure Yuclid coverage build
+        run: |
+          rm -rf yuclid/build-coverage
+
+          cmake \
+            -S yuclid \
+            -B yuclid/build-coverage \
+            -G Ninja \
+            -DCMAKE_CXX_COMPILER=g++-14 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DUSE_STATIC_LINK=OFF \
+            -DBUILD_DOC=OFF \
+            -DCMAKE_CXX_FLAGS="--coverage -O0 -g -fprofile-abs-path" \
+            -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+
+      - name: Build Yuclid coverage targets
+        run: |
+          cmake --build yuclid/build-coverage \
+            --parallel "$(nproc)"
+
+      - name: Clear old coverage counters
+        run: find yuclid/build-coverage -name '*.gcda' -delete
+
+      - name: Run full Yuclid CTest suite
+        run: |
+          ctest \
+            --test-dir yuclid/build-coverage \
+            --output-on-failure \
+            --parallel "$(nproc)"
+
+      - name: Generate Yuclid C++ coverage report
+        run: |
+          mkdir -p coverage/yuclid-cpp-html
+
+          gcovr \
+            --root "$GITHUB_WORKSPACE/yuclid" \
+            --object-directory "$GITHUB_WORKSPACE/yuclid/build-coverage" \
+            --gcov-executable gcov-14 \
+            --filter "$GITHUB_WORKSPACE/yuclid/src" \
+            --filter "$GITHUB_WORKSPACE/yuclid/include" \
+            --exclude "$GITHUB_WORKSPACE/yuclid/tests" \
+            --cobertura-pretty \
+            --cobertura coverage/yuclid-cpp.xml \
+            --html-details coverage/yuclid-cpp-html/index.html \
+            --print-summary
+
+      - name: Upload Yuclid C++ coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuclid-cpp-coverage
+          path: |
+            coverage/yuclid-cpp.xml
+            coverage/yuclid-cpp-html/
+          if-no-files-found: ignore
