@@ -760,3 +760,30 @@ jobs:
           name: backend-newclid-e2e-report
           path: reports/pytest-backend-newclid-e2e.xml
           if-no-files-found: ignore
+
+  test-pipeline-gate:
+    name: Test pipeline gate
+    runs-on: ubuntu-24.04
+    needs:
+      - integration-gate
+      - frontend-backend-e2e-tests
+      - backend-newclid-e2e-tests
+    if: always()
+
+    steps:
+      - name: Check full test pipeline results
+        run: |
+          results=(
+            "${{ needs.integration-gate.result }}"
+            "${{ needs.frontend-backend-e2e-tests.result }}"
+            "${{ needs.backend-newclid-e2e-tests.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "Test pipeline failed with result: $result"
+              exit 1
+            fi
+          done
+
+          echo "Full test pipeline passed. Skipped jobs are allowed."
