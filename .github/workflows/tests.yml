@@ -684,7 +684,7 @@ jobs:
             frontend/playwright-report/
           if-no-files-found: ignore
 
-test-pipeline-gate:
+  test-pipeline-gate:
     name: Test pipeline gate
     runs-on: ubuntu-24.04
     needs:
