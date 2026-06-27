@@ -16,8 +16,9 @@
       --- MODIFICATIONS ---
    Copyright 2026 Simeon Vutov, Petar Iliev
 
-   Contributions: Added command-line flow for parsing custom rule files and
-   passing custom rules into theorem matching and DDAR solving modes.
+   Contributions: Separated problem parsing from custom-rule parsing, loaded
+   optional custom rule schemas from `--input-additional-rules-file`, and passed
+   them into theorem matching and DDAR solving modes.
 */
 #include "config_options.hpp" // Include our configuration class header
 #include "matchers/matcher.hpp"

@@ -16,9 +16,9 @@
       --- MODIFICATIONS ---
    Copyright 2026 Simeon Vutov, Petar Iliev
 
-   Contributions: Moved the theorem matcher into the matchers namespace
-   directory and integrated generic custom-rule matching into the existing
-   theorem matching pipeline.
+   Contributions: Moved the theorem matcher into the matchers directory,
+   integrated generic custom-rule matching into the existing theorem matching
+   flow, and inserted generated custom theorem candidates into the theorem set.
 */
 #include "matchers/matcher.hpp"
 
