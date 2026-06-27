@@ -1,38 +1,44 @@
 name: Documentation
 
 on:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "README.rst"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/documentation.yml"
 
-  # Allows you to run this workflow manually from the Actions tab
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "README.rst"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/documentation.yml"
+
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
+  group: documentation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
+    name: Build documentation
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
@@ -43,10 +49,36 @@ jobs:
       - name: Build documentation
         run: |
           nix develop --command bash -c "uv sync --extra doc && uv run python ./docs/reformat.py && uv run sphinx-build -b html ./docs ./_build"
-      - name: Upload artifact
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './_build'
+          path: "./_build"
+
+  deploy:
+    name: Deploy documentation
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
