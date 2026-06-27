@@ -1,29 +1,710 @@
 name: Tests
 
-on: ["push"]
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
+  detect-changes:
+    name: Detect changed components
+    runs-on: ubuntu-24.04
+
+    outputs:
+      run_all: ${{ steps.mode.outputs.run_all }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      yuclid: ${{ steps.filter.outputs.yuclid }}
+      newclid: ${{ steps.filter.outputs.newclid }}
+      ncdgen: ${{ steps.filter.outputs.ncdgen }}
+      docker: ${{ steps.filter.outputs.docker }}
+      python: ${{ steps.filter.outputs.python }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        lfs: true
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Install Nix
-      uses: DeterminateSystems/nix-installer-action@main
+      - name: Detect manual full run
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run_all=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_all=false" >> "$GITHUB_OUTPUT"
+          fi
 
-    - name: Cache Nix store
-      uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Detect changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
 
-    - name: Run pre-commit checks
-      uses: pre-commit/action@v3.0.1
+            backend:
+              - 'backend/**'
+              - 'Dockerfile.backend'
 
-    - name: Run tests
-      run: |
-        nix develop --command bash -c "uv run pytest -n auto --durations=0 -vv --timeout=24"
+            yuclid:
+              - 'yuclid/**'
+
+            newclid:
+              - 'newclid/**'
+
+            ncdgen:
+              - 'ncdgen/**'
+
+            docker:
+              - 'Dockerfile.backend'
+              - 'docker-compose.yml'
+              - 'docker-compose.dev.yml'
+              - '.dockerignore'
+              - 'frontend/Dockerfile'
+              - 'frontend/nginx.conf'
+              - 'frontend/nginx.deploy.conf'
+
+            python:
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - 'pytest.ini'
+              - 'mypy.ini'
+              - '.pre-commit-config.yaml'
+
+            workflows:
+              - '.github/workflows/tests.yml'
+
+      - name: Print changed components
+        run: |
+          echo "run_all=${{ steps.mode.outputs.run_all }}"
+          echo "frontend=${{ steps.filter.outputs.frontend }}"
+          echo "backend=${{ steps.filter.outputs.backend }}"
+          echo "yuclid=${{ steps.filter.outputs.yuclid }}"
+          echo "newclid=${{ steps.filter.outputs.newclid }}"
+          echo "ncdgen=${{ steps.filter.outputs.ncdgen }}"
+          echo "docker=${{ steps.filter.outputs.docker }}"
+          echo "python=${{ steps.filter.outputs.python }}"
+          echo "workflows=${{ steps.filter.outputs.workflows }}"
+
+  frontend-build:
+    name: Frontend build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: detect-changes
+    if: >-
+      ${{
+        needs.detect-changes.outputs.run_all == 'true' ||
+        needs.detect-changes.outputs.frontend == 'true' ||
+        needs.detect-changes.outputs.workflows == 'true'
+      }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Upload frontend build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          if-no-files-found: ignore
+
+  frontend-unit-tests:
+    name: Frontend unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: detect-changes
+    if: >-
+      ${{
+        needs.detect-changes.outputs.run_all == 'true' ||
+        needs.detect-changes.outputs.frontend == 'true' ||
+        needs.detect-changes.outputs.workflows == 'true'
+      }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: npm run test:unit:run
+
+  backend-unit-tests:
+    name: Backend unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: detect-changes
+    if: >-
+      ${{
+        needs.detect-changes.outputs.run_all == 'true' ||
+        needs.detect-changes.outputs.backend == 'true' ||
+        needs.detect-changes.outputs.python == 'true' ||
+        needs.detect-changes.outputs.workflows == 'true'
+      }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Install backend test environment
+        run: |
+          uv venv
+          uv pip install -e "backend[test]"
+
+      - name: Run backend unit tests
+        run: |
+          .venv/bin/python -m pytest backend/tests/unit -q \
+            --junitxml=reports/pytest-backend-unit.xml
+
+      - name: Upload backend unit test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-unit-test-report
+          path: reports/pytest-backend-unit.xml
+          if-no-files-found: ignore
+
+  yuclid-compile-and-test:
+    name: Yuclid C++ compile and CTest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: detect-changes
+    if: >-
+      ${{
+        needs.detect-changes.outputs.run_all == 'true' ||
+        needs.detect-changes.outputs.yuclid == 'true' ||
+        needs.detect-changes.outputs.python == 'true' ||
+        needs.detect-changes.outputs.workflows == 'true'
+      }}
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
+
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Sync Python environment and build Yuclid
+        run: uv sync --frozen
+
+      - name: Find Yuclid CMake build directory
+        id: yuclid-build-dir
+        run: |
+          YUCLID_BUILD_DIR="$(dirname "$(find yuclid/build -name CMakeCache.txt | head -n 1)")"
+
+          if [ -z "$YUCLID_BUILD_DIR" ]; then
+            echo "Could not find Yuclid CMake build directory"
+            find yuclid -maxdepth 4 -type d || true
+            exit 1
+          fi
+
+          echo "Yuclid build dir: $YUCLID_BUILD_DIR"
+          echo "dir=$YUCLID_BUILD_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Build Yuclid C++ test targets
+        run: |
+          cmake --build "${{ steps.yuclid-build-dir.outputs.dir }}" \
+            --parallel "$(nproc)"
+
+      - name: Run Yuclid CTest suite
+        run: |
+          ctest \
+            --test-dir "${{ steps.yuclid-build-dir.outputs.dir }}" \
+            --output-on-failure \
+            --parallel "$(nproc)" \
+            --output-junit "$GITHUB_WORKSPACE/reports/ctest-yuclid.xml"
+
+      - name: Run Yuclid Python pytest tests
+        run: |
+          uv run pytest yuclid/tests -q \
+            --junitxml=reports/pytest-yuclid.xml
+
+      - name: Upload Yuclid test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuclid-test-reports
+          path: reports/*.xml
+          if-no-files-found: ignore
+
+  unit-gate:
+    name: Unit stage gate
+    runs-on: ubuntu-24.04
+    needs:
+      - detect-changes
+      - frontend-build
+      - frontend-unit-tests
+      - backend-unit-tests
+      - yuclid-compile-and-test
+    if: always()
+
+    steps:
+      - name: Check unit stage results
+        run: |
+          results=(
+            "${{ needs.detect-changes.result }}"
+            "${{ needs.frontend-build.result }}"
+            "${{ needs.frontend-unit-tests.result }}"
+            "${{ needs.backend-unit-tests.result }}"
+            "${{ needs.yuclid-compile-and-test.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "Unit stage failed with result: $result"
+              exit 1
+            fi
+          done
+
+          echo "Unit stage passed. Skipped jobs are allowed."
+
+  frontend-integration-tests:
+    name: Frontend integration tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs:
+      - detect-changes
+      - unit-gate
+    if: >-
+      ${{
+        always() &&
+        needs.unit-gate.result == 'success' &&
+        (
+          needs.detect-changes.outputs.run_all == 'true' ||
+          needs.detect-changes.outputs.frontend == 'true' ||
+          needs.detect-changes.outputs.workflows == 'true'
+        )
+      }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend integration tests
+        working-directory: frontend
+        run: npm run test:integration:run
+
+  backend-integration-tests:
+    name: Backend Redis/RQ integration tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs:
+      - detect-changes
+      - unit-gate
+    if: >-
+      ${{
+        always() &&
+        needs.unit-gate.result == 'success' &&
+        (
+          needs.detect-changes.outputs.run_all == 'true' ||
+          needs.detect-changes.outputs.backend == 'true' ||
+          needs.detect-changes.outputs.python == 'true' ||
+          needs.detect-changes.outputs.workflows == 'true'
+        )
+      }}
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
+
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Sync full Newclid/Yuclid environment
+        run: uv sync --frozen
+
+      - name: Wait for Redis
+        run: |
+          uv run python - <<'PY'
+          import os
+          import time
+          from redis import Redis
+
+          redis = Redis.from_url(os.environ["REDIS_URL"])
+
+          for _ in range(30):
+              try:
+                  redis.ping()
+                  print("Redis is ready")
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Redis did not become ready")
+          PY
+
+      - name: Run backend Redis/RQ integration tests
+        run: |
+          REDIS_URL="$REDIS_URL" \
+            uv run pytest backend/tests/integration -m "redis and not slow" -q \
+            --junitxml=reports/pytest-backend-integration.xml
+
+      - name: Upload backend integration test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-integration-test-report
+          path: reports/pytest-backend-integration.xml
+          if-no-files-found: ignore
+
+  integration-gate:
+    name: Integration stage gate
+    runs-on: ubuntu-24.04
+    needs:
+      - detect-changes
+      - unit-gate
+      - frontend-integration-tests
+      - backend-integration-tests
+    if: always()
+
+    steps:
+      - name: Check integration stage results
+        run: |
+          results=(
+            "${{ needs.detect-changes.result }}"
+            "${{ needs.unit-gate.result }}"
+            "${{ needs.frontend-integration-tests.result }}"
+            "${{ needs.backend-integration-tests.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "Integration stage failed with result: $result"
+              exit 1
+            fi
+          done
+
+          echo "Integration stage passed. Skipped jobs are allowed."
+
+  frontend-backend-e2e-tests:
+    name: Frontend ↔ Backend e2e tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    needs:
+      - detect-changes
+      - integration-gate
+    if: >-
+      ${{
+        always() &&
+        needs.integration-gate.result == 'success' &&
+        (
+          needs.detect-changes.outputs.run_all == 'true' ||
+          needs.detect-changes.outputs.frontend == 'true' ||
+          needs.detect-changes.outputs.backend == 'true' ||
+          needs.detect-changes.outputs.docker == 'true' ||
+          needs.detect-changes.outputs.python == 'true' ||
+          needs.detect-changes.outputs.workflows == 'true'
+        )
+      }}
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+      NEWCLID_QUEUE_NAME: newclid
+      FRONTEND_BASE_URL: http://127.0.0.1:5173
+      BACKEND_BASE_URL: http://127.0.0.1:8000
+      PLAYWRIGHT_JUNIT_OUTPUT_NAME: ../reports/e2e-junit.xml
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Install backend test environment
+        run: |
+          uv venv
+          uv pip install -e "backend[test]"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for Redis
+        run: |
+          .venv/bin/python - <<'PY'
+          import os
+          import time
+          from redis import Redis
+
+          redis = Redis.from_url(os.environ["REDIS_URL"])
+
+          for _ in range(30):
+              try:
+                  redis.ping()
+                  print("Redis is ready")
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Redis did not become ready")
+          PY
+
+      - name: Start backend
+        run: |
+          REDIS_URL="$REDIS_URL" \
+          NEWCLID_QUEUE_NAME="$NEWCLID_QUEUE_NAME" \
+          .venv/bin/python -m uvicorn newclid_backend.main:app \
+            --app-dir backend/src \
+            --host 127.0.0.1 \
+            --port 8000 \
+            > reports/backend-e2e.log 2>&1 &
+
+          echo $! > reports/backend.pid
+
+      - name: Start frontend
+        run: |
+          cd frontend
+          npm run dev -- --host 127.0.0.1 --port 5173 \
+            > ../reports/frontend-e2e.log 2>&1 &
+
+          echo $! > ../reports/frontend.pid
+
+      - name: Wait for backend and frontend
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null; then
+              echo "Backend is ready"
+              break
+            fi
+            sleep 1
+          done
+
+          curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null
+
+          for _ in $(seq 1 30); do
+            if curl -sf "$FRONTEND_BASE_URL" >/dev/null; then
+              echo "Frontend is ready"
+              break
+            fi
+            sleep 1
+          done
+
+          curl -sf "$FRONTEND_BASE_URL" >/dev/null
+
+      - name: Run frontend-backend e2e tests
+        working-directory: frontend
+        run: npm run test:e2e:frontend-backend
+
+      - name: Stop background services
+        if: always()
+        run: |
+          if [ -f reports/backend.pid ]; then
+            kill "$(cat reports/backend.pid)" 2>/dev/null || true
+          fi
+
+          if [ -f reports/frontend.pid ]; then
+            kill "$(cat reports/frontend.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload frontend-backend e2e artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-backend-e2e-artifacts
+          path: |
+            reports/backend-e2e.log
+            reports/frontend-e2e.log
+            reports/e2e-junit.xml
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+
+  test-pipeline-gate:
+    name: Test pipeline gate
+    runs-on: ubuntu-24.04
+    needs:
+      - integration-gate
+      - frontend-backend-e2e-tests
+    if: always()
+
+    steps:
+      - name: Check full test pipeline results
+        run: |
+          results=(
+            "${{ needs.integration-gate.result }}"
+            "${{ needs.frontend-backend-e2e-tests.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "Test pipeline failed with result: $result"
+              exit 1
+            fi
+          done
+
+          echo "Full test pipeline passed. Skipped jobs are allowed."
