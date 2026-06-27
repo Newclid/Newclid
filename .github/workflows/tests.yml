@@ -1,29 +1,100 @@
 name: Tests
 
-on: ["push"]
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+      - "ci/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  tests:
+  detect-changes:
+    name: Detect changed components
     runs-on: ubuntu-latest
+
+    outputs:
+      run_all: ${{ steps.mode.outputs.run_all }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      yuclid: ${{ steps.filter.outputs.yuclid }}
+      newclid: ${{ steps.filter.outputs.newclid }}
+      ncdgen: ${{ steps.filter.outputs.ncdgen }}
+      docker: ${{ steps.filter.outputs.docker }}
+      python: ${{ steps.filter.outputs.python }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        lfs: true
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Install Nix
-      uses: DeterminateSystems/nix-installer-action@main
+      - name: Detect manual full run
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run_all=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_all=false" >> "$GITHUB_OUTPUT"
+          fi
 
-    - name: Cache Nix store
-      uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Detect changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
 
-    - name: Run pre-commit checks
-      uses: pre-commit/action@v3.0.1
+            backend:
+              - 'backend/**'
+              - 'Dockerfile.backend'
 
-    - name: Run tests
-      run: |
-        nix develop --command bash -c "uv run pytest -n auto --durations=0 -vv --timeout=24"
+            yuclid:
+              - 'yuclid/**'
+
+            newclid:
+              - 'newclid/**'
+
+            ncdgen:
+              - 'ncdgen/**'
+
+            docker:
+              - 'Dockerfile.backend'
+              - 'docker-compose.yml'
+              - 'docker-compose.dev.yml'
+              - '.dockerignore'
+              - 'frontend/Dockerfile'
+              - 'frontend/nginx.conf'
+              - 'frontend/nginx.deploy.conf'
+
+            python:
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - 'pytest.ini'
+              - 'mypy.ini'
+              - '.pre-commit-config.yaml'
+
+            workflows:
+              - '.github/workflows/tests.yml'
+
+      - name: Print changed components
+        run: |
+          echo "run_all=${{ steps.mode.outputs.run_all }}"
+          echo "frontend=${{ steps.filter.outputs.frontend }}"
+          echo "backend=${{ steps.filter.outputs.backend }}"
+          echo "yuclid=${{ steps.filter.outputs.yuclid }}"
+          echo "newclid=${{ steps.filter.outputs.newclid }}"
+          echo "ncdgen=${{ steps.filter.outputs.ncdgen }}"
+          echo "docker=${{ steps.filter.outputs.docker }}"
+          echo "python=${{ steps.filter.outputs.python }}"
+          echo "workflows=${{ steps.filter.outputs.workflows }}"
