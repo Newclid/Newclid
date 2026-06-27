@@ -19,7 +19,7 @@ concurrency:
 jobs:
   detect-changes:
     name: Detect changed components
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     outputs:
       run_all: ${{ steps.mode.outputs.run_all }}
@@ -101,7 +101,7 @@ jobs:
 
   frontend-build:
     name: Frontend build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: detect-changes
     if: >-
@@ -140,7 +140,7 @@ jobs:
 
   frontend-unit-tests:
     name: Frontend unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: detect-changes
     if: >-
@@ -171,7 +171,7 @@ jobs:
 
   backend-unit-tests:
     name: Backend unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: detect-changes
     if: >-
@@ -217,7 +217,7 @@ jobs:
 
   yuclid-compile-and-test:
     name: Yuclid compile, CTest, and pytest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: detect-changes
     if: >-
@@ -271,7 +271,7 @@ jobs:
         run: mkdir -p reports
 
       - name: Sync Python environment and build Yuclid
-        run: uv sync --frozen -v
+        run: uv sync --frozen
 
       - name: Find Yuclid CMake build directory
         id: yuclid-build-dir
@@ -314,7 +314,7 @@ jobs:
 
   unit-gate:
     name: Unit stage gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - detect-changes
       - frontend-build
@@ -345,7 +345,7 @@ jobs:
 
   frontend-integration-tests:
     name: Frontend integration tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs:
       - detect-changes
@@ -382,7 +382,7 @@ jobs:
 
   backend-integration-tests:
     name: Backend Redis/RQ integration tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs:
       - detect-changes
@@ -454,7 +454,7 @@ jobs:
         run: mkdir -p reports
 
       - name: Sync full Newclid/Yuclid environment
-        run: uv sync --frozen -v
+        run: uv sync --frozen
 
       - name: Wait for Redis
         run: |
@@ -492,7 +492,7 @@ jobs:
 
   integration-gate:
     name: Integration stage gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - detect-changes
       - unit-gate
@@ -522,7 +522,7 @@ jobs:
 
   frontend-backend-e2e-tests:
     name: Frontend ↔ Backend e2e tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     needs:
       - detect-changes
@@ -686,7 +686,7 @@ jobs:
 
   backend-newclid-e2e-tests:
     name: Backend ↔ Newclid e2e tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs:
       - detect-changes
@@ -749,7 +749,7 @@ jobs:
         run: mkdir -p reports
 
       - name: Sync full Newclid/Yuclid environment
-        run: uv sync --frozen -v
+        run: uv sync --frozen
 
       - name: Run backend-Newclid e2e tests
         run: |
