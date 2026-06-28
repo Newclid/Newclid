@@ -1,7 +1,7 @@
 # Frontend tests
 
 The frontend uses Vitest for both unit and frontend integration tests. The two
-suites are separate Vitest projects so they can later run as independent GitLab
+suites are separate Vitest projects so they can later run as independent CI
 CI jobs.
 
 ## Structure
