@@ -32,6 +32,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Pull requests build the documentation to catch broken Sphinx/toctree/API
+  # docs. Only pushes to main and manual runs upload the Pages artifact and
+  # deploy.
   build:
     name: Build documentation
     runs-on: ubuntu-latest

@@ -17,6 +17,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # This job is the single source of truth for component-level change detection.
+  # Normal PR/push runs only execute affected component jobs; workflow_dispatch
+  # forces a full validation run.
   detect-changes:
     name: Detect changed components
     runs-on: ubuntu-24.04
@@ -313,6 +316,8 @@ jobs:
           path: reports/*.xml
           if-no-files-found: ignore
 
+  # Skipped component jobs are allowed here because path filtering can skip
+  # unrelated components. The gate fails only on failed or cancelled jobs.
   unit-gate:
     name: Unit stage gate
     runs-on: ubuntu-24.04
@@ -491,6 +496,8 @@ jobs:
           path: reports/pytest-backend-integration.xml
           if-no-files-found: ignore
 
+  # Same pattern as the unit gate: fail only on failed/cancelled jobs, but allow
+  # skipped jobs from path-based change detection.
   integration-gate:
     name: Integration stage gate
     runs-on: ubuntu-24.04
@@ -684,6 +691,8 @@ jobs:
             frontend/playwright-report/
           if-no-files-found: ignore
 
+  # Final gate keeps the workflow status meaningful even when some downstream
+  # jobs were skipped by path filtering.
   test-pipeline-gate:
     name: Test pipeline gate
     runs-on: ubuntu-24.04

@@ -79,6 +79,15 @@ jobs:
           path: build/CMakeFiles/CMakeConfigureLog.yaml
           retention-days: 7
 
+  # macOS is intentionally different from the normal Linux/Windows build.
+  #
+  # Yuclid uses C++23 <generator>. The default Apple Clang/libc++ toolchain on
+  # GitHub macOS runners does not support this path reliably, so this job builds
+  # Yuclid with Homebrew GCC 14.
+  #
+  # Boost must be built with the same GCC/libstdc++ toolchain. Using Homebrew's
+  # prebuilt Boost can mix Apple Clang/libc++ Boost libraries with GCC-built
+  # Yuclid objects, which leads to ABI/linker problems.
   macos-build-and-test:
     name: macOS GCC
     runs-on: macos-15
@@ -87,6 +96,8 @@ jobs:
       BOOST_VERSION: 1.87.0
       BOOST_DIR_NAME: boost_1_87_0
       BOOST_INSTALL_DIR: .boost-gcc
+      # Bump this when the Boost library set or build flags change.
+      # This forces GitHub Actions to rebuild the cached GCC-built Boost tree.
       BOOST_CACHE_VERSION: v2
       MACOSX_DEPLOYMENT_TARGET: "15.0"
 
@@ -141,6 +152,9 @@ jobs:
           path: ${{ env.BOOST_INSTALL_DIR }}
           key: macos-15-boost-${{ env.BOOST_VERSION }}-gcc14-${{ env.BOOST_CACHE_VERSION }}-${{ runner.arch }}
 
+      # Force CMake to use the GCC-built Boost tree from .boost-gcc.
+      # Without Boost_NO_SYSTEM_PATHS, CMake may silently pick Homebrew/system
+      # Boost and reintroduce the macOS ABI mismatch.
       - name: Configure and Build Yuclid macOS
         run: |
           set -euxo pipefail
