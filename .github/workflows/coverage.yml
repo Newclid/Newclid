@@ -189,6 +189,9 @@ jobs:
             coverage/backend-python-html/
           if-no-files-found: ignore
 
+  # C++ coverage is collected from a direct CMake/gcovr build instead of the
+  # Python/uv package build. This keeps native Yuclid coverage focused on
+  # yuclid/src and avoids mixing it with Python package coverage.
   yuclid-cpp-coverage:
     name: Yuclid C++ coverage
     runs-on: ubuntu-24.04
@@ -535,6 +538,9 @@ jobs:
             frontend/playwright-report/
           if-no-files-found: ignore
 
+  # Coverage artifacts are always produced for inspection. Codacy upload is
+  # best-effort and restricted to pushes on the canonical upstream repository so
+  # forks and PRs do not need project tokens or publish duplicate coverage.
   upload-codacy-coverage:
     name: Upload coverage to Codacy
     runs-on: ubuntu-24.04
