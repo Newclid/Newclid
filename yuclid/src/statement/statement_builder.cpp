@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "parser/constant_parser.hpp"
 #include "rules/rule_mapping.hpp"
 #include "rules/rule_schema.hpp"
 #include "statement/coll.hpp"
@@ -156,35 +157,9 @@ namespace {
             "parsed_constant can only be used with NNRat or Rat!"
         );
 
-        const std::string &value_str = pattern.args.at(index);
-        std::istringstream value_sstream(value_str);
-
-        ExpectedConstType constant_val;
-        value_sstream >> constant_val; 
-
-        if(value_sstream.fail()){
-            // LEGACY COMPATIBILITY:
-            // The original parser does not verify if the stream extraction succeeded.
-            // That is why we also decided not to do anything even if the fail flag is raised.
-            // Errors are swallowed and the returned value is the default initialized value (0/1).
-            // This happens when the input from the stream lacks a slash, or if there is a 
-            // division by zero caught by the stream. Example inputs: "3" or "2/0".
-            //
-            // The code below is a workaround that could be used in the future 
-            // if we decide to upgrade the parser to handle whole numbers gracefully 
-            // and throw clean errors for bad input.
-
-            // if (value_sstream.eof() && !value_str.empty() && std::isdigit(value_str.back())) {
-            //     // the number was parsed properly, the fail bit was raised because EOF was encountered while looking for '/'
-            // }
-            // else {
-            //     throw std::runtime_error(
-            //     std::format("Predicate '{}' expected a valid fraction or integer at index {}, but got '{}'",
-            //                 pattern.name, index, value_str)
-            //     );
-            // }
-        }
-        return constant_val;
+        return parse_legacy_rational_constant<ExpectedConstType>(
+            pattern.args.at(index)
+        );
     }
 
     void build_coll_pattern(
