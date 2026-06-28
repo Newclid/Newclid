@@ -22,6 +22,7 @@
 */
 #include "config_options.hpp"
 #include "parser/problem_parser.hpp"
+#include "parser/constant_parser.hpp"
 
 #include <cmath>
 #include "statement/circumcenter.hpp"
@@ -197,30 +198,25 @@ namespace Yuclid {
       } else if (statement == "rconst") {
         auto d1 = get_dist(sstream);
         auto d2 = get_dist(sstream);
-        NNRat r;
-        sstream >> r;
+        NNRat r = parse_legacy_rational_constant_from_stream<NNRat>(sstream);
         act(make_unique<RatioDistEquals>(d1, d2, r));
       } else if (statement == "r2const") {
         auto d1 = get_squared_dist(sstream);
         auto d2 = get_squared_dist(sstream);
-        NNRat r;
-        sstream >> r;
+        NNRat r = parse_legacy_rational_constant_from_stream<NNRat>(sstream);
         act(make_unique<RatioSquaredDist>(d1, d2, r));
       } else if (statement == "lconst") {
         auto d = get_dist(sstream);
-        NNRat r;
-        sstream >> r;
+        NNRat r = parse_legacy_rational_constant_from_stream<NNRat>(sstream);
         act(make_unique<DistEq>(d, r));
       } else if (statement == "l2const") {
         auto d = get_squared_dist(sstream);
-        NNRat r;
-        sstream >> r;
+        NNRat r = parse_legacy_rational_constant_from_stream<NNRat>(sstream);
         act(make_unique<SquaredDistEq>(d, r));
       } else if (statement == "aconst") {
         auto a = get_slope_angle(sstream);
         auto b = get_slope_angle(sstream);
-        Rat r;
-        sstream >> r;
+        Rat r = parse_legacy_rational_constant_from_stream<Rat>(sstream);
         act(LineAngleEq(a, b, r).normalize());
       } else if (statement == "sameclock") {
         auto l = get_triangle(sstream);
