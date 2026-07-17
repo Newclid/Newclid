@@ -1,0 +1,179 @@
+#pragma once
+
+#include <algorithm>
+#include <cstddef>
+#include <utility>
+#include <vector>
+
+#include <boost/log/trivial.hpp>
+
+namespace Yuclid {
+
+    /**
+     * Temporary key/id pair used while building bucketed cache views.
+     *
+     * key:
+     *   Numeric value used for sorting/grouping.
+     *
+     * id:
+     *   Index into a cache-owned object list.
+     *
+     * Example:
+     *   PointPairId -> index into LazyGeometryCache::point_pairs()
+     */
+    template <typename Id>
+    struct KeyedId {
+        double key;
+        Id id;
+    };
+
+    /**
+     * Builds a temporary list of IDs sorted by their numeric key.
+     *
+     * The cache owns the actual objects. This function stores only IDs plus their
+     * computed keys, not copies of the objects.
+     *
+     * Example:
+     *   build_sorted_keyed_ids<PointPairId>(
+     *       point_pairs.size(),
+     *       [&](PointPairId id) { return squared_length_of_point_pair(id); }
+     *   )
+     *
+     * Result:
+     *   [{key=3.0, id=2}, {key=5.0, id=0}, {key=5.0, id=3}, ...]
+     */
+    template <typename Id, typename KeyFn>
+    std::vector<KeyedId<Id>> build_sorted_keyed_ids(
+        std::size_t object_count,
+        KeyFn key_for_id
+    ) {
+        std::vector<KeyedId<Id>> keyed_ids;
+        keyed_ids.reserve(object_count);
+
+        for (std::size_t raw_id = 0; raw_id < object_count; raw_id++) {
+            const Id id = static_cast<Id>(raw_id);
+
+            keyed_ids.push_back(KeyedId<Id>{
+                .key = static_cast<double>(key_for_id(id)),
+                .id = id,
+            });
+        }
+
+        std::sort(
+            keyed_ids.begin(),
+            keyed_ids.end(),
+            [](const KeyedId<Id> &left, const KeyedId<Id> &right) {
+                return left.key < right.key;
+            }
+        );
+
+        return keyed_ids;
+    }
+
+    /**
+     * Iterates over buckets built from an already sorted keyed-ID list.
+     *
+     * This follows the same tolerance style as the current TheoremMatcher:
+     *
+     *   - compare each key with the previous key
+     *   - keep adding to the same bucket while:
+     *       key < last_key + tolerance
+     *   - warn if the bucket drifts more than 10x tolerance from its start
+     *
+     * The warning matches the old matcher behavior. It does not split or skip
+     * the bucket, because doing so would change matching behavior.
+     *
+     * For every completed bucket, add_bucket is called with:
+     *   - std::vector<Id>: IDs belonging to the bucket
+     *   - double: representative bucket key, taken from the first keyed item
+     *
+     * The caller decides how to store the bucket.
+     */
+    template <typename Id, typename AddBucketFn>
+    void for_each_bucket_from_sorted_keyed_ids(
+        const std::vector<KeyedId<Id>> &sorted_ids,
+        double tolerance,
+        AddBucketFn add_bucket,
+        std::size_t min_bucket_size = 1,
+        const char *debug_name = "geometry ids",
+        double drift_warning_factor = 10.0
+    ) {
+        if (sorted_ids.empty()) {
+            return;
+        }
+
+        auto add_bucket_from_range = [&](std::size_t begin, std::size_t end) {
+            const std::size_t bucket_size = end - begin;
+
+            if (bucket_size < min_bucket_size) {
+                return;
+            }
+
+            std::vector<Id> bucket;
+            bucket.reserve(bucket_size);
+
+            for (std::size_t i = begin; i < end; i++) {
+                bucket.push_back(sorted_ids[i].id);
+            }
+
+            add_bucket(std::move(bucket), sorted_ids[begin].key);
+        };
+
+        std::size_t start_bucket_index = 0;
+        double start_bucket_key = sorted_ids[0].key;
+        double last_key = start_bucket_key;
+        bool warned_for_current_bucket = false;
+
+        for (std::size_t index = 1; index < sorted_ids.size(); index++) {
+            const double key = sorted_ids[index].key;
+
+            if (key < last_key + tolerance) {
+                if (
+                    !warned_for_current_bucket &&
+                    key >= start_bucket_key + drift_warning_factor * tolerance
+                ) {
+                    BOOST_LOG_TRIVIAL(warning)
+                        << "While bucketing " << debug_name
+                        << ": bucket tolerance "
+                        << drift_warning_factor
+                        << "x overflow";
+
+                    warned_for_current_bucket = true;
+                }
+            } else {
+                add_bucket_from_range(start_bucket_index, index);
+
+                start_bucket_index = index;
+                start_bucket_key = key;
+                warned_for_current_bucket = false;
+            }
+
+            last_key = key;
+        }
+
+        add_bucket_from_range(start_bucket_index, sorted_ids.size());
+    }
+
+    /**
+     * Iterates over all unique unordered pairs inside one vector.
+     *
+     * Example:
+     *   values = [A, B, C]
+     *
+     * pair_fn receives:
+     *   (A, B)
+     *   (A, C)
+     *   (B, C)
+     */
+    template <typename Value, typename PairFn>
+    void for_each_unordered_pair(
+        const std::vector<Value> &values,
+        PairFn pair_fn
+    ) {
+        for (std::size_t i = 0; i < values.size(); ++i) {
+            for (std::size_t j = i + 1; j < values.size(); ++j) {
+                pair_fn(values[i], values[j]);
+            }
+        }
+    }
+}

@@ -5,7 +5,6 @@
         "boost-log",
         "boost-program-options",
         "boost-safe-numerics",
-        "boost-system",
         "boost-test"
     ]
 }

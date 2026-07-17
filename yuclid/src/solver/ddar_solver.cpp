@@ -12,6 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Extended DDAR solver initialization to accept custom rule
+   schemas and pass them into theorem matching.
 */
 #include "solver/ddar_solver.hpp"
 #include "ar/equation.hpp"
@@ -24,13 +30,14 @@
 #include "statement/squared_dist_eq.hpp"
 #include "numbers/util.hpp"
 #include "config_options.hpp"
-#include "matcher.hpp"
+#include "matchers/matcher.hpp"
 #include "type/dist.hpp"
 #include "type/sin_or_dist.hpp"
 #include "type/slope_angle.hpp"
 #include "type/squared_dist.hpp"
 #include "type/variable_types.hpp"
 #include "typedef.hpp"
+#include "rules/rule_schema.hpp"
 
 #include <boost/json/array.hpp>
 #include <boost/json/serialize.hpp>
@@ -55,8 +62,8 @@ using namespace std;
 
 namespace Yuclid {
 
-  DDARSolver::DDARSolver(const Problem *problem, const Config::Solver *config) :
-    m_problem(problem), m_config(config) {
+  DDARSolver::DDARSolver(const Problem *problem, const Config::Solver *config, std::span<const RuleSchema> custom_rules) :
+    m_problem(problem), m_config(config), m_custom_rules(custom_rules) {
     BOOST_LOG_TRIVIAL(info) << "Adding `by assumption` theorems";
     // Add problem's hypotheses.
     for (const auto &hyp : problem->hypotheses()) {
@@ -65,7 +72,7 @@ namespace Yuclid {
 
     BOOST_LOG_TRIVIAL(info) << "Matching theorems";
     // Enqueue all numerically matching theorems.
-    TheoremMatcher matcher(m_problem, m_config);
+    TheoremMatcher matcher(m_problem, m_config, m_custom_rules);
     for (const auto &thm : matcher.theorems()) {
       insert_theorem(thm.clone());
     }

@@ -13,6 +13,7 @@
    manual/building_a_problem_setup/index
    manual/concepts/index
    manual/faq
+   manual/development/index
 
 
 .. toctree::

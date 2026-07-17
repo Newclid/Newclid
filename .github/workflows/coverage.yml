@@ -1,32 +1,694 @@
 name: Coverage
 
-on: ["push"]
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  coverage:
-    runs-on: ubuntu-latest
+  newclid-python-coverage:
+    name: Newclid Python coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        lfs: true
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install Nix
-      uses: DeterminateSystems/nix-installer-action@main
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
 
-    - name: Cache Nix store
-      uses: DeterminateSystems/magic-nix-cache-action@main
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
 
-    - name: Build coverage using pytest-cov
-      run: |
-        nix develop --command bash -c "uv run pytest -n auto -m 'not slow' --cov --cov-fail-under=74 --cov-report=xml --cov-report=term-missing"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-    - name: Codacy Coverage Reporter
-      uses: codacy/codacy-coverage-reporter-action@v1.3.0
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        coverage-reports: coverage.xml
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create coverage directory
+        run: mkdir -p coverage
+
+      - name: Sync full Python environment
+        run: uv sync --frozen
+
+      - name: Collect Newclid Python coverage
+        run: |
+          uv run pytest newclid/tests -q \
+            --cov=newclid \
+            --cov-report=xml:coverage/newclid-python.xml \
+            --cov-report=html:coverage/newclid-python-html \
+            --cov-report=term-missing
+
+      - name: Upload Newclid coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newclid-python-coverage
+          path: |
+            coverage/newclid-python.xml
+            coverage/newclid-python-html/
+          if-no-files-found: ignore
+
+  backend-python-coverage:
+    name: Backend Python coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
+
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create coverage directory
+        run: mkdir -p coverage
+
+      - name: Sync full Python environment
+        run: uv sync --frozen
+
+      - name: Wait for Redis
+        run: |
+          uv run python - <<'PY'
+          import os
+          import time
+          from redis import Redis
+
+          redis = Redis.from_url(os.environ["REDIS_URL"])
+
+          for _ in range(30):
+              try:
+                  redis.ping()
+                  print("Redis is ready")
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Redis did not become ready")
+          PY
+
+      - name: Collect backend Python coverage
+        run: |
+          REDIS_URL="$REDIS_URL" \
+            uv run pytest backend/tests -q \
+            --cov=newclid_backend \
+            --cov-report=xml:coverage/backend-python.xml \
+            --cov-report=html:coverage/backend-python-html \
+            --cov-report=term-missing
+
+      - name: Upload backend coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-python-coverage
+          path: |
+            coverage/backend-python.xml
+            coverage/backend-python-html/
+          if-no-files-found: ignore
+
+  # C++ coverage is collected from a direct CMake/gcovr build instead of the
+  # Python/uv package build. This keeps native Yuclid coverage focused on
+  # yuclid/src and avoids mixing it with Python package coverage.
+  yuclid-cpp-coverage:
+    name: Yuclid C++ coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ coverage dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
+
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Set up Python for gcovr
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install gcovr
+        run: python -m pip install gcovr
+
+      - name: Configure Yuclid coverage build
+        run: |
+          rm -rf yuclid/build-coverage
+
+          cmake \
+            -S yuclid \
+            -B yuclid/build-coverage \
+            -G Ninja \
+            -DCMAKE_CXX_COMPILER=g++-14 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DUSE_STATIC_LINK=OFF \
+            -DBUILD_DOC=OFF \
+            -DCMAKE_CXX_FLAGS="--coverage -O0 -g -fprofile-abs-path" \
+            -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+
+      - name: Build Yuclid coverage targets
+        run: |
+          cmake --build yuclid/build-coverage \
+            --parallel "$(nproc)"
+
+      - name: Clear old coverage counters
+        run: find yuclid/build-coverage -name '*.gcda' -delete
+
+      - name: Collect Yuclid C++ coverage with full CTest suite
+        run: |
+          ctest \
+            --test-dir yuclid/build-coverage \
+            --output-on-failure \
+            --parallel "$(nproc)"
+
+      - name: Generate Yuclid C++ coverage report
+        run: |
+          mkdir -p coverage/yuclid-cpp-html
+
+          gcovr \
+            --root "$GITHUB_WORKSPACE/yuclid" \
+            --object-directory "$GITHUB_WORKSPACE/yuclid/build-coverage" \
+            --gcov-executable gcov-14 \
+            --filter "$GITHUB_WORKSPACE/yuclid/src" \
+            --filter "$GITHUB_WORKSPACE/yuclid/include" \
+            --exclude "$GITHUB_WORKSPACE/yuclid/tests" \
+            --cobertura-pretty \
+            --cobertura coverage/yuclid-cpp.xml \
+            --html-details coverage/yuclid-cpp-html/index.html \
+            --print-summary
+
+      - name: Upload Yuclid C++ coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuclid-cpp-coverage
+          path: |
+            coverage/yuclid-cpp.xml
+            coverage/yuclid-cpp-html/
+          if-no-files-found: ignore
+
+  yuclid-python-coverage:
+    name: Yuclid Python coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      CMAKE_ARGS: >-
+        -DUSE_STATIC_LINK=OFF
+        -DBUILD_DOC=OFF
+        -DCMAKE_BUILD_TYPE=Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++ build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libboost-dev \
+            libboost-log-dev \
+            libboost-json-dev \
+            libboost-program-options-dev \
+            libboost-test-dev \
+            gcc-14 \
+            g++-14 \
+            ca-certificates
+
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Create coverage directory
+        run: mkdir -p coverage
+
+      - name: Sync full Python environment and build Yuclid package
+        run: uv sync --frozen
+
+      - name: Collect Yuclid Python coverage
+        run: |
+          uv run pytest yuclid/tests -q \
+            --cov=py_yuclid \
+            --cov-report=xml:coverage/yuclid-python.xml \
+            --cov-report=html:coverage/yuclid-python-html \
+            --cov-report=term-missing
+
+      - name: Upload Yuclid Python coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuclid-python-coverage
+          path: |
+            coverage/yuclid-python.xml
+            coverage/yuclid-python-html/
+          if-no-files-found: ignore
+
+  frontend-coverage:
+    name: Frontend coverage and e2e checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+      NEWCLID_QUEUE_NAME: newclid
+      FRONTEND_BASE_URL: http://127.0.0.1:5173
+      BACKEND_BASE_URL: http://127.0.0.1:8000
+      PLAYWRIGHT_JUNIT_OUTPUT_NAME: ../coverage/frontend-e2e-junit.xml
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Create coverage directory
+        run: mkdir -p coverage
+
+      - name: Install backend test environment
+        run: |
+          uv venv
+          uv pip install -e "backend[test]"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Collect frontend unit coverage
+        working-directory: frontend
+        run: |
+          npm run test:unit:run -- \
+            --coverage \
+            --coverage.provider=v8 \
+            --coverage.reporter=text \
+            --coverage.reporter=lcov \
+            --coverage.reporter=html \
+            --coverage.reporter=json-summary \
+            --coverage.reportsDirectory=coverage/unit
+
+      - name: Collect frontend integration coverage
+        working-directory: frontend
+        run: |
+          npm run test:integration:run -- \
+            --coverage \
+            --coverage.provider=v8 \
+            --coverage.reporter=text \
+            --coverage.reporter=lcov \
+            --coverage.reporter=html \
+            --coverage.reporter=json-summary \
+            --coverage.reportsDirectory=coverage/integration
+
+      - name: Wait for Redis
+        run: |
+          .venv/bin/python - <<'PY'
+          import os
+          import time
+          from redis import Redis
+
+          redis = Redis.from_url(os.environ["REDIS_URL"])
+
+          for _ in range(30):
+              try:
+                  redis.ping()
+                  print("Redis is ready")
+                  break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit("Redis did not become ready")
+          PY
+
+      - name: Start backend
+        run: |
+          REDIS_URL="$REDIS_URL" \
+          NEWCLID_QUEUE_NAME="$NEWCLID_QUEUE_NAME" \
+          .venv/bin/python -m uvicorn newclid_backend.main:app \
+            --app-dir backend/src \
+            --host 127.0.0.1 \
+            --port 8000 \
+            > coverage/backend-e2e.log 2>&1 &
+
+          echo $! > coverage/backend.pid
+
+      - name: Start frontend
+        run: |
+          cd frontend
+          npm run dev -- --host 127.0.0.1 --port 5173 \
+            > ../coverage/frontend-e2e.log 2>&1 &
+
+          echo $! > ../coverage/frontend.pid
+
+      - name: Wait for backend and frontend
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null; then
+              echo "Backend is ready"
+              break
+            fi
+            sleep 1
+          done
+
+          curl -sf "$BACKEND_BASE_URL/api/health" >/dev/null
+
+          for _ in $(seq 1 30); do
+            if curl -sf "$FRONTEND_BASE_URL" >/dev/null; then
+              echo "Frontend is ready"
+              break
+            fi
+            sleep 1
+          done
+
+          curl -sf "$FRONTEND_BASE_URL" >/dev/null
+
+      - name: Run frontend-backend e2e checks
+        working-directory: frontend
+        run: npm run test:e2e:frontend-backend
+
+      - name: Stop background services
+        if: always()
+        run: |
+          if [ -f coverage/backend.pid ]; then
+            kill "$(cat coverage/backend.pid)" 2>/dev/null || true
+          fi
+
+          if [ -f coverage/frontend.pid ]; then
+            kill "$(cat coverage/frontend.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload frontend coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: |
+            frontend/coverage/unit/lcov.info
+            frontend/coverage/unit/index.html
+            frontend/coverage/unit/**/*.html
+            frontend/coverage/unit/coverage-summary.json
+            frontend/coverage/integration/lcov.info
+            frontend/coverage/integration/index.html
+            frontend/coverage/integration/**/*.html
+            frontend/coverage/integration/coverage-summary.json
+            coverage/frontend-e2e-junit.xml
+            coverage/backend-e2e.log
+            coverage/frontend-e2e.log
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+
+  # Coverage artifacts are always produced for inspection. Codacy upload is
+  # best-effort and restricted to pushes on the canonical upstream repository so
+  # forks and PRs do not need project tokens or publish duplicate coverage.
+  upload-codacy-coverage:
+    name: Upload coverage to Codacy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs:
+      - newclid-python-coverage
+      - backend-python-coverage
+      - yuclid-cpp-coverage
+      - yuclid-python-coverage
+      - frontend-coverage
+    if: always()
+
+    env:
+      CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+
+    steps:
+      - name: Prepare coverage reports directory
+        run: mkdir -p coverage-reports
+
+      - name: Download Newclid coverage
+        if: ${{ needs.newclid-python-coverage.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: newclid-python-coverage
+          path: coverage-reports/newclid
+
+      - name: Download backend coverage
+        if: ${{ needs.backend-python-coverage.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-python-coverage
+          path: coverage-reports/backend
+
+      - name: Download Yuclid C++ coverage
+        if: ${{ needs.yuclid-cpp-coverage.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: yuclid-cpp-coverage
+          path: coverage-reports/yuclid-cpp
+
+      - name: Download Yuclid Python coverage
+        if: ${{ needs.yuclid-python-coverage.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: yuclid-python-coverage
+          path: coverage-reports/yuclid-python
+
+      - name: Download frontend coverage
+        if: ${{ needs.frontend-coverage.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage
+          path: coverage-reports/frontend
+
+      - name: List coverage reports
+        run: find coverage-reports -maxdepth 8 -type f | sort
+
+      - name: Upload Newclid coverage to Codacy
+        continue-on-error: true
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.newclid-python-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/newclid/newclid-python.xml
+
+      - name: Upload backend coverage to Codacy
+        continue-on-error: true
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.backend-python-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/backend/backend-python.xml
+
+      - name: Upload Yuclid C++ coverage to Codacy
+        continue-on-error: true
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.yuclid-cpp-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/yuclid-cpp/yuclid-cpp.xml
+
+      - name: Upload Yuclid Python coverage to Codacy
+        continue-on-error: true
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.yuclid-python-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/yuclid-python/yuclid-python.xml
+
+      - name: Upload frontend unit coverage to Codacy
+        continue-on-error: true
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.frontend-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/frontend/unit/lcov.info
+
+      - name: Upload frontend integration coverage to Codacy
+        continue-on-error: true
+        if: >-
+          ${{
+            github.repository == 'Newclid/Newclid' &&
+            github.event_name == 'push' &&
+            env.CODACY_PROJECT_TOKEN != '' &&
+            needs.frontend-coverage.result == 'success'
+          }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage-reports/frontend/integration/lcov.info
+
+      - name: Skip Codacy upload explanation
+        if: >-
+          ${{
+            github.repository != 'Newclid/Newclid' ||
+            github.event_name != 'push' ||
+            env.CODACY_PROJECT_TOKEN == ''
+          }}
+        run: |
+          echo "Skipping Codacy upload."
+          echo "This is expected on pull requests, forks, or repositories without CODACY_PROJECT_TOKEN."

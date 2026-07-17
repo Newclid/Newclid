@@ -1,0 +1,73 @@
+x-backend-image: &backend-image
+  image: newclid-backend:demo
+  build:
+    context: .
+    dockerfile: Dockerfile.backend
+
+services:
+  web:
+    image: newclid-web:demo
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api:
+    <<: *backend-image
+    restart: unless-stopped
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DEFAULT_JOB_TIMEOUT_SECONDS: "120"
+    command: >
+      uvicorn newclid_backend.main:app
+      --host 0.0.0.0
+      --port 8000
+    depends_on:
+      - redis
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    <<: *backend-image
+    restart: unless-stopped
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DEFAULT_JOB_TIMEOUT_SECONDS: "120"
+    command: >
+      sh -c 'rq worker --url "$$REDIS_URL" newclid'
+    depends_on:
+      - redis
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+    volumes:
+      - redis-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  redis-data:

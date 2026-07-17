@@ -24,6 +24,9 @@ class ProofSections(BaseModel):
     unproven_goals: list[str]
     proof_steps: list[str]
     appendix_ar: list[str]
+    construction_signatures: list[str] = []
+    step_signatures: list[str] = []
+    goal_signatures: list[str] = []
 
 
 def write_proof(proof_data: ProofData) -> str:
@@ -118,6 +121,27 @@ def write_proof_sections(proof_data: ProofData) -> ProofSections:
         appendix_ar_lines.append("\n\n")
         appendix_ar_lines.extend(_write_ar_deduction_appendix(step_id, ar_deduction))
 
+    construction_signatures: list[str] = []
+    for assumption in proof_data.construction_assumptions:
+        try:
+            construction_signatures.append(repr(assumption.predicate))
+        except Exception:
+            pass
+
+    step_signatures: list[str] = []
+    for step in proof_data.proof_steps:
+        try:
+            step_signatures.append(repr(step.proven_predicate.predicate))
+        except Exception:
+            pass
+
+    goal_signatures: list[str] = []
+    for goal in proof_data.proven_goals:
+        try:
+            goal_signatures.append(repr(goal.predicate))
+        except Exception:
+            pass
+
     return ProofSections(
         points=point_lines,
         assumptions=assumption_lines,
@@ -127,6 +151,9 @@ def write_proof_sections(proof_data: ProofData) -> ProofSections:
         unproven_goals=unproven_goal_lines,
         proof_steps=proof_lines,
         appendix_ar=appendix_ar_lines,
+        construction_signatures=construction_signatures,
+        step_signatures=step_signatures,
+        goal_signatures=goal_signatures,
     )
 
 

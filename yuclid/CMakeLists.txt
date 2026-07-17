@@ -55,7 +55,7 @@ option(WITH_SAFE_NUMERICS
   ${WITH_SAFE_NUMERICS_DEFAULT}
 )
 
-option(USE_STATIC_LINK "Link statically to external libraries" ON)
+option(USE_STATIC_LINK "Link statically to external libraries" OFF)
 option(BUILD_DOC "Build doxygen documentation" ON)
 
 if (USE_STATIC_LINK)
@@ -66,13 +66,26 @@ if (USE_STATIC_LINK)
     else()
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
     endif()
-  elseif(NOT APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+  endif()
+endif()
+
+# On Windows, CMake has no standard location to search for Boost.
+# Users must download Boost from boost.org and point us at the cmake subfolder
+# inside the lib directory via this environment variable.
+if(WIN32 AND NOT DEFINED Boost_DIR AND DEFINED ENV{YUCLID_BOOST_DIR})
+  if(EXISTS "$ENV{YUCLID_BOOST_DIR}/BoostConfig.cmake")
+    set(Boost_DIR "$ENV{YUCLID_BOOST_DIR}" CACHE PATH "Path to BoostConfig.cmake")
+    message(STATUS "Using Boost_DIR from YUCLID_BOOST_DIR: ${Boost_DIR}")
+  else()
+    message(FATAL_ERROR
+      "YUCLID_BOOST_DIR is set, but BoostConfig.cmake was not found there: "
+      "$ENV{YUCLID_BOOST_DIR}"
+    )
   endif()
 endif()
 
 find_package(Boost 1.83 REQUIRED
-  COMPONENTS log log_setup json program_options system unit_test_framework headers)
+  COMPONENTS log log_setup json program_options unit_test_framework headers)
 
 yuclid_check_cxx_feature(
   HAVE_VARIABLES_MAP_CONTAINS

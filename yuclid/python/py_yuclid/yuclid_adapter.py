@@ -125,6 +125,7 @@ class YuclidAdapter(DeductionProvider):
         self._precomputed_numerical_checks: list[CachedNumericalCheckDeduction] = []
         self._precomputed_reflexivities: list[CachedReflexivityDeduction] = []
         self._precomputation_input: list[str] | None = None
+        self.custom_rules: list[Rule] | None = None
         self.goals: list[PredicateConstruction] = []
 
     @property
@@ -132,6 +133,18 @@ class YuclidAdapter(DeductionProvider):
         if self._precomputation_input is None:
             raise ValueError("Precomputation input is not set.")
         return "\n".join(self._precomputation_input)
+
+    @property
+    def precomputation_custom_rules_str(self) -> str:
+        if self.custom_rules is None:
+            return ""
+        else:
+            rule_lines: list[str] = []
+            for rule in self.custom_rules:
+                rule_str = "\n".join(_write_custom_rule_setup(rule))
+                rule_lines.append(rule_str)
+
+            return "\n".join(rule_lines)
 
     def ordered_deductions_for_problem(
         self, problem: ProblemSetup
@@ -158,6 +171,11 @@ class YuclidAdapter(DeductionProvider):
         self._precomputation_input = _write_yuclid_setup(problem)
         yuclid_output = self._run_yuclid()
 
+        id_to_yuclid_extended = ID_TO_YUCLID_RULE.copy()
+        if self.custom_rules is not None:
+            for custom_rule in self.custom_rules:
+                id_to_yuclid_extended[custom_rule.id] = custom_rule
+
         for he_deduction in yuclid_output.all_deductions:
             deduction: CachedDeduction
             match he_deduction.deduction_type:
@@ -167,8 +185,10 @@ class YuclidAdapter(DeductionProvider):
                         HESpecificRule.BY_CONSTRUCTION.value,
                     }:
                         continue
-                    deduction = he_deduction.to_cached_application()
-                    rule = ID_TO_YUCLID_RULE[he_deduction.newclid_rule]
+                    deduction = he_deduction.to_cached_application(
+                        id_to_yuclid_extended
+                    )
+                    rule = id_to_yuclid_extended[he_deduction.newclid_rule]
                     self._precomputed_rule_deductions[rule].append(deduction)
                 case DeductionType.AR:
                     deduction = he_deduction.to_cached_application()
@@ -187,7 +207,14 @@ class YuclidAdapter(DeductionProvider):
         t0 = time.perf_counter()
         with tempfile.TemporaryDirectory() as temp_dir:
             input_file_path = Path(temp_dir) / f"problem_{self.problem_name}.txt"
+            input_custom_rules_file_path = (
+                Path(temp_dir) / f"custom_rules_{self.problem_name}.txt"
+            )
             input_file_path.write_text(self.precomputation_input_str)
+            input_custom_rules_file_path.write_text(
+                self.precomputation_custom_rules_str
+            )
+
             command = [
                 YUCLID_PATH.as_posix(),
                 "--mode",
@@ -202,6 +229,15 @@ class YuclidAdapter(DeductionProvider):
                 "--input-file",
                 str(input_file_path),
             ]
+
+            if self.custom_rules:
+                command.extend(
+                    [
+                        "--input-additional-rules-file",
+                        str(input_custom_rules_file_path),
+                    ]
+                )
+
             cmd_joined = " ".join(command)
             LOGGER.debug(
                 f"Running yuclid on {input_file_path}. Setup:\n{self.precomputation_input_str}"
@@ -269,10 +305,16 @@ class HERuleApplication(BaseModel):
     assumptions: list[HEConstruction]
     assertions: list[HEConstruction]
 
-    def to_cached_application(self) -> CachedRuleDeduction:
+    def to_cached_application(
+        self, extended_rule_dict: dict[str, Rule] | None = None
+    ) -> CachedRuleDeduction:
         premises = tuple(assumption.to_newclid() for assumption in self.assumptions)
         conclusions = tuple(assertion.to_newclid() for assertion in self.assertions)
-        rule = ID_TO_YUCLID_RULE[self.newclid_rule]
+
+        lookup_dict = (
+            extended_rule_dict if extended_rule_dict is not None else ID_TO_YUCLID_RULE
+        )
+        rule = lookup_dict[self.newclid_rule]
 
         return CachedRuleDeduction(
             deduction_type=DeductionType.RULE,
@@ -381,6 +423,19 @@ def _predicate_to_yuclid(predicate: PredicateConstruction) -> str:
         else:
             args_txts.append(arg)
     return f"{predicate_name} {' '.join(args_txts)}"
+
+
+def _write_custom_rule_setup(rule: Rule) -> list[str]:
+    rule_setup_lines: list[str] = []
+    rule_setup_lines.append(f"rule {rule.id} {' '.join(sorted(rule.variables))}")
+    for premise in rule.premises:
+        rule_setup_lines.append(f"require {premise.name} {' '.join(premise.variables)}")
+    for conclusion in rule.conclusions:
+        rule_setup_lines.append(
+            f"conclude {conclusion.name} {' '.join(conclusion.variables)}"
+        )
+    rule_setup_lines.append("end")
+    return rule_setup_lines
 
 
 YUCLID_RULES: set[Rule] = {

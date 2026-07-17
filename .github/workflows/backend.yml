@@ -1,0 +1,83 @@
+name: Backend
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      # Backend runs when the engine changes: newclid_runner.py imports newclid.
+      - "newclid/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "newclid/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/backend.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+      - name: Install backend
+        # No C++ toolchain here: this job proves the backend runs without
+        # building the engine.
+        run: |
+          uv venv
+          uv pip install -e "backend[test]"
+      - name: Run unit tests
+        run: .venv/bin/python -m pytest backend/tests/unit -vv
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: unit
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        # GitHub waits for this to pass before starting the job, so we don't
+        # need a wait-for-redis script.
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      REDIS_URL: redis://127.0.0.1:6379/15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+      - name: Cache Nix store
+        uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Build workspace
+        # Separate step from the tests so a build failure is easy to spot.
+        run: nix develop --command uv sync --all-extras
+      - name: Run integration tests
+        run: nix develop --command uv run pytest backend/tests/integration -vv

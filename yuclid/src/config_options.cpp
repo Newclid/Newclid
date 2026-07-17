@@ -12,6 +12,13 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Added CLI configuration for an optional additional custom-rule
+   file, including the `--input-additional-rules-file` option, stored path, and
+   accessor used by the Yuclid executable.
 */
 #include "config_options.hpp"
 
@@ -87,6 +94,8 @@ namespace Yuclid {
        "Use json for output. Currently, only used in `--mode=match`")
       ("input-file", po::value<std::vector<std::string>>(&m_input_file_paths)->multitoken(),
        "Input file paths. If not specified, standard input (std::cin) is used.")
+      ("input-additional-rules-file", po::value<std::string>(&m_custom_rules_file_path),
+       "Path to a text file containing additional rules to be evaluated by the matcher.")
       ("log-level", po::value<boost::log::trivial::severity_level>(&m_log_level)->default_value(boost::log::trivial::info),
        "Set the minimum logging severity level (trace, debug, info, warning, error, fatal). Default: info.")
       ("mode", po::value<Mode>(&m_mode)->implicit_value(Mode::DDAR),

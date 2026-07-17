@@ -53,22 +53,36 @@ Using pip
 
   pip install newclid[yuclid]
 
-
 Building from source
 ^^^^^^^^^^^^^^^^^^^^
 
 Follow `uv installation instructions <https://docs.astral.sh/uv/getting-started/installation/>`_
 
+**Prerequisites:** Install `Boost <https://www.boost.org/users/download/>`_ library before running ``uv sync``.
 
 .. code:: bash
 
   git clone https://github.com/Newclid/Newclid.git
   cd Newclid
+
+**Windows 10/11:** Before running ``uv sync``, tell CMake where Boost is installed
+by setting the ``YUCLID_BOOST_DIR`` environment variable in your PowerShell session:
+
+.. code:: powershell
+
+  $env:YUCLID_BOOST_DIR = "C:\path\to\boost\lib64-msvc-XX.X\cmake\Boost-X.XX.X"
+
+The path must point to the ``cmake\Boost-X.XX.X`` subfolder inside the lib directory,
+not the Boost root folder itself.
+
+Now, after this is done, on all systems you can run:
+
+.. code:: bash
+
   uv sync
 
 If you run into issues to build yuclid, you might need to set an environment variable like `CXX=/usr/bin/g++-14`, try adding environment variable that are present in `.env`.
 If you still have issues, `submit an issue <https://github.com/Newclid/Newclid/issues>`_.
-
 
 Quickstart
 ----------
@@ -245,3 +259,4 @@ https://creativecommons.org/licenses/by/4.0/legalcode
 
 .. role:: raw-html(raw)
     :format: html
+

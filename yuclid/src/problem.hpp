@@ -12,6 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Added `point_at` to return existing problem points by index
+   and support matcher/cache code that works with point indices.
 */
 #pragma once
 #include <ranges>
@@ -19,6 +25,7 @@
 #include <vector>
 #include <cstddef>
 
+#include "matchers/matching_types.hpp"
 #include "statement/statement.hpp"
 #include "type/named_point.hpp"
 #include "typedef.hpp"
@@ -138,6 +145,20 @@ namespace Yuclid {
      * @return A point with a given name.
      */
     [[nodiscard]] Point find_point(const std::string &name) const;
+
+    /**
+     * @brief Gets a Point handle for an existing problem point by index.
+     *
+     * This does not create a new point; it returns a lightweight Point handle
+     * referring to the point stored in this Problem.
+     *
+     * @param index Index of the point in this problem.
+     *
+     * @return Point handle for the existing point at the given index.
+     *
+     * @throws std::runtime_error if index is outside the problem point range.
+     */
+    [[nodiscard]] Point point_at(const size_t index) const;
   };
 
 } // namespace Yuclid

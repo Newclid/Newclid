@@ -12,6 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Added `Theorem::from_statements` for constructing theorem
+   objects from dynamically built hypothesis and conclusion statements.
 */
 #include "ar/equation.hpp"
 #include "ar/linear_combination.hpp"
@@ -411,6 +417,20 @@ namespace Yuclid {
   Theorem::Theorem(std::string_view name, std::string_view newclid_id) :
     m_name(name), m_newclid_rule(newclid_id)
   {}
+
+  Theorem Theorem::from_statements(
+    std::string_view name,
+    std::string_view newclid_rule,
+    std::vector<std::unique_ptr<Statement>> hypotheses,
+    std::vector<std::unique_ptr<Statement>> conclusions
+  ) {
+    Theorem newTheorem(name, newclid_rule);
+
+    newTheorem.m_hypotheses = std::move(hypotheses);
+    newTheorem.m_conclusions = std::move(conclusions);
+
+    return newTheorem;
+  }
 
   Theorem Theorem::triangle_bisector_of_equal_angles(const Point &point,
                                                      const Angle &angle) {

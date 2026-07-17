@@ -1,0 +1,1844 @@
+/* ---------- Design tokens ---------- */
+
+:root {
+  /* Type system: Inter for UI, IBM Plex Mono for numbers, Fraunces for math labels. */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: 'Fraunces', 'Times New Roman', serif;
+
+  /* Surfaces — paper-white feel, slightly warm. */
+  --bg-app: #FAF8F4;
+  --bg-canvas: #FDFBF7;
+  --bg-toolbar: #F2EFE8;
+  --bg-elevated: #FFFFFF;
+
+  /* Ink — graphite-on-paper, never pure black. */
+  --ink-strong: #1A1816;
+  --ink-mid: #595650;
+  --ink-soft: #8C887F;
+  --ink-faint: #BFBBB1;
+
+  /* Borders */
+  --rule-soft: rgba(26, 24, 22, 0.07);
+  --rule-mid: rgba(26, 24, 22, 0.14);
+
+  /* The single accent — a deep ink-blue. Used sparingly. */
+  --accent: #2A4A7F;
+  --accent-soft: rgba(42, 74, 127, 0.12);
+
+  /* Canvas-specific */
+  --grid-minor: rgba(26, 24, 22, 0.045);
+  --grid-major: rgba(26, 24, 22, 0.10);
+  --axis-stroke: rgba(26, 24, 22, 0.40);
+  --axis-label: #8C887F;
+  --shape-stroke: #1A1816;
+  --circle-stroke: #1A1816;
+  --point-fill: #1A1816;
+  --label-fill: #1A1816;
+  --preview-stroke: #8C887F;
+}
+
+/* ---------- Reset ---------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-app);
+  color: var(--ink-strong);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* ---------- App shell ---------- */
+
+#app {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Suppress text selection and keep the resize cursor while dragging the handle. */
+body.is-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* The canvas host fills the whole app; the toolbar floats on top of it. */
+.canvas-host {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.canvas-host > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.zoom-controls {
+  position: absolute;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+.zoom-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  background: var(--bg-elevated);
+  color: var(--ink-strong);
+  border: 1px solid var(--rule-mid);
+  border-bottom: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-btn:last-child {
+  border-bottom: 1px solid var(--rule-mid);
+}
+
+.zoom-btn:hover {
+  background: rgba(26, 24, 22, 0.06);
+}
+
+.zoom-btn:active {
+  background: rgba(26, 24, 22, 0.12);
+}
+
+.redraw-btn {
+  position: absolute;
+  bottom: calc(1.25rem + 80px);
+  right: 1.25rem;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--accent);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+.redraw-btn:hover {
+  background: #20396A;
+}
+
+.redraw-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---------- Toolbar ---------- */
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-toolbar);
+  border-right: 1px solid var(--rule-mid);
+  padding: 24px 16px 16px;
+  gap: 4px;
+  /* Overlay the canvas so resizing covers the plane instead of shrinking it. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--toolbar-width, 350px);
+  height: 100%;
+  z-index: 10;
+}
+
+/* Drag strip sitting over the toolbar's right border. */
+.toolbar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 5;
+  touch-action: none;
+  transition: background 120ms ease;
+}
+
+.toolbar-resizer:hover,
+.toolbar-resizer.is-active {
+  background: var(--accent-soft);
+}
+
+.toolbar-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 6px 22px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.toolbar-brand-mark {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--ink-strong);
+  line-height: 1;
+}
+
+.toolbar-brand-name {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+}
+
+.toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+  /* Take the leftover height and scroll the tool list so the action buttons
+     below stay pinned as the catalog grows. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--ink-mid);
+  transition: background 120ms ease, color 120ms ease;
+  position: relative;
+}
+
+.tool-btn:hover {
+  background: rgba(26, 24, 22, 0.04);
+  color: var(--ink-strong);
+}
+
+.tool-btn.is-active {
+  background: var(--bg-elevated);
+  color: var(--ink-strong);
+  box-shadow: 0 0 0 1px var(--rule-mid), 0 1px 2px rgba(26, 24, 22, 0.04);
+}
+
+.tool-btn.is-active::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+
+.tool-btn svg {
+  flex: 0 0 auto;
+}
+
+.tool-btn-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool-btn-key {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  letter-spacing: 0.05em;
+}
+
+.tool-btn:hover .tool-btn-key {
+  color: var(--ink-soft);
+}
+
+.toolbar-spacer {
+  /* The tool group now fills the leftover space, so the spacer no longer needs
+     to grow; the proofs tab uses its own flex:1 panel. */
+  flex: 0 0 auto;
+}
+
+.tool-btn-danger {
+  color: var(--ink-soft);
+}
+
+.tool-btn-danger:hover {
+  color: #8B2828;
+}
+
+.tool-btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-radius: 6px;
+}
+
+.tool-btn-primary:hover {
+  background: #20396A;
+  color: #FFFFFF;
+}
+
+.tool-btn-primary .tool-btn-label {
+  color: #FFFFFF;
+}
+
+/* ---------- Toolbar group buttons ---------- */
+
+/* Thin rule separating select from the group list */
+.toolbar-sep {
+  height: 1px;
+  background: var(--rule-soft);
+  margin: 6px 0;
+}
+
+/* A group-level button has no icon so the label starts at the left edge */
+.tool-group-btn .tool-btn-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mid);
+}
+
+/* Subtle highlight when the active tool lives inside this group */
+.tool-group-btn.has-active {
+  background: var(--accent-soft);
+}
+
+.tool-group-btn.has-active .tool-btn-label {
+  color: var(--accent);
+}
+
+/* Arrow chevron at the right edge of a group button */
+.tool-group-arrow {
+  font-size: 14px;
+  color: var(--ink-faint);
+  margin-left: auto;
+  line-height: 1;
+}
+
+.tool-group-btn.has-active .tool-group-arrow {
+  color: var(--accent);
+}
+
+/* "← All tools" back button */
+.tool-group-back .tool-btn-label {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.tool-group-back:hover {
+  background: var(--accent-soft);
+}
+
+/* ---------- Advanced Options expandable ---------- */
+
+.advanced-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.advanced-arrow {
+  font-size: 14px;
+  color: var(--ink-faint);
+  margin-left: auto;
+  line-height: 1;
+  display: inline-block;
+  transition: transform 120ms ease;
+}
+
+.advanced-section.is-open .advanced-arrow {
+  transform: rotate(90deg);
+}
+
+.advanced-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 4px;
+}
+
+/* ---------- Panel tab switch (Toolbar | Proofs) ---------- */
+
+.panel-tab-switch {
+  display: flex;
+  align-items: stretch;
+  margin: 6px 0 0;
+  padding: 2px;
+  background: rgba(26, 24, 22, 0.04);
+  border: 1px solid var(--rule-mid);
+  border-radius: 8px;
+}
+
+.panel-tab-btn {
+  flex: 1 1 0;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  border-radius: 6px;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.panel-tab-btn:hover {
+  color: var(--ink-strong);
+}
+
+.panel-tab-btn.is-active {
+  background: var(--bg-elevated);
+  color: var(--ink-strong);
+  box-shadow: 0 0 0 1px var(--rule-mid), 0 1px 2px rgba(26, 24, 22, 0.04);
+}
+
+/* ---------- Proofs history list ---------- */
+
+.panel-proofs {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.proofs-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.proofs-list-empty {
+  margin: 0;
+  padding: 8px 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.proofs-list-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 10px;
+  border-radius: 6px;
+  transition: background 120ms ease;
+}
+
+.proofs-list-item:hover {
+  background: rgba(26, 24, 22, 0.04);
+}
+
+.proofs-list-item-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  cursor: pointer;
+  padding: 6px 0;
+  outline: none;
+  border-radius: 4px;
+}
+
+.proofs-list-item-main:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.proofs-list-name {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proofs-list-menu-btn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--ink-soft);
+  border-radius: 4px;
+  transition: background 120ms ease, color 120ms ease;
+  opacity: 0;
+}
+
+.proofs-list-item:hover .proofs-list-menu-btn,
+.proofs-list-item:focus-within .proofs-list-menu-btn {
+  opacity: 1;
+}
+
+.proofs-list-menu-btn:hover {
+  background: rgba(26, 24, 22, 0.08);
+  color: var(--ink-strong);
+}
+
+.proofs-list-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  z-index: 200;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-mid);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(26, 24, 22, 0.12);
+  padding: 4px;
+  min-width: 130px;
+}
+
+.proofs-list-dropdown.is-open {
+  display: flex;
+  flex-direction: column;
+}
+
+.proofs-list-dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: var(--ink-strong);
+  border-radius: 5px;
+  transition: background 100ms ease;
+}
+
+.proofs-list-dropdown-item:hover {
+  background: rgba(26, 24, 22, 0.06);
+}
+
+.proofs-list-dropdown-item-danger {
+  color: #8B2828;
+}
+
+.proofs-list-dropdown-item-danger:hover {
+  background: rgba(139, 40, 40, 0.07);
+}
+
+.proofs-list-rename-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-strong);
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  min-width: 0;
+  outline: none;
+}
+
+/* Narrow mode: replace status badge text with a coloured circle */
+.proofs-list.is-narrow .proof-status-badge {
+  font-size: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink-faint);
+}
+
+.proofs-list.is-narrow .proof-status-badge[data-status="queued"],
+.proofs-list.is-narrow .proof-status-badge[data-status="running"] {
+  background: var(--accent);
+}
+
+.proofs-list.is-narrow .proof-status-badge[data-status="succeeded"] {
+  background: #1A6B1A;
+}
+
+.proofs-list.is-narrow .proof-status-badge[data-status="failed"],
+.proofs-list.is-narrow .proof-status-badge[data-status="timed_out"] {
+  background: #8B2828;
+}
+
+/* ---------- Solve-new-problem choice modal ---------- */
+
+.proof-choice-dialog {
+  width: min(420px, 90vw);
+}
+
+.proof-choice-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.proof-choice-btn {
+  width: 100%;
+  text-align: left;
+  padding: 16px 18px;
+  border-radius: 8px;
+  border: 1.5px solid var(--rule-mid);
+  background: var(--bg-canvas);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+
+.proof-choice-btn:hover {
+  background: var(--bg-elevated);
+  box-shadow: 0 2px 8px rgba(26, 24, 22, 0.08);
+}
+
+.proof-choice-btn-primary {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.proof-choice-btn-primary:hover {
+  background: rgba(42, 74, 127, 0.18);
+  border-color: var(--accent);
+}
+
+.proof-choice-btn-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.proof-choice-btn-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.proof-choice-btn-subtitle {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.proof-choice-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  background: var(--rule-mid);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.proof-choice-badge-recommended {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.proof-choice-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.proof-choice-cancel {
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 6px 20px;
+}
+
+.proof-choice-cancel:hover {
+  color: var(--ink-strong);
+  background: var(--rule-soft);
+}
+
+/* ---------- JGEX input modal ---------- */
+
+.jgex-backdrop {
+  position: fixed;
+  inset: 0;
+  display: none;                       /* shown via .is-open */
+  align-items: center;
+  justify-content: center;             /* centers the dialog */
+  background: rgba(26, 24, 22, 0.35);  /* dims the page; canvas still shows through */
+  z-index: 100;
+}
+
+.jgex-backdrop.is-open {
+  display: flex;
+}
+
+.jgex-dialog {
+  width: min(560px, 90vw);             /* centered box, not full-screen */
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-mid);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(26, 24, 22, 0.22);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jgex-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ink-strong);
+}
+
+.jgex-input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 6px;
+  background: var(--bg-canvas);
+  color: var(--ink-strong);
+}
+
+.jgex-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.jgex-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.jgex-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.jgex-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.jgex-btn-quiet {
+  color: var(--ink-mid);
+}
+
+.jgex-btn-quiet:hover {
+  background: rgba(26, 24, 22, 0.04);
+  color: var(--ink-strong);
+}
+
+.jgex-btn-accent {
+  background: var(--accent);
+  color: #FFFFFF;
+}
+
+.jgex-btn-accent:hover {
+  background: #20396A;
+}
+
+.jgex-btn-accent:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.jgex-btn-danger {
+  background: #8B2828;
+  color: #FFFFFF;
+}
+
+.jgex-btn-danger:hover {
+  background: #6E1F1F;
+}
+
+.clear-confirm-msg {
+  margin: 0 0 20px;
+  font-size: 13.5px;
+  color: var(--ink-mid);
+  line-height: 1.55;
+}
+
+.remove-confirm-dialog {
+  width: min(360px, 90vw);
+}
+
+.remove-confirm-body {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-mid);
+}
+
+.jgex-error {
+  font-size: 12px;
+  color: #8B2828;
+  min-height: 0;
+  margin: 0;
+}
+
+/* ---------- Proof panel ---------- */
+
+.proof-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}
+
+.proof-back-btn {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.proof-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.proof-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.proof-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.proof-status-badge {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mid);
+}
+
+.proof-status-badge[data-status="queued"],
+.proof-status-badge[data-status="running"] {
+  color: var(--accent);
+}
+
+.proof-status-badge[data-status="succeeded"] {
+  color: #1A6B1A;
+}
+
+.proof-status-badge[data-status="failed"],
+.proof-status-badge[data-status="timed_out"] {
+  color: #8B2828;
+}
+
+.proof-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.proof-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.proof-steps-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.proof-step-item {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-strong);
+  line-height: 1.5;
+  word-break: break-word;
+  padding: 4px 6px;
+  background: rgba(26, 24, 22, 0.03);
+  border-radius: 4px;
+}
+
+.proof-error-msg {
+  margin: 0;
+  font-size: 12px;
+  color: #8B2828;
+  line-height: 1.5;
+}
+
+.proof-step-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 8px;
+  background: rgba(26, 24, 22, 0.03);
+  border-radius: 4px;
+  border-left: 2px solid var(--rule-mid);
+}
+
+.proof-step-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.proof-step-premise {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-mid);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.proof-step-premise.is-active-substep {
+  background: rgba(200, 134, 10, 0.18);
+  color: #7A5000;
+  border-radius: 3px;
+  padding-left: 4px;
+  margin-left: -4px;
+}
+
+.proof-step-conclusion.is-active-substep {
+  background: rgba(26, 122, 26, 0.18);
+  color: #0A4A0A;
+  border-radius: 3px;
+  padding-left: 4px;
+  margin-left: -4px;
+}
+
+.proof-step-rule {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ink-soft);
+  line-height: 1.4;
+  padding: 2px 0;
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+  margin: 1px 0;
+}
+
+.proof-step-rule::before {
+  content: '⟹  ';
+  font-style: normal;
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.proof-step-conclusion {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink-strong);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.proof-stderr {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: #8B2828;
+  background: rgba(139, 40, 40, 0.04);
+  border: 1px solid rgba(139, 40, 40, 0.12);
+  border-radius: 4px;
+  padding: 8px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.proof-step-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.proof-step-nav-btn {
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink-mid);
+  flex-shrink: 0;
+}
+
+.proof-step-nav-btn:hover:not(:disabled) {
+  background: rgba(26, 24, 22, 0.05);
+}
+
+.proof-step-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.proof-step-counter {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.proof-step-card.is-active {
+  border-left-color: #2A4A7F;
+  background: rgba(42, 74, 127, 0.06);
+}
+
+.proof-step-card.is-active.is-substep-premise {
+  border-left-color: #C8860A;
+  background: rgba(200, 134, 10, 0.06);
+}
+
+.proof-step-card.is-active.is-substep-conclusion {
+  border-left-color: #1A7A1A;
+  background: rgba(26, 122, 26, 0.06);
+}
+
+/* Sub-step navigation (inside the active step card) */
+
+.proof-substep-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.proof-substep-nav-btn {
+  font-size: 11px;
+  padding: 2px 6px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink-mid);
+  flex-shrink: 0;
+}
+
+.proof-substep-nav-btn:hover:not(:disabled) {
+  background: rgba(26, 24, 22, 0.05);
+  color: var(--ink-strong);
+}
+
+.proof-substep-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.proof-substep-counter {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Proof legend ---------- */
+
+.proof-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: rgba(26, 24, 22, 0.03);
+  border: 1px solid var(--rule-soft);
+  border-radius: 5px;
+}
+
+.proof-legend-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.proof-legend-desc {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+/* Inline ref-label badges used in Premises, Numerical Checks, Derived Facts lists
+   and remapped inside proof-step-premise / proof-step-conclusion spans. */
+.proof-ref-label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-right: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.proof-ref-premise {
+  background: rgba(42, 74, 127, 0.12);
+  color: #2A4A7F;
+}
+
+.proof-ref-numerical {
+  background: rgba(80, 50, 120, 0.12);
+  color: #503278;
+}
+
+.proof-ref-derived {
+  background: rgba(26, 100, 26, 0.12);
+  color: #1A641A;
+}
+
+/* List items that use an inline ref-label badge instead of raw text. */
+.proof-labeled-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.proof-empty-hint {
+  color: var(--ink-faint);
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 11px;
+}
+
+/* ---------- Goal picker (visual problem definition) ---------- */
+
+.goal-chooser-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goal-pred-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.goal-pred-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border-radius: 6px;
+  border: 1.5px solid var(--rule-mid);
+  background: var(--bg-canvas);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.goal-pred-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--ink-soft);
+}
+
+.goal-pred-btn.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.goal-pred-icon {
+  font-size: 17px;
+  line-height: 1;
+  color: var(--ink-strong);
+}
+
+.goal-pred-label {
+  font-size: 10.5px;
+  color: var(--ink-mid);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.goal-pred-btn.is-active .goal-pred-label { color: var(--accent); }
+
+.goal-slot-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.goal-slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Group header shown above each logical cluster (Line 1, Angle 2, …). */
+.goal-slot-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  padding: 8px 0 3px;
+}
+
+/* Container for the rows within one group — adds a slight left indent. */
+.goal-slot-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 4px;
+  border-left: 2px solid var(--rule-soft);
+  margin-bottom: 2px;
+}
+
+.goal-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: rgba(26, 24, 22, 0.03);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 100ms ease, border-color 100ms ease;
+}
+
+/* Filled rows get a pencil cursor — clicking re-focuses them for editing. */
+.goal-slot-row.is-filled { cursor: text; }
+
+.goal-slot-row:hover:not(.is-next) { border-color: var(--rule-mid); background: var(--bg-elevated); }
+
+.goal-slot-row.is-next   { border-color: var(--accent); background: var(--accent-soft); cursor: default; }
+.goal-slot-row.is-filled { background: rgba(26, 107, 26, 0.06); border-color: rgba(26, 107, 26, 0.22); }
+
+.goal-slot-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-strong);
+  width: 16px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.goal-slot-value {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink-strong);
+}
+
+.goal-slot-placeholder       { flex: 1; font-size: 11.5px; color: var(--ink-faint); font-style: italic; }
+.goal-slot-placeholder.is-next { color: var(--accent); }
+
+.goal-slot-clear {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--ink-soft);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+.goal-slot-clear:hover { color: #8B2828; background: rgba(139, 40, 40, 0.06); }
+
+.goal-hint { margin: 0; font-size: 11.5px; color: var(--accent); font-style: italic; }
+.goal-hint-warn { color: var(--ink-soft); font-style: normal; }
+.goal-pred-description { margin: 6px 0 0; font-size: 0.78rem; color: var(--ink-soft); line-height: 1.4; }
+
+/* + Add point / − Remove last controls for variable-length predicates. */
+.goal-var-controls {
+  display: flex;
+  gap: 6px;
+  padding: 6px 0 2px;
+}
+
+.goal-var-btn {
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--rule-mid);
+  background: var(--bg-canvas);
+  color: var(--ink-mid);
+  transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
+}
+
+.goal-var-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--ink-strong);
+  border-color: var(--accent);
+}
+
+.goal-var-btn-remove:hover {
+  border-color: #8B2828;
+  color: #8B2828;
+  background: rgba(139, 40, 40, 0.04);
+}
+
+.goal-preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.goal-preview-code {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-strong);
+  background: rgba(26, 24, 22, 0.04);
+  border: 1px solid var(--rule-soft);
+  border-radius: 4px;
+  padding: 7px 8px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 90px;
+  overflow-y: auto;
+}
+
+.goal-submit-btn { align-self: flex-end; margin-top: 2px; }
+
+/* ---------- Job status banner ---------- */
+
+.job-status-banner {
+  display: none;
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 200;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  box-shadow: 0 4px 16px rgba(26, 24, 22, 0.16);
+  max-width: 480px;
+}
+
+.job-status-banner.is-visible {
+  display: flex;
+}
+
+.job-status-banner[data-variant="success"] {
+  background: #EAF3EA;
+  color: #1A4A1A;
+  border: 1px solid rgba(26, 74, 26, 0.18);
+}
+
+.job-status-banner[data-variant="error"] {
+  background: #F5EAEA;
+  color: #6B1A1A;
+  border: 1px solid rgba(107, 26, 26, 0.18);
+}
+
+.job-status-banner[data-variant="info"] {
+  background: #EAF0FA;
+  color: #1A3A5C;
+  border: 1px solid rgba(26, 58, 92, 0.18);
+}
+
+.job-banner-text {
+  flex: 1;
+}
+
+.job-banner-close {
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.55;
+  padding: 0 2px;
+}
+
+.job-banner-close:hover {
+  opacity: 1;
+}
+
+/* ---------- Theorem manager — list view ---------- */
+
+.theorem-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.theorem-create-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.theorem-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.theorem-saved-card {
+  border: 1px solid var(--rule-mid);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--bg-canvas);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theorem-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.theorem-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-strong);
+  word-break: break-all;
+}
+
+.theorem-card-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.theorem-card-action-btn {
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  color: var(--ink-mid);
+  background: var(--bg-elevated);
+  transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
+}
+
+.theorem-card-action-btn:hover {
+  background: rgba(26, 24, 22, 0.06);
+  color: var(--ink-strong);
+}
+
+.theorem-card-delete-btn:hover {
+  color: #8B2828;
+  border-color: rgba(139, 40, 40, 0.4);
+  background: rgba(139, 40, 40, 0.05);
+}
+
+.theorem-card-desc {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.theorem-card-predicates {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.theorem-card-pred-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-soft);
+}
+
+.theorem-card-pred {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-strong);
+  background: rgba(26, 24, 22, 0.04);
+  border-radius: 3px;
+  padding: 2px 5px;
+  word-break: break-all;
+}
+
+.theorem-card-pred-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.theorem-card-pred-human {
+  font-size: 12px;
+  color: var(--ink-strong);
+  line-height: 1.4;
+}
+
+.theorem-card-pred-jgex {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+  background: rgba(26, 24, 22, 0.04);
+  border-radius: 3px;
+  padding: 2px 5px;
+  word-break: break-all;
+}
+
+.theorem-card-jgex-toggle {
+  align-self: flex-start;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  border: none;
+  background: none;
+  padding: 2px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-top: 2px;
+}
+
+.theorem-card-jgex-toggle:hover {
+  color: var(--ink-strong);
+}
+
+/* ---------- Theorem manager — builder: name/description form fields ---------- */
+
+.theorem-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theorem-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+
+.theorem-field-input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  padding: 6px 9px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 5px;
+  background: var(--bg-canvas);
+  color: var(--ink-strong);
+  box-sizing: border-box;
+}
+
+.theorem-field-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.theorem-field-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.theorem-field-textarea {
+  font-family: var(--font-sans);
+  resize: vertical;
+  min-height: 54px;
+  line-height: 1.4;
+}
+
+/* ---------- Theorem manager — builder: predicate picker + editable rows ---------- */
+
+.theorem-pred-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(26, 24, 22, 0.02);
+  border: 1px solid var(--rule-soft);
+  border-radius: 6px;
+}
+
+.theorem-pred-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theorem-pred-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.theorem-picker-cancel {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.theorem-add-pred-btn {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.theorem-editable-pred {
+  border: 1px solid var(--rule-mid);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theorem-editable-pred-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.theorem-editable-pred-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.theorem-pred-delete-btn {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink-soft);
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+.theorem-pred-delete-btn:hover {
+  color: #8B2828;
+  background: rgba(139, 40, 40, 0.06);
+}
+
+.theorem-args {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.theorem-arg-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.theorem-arg-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-strong);
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.theorem-arg-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 3px 7px;
+  border: 1px solid var(--rule-mid);
+  border-radius: 4px;
+  background: var(--bg-canvas);
+  color: var(--ink-strong);
+  min-width: 0;
+}
+
+.theorem-arg-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.theorem-arg-input-fraction {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  max-width: 80px;
+}
+
+.theorem-arg-input-point {
+  flex: 0 0 auto;
+  width: 36px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+}
+
+.theorem-arg-hint {
+  font-size: 10px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.theorem-arg-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---------- Theorem builder — pinned save footer ---------- */
+
+.theorem-builder-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--rule-mid);
+}
+
+.theorem-error-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 10px;
+  background: rgba(139, 40, 40, 0.07);
+  border: 1px solid rgba(139, 40, 40, 0.22);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #7A1F1F;
+  line-height: 1.45;
+}
+
+.theorem-error-icon {
+  flex-shrink: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.theorem-save-btn {
+  align-self: flex-end;
+}
+
+/* ---------- Construction slot hint ---------- */
+
+.slot-hint {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26, 24, 22, 0.80);
+  color: #FAF8F4;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-family: var(--font-sans);
+  pointer-events: none;
+  z-index: 6;
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.slot-error {
+  position: absolute;
+  bottom: 136px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(180, 30, 30, 0.92);
+  color: #FFF;
+  padding: 9px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  pointer-events: none;
+  z-index: 6;
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+.point-context-menu {
+  position: absolute;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  padding: 4px 0;
+  min-width: 140px;
+}
+.point-context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 14px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1a1a1a;
+}
+.point-context-menu button:hover { background: #f0f0f0; }
+
+.point-rename-input {
+  position: absolute;
+  z-index: 101;
+  font-size: 13px;
+  padding: 2px 6px;
+  border: 1px solid #2A4A7F;
+  border-radius: 3px;
+  width: 70px;
+}

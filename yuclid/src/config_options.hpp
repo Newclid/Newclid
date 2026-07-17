@@ -12,6 +12,13 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Added CLI configuration for an optional additional custom-rule
+   file, including the `--input-additional-rules-file` option, stored path, and
+   accessor used by the Yuclid executable.
 */
 #pragma once
 
@@ -68,6 +75,10 @@ namespace Yuclid {
         return m_input_file_paths;
       }
 
+      [[nodiscard]] const std::string& custom_rules_file_path() const {
+        return m_custom_rules_file_path;
+      }
+
       [[nodiscard]] bool err_on_failure() const { return m_err_on_failure; }
 
       /**
@@ -80,6 +91,7 @@ namespace Yuclid {
       boost::log::trivial::severity_level m_log_level = boost::log::trivial::info;
       bool m_use_json = false;
       std::vector<std::string> m_input_file_paths;
+      std::string m_custom_rules_file_path;
       bool m_err_on_failure = false;
     };
 
