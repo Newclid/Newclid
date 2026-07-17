@@ -1,87 +1,37 @@
 name: Documentation
-
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "docs/**"
-      - "README.rst"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/documentation.yml"
-
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "docs/**"
-      - "README.rst"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".github/workflows/documentation.yml"
-
+    branches: ["main"]
   workflow_dispatch:
-
 permissions:
   contents: read
+  pages: write
   id-token: write
-
 concurrency:
-  group: documentation-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
+  group: "pages"
+  cancel-in-progress: false
 jobs:
-  # Pull requests build the documentation to catch broken Sphinx/toctree/API
-  # docs. Only pushes to main and manual runs upload the Pages artifact and
-  # deploy.
-  build:
-    name: Build documentation
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
-
-      - name: Cache Nix store
-        uses: DeterminateSystems/magic-nix-cache-action@main
-
-      - name: Build documentation
-        run: |
-          nix develop --command bash -c "uv sync --extra doc && uv run python ./docs/reformat.py && uv run sphinx-build -b html ./docs ./_build"
-
-      - name: Upload Pages artifact
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "./_build"
-
   deploy:
-    name: Deploy documentation
-    if: github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-
+    runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+      - name: Cache Nix store
+        uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Build documentation
+        run: |
+          nix develop --command bash -c "uv sync --extra doc && uv run python ./docs/reformat.py && uv run sphinx-build -b html ./docs ./_build"
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './_build'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
