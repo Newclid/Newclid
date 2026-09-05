@@ -3,7 +3,21 @@ Yuclid extension guides
 
 Yuclid guides are task-oriented recipes for extending or debugging the custom
 rule matcher. Use the module pages for explanation, and use these pages when you
-need concrete implementation steps.
+need concrete implementation steps: exact file paths, method signatures, a
+worked code example grounded in the current source (usually adapted from
+``CongProvider``, the one predicate that already has a fully optimized
+provider, or from an existing Boost.Test file under ``yuclid/test/``), and the
+CMake/test commands to prove the change works.
+
+Most future work on the matcher falls into one of these guides. In
+particular, most predicates the engine already understands — ``coll``,
+``para``, ``perp``, ``midp``, ``eqangle``, ``simtri``, ``cyclic``, and the
+ratio/constant predicates (``eqratio``, ``rconst``, ``r2const``, ``lconst``,
+``l2const``, ``aconst``) — still fall back to the unoptimized
+``BaseProvider`` (see ``yuclid/src/matchers/predicate_matching_metadata.cpp``
+for the full role/cost table). Giving any one of them a real provider is a
+well-scoped, high-value contribution — start with
+:doc:`add_a_predicate_provider`.
 
 .. toctree::
    :maxdepth: 1
