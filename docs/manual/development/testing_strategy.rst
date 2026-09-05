@@ -1,9 +1,9 @@
 Testing strategy
 ================
 
-Each package in the workspace (see :doc:`repository_layout`) owns its own test
-suite, in the layer that makes sense for its language and its distance from
-the core solver logic. This page gives the overview; :doc:`yuclid/testing`
+Each package in the workspace owns its own test suite, in the layer that
+makes sense for its language and its distance from the core solver logic.
+This page gives the overview; :doc:`yuclid/testing`
 goes into the Yuclid-specific detail (which C++ test file protects which
 matcher module, and how to pick a regression test for a matcher change).
 

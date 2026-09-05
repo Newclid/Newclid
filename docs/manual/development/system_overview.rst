@@ -8,9 +8,8 @@ a human-readable proof. Yuclid is Newclid's optional C++ engine: a fast,
 native implementation of the same deduction/matching machinery, exposed to
 Python through the ``py_yuclid`` bindings.
 
-This page gives the big picture. :doc:`repository_layout` describes where the
-code for each piece lives, and :doc:`yuclid/index` documents Yuclid's custom
-rule matcher in depth.
+This page gives the big picture, and :doc:`yuclid/index` documents Yuclid's
+custom rule matcher in depth.
 
 The high-level pipeline
 -----------------------
