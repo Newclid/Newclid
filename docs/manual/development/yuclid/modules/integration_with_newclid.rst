@@ -128,9 +128,10 @@ constructions, proof steps, and goals. These signatures help downstream code
 identify the predicate behind a proof line without reparsing the human-readable
 proof text.
 
-The signatures are especially useful for frontend/backend proof visualization:
-text can still be shown to users, while structured signatures can be used to
-highlight or connect proof objects programmatically.
+The signatures are especially useful for a consuming application that
+visualizes proofs (for example Viewclid's web frontend and backend): text can
+still be shown to users, while structured signatures can be used to highlight
+or connect proof objects programmatically.
 
 Yuclid integration debugging order
 ----------------------------------

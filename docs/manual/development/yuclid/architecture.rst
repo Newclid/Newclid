@@ -119,10 +119,11 @@ starts.
 
 .. code-block:: text
 
-   1. Frontend/backend submits custom theorem text
+   1. A calling application (e.g. a Python script, notebook, or an external
+      service such as Viewclid) submits custom theorem text
           │
           ▼
-   2. Newclid backend builds Newclid Rule objects
+   2. Newclid builds Newclid Rule objects
           │
           ▼
    3. GeometricSolverBuilder.with_additional_rules(...) appends non-duplicate rules
