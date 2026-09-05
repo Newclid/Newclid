@@ -7,7 +7,4 @@ Developer guide
    system_overview
    repository_layout
    testing_strategy
-   contracts/index
-   frontend/index
-   backend/index
    yuclid/index
