@@ -121,26 +121,15 @@ def write_proof_sections(proof_data: ProofData) -> ProofSections:
         appendix_ar_lines.append("\n\n")
         appendix_ar_lines.extend(_write_ar_deduction_appendix(step_id, ar_deduction))
 
-    construction_signatures: list[str] = []
-    for assumption in proof_data.construction_assumptions:
-        try:
-            construction_signatures.append(repr(assumption.predicate))
-        except Exception:
-            pass
+    construction_signatures = [
+        repr(assumption.predicate) for assumption in proof_data.construction_assumptions
+    ]
 
-    step_signatures: list[str] = []
-    for step in proof_data.proof_steps:
-        try:
-            step_signatures.append(repr(step.proven_predicate.predicate))
-        except Exception:
-            pass
+    step_signatures = [
+        repr(step.proven_predicate.predicate) for step in proof_data.proof_steps
+    ]
 
-    goal_signatures: list[str] = []
-    for goal in proof_data.proven_goals:
-        try:
-            goal_signatures.append(repr(goal.predicate))
-        except Exception:
-            pass
+    goal_signatures = [repr(goal.predicate) for goal in proof_data.proven_goals]
 
     return ProofSections(
         points=point_lines,
