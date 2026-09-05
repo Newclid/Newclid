@@ -18,6 +18,5 @@ jobs:
     - name: Run pre-commit checks
       uses: pre-commit/action@v3.0.1
     - name: Run tests
-      # Backend tests need Redis or the runner path, covered in backend.yml.
       run: |
-        nix develop --command bash -c "uv run pytest -n auto --durations=0 -vv --timeout=24 --ignore=backend"
+        nix develop --command bash -c "uv run pytest -n auto --durations=0 -vv --timeout=24"
