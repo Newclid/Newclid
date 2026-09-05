@@ -138,13 +138,13 @@ class YuclidAdapter(DeductionProvider):
     def precomputation_custom_rules_str(self) -> str:
         if self.custom_rules is None:
             return ""
-        else:
-            rule_lines: list[str] = []
-            for rule in self.custom_rules:
-                rule_str = "\n".join(_write_custom_rule_setup(rule))
-                rule_lines.append(rule_str)
 
-            return "\n".join(rule_lines)
+        rule_lines: list[str] = []
+        for rule in self.custom_rules:
+            rule_str = "\n".join(_write_custom_rule_setup(rule))
+            rule_lines.append(rule_str)
+
+        return "\n".join(rule_lines)
 
     def ordered_deductions_for_problem(
         self, problem: ProblemSetup
@@ -306,15 +306,12 @@ class HERuleApplication(BaseModel):
     assertions: list[HEConstruction]
 
     def to_cached_application(
-        self, extended_rule_dict: dict[str, Rule] | None = None
+        self, extended_rule_dict: dict[str, Rule]
     ) -> CachedRuleDeduction:
         premises = tuple(assumption.to_newclid() for assumption in self.assumptions)
         conclusions = tuple(assertion.to_newclid() for assertion in self.assertions)
 
-        lookup_dict = (
-            extended_rule_dict if extended_rule_dict is not None else ID_TO_YUCLID_RULE
-        )
-        rule = lookup_dict[self.newclid_rule]
+        rule = extended_rule_dict[self.newclid_rule]
 
         return CachedRuleDeduction(
             deduction_type=DeductionType.RULE,
