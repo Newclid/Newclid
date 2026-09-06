@@ -107,7 +107,7 @@ namespace Yuclid {
 
     void GenericRuleMatcher::add_providers_to_registry() {
         // add all providers that are implemented
-        m_provider_registry.register_provider("cong", make_unique<BaseProvider>());
+        m_provider_registry.register_provider("cong", make_unique<CongProvider>());
     }
 
     std::vector<Theorem> GenericRuleMatcher::optimized_match() const {
