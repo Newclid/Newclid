@@ -12,8 +12,15 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Updated matcher includes after reorganizing the theorem
+   matcher into the matchers directory and added `point_at` for retrieving
+   existing problem points by index.
 */
-#include "matcher.hpp"
+#include "matchers/matcher.hpp"
 #include "problem.hpp"
 #include "statement/statement.hpp"
 #include "type/point.hpp"     // To create point objects for the map
@@ -81,6 +88,13 @@ namespace Yuclid {
       }
     }
     throw runtime_error(format("Point named {} not found in the problem", name));
+  }
+
+  Point Problem::point_at(const size_t index) const {
+    if(index >= num_points())
+        throw runtime_error(format("Point with index {} was not found in the problem", index));
+    
+    return Point(index, this);
   }
 
 } // namespace Yuclid

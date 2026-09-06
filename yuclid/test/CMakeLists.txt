@@ -14,6 +14,21 @@ foreach(name
     int_sqrt
     #slope_angle
     #squared_dist
+    rule_parser
+    generic_rule_matcher
+    statement_builder
+    theorem_builder
+    filter_state
+    mapping_state
+    problem_parser
+    geometry_bucket_utils
+    lazy_geometry_cache
+    rule_plan
+    provider_registry
+    base_provider
+    custom_rule_integration_test
+    schema_validator
+    cong_provider
   )
   add_executable(test_${name} ${name}.cpp)
 

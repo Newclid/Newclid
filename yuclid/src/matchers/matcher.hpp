@@ -12,6 +12,13 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Moved the theorem matcher into the matchers directory,
+   extended its interface and state to carry custom rule schemas, and declared
+   the generic custom-rule matching hook.
 */
 #pragma once
 #include <boost/container_hash/hash.hpp>
@@ -21,6 +28,7 @@
 #include <unordered_set>
 
 #include "config_options.hpp"
+#include "rules/rule_schema.hpp"
 
 namespace Yuclid {
   class Angle;
@@ -37,7 +45,7 @@ namespace Yuclid {
 
   class TheoremMatcher {
   public:
-    explicit TheoremMatcher(const Problem *prob, const Config::Solver *config);
+    explicit TheoremMatcher(const Problem *prob, const Config::Solver *config, std::span<const RuleSchema> custom_rules);
     [[nodiscard]] const std::vector<Theorem> &theorems() const {
       return m_theorems;
     }
@@ -162,8 +170,11 @@ namespace Yuclid {
 
     void match_orthocenters();
 
+    void match_generic_rules();
+
     const Problem *m_problem;
     const Config::Solver *m_config;
+    const std::span<const RuleSchema> m_custom_rules;
 
     std::vector<Theorem> m_theorems;
   };

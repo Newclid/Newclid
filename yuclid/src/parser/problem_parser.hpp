@@ -12,6 +12,13 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Renamed the simple problem parser to a dedicated problem
+   parser interface and updated the parser entry point to separate problem
+   parsing from custom rule parsing.
 */
 #pragma once
 #include <istream>
@@ -19,5 +26,5 @@
 namespace Yuclid {
   class Problem;
 
-  [[nodiscard]] Problem parse_input_simple(std::istream &input);
+  [[nodiscard]] Problem parse_problem(std::istream &input);
 }

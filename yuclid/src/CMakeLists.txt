@@ -1,4 +1,5 @@
 add_subdirectory(numbers)
+include(GNUInstallDirs)
 
 add_library(yuclid
   STATIC
@@ -9,12 +10,24 @@ add_library(yuclid
   ar/linear_system.cpp
   ar/reduced_equation.cpp
   config_options.cpp
-  matcher.cpp
+  matchers/filter_state.cpp
+  matchers/matcher.cpp
+  matchers/mapping_state.cpp
+  matchers/rule_plan.cpp
+  matchers/generic_rule_matcher.cpp
+  matchers/lazy_geometry_cache.cpp
+  matchers/predicate_provider.cpp
+  matchers/predicate_matching_metadata.cpp
+  matchers/base_provider.cpp
+  matchers/cong_provider.cpp
   numbers/add_circle.cpp
   numbers/posreal.cpp
   numbers/root_rat.cpp
   numbers/util.cpp
-  parser/simple.cpp
+  parser/problem_parser.cpp
+  parser/rule_parser.cpp
+  rules/theorem_builder.cpp
+  rules/schema_validator.cpp
   problem.cpp
   solver/ddar_solver.cpp
   solver/statement_proof.cpp
@@ -50,6 +63,7 @@ add_library(yuclid
   statement/squared_dist_eq.cpp
   statement/statement.cpp
   statement/thales.cpp
+  statement/statement_builder.cpp
   theorem.cpp
   type/angle.cpp
   type/dist.cpp
@@ -68,7 +82,6 @@ target_link_libraries(yuclid
   Boost::log_setup
   Boost::json
   Boost::program_options
-  Boost::system
   Boost::headers
 )
 
@@ -79,7 +92,26 @@ target_link_libraries(yuclid_exe PRIVATE
 )
 
 if (DEFINED SKBUILD_SCRIPTS_DIR)
-  install(TARGETS yuclid_exe DESTINATION "${SKBUILD_SCRIPTS_DIR}")
+  set(YUCLID_RUNTIME_DEST "${SKBUILD_SCRIPTS_DIR}")
 else()
-  install(TARGETS yuclid_exe DESTINATION "${CMAKE_INSTALL_BINDIR}")
+  set(YUCLID_RUNTIME_DEST "${CMAKE_INSTALL_BINDIR}")
+endif()
+
+# Install yuclid.exe and any Boost DLLs it depends on into the same directory.
+# On Windows, DLLs must live next to the exe or the exe crashes at startup
+# with a missing DLL error (exit code 0xC0000135).
+# $<TARGET_RUNTIME_DLLS:...> resolves automatically from Boost target metadata.
+# OPTIONAL silently skips this when Boost is static (no DLLs to copy).
+if(WIN32)
+  install(TARGETS yuclid_exe
+    RUNTIME DESTINATION "${YUCLID_RUNTIME_DEST}"
+  )
+  install(FILES $<TARGET_RUNTIME_DLLS:yuclid_exe>
+    DESTINATION "${YUCLID_RUNTIME_DEST}"
+    OPTIONAL
+  )
+else()
+  install(TARGETS yuclid_exe
+    RUNTIME DESTINATION "${YUCLID_RUNTIME_DEST}"
+  )
 endif()

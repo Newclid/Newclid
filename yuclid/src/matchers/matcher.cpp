@@ -12,8 +12,15 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Moved the theorem matcher into the matchers directory,
+   integrated generic custom-rule matching into the existing theorem matching
+   flow, and inserted generated custom theorem candidates into the theorem set.
 */
-#include "matcher.hpp"
+#include "matchers/matcher.hpp"
 
 #include <boost/container_hash/hash.hpp>
 #include <functional>
@@ -38,6 +45,8 @@
 #include "type/squared_dist.hpp"
 #include "typedef.hpp"
 #include "config_options.hpp"
+#include "rules/rule_schema.hpp"
+#include "matchers/generic_rule_matcher.hpp"
 
 #include <algorithm>
 #include <boost/log/trivial.hpp>
@@ -117,8 +126,11 @@ namespace Yuclid {
     }
   }
 
-  TheoremMatcher::TheoremMatcher(const Problem *prob, const Config::Solver *config) :
-    m_problem(prob), m_config(config) {
+  TheoremMatcher::TheoremMatcher(const Problem *prob, const Config::Solver *config, std::span<const RuleSchema> custom_rules) :
+    m_problem(prob), m_config(config), m_custom_rules(custom_rules) {
+
+    BOOST_LOG_TRIVIAL(info) << "TheoremMatcher received " << custom_rules.size() << " custom rules.";
+
     match_similar_triangles();
     match_between();
     auto important_angles = match_equal_angles();
@@ -129,6 +141,9 @@ namespace Yuclid {
       match_perpendiculars();
     } else {
       match_orthocenters();
+    }
+    if (!custom_rules.empty()){
+      match_generic_rules();
     }
   }
 
@@ -644,6 +659,14 @@ namespace Yuclid {
           }
         }
       }
+    }
+  }
+
+  void TheoremMatcher::match_generic_rules() {
+    GenericRuleMatcher generic_rule_matcher(m_problem, m_custom_rules);
+    std::vector<Theorem> generic_theorems = generic_rule_matcher.optimized_match();
+    for(const Theorem &theorem: generic_theorems){
+      insert_theorem(theorem);
     }
   }
 

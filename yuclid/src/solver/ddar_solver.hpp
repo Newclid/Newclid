@@ -12,12 +12,19 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+      --- MODIFICATIONS ---
+   Copyright 2026 Simeon Vutov, Petar Iliev
+
+   Contributions: Extended the DDAR solver interface and state to carry
+   custom rule schemas into theorem matching.
 */
 #pragma once
 #include "ar/linear_system.hpp"
 #include "type/variable_types.hpp"
 #include "typedef.hpp"
 #include "config_options.hpp"
+#include "rules/rule_schema.hpp"
 #include <boost/preprocessor.hpp>
 #include <map>
 #include <memory>
@@ -93,7 +100,7 @@ namespace Yuclid {
      */
     size_t push_established_statement(const StatementProof *pf);
 
-    DDARSolver(const Problem *problem, const Config::Solver *config);
+    DDARSolver(const Problem *problem, const Config::Solver *config, std::span<const RuleSchema> custom_rules);
 
     /**
      * @brief Insert an equation in a table of equations to solve.
@@ -169,6 +176,7 @@ namespace Yuclid {
   private:
     const Problem *m_problem;
     const Config::Solver *m_config;
+    const std::span<const RuleSchema> m_custom_rules;
 
     /** Current proof level. */
     size_t m_level{0};
