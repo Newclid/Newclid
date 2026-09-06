@@ -99,6 +99,29 @@ struct CongProviderFixture {
         }
     }
 
+    // Two disjoint length-1 segments that share no endpoint: (P0,P1) and (P2,P3).
+    // Every other pairwise distance (P0P2, P0P3, P1P2, P1P3) is unique, so this
+    // produces exactly one bucket with exactly two elements and no other bucket.
+    // This isolates the "one point known" / "two independent points known"
+    // branches to a single, hand-countable combination each.
+    void setup_two_pair_bowtie() {
+        (void) prob.add_point("W0", 0.0, 0.0);  // 0
+        (void) prob.add_point("W1", 1.0, 0.0);  // 1
+        (void) prob.add_point("W2", 0.0, 10.0); // 2
+        (void) prob.add_point("W3", 0.0, 11.0); // 3
+    }
+
+    // An equilateral triangle: all three pairwise distances are equal, so all
+    // three pairs land in a single bucket. Used to exercise the "two
+    // independent points known, same target variable" sub-branch (e.g.
+    // `cong A B C B`), which needs two segments from different bucket entries
+    // to land on the exact same free point.
+    void setup_equilateral_triangle() {
+        (void) prob.add_point("E0", 0.0, 0.0);
+        (void) prob.add_point("E1", 1.0, 0.0);
+        (void) prob.add_point("E2", 0.5, 0.8660254037844386);
+    }
+
     void run_comparison(CongProvider& cong_provider, PlannedPredicate& pp, MappingState& mapping, LazyGeometryCache& cache, const std::string& name) {
         std::size_t estimate = cong_provider.estimate_extensions(pp, mapping, cache);
         
@@ -253,6 +276,55 @@ BOOST_AUTO_TEST_CASE(estimate_intersection_reduction_applied) {
     BOOST_CHECK_EQUAL(provider.estimate_extensions(pp, mapping, cache), 22);
 }
 
+BOOST_AUTO_TEST_CASE(estimate_state_0011_length_known_via_cd) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Mirror of estimate_state_1100_length_known, but the KNOWN segment is CD
+    // instead of AB (state 0b0011 instead of 0b1100). Exercises the
+    // `is_ab_known == false` half of the shared two-assigned branch.
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 0)); // C -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 1)); // D -> P1
+
+    // Same bucket (length 1.0, size 4), same math as the 1100 case: (4-1)*2=6.
+    // Total = base_cost (20) + 6 = 26.
+    BOOST_CHECK_EQUAL(provider.estimate_extensions(pp, mapping, cache), 26);
+}
+
+BOOST_AUTO_TEST_CASE(estimate_state_1000_one_point_known) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Only A assigned (state 0b1000): length unknown, no intersection reduction.
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> P0
+
+    // connections = num_points - 1 = 4. avg_bucket_size = total_pairs(10) / num_buckets(2) = 5.
+    // estimate = connections * avg_bucket_size * 2 = 4 * 5 * 2 = 40.
+    // Total = base_cost (20) + 40 = 60.
+    BOOST_CHECK_EQUAL(provider.estimate_extensions(pp, mapping, cache), 60);
+}
+
+BOOST_AUTO_TEST_CASE(estimate_state_1010_two_independent_reduction) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // A and C assigned to two different points (state 0b1010): same base math
+    // as the 1000 case, but with the intersection reduction applied.
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2)); // C -> P2
+
+    // Base estimate: connections(4) * avg_bucket_size(5) * 2 = 40.
+    // Intersection reduction: N = 5 points. (40 + 5 - 1) / 5 = 44 / 5 = 8.
+    // Total = base_cost (20) + 8 = 28.
+    BOOST_CHECK_EQUAL(provider.estimate_extensions(pp, mapping, cache), 28);
+}
+
 // ----------------------------------------------------------------------
 // Generate Extensions Tests
 // ----------------------------------------------------------------------
@@ -349,6 +421,82 @@ BOOST_AUTO_TEST_CASE(generation_state_1110_one_missing) {
     BOOST_CHECK_EQUAL(results.size(), 1);
 }
 
+BOOST_AUTO_TEST_CASE(generation_state_1101_c_missing) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // A->P0, B->P1 (length 1, this is what fixes the target length)
+    // D->P3 (anchor for the missing variable C)
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 3));
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // C must map to P2 (the only free point exactly length 1 away from P3).
+    BOOST_CHECK_EQUAL(results.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_1011_b_missing) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // C->P2, D->P3 (length 1, this is what fixes the target length)
+    // A->P0 (anchor for the missing variable B)
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2));
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 3));
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0));
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // B must map to P1 (the only free point exactly length 1 away from P0).
+    BOOST_CHECK_EQUAL(results.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_0111_a_missing) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // C->P2, D->P3 (length 1, this is what fixes the target length)
+    // B->P1 (anchor for the missing variable A)
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2));
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 3));
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 1));
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // A must map to P0 (the only free point exactly length 1 away from P1).
+    BOOST_CHECK_EQUAL(results.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_0011_length_known_via_cd) {
+    setup_geometry();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    // Mirror of generation_state_1100_segment_known: the KNOWN segment is CD
+    // (state 0b0011) rather than AB. C and D occupy P0/P1, so the only
+    // remaining pair in the length-1 bucket with two free points is (P2, P3).
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 0)); // C -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 1)); // D -> P1
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // A->P2,B->P3 and A->P3,B->P2.
+    BOOST_CHECK_EQUAL(results.size(), 2);
+}
+
 BOOST_AUTO_TEST_CASE(generation_state_1010_shared_variable) {
     setup_geometry();
     LazyGeometryCache cache(prob);
@@ -367,7 +515,173 @@ BOOST_AUTO_TEST_CASE(generation_state_1010_shared_variable) {
     // Length 1: (0,1) and (0,3). Thus B=1, C=3 OR B=3, C=1.
     // Length sqrt(2): Only (0,2). We can't have B=2 and C=2 because B and C must be distinct.
     // P4 (Outlier) has no equal length segment.
-    BOOST_CHECK_EQUAL(results.size(), 2); 
+    BOOST_CHECK_EQUAL(results.size(), 2);
+}
+
+// One-point-known family (0b1000 / 0b0100 / 0b0010 / 0b0001).
+// Each state selects a different anchor variable and, with it, a distinct
+// literal branch in CongProvider::generate_extensions. The bowtie geometry
+// (two disjoint length-1 segments (0,1) and (2,3), everything else a
+// singleton) makes each case resolve to exactly one bucket walk with exactly
+// one qualifying (id1, id2) combination in each direction.
+
+BOOST_AUTO_TEST_CASE(generation_state_1000_one_point_known) {
+    setup_two_pair_bowtie();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> P0 (anchor)
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // The only segment touching P0 is (P0,P1), so B->P1. The other bucket
+    // entry (P2,P3) supplies C/D in both orientations.
+    // Expect: {B:1,C:2,D:3} and {B:1,C:3,D:2}.
+    BOOST_CHECK_EQUAL(results.size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_0100_one_point_known) {
+    setup_two_pair_bowtie();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 0)); // B -> P0 (anchor)
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // Same geometry as the 0b1000 case, but the anchor/target roles are
+    // swapped per the `state_mask == 0b0100` branch: A->P1, and C/D fill in
+    // from the (P2,P3) pair in both orientations.
+    BOOST_CHECK_EQUAL(results.size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_0010_one_point_known) {
+    setup_two_pair_bowtie();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 0)); // C -> P0 (anchor)
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // `state_mask == 0b0010` branch: D->P1, and A/B fill in from (P2,P3).
+    BOOST_CHECK_EQUAL(results.size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_0001_one_point_known) {
+    setup_two_pair_bowtie();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 0)); // D -> P0 (anchor)
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // Final `else` branch (state_mask == 0b0001): C->P1, and A/B fill in
+    // from (P2,P3).
+    BOOST_CHECK_EQUAL(results.size(), 2);
+}
+
+// Two-independent-points family (0b1010 / 0b1001 / 0b0110 / 0b0101), with
+// four fully distinct variables so each hits the "different variable" path
+// (line ~521-524) rather than the same-variable path exercised separately
+// below. Using the same bowtie geometry: the two anchors sit on the two
+// different bucket pairs, so there is exactly one valid combination.
+
+BOOST_AUTO_TEST_CASE(generation_state_1010_two_independent_distinct_vars) {
+    setup_two_pair_bowtie();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2)); // C -> P2
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // B must complete (P0,P1) -> B=P1; D must complete (P2,P3) -> D=P3.
+    BOOST_CHECK_EQUAL(results.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_1001_two_independent_distinct_vars) {
+    setup_two_pair_bowtie();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 2)); // D -> P2
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // B completes (P0,P1) -> B=P1; C completes (P2,P3) -> C=P3.
+    BOOST_CHECK_EQUAL(results.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_0110_two_independent_distinct_vars) {
+    setup_two_pair_bowtie();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 0)); // B -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 2)); // C -> P2
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // A completes (P0,P1) -> A=P1; D completes (P2,P3) -> D=P3.
+    BOOST_CHECK_EQUAL(results.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_0101_two_independent_distinct_vars) {
+    setup_two_pair_bowtie();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "D"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(1, 0)); // B -> P0
+    BOOST_REQUIRE(mapping.try_apply_assignment(3, 2)); // D -> P2
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // A completes (P0,P1) -> A=P1; C completes (P2,P3) -> C=P3.
+    BOOST_CHECK_EQUAL(results.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(generation_state_1010_two_independent_same_variable) {
+    // `cong A B C B`: B appears at both the second and fourth argument
+    // positions, so other_seg1_idx == other_seg2_idx (the "same variable"
+    // sub-branch at cong_provider.cpp:518-520). That branch only produces a
+    // result when both segments' free ends land on the SAME point, which
+    // needs a bucket where two different pairs share a free endpoint -
+    // impossible in the disjoint bowtie, so this uses the equilateral
+    // triangle instead (all three sides in one bucket).
+    setup_equilateral_triangle();
+    LazyGeometryCache cache(prob);
+    MappingState mapping(schema, prob);
+    PlannedPredicate pp = build_planned_pred({"A", "B", "C", "B"});
+
+    BOOST_REQUIRE(mapping.try_apply_assignment(0, 0)); // A -> E0
+    BOOST_REQUIRE(mapping.try_apply_assignment(2, 1)); // C -> E1
+
+    auto generator = provider.generate_extensions(pp, mapping, cache);
+    auto results = consume_generator(generator);
+
+    // The only point equidistant from both E0 (via segment E0-E2) and E1
+    // (via segment E1-E2) within the same bucket is E2, so B -> E2.
+    BOOST_CHECK_EQUAL(results.size(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(generation_state_0000_brute_force) {
